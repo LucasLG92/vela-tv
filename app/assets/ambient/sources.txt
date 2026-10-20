@@ -1,0 +1,14 @@
+Vídeos comunitarios para salvapantallas personal de Aerial.
+Joshua Michaels y Hal Bergman. Copyright 2020 Jetson Creative, LLC; bajo licencia de Fotologistics, LLC.
+Fuente: https://github.com/glouel/AerialCommunity
+Catálogo publicado por los autores: https://raw.githubusercontent.com/glouel/AerialCommunity/master/entries.json
+Licencia: https://www.jetsoncreative.com/aeriallicense
+Los archivos de vídeo no se incluyen ni se redistribuyen en el APK. Se reproducen por HTTPS desde las direcciones publicadas por los autores, solo al entrar en el salvapantallas.
+Las fotografías de Plex pertenecen a la biblioteca del usuario y no se incluyen en el APK.
+
+Tiempo y ubicación:
+Datos meteorológicos: Open-Meteo, https://open-meteo.com/ (CC BY 4.0).
+Condiciones y atribución: https://open-meteo.com/en/terms
+Búsqueda de ciudades: Open-Meteo Geocoding, https://open-meteo.com/en/docs/geocoding-api
+Lugares basados en GeoNames, https://www.geonames.org/ (CC BY 4.0).
+La ubicación automática usa permiso aproximado solo al abrir el salvapantallas. No solicita GPS preciso ni acceso de ubicación en segundo plano. Para consultar el tiempo se redondean las coordenadas a dos decimales.

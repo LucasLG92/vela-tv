@@ -1,0 +1,164 @@
+[
+  {
+    "file": "01-inicio.webp",
+    "title": "Inicio con carteles y reloj",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "02-aspecto-menta-compacto.webp",
+    "title": "Menta y carteles compactos",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "03-aspecto-lavanda-grande.webp",
+    "title": "Lavanda y carteles grandes",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "04-seguir-viendo.webp",
+    "title": "Seguir viendo separado",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "05-biblioteca-paginada.webp",
+    "title": "Biblioteca por páginas: estado de demostración 25–33 de 33",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "06-menu-lateral.webp",
+    "title": "Menú lateral con seis accesos",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "07-menu-accesos.webp",
+    "title": "Mover o quitar sin desinstalar",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "08-ordenar-accesos.webp",
+    "title": "Ordenar con el mando",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "09-todas-las-apps.webp",
+    "title": "Todas las aplicaciones",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "10-ajustes.webp",
+    "title": "Ajustes nativos",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "11-apariencia.webp",
+    "title": "Personalizar apariencia",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "12-colores.webp",
+    "title": "Seis colores de acento",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "13-carteles.webp",
+    "title": "Tres tamaños de cartel",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "14-fondo.webp",
+    "title": "Intensidad del fondo",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "15-rendimiento.webp",
+    "title": "Imagen y rendimiento",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "16-accesos.webp",
+    "title": "Configurar los accesos",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "17-cuentas.webp",
+    "title": "Cuentas y servicios: datos Demo",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "18-salvapantallas-ajustes.webp",
+    "title": "Ajustes del salvapantallas",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "19-ubicacion-demo.webp",
+    "title": "Ubicación: Reikiavik de demostración",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "20-salvapantallas-plex-demo.webp",
+    "title": "Fondos de Plex: escena abierta de Sintel de demostración",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "21-salvapantallas-aereos.webp",
+    "title": "Salvapantallas de vídeo: demostración con material NASA/JSC",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "22-cuentas-sin-vincular.webp",
+    "title": "Cuentas sin una sesión real",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "23-asistente.webp",
+    "title": "Bienvenida del asistente",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "24-asistente-cuentas.webp",
+    "title": "Cuentas en el asistente",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "25-television.webp",
+    "title": "Catálogo público de TV",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "26-listas-tv.webp",
+    "title": "Listas y ajustes de TV",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  },
+  {
+    "file": "27-reproductor-video-demo.webp",
+    "title": "Reproductor nativo con vídeo de prueba CC0",
+    "source": "native clean-emulator capture",
+    "personal_data": false
+  }
+]

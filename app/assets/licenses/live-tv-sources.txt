@@ -1,0 +1,23 @@
+LIVE TELEVISION IN VELA
+
+Channel information and programme guide: TDTChannels, by Marc Vila / LaQuay and contributors.
+https://github.com/LaQuay/TDTChannels
+https://www.tdtchannels.com/
+Catalog: https://www.tdtchannels.com/lists/tv.json
+Guide: https://www.tdtchannels.com/epg/TV.json
+Repository license: Apache 2.0, included in tdtchannels-Apache-2.0.txt.
+The catalog and guide are fetched at runtime; no television recordings are bundled or redistributed.
+Channel names, logos and broadcasts belong to their respective owners.
+
+Vela's native browser and player are independent implementations. Vela is not affiliated with TDTChannels or TDT Spain.
+TDT Spain's public M3U manual was consulted for format interoperability:
+https://www.tdtspain.com/m3u.html
+Personal playlists support standard EXTINF metadata and direct HTTPS signals. Custom extraction rules,
+DRM, cookies and provider authentication are not imported from TDT Spain or other applications.
+Some broadcasters require their own application, website, account or geographic availability.
+
+From Vela 1.9.1 official channel websites can open inside Vela using Android System WebView,
+loaded on demand in a separate process. Broadcaster players, consent, advertising and account/DRM
+checks remain under their control. Web sessions stay privately on the device and are independent
+of sessions in other applications. Availability in a WebView depends on the broadcaster and device.
+Android WebView documentation: https://developer.android.com/develop/ui/views/layout/webapps/webview

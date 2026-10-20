@@ -1,0 +1,23 @@
+# Your settings and signing key stay on your machine
+config.properties
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+adbkey*
+local.properties
+.env
+.env.*
+!*.example
+*.idsig
+*.zip
+
+# Build output
+out/
+*.apk
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

@@ -1,0 +1,26 @@
+Brand assets identify shortcuts to the respective installed applications. Trademarks remain with their owners.
+
+Plex: original six SVG paths and white/gold fills from the www.plex.tv header, converted without geometry changes to app/res/drawable/logo_plex.xml.
+Source: https://www.plex.tv/
+
+YouTube: unmodified full-color white digital logo, supplied in the official Core YouTube logo package.
+Source page: https://brand.youtube/youtube-logo
+Archive: https://www.gstatic.com/marketing-cms/52/7d/637fef5a4788a97747e6feabc4aa/youtube-logo.zip
+Entry: YouTube_Logo/Digital/01 Full Color/yt_logo_fullcolor_white_digital.png
+
+Prime Video: unmodified transparent white logo served by Prime Video's own website.
+Source page: https://www.primevideo.com/
+Image: https://m.media-amazon.com/images/G/01/digital/video/acquisition/logo/pv_logo_white._CB548637580_.png
+
+Retrieved 2026-10-20. No generated brand artwork.
+
+Official Android TV app icon plex: https://play.google.com/store/apps/details?id=com.plexapp.android&hl=en
+Image: https://play-lh.googleusercontent.com/0-rSvTIYVEveysANiSS5FITkkD-kpe6TG91nJRy7ht2J0BHlPWXiGaMcDRYUOwTVuZsE4-HyI-qSL0KkNEvQ=s0-br30
+
+Official Android TV app icon prime: https://play.google.com/store/apps/details?id=com.amazon.amazonvideo.livingroom&hl=en
+Image: https://play-lh.googleusercontent.com/qyXqjzPggunbifX0ODhCehdy4ei0F90u0N3f4pPk8NhgCZD75dH8bdQYPROGRVlTVOs8B8JAT58X6ImMZv5ugHg=s0-br30
+
+Additional Material UI icons (person, movie, video_library): https://github.com/google/material-design-icons; Apache 2.0, same license as app/assets/symbols/LICENSE-material-symbols.txt. Original paths converted to Android vectors.
+
+YouTube sidebar icon: unmodified official icon from https://www.gstatic.com/marketing-cms/89/d9/cf95c4f345709f4998dc581221b0/youtube-icon.zip
+Entry: YouTube_Icon/Digital/01 Red/yt_icon_red_digital.png
