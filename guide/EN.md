@@ -10,6 +10,6 @@ Plex authorization uses its device code flow. YouTube and Prime sessions remain 
 
 The home screen uses bounded image caches and releases artwork on exit. WebView is loaded only for a selected web channel in a dedicated process that ends after closing. Total memory varies; there is no zero-RAM claim.
 
-Screenshots are actual emulator captures using fictional demo metadata and openly licensed Blender film artwork. No personal Plex library, avatar, city or valid account credential was used. The space-video screensaver illustration uses NASA/JSC demo footage rather than redistributing community screensaver footage. See [credits](../gallery/CREDITS.md).
+Screenshots are actual native 4K emulator captures. Movie and series artwork was retrieved from Plex with the user's permission; their profile, server name and account details are anonymized. The emulator contains no valid account credentials. Watch progress, pagination and the weather city are examples. Original Plex artwork files are not distributed in the source or APK. The openly licensed Blender assets remain available as an alternative test fixture. The space-video screensaver illustration uses NASA/JSC demo footage rather than redistributing community screensaver footage. See [credits](../gallery/CREDITS.md).
 
 Code is MIT, derived from Free My TV with its copyright retained. Fonts, artwork, trademarks, catalogs and remote videos have their own licenses and terms: [notices](../NOTICE.md).

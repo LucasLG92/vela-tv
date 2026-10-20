@@ -13,6 +13,7 @@ El nombre, la interfaz de Vela y sus ampliaciones no implican afiliación con el
 | Identificadores de las aplicaciones | Marcas de sus propietarios; [fuentes](app/assets/brands/sources.txt) |
 | Vídeos del salvapantallas | No se incluyen archivos de vídeo; sus enlaces y condiciones de uso personal se describen en [fuentes](app/assets/ambient/sources.txt). La licencia MIT del código no concede derechos sobre esos vídeos. |
 | Tiempo y búsqueda de ciudades | [Open-Meteo](https://open-meteo.com/), CC BY 4.0; GeoNames según los avisos de la aplicación |
-| Carteles y escena de las capturas | Cortos abiertos de Blender, CC BY 3.0/4.0; [créditos completos](gallery/CREDITS.md) |
+| Carteles y fondos de las capturas | Material cinematográfico de sus respectivos titulares, obtenido de Plex con autorización del usuario para ilustrar Vela; [detalles](gallery/CREDITS.md). No se licencia bajo MIT. |
+| Recursos abiertos de las pruebas | Cortos de Blender, CC BY 3.0/4.0; [créditos completos](gallery/CREDITS.md). |
 
-Las películas y las cuentas de las capturas son datos de demostración. Las imágenes abiertas usadas para documentar la interfaz están en `tests/gallery/assets/`; no se empaquetan en el APK de Vela.
+Las cuentas, el progreso y la paginación de las capturas son ejemplos anonimizados. Los carteles cinematográficos originales no se redistribuyen como recursos de la aplicación. Las imágenes abiertas en `tests/gallery/assets/` se conservan como material alternativo para pruebas; tampoco se empaquetan en el APK de Vela.

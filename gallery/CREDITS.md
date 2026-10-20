@@ -1,8 +1,14 @@
-# Créditos de las capturas
+# Imágenes y créditos
 
-La interfaz es Vela. Los títulos y el servidor de demostración son datos de prueba y no proceden de una biblioteca personal. No existe afiliación o patrocinio de los autores de las imágenes.
+La galería actual muestra capturas nativas de Vela en 4K. Los carteles y fondos de películas y series se han obtenido de una biblioteca de Plex con autorización de su usuario para publicar estas capturas. El perfil, servidor y cuenta están anonimizados; el progreso y la paginación son ejemplos.
 
-Los carteles se muestran a menor tamaño dentro de la interfaz; la escena de fondo se ajusta al encuadre. No se redibuja ni genera arte mediante IA. Las licencias de estas imágenes son independientes de la licencia MIT del código.
+Las imágenes y marcas cinematográficas pertenecen a sus respectivos titulares. Su presencia ilustra la interfaz y no implica afiliación ni patrocinio. La licencia MIT del código **no se aplica a estas imágenes**. No se distribuyen los archivos originales de Plex, credenciales, rutas privadas ni contenido audiovisual de la biblioteca.
+
+Entre los títulos mostrados están Oppenheimer, Origen, Avatar: Fuego y ceniza, Spider-Man: Brand New Day, Gladiator II, Robot salvaje, Superman, Star Wars: The Mandalorian and Grogu, The Last of Us, Stranger Things, Breaking Bad y La muerte del unicornio. La disponibilidad y los carteles de una instalación dependen de su propia biblioteca.
+
+## Material alternativo para pruebas
+
+Los siguientes recursos abiertos permanecen en `tests/gallery/assets/` para generar una galería alternativa sin utilizar una biblioteca personal. También se usaron en la primera versión de la documentación. No forman parte del APK. No se redibuja ni se genera arte mediante IA.
 
 | Archivo de prueba | Autor | Fuente | Licencia |
 | --- | --- | --- | --- |

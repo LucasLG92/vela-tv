@@ -1,16 +1,28 @@
-# Galería de Vela 1.10.0 Preview
+# Galería de Vela · 4K
 
-Capturas directas de la aplicación en un emulador independiente a 1920 × 1080. Son pantallas reales, sin imágenes generadas ni montajes. Las imágenes se codifican en WebP para que esta página cargue con menos datos.
+**29 capturas nativas a 3840 × 2160**, codificadas en WebP de alta calidad. Son pantallas reales de Vela en un emulador independiente, sin arte generado ni montajes.
 
-Los carteles pertenecen a cortos abiertos de Blender y la cuenta «Vela Demo» es una simulación sin credenciales válidas. La paginación se muestra con un estado de prueba. Los accesos de Plex, YouTube TV y Prime usan aplicaciones de prueba para documentar la barra, no sesiones reales. La ubicación de ejemplo no procede de una televisión personal.
+Los carteles y fondos de películas y series proceden de Plex y se han obtenido con autorización del usuario para estas capturas. El perfil y el servidor se presentan de forma anónima. No se publican su avatar, cuenta, credenciales, biblioteca completa, rutas o enlaces privados. No hay una sesión real de Plex en el emulador de documentación; las imágenes se preparan por separado.
 
-El catálogo y los logotipos de TV son públicos y reales. El reproductor muestra un vídeo CC0 de MDN, no una emisión de pago. La captura del salvapantallas de vídeo utiliza material de demostración NASA/JSC; no se publican fotogramas de los vídeos comunitarios sujetos a uso personal. Estas capturas no certifican los directos de todas las emisoras en un dispositivo físico.
+El progreso de Seguir viendo, la paginación y la ubicación son ejemplos, no el historial ni la ciudad del usuario. Los accesos de Plex, YouTube TV y Prime usan aplicaciones de prueba para documentar la barra, no sesiones reales.
 
-[Créditos de imágenes y material de demostración](CREDITS.md) · [Volver al proyecto](../README.md)
+El catálogo y los logotipos de TV son públicos y reales. El reproductor muestra un vídeo CC0 de MDN, no una emisión de pago. El salvapantallas de vídeo utiliza material de demostración NASA/JSC; no se publican fotogramas de los vídeos comunitarios sujetos a uso personal. Las capturas no certifican los directos de todas las emisoras en un dispositivo físico.
+
+La mayor resolución de esta documentación no modifica el APK ni sus límites de memoria. La calidad y el contenido de cada instalación dependen de su biblioteca, pantalla y ajustes.
+
+[Imágenes y créditos](CREDITS.md) · [Volver al proyecto](../README.md)
 
 ## Inicio con carteles y reloj
 
 ![Inicio con carteles y reloj](01-inicio.webp)
+
+## Películas de Plex
+
+![Películas de Plex](28-peliculas.webp)
+
+## Series de Plex
+
+![Series de Plex](29-series.webp)
 
 ## Menta y carteles compactos
 
@@ -24,9 +36,9 @@ El catálogo y los logotipos de TV son públicos y reales. El reproductor muestr
 
 ![Seguir viendo separado](04-seguir-viendo.webp)
 
-## Biblioteca por páginas: estado de demostración 25–33 de 33
+## Biblioteca por páginas: estado de ejemplo 25–33 de 33
 
-![Biblioteca por páginas: estado de demostración 25–33 de 33](05-biblioteca-paginada.webp)
+![Biblioteca por páginas: estado de ejemplo 25–33 de 33](05-biblioteca-paginada.webp)
 
 ## Menú lateral con seis accesos
 
@@ -72,9 +84,9 @@ El catálogo y los logotipos de TV son públicos y reales. El reproductor muestr
 
 ![Configurar los accesos](16-accesos.webp)
 
-## Cuentas y servicios: datos Demo
+## Cuentas y servicios con servidor anonimizado
 
-![Cuentas y servicios: datos Demo](17-cuentas.webp)
+![Cuentas y servicios con servidor anonimizado](17-cuentas.webp)
 
 ## Ajustes del salvapantallas
 
@@ -84,9 +96,9 @@ El catálogo y los logotipos de TV son públicos y reales. El reproductor muestr
 
 ![Ubicación: Reikiavik de demostración](19-ubicacion-demo.webp)
 
-## Fondos de Plex: escena abierta de Sintel de demostración
+## Salvapantallas de Plex con fondo real de Oppenheimer
 
-![Fondos de Plex: escena abierta de Sintel de demostración](20-salvapantallas-plex-demo.webp)
+![Salvapantallas de Plex con fondo real de Oppenheimer](20-salvapantallas-plex-demo.webp)
 
 ## Salvapantallas de vídeo: demostración con material NASA/JSC
 

@@ -17,4 +17,4 @@ Los accesos de la barra, el aspecto y los favoritos de TV se guardan en el dispo
 
 El reproductor web utiliza un proceso separado que se carga al abrir un canal web y termina al cerrarlo. Esto reduce su presencia fuera de la reproducción; WebView consume memoria mientras se utiliza y no se promete consumo cero.
 
-Las capturas públicas se generan en un emulador independiente con datos Demo, sin credenciales válidas ni biblioteca personal. La ciudad de demostración no procede de una televisión real. Consulta [la galería](../gallery/README.md) para distinguir pruebas reales y datos de demostración.
+Las capturas públicas se generan en un emulador independiente, sin credenciales válidas. Los carteles y fondos se han obtenido de Plex con autorización del usuario y se utilizan únicamente dentro de las capturas. El avatar, nombre del servidor, cuenta, rutas y enlaces privados no se publican. El progreso, la paginación y la ciudad son ejemplos; no revelan el historial de reproducción ni la ubicación del usuario. Consulta [la galería](../gallery/README.md).

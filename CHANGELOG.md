@@ -1,5 +1,11 @@
 # Cambios
 
+## Galería 4K · 2026-10-21
+
+- 29 capturas nativas de alta resolución, con carteles y fondos reales de Plex autorizados por el usuario.
+- Perfil y servidor anonimizados; progreso, páginas y ciudad de ejemplo.
+- Nuevas vistas de Películas y Series. El APK y sus límites de memoria se mantienen.
+
 ## 1.10.0 Preview — 2026-10-21
 
 - Seis colores de acento para selección del menú, acción principal, progreso y Ajustes.

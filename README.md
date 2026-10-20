@@ -6,9 +6,9 @@ Launcher nativo para **Android TV y Google TV · Android 11+**. Configuración p
 
 **[Descargar la preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.0-preview)** · [Instalación](guide/INSTALL.es.md) · [Todas las capturas](gallery/README.md) · [English](guide/EN.md)
 
-![Inicio de Vela con carteles reales de cortos abiertos y datos de demostración](gallery/01-inicio.webp)
+![Inicio de Vela en 4K con Oppenheimer y carteles reales de Plex](gallery/01-inicio.webp)
 
-> Capturas reales de Vela en un emulador, con contenido abierto y datos Demo. No muestran una cuenta, biblioteca, avatar o ubicación personal. Los carteles se usan con sus [créditos y licencias](gallery/CREDITS.md); no vienen incluidos en el APK.
+> Capturas nativas en **4K**, con carteles y fondos reales obtenidos de Plex con autorización del usuario. Perfil y servidor anonimizados; ubicación, progreso y paginación de ejemplo. Los originales y las credenciales no se publican ni se incluyen en el APK. [Sobre las imágenes](gallery/CREDITS.md).
 
 ## A tu manera
 
@@ -44,7 +44,7 @@ El reproductor nativo y el web se liberan al salir. La web se carga en un proces
 
 ## Estado de esta versión
 
-**1.10.0 Preview.** La personalización, la navegación con mando, los tamaños de cartel, los límites de caché y el restablecimiento se han probado en un emulador Android 16. También se han probado catálogo y guía reales, reproducción nativa y controles web. La generación de la galería comprueba que no se utilice una cuenta personal.
+**1.10.0 Preview.** La personalización, la navegación con mando, los tamaños de cartel, los límites de caché y el restablecimiento se han probado en un emulador Android 16. También se han probado catálogo y guía reales, reproducción nativa y controles web. La galería se captura en un emulador sin credenciales personales; las imágenes de Plex se preparan por separado y se anonimiza la información de la cuenta.
 
 Funciones anteriores se han probado en una TCL con Android 11. Esta preview completa todavía necesita validación física: **cargar la página de Cuatro no demuestra que su directo o el de Telecinco funcionen en todos los televisores**. Las plataformas pueden pedir sus cookies, cuenta, región o requisitos de reproducción.
 
