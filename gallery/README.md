@@ -110,7 +110,7 @@ Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela 
 
 ## Encuentra tu próximo directo
 
-![Encuentra tu próximo directo](25-television.webp)
+![Encuentra tu próximo directo](https://raw.githubusercontent.com/LucasLG92/vela-tv/5cc0669c2f85ec2db37596fe2e38156ced80228e/gallery/25-television.webp)
 
 ## Tu lista, tus canales
 

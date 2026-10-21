@@ -36,7 +36,7 @@ Seis colores de acento, tres tamaños de cartel y distintas intensidades de fond
 
 Encuentra tus canales, consulta qué están poniendo y mira cuánto queda de cada programa, con el tiempo restante y una barra de progreso en cada tarjeta. Guarda tus favoritos o añade tu propia lista M3U HTTPS.
 
-![Canales y programación en Vela](gallery/25-television.webp)
+![Canales y programación en Vela](https://raw.githubusercontent.com/LucasLG92/vela-tv/5cc0669c2f85ec2db37596fe2e38156ced80228e/gallery/25-television.webp)
 
 ## Incluso las pausas tienen su momento
 
