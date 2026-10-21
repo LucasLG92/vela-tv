@@ -1,5 +1,14 @@
 # Cambios
 
+## 1.10.2 Preview · 2026-10-21
+
+- Nueva biblioteca de apps con iconos cuadrados grandes, nombres debajo y seis columnas.
+- Una sola cuadrícula: todas las favoritas primero, respetando el orden de la barra y sin duplicados.
+- Iconos adaptativos con sus propias capas y colores; selección discreta y fondo opaco en degradado.
+- Carga local en segundo plano, celdas recicladas y recursos liberados al cerrar o pausar.
+- Caché de iconos de 1 MiB; el modo ligero reduce resolución y caché a 512 KiB.
+- Navegación con mando y orden de más de cuatro favoritas comprobados en emulador.
+
 ## 1.10.1 Preview · 2026-10-21
 
 - Tus apps muestra los iconos originales en una cuadrícula con tarjetas recicladas y navegación por mando.

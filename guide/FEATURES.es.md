@@ -11,7 +11,7 @@ Conecta Plex desde el mando y elige tu servidor. Vela utiliza sus carteles y fon
 
 ## Tus aplicaciones
 
-Abre tus favoritas desde la barra lateral o entra en Tus apps para ver todas las aplicaciones instaladas. La cuadrícula muestra sus iconos originales y se recorre con las flechas del mando.
+Abre tus favoritas desde la barra lateral o entra en Tus apps para ver todas las aplicaciones instaladas. La biblioteca reúne todas las apps en una cuadrícula de iconos grandes y cuadrados con el nombre debajo. Tus favoritas aparecen primero, en el orden de la barra lateral, sin duplicarse y sin un límite de cuatro. Recorre la cuadrícula con las flechas; sube desde la primera fila para llegar a Cerrar.
 
 Mantén OK sobre un acceso de la barra para moverlo o quitarlo. Quitar un acceso conserva la aplicación instalada. Puedes añadir más accesos desde Ajustes.
 

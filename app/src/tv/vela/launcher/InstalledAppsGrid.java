@@ -1,48 +1,42 @@
 package tv.vela.launcher;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
+import android.content.pm.PackageManager;
+import android.graphics.*;
+import android.graphics.drawable.*;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.LruCache;
 import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
 import java.util.*;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 
-/** Recycled app cards. Package artwork is loaded locally, only for requested cells. */
+/** A single recycled icon library. Only visible apps request local artwork. */
 final class InstalledAppsGrid extends GridView {
-    private static final int COLUMNS=5,ICON_SIZE=96,CACHE_BYTES=512*1024;
+    static final int COLUMNS=6;
+    private final int iconSize,cacheBytes;
     private final Handler main=new Handler(Looper.getMainLooper());
     private final ThreadPoolExecutor worker=Visuals.worker(1);
-    private final LruCache<String,Bitmap> icons=new LruCache<String,Bitmap>(CACHE_BYTES){
-        @Override protected int sizeOf(String key,Bitmap bitmap){return bitmap.getAllocationByteCount();}
-    };
-    private final Set<String> pending=new HashSet<>();
+    private final LruCache<String,Bitmap> icons;
+    private final Set<String> pending=new HashSet<>(),favorites;
     private final List<SidebarApps.Choice> choices=new ArrayList<>();
-    private final List<View> above;
     private final View close;
     private final AppsAdapter adapter=new AppsAdapter();
     private volatile boolean released;
 
-    InstalledAppsGrid(Context context,Set<String> featured,List<View> above,View close,TextView status,Consumer<SidebarApps.Choice> open){
-        super(context);this.above=new ArrayList<>(above);this.close=close;
+    InstalledAppsGrid(Context context,List<String> featured,View close,TextView status,TextView count,Consumer<SidebarApps.Choice> open){
+        super(context);this.close=close;favorites=new HashSet<>(featured);
+        iconSize=Visuals.light(context)?128:192;cacheBytes=Visuals.light(context)?512*1024:1024*1024;
+        icons=new LruCache<String,Bitmap>(cacheBytes){@Override protected int sizeOf(String key,Bitmap bitmap){return bitmap.getAllocationByteCount();}};
         setId(View.generateViewId());setFocusable(true);setFocusableInTouchMode(true);setDefaultFocusHighlightEnabled(false);
-        setNumColumns(COLUMNS);setColumnWidth(320);setHorizontalSpacing(28);setVerticalSpacing(22);setStretchMode(NO_STRETCH);
-        setPadding(8,8,8,16);setClipToPadding(false);setClipChildren(false);setGravity(Gravity.LEFT);
-        setSelector(new ColorDrawable(Color.TRANSPARENT));setCacheColorHint(Color.TRANSPARENT);setVerticalScrollBarEnabled(true);
-        setAdapter(adapter);setEmptyView(status);
+        setNumColumns(COLUMNS);setColumnWidth(264);setHorizontalSpacing(26);setVerticalSpacing(14);setStretchMode(NO_STRETCH);
+        setPadding(12,16,12,16);setClipToPadding(false);setClipChildren(false);setGravity(Gravity.LEFT);
+        setSelector(new ColorDrawable(Color.TRANSPARENT));setCacheColorHint(Color.TRANSPARENT);setVerticalScrollBarEnabled(false);
+        setAdapter(adapter);setEmptyView(status);close.setNextFocusDownId(getId());
         setOnItemClickListener((parent,view,position,id)->{if(!released&&position>=0&&position<choices.size())open.accept(choices.get(position));});
         setOnItemSelectedListener(new OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> parent,View view,int position,long id){highlight();}
@@ -53,16 +47,20 @@ final class InstalledAppsGrid extends GridView {
             public void onScrollStateChanged(AbsListView view,int state){}
             public void onScroll(AbsListView view,int first,int visible,int total){highlight();}
         });
-        Set<String> excluded=new HashSet<>(featured);
+        List<String> order=new ArrayList<>(featured);
         worker.execute(()->{
             if(released)return;List<SidebarApps.Choice> found=new ArrayList<>();
-            try{found.addAll(SidebarApps.choices(context));}catch(RuntimeException ignored){}
-            found.removeIf(choice->excluded.contains(choice.pkg));
+            try{
+                List<SidebarApps.Choice> all=SidebarApps.choices(context);Map<String,SidebarApps.Choice> remaining=new LinkedHashMap<>();
+                for(SidebarApps.Choice choice:all)remaining.put(choice.pkg,choice);
+                for(String pkg:order){SidebarApps.Choice choice=remaining.remove(pkg);if(choice!=null)found.add(choice);}
+                found.addAll(remaining.values());
+            }catch(RuntimeException ignored){}
             main.post(()->{
                 if(released)return;choices.addAll(found);adapter.notifyDataSetChanged();
+                count.setText(choices.size()+Ui.tr(" aplicativos"," apps"," apps"));
                 status.setText(Ui.tr("Nenhum aplicativo disponível.","No apps available.","No hay aplicaciones disponibles."));
-                if(choices.isEmpty()){if(above.isEmpty())close.requestFocus();}
-                else if(above.isEmpty()){setSelection(0);requestFocus();}
+                if(choices.isEmpty())close.requestFocus();else{setSelection(0);requestFocus();}
             });
         });
     }
@@ -76,11 +74,7 @@ final class InstalledAppsGrid extends GridView {
                 if((position/COLUMNS+1)*COLUMNS>=getCount())return true;
                 if(position+COLUMNS>=getCount()){setSelection(getCount()-1);return true;}
             }
-        }
-        if(key==KeyEvent.KEYCODE_DPAD_UP&&event.getAction()==KeyEvent.ACTION_DOWN&&position<COLUMNS){
-            int column=Math.max(0,position);
-            View target=above.isEmpty()?close:above.get(Math.min(above.size()-1,(int)((column+.5f)*above.size()/COLUMNS)));
-            target.requestFocus();return true;
+            if(key==KeyEvent.KEYCODE_DPAD_UP&&position<COLUMNS){close.requestFocus();return true;}
         }
         return super.dispatchKeyEvent(event);
     }
@@ -92,6 +86,7 @@ final class InstalledAppsGrid extends GridView {
 
     private void icon(Tile tile,SidebarApps.Choice choice){
         tile.pkg=choice.pkg;tile.label.setText(choice.label);tile.setContentDescription(choice.label);
+        tile.pin.setVisibility(favorites.contains(choice.pkg)?VISIBLE:INVISIBLE);
         tile.initial.setText(choice.label.isEmpty()?"?":choice.label.substring(0,choice.label.offsetByCodePoints(0,1)).toUpperCase(Ui.locale()));
         Bitmap cached=icons.get(choice.pkg);tile.image.setImageBitmap(cached);tile.initial.setVisibility(cached==null?VISIBLE:GONE);
         if(cached!=null||released||!pending.add(choice.pkg))return;
@@ -108,15 +103,25 @@ final class InstalledAppsGrid extends GridView {
     private Bitmap loadIcon(String pkg){
         Bitmap bitmap=null;
         try{
-            Drawable original=pkg.equals("com.plexapp.android")||pkg.equals(SidebarApps.YOUTUBE)||pkg.equals("com.amazon.amazonvideo.livingroom")
-                ?SidebarApps.icon(getContext(),pkg):getContext().getPackageManager().getApplicationIcon(pkg);
-            if(original==null)return null;
-            bitmap=Bitmap.createBitmap(ICON_SIZE,ICON_SIZE,Bitmap.Config.ARGB_8888);
-            int width=Math.max(1,original.getIntrinsicWidth()),height=Math.max(1,original.getIntrinsicHeight());
-            float scale=ICON_SIZE/(float)Math.max(width,height);int w=Math.max(1,Math.round(width*scale)),h=Math.max(1,Math.round(height*scale));
-            original.setBounds((ICON_SIZE-w)/2,(ICON_SIZE-h)/2,(ICON_SIZE+w)/2,(ICON_SIZE+h)/2);original.draw(new Canvas(bitmap));
+            Drawable original=null;String provider=pkg.equals("com.plexapp.android")?"plex":pkg.equals(SidebarApps.YOUTUBE)?"youtube":pkg.equals("com.amazon.amazonvideo.livingroom")?"prime":null;
+            if(provider!=null)try(java.io.InputStream in=getContext().getAssets().open("brands/icon-"+provider+".png")){
+                BitmapFactory.Options options=new BitmapFactory.Options();options.inSampleSize=iconSize==128?4:2;
+                Bitmap source=BitmapFactory.decodeStream(in,null,options);if(source!=null)original=new BitmapDrawable(getResources(),source);
+            }catch(java.io.IOException ignored){}
+            if(original==null)original=getContext().getPackageManager().getApplicationIcon(pkg);
+            bitmap=Bitmap.createBitmap(iconSize,iconSize,Bitmap.Config.ARGB_8888);Canvas canvas=new Canvas(bitmap);
+            Path mask=new Path();mask.addRoundRect(new RectF(0,0,iconSize,iconSize),iconSize*.224f,iconSize*.224f,Path.Direction.CW);canvas.clipPath(mask);
+            if(original instanceof AdaptiveIconDrawable){
+                // Use the app's own layers in the TV square mask, without changing its colors.
+                AdaptiveIconDrawable adaptive=(AdaptiveIconDrawable)original;int inset=iconSize/4;
+                for(Drawable layer:new Drawable[]{adaptive.getBackground(),adaptive.getForeground()})if(layer!=null){layer.setBounds(-inset,-inset,iconSize+inset,iconSize+inset);layer.draw(canvas);}
+            }else{
+                int width=Math.max(1,original.getIntrinsicWidth()),height=Math.max(1,original.getIntrinsicHeight());
+                float scale=iconSize/(float)Math.max(width,height);int w=Math.max(1,Math.round(width*scale)),h=Math.max(1,Math.round(height*scale));
+                original.setBounds((iconSize-w)/2,(iconSize-h)/2,(iconSize+w)/2,(iconSize+h)/2);original.draw(canvas);
+            }
             return bitmap;
-        }catch(android.content.pm.PackageManager.NameNotFoundException|RuntimeException ignored){if(bitmap!=null)bitmap.recycle();return null;}
+        }catch(PackageManager.NameNotFoundException|RuntimeException ignored){if(bitmap!=null)bitmap.recycle();return null;}
     }
 
     void trim(){icons.evictAll();}
@@ -139,21 +144,28 @@ final class InstalledAppsGrid extends GridView {
     private final class Tile extends FrameLayout {
         final ImageView image;
         final TextView label,initial;
-        final View mark;
+        final FrameLayout artwork;
+        final View pin;
         String pkg;
         boolean styled,focused;
         Tile(){
-            super(InstalledAppsGrid.this.getContext());setLayoutParams(new AbsListView.LayoutParams(320,144));
+            super(InstalledAppsGrid.this.getContext());setLayoutParams(new AbsListView.LayoutParams(264,250));
             setFocusable(false);setDefaultFocusHighlightEnabled(false);setClipChildren(false);
-            image=new ImageView(getContext());image.setScaleType(ImageView.ScaleType.FIT_CENTER);image.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-            LayoutParams artwork=new LayoutParams(72,72,Gravity.TOP|Gravity.CENTER_HORIZONTAL);artwork.topMargin=19;addView(image,artwork);
-            initial=caption(31,Ui.displaySemibold);initial.setTextColor(0xFFB9BDCA);initial.setBackground(shape(0xFF303541,19));addView(initial,new LayoutParams(artwork));
-            label=caption(19,Ui.medium);label.setSingleLine(true);label.setEllipsize(android.text.TextUtils.TruncateAt.END);label.setPadding(14,0,14,0);
-            LayoutParams name=new LayoutParams(-1,32);name.topMargin=99;addView(label,name);
-            mark=new View(getContext());mark.setBackground(shape(Appearance.accent(getContext()),2));LayoutParams m=new LayoutParams(32,3,Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL);m.bottomMargin=5;addView(mark,m);
+            artwork=new FrameLayout(getContext());artwork.setBackground(shape(0xFF202630,43));artwork.setClipToOutline(true);
+            LayoutParams art=new LayoutParams(192,192,Gravity.TOP|Gravity.CENTER_HORIZONTAL);art.topMargin=10;addView(artwork,art);
+            image=new ImageView(getContext());image.setScaleType(ImageView.ScaleType.FIT_CENTER);image.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);artwork.addView(image,new LayoutParams(-1,-1));
+            initial=caption(56,Ui.displaySemibold);initial.setTextColor(0xFFB9BDCA);artwork.addView(initial,new LayoutParams(-1,-1));
+            label=caption(21,Ui.medium);label.setSingleLine(true);label.setEllipsize(android.text.TextUtils.TruncateAt.END);label.setPadding(8,0,8,0);
+            LayoutParams name=new LayoutParams(-1,32);name.topMargin=207;addView(label,name);
+            pin=new View(getContext());pin.setBackground(shape(Appearance.accent(getContext()),3));LayoutParams p=new LayoutParams(5,5,Gravity.TOP|Gravity.CENTER_HORIZONTAL);p.topMargin=245;addView(pin,p);
         }
-        private TextView caption(int size,android.graphics.Typeface font){TextView text=new TextView(getContext());text.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);text.setTypeface(font);text.setTextColor(0xFFF7F7FA);text.setGravity(Gravity.CENTER);text.setIncludeFontPadding(false);text.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);return text;}
-        void selected(boolean value){if(styled&&focused==value)return;styled=true;focused=value;setBackground(shape(focused?0xFF3B404E:0xFF20232C,20));mark.setVisibility(focused?VISIBLE:INVISIBLE);setElevation(focused?16:0);setScaleX(focused?1.025f:1);setScaleY(focused?1.025f:1);}
+        private TextView caption(int size,android.graphics.Typeface font){TextView text=new TextView(getContext());text.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);text.setTypeface(font);text.setGravity(Gravity.CENTER);text.setIncludeFontPadding(false);text.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);return text;}
+        void selected(boolean value){
+            if(styled&&focused==value)return;styled=true;focused=value;
+            artwork.setScaleX(focused?1.07f:1);artwork.setScaleY(focused?1.07f:1);artwork.setElevation(focused?18:0);
+            GradientDrawable outline=shape(Color.TRANSPARENT,43);if(focused)outline.setStroke(2,0xCCFFFFFF);artwork.setForeground(outline);
+            label.setTextColor(focused?0xFFFFFFFF:0xFFC5CAD5);
+        }
     }
     private static GradientDrawable shape(int color,int radius){GradientDrawable shape=new GradientDrawable();shape.setColor(color);shape.setCornerRadius(radius);return shape;}
 }

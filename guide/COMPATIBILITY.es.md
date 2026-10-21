@@ -18,12 +18,12 @@ Las webs oficiales pueden abrirse dentro de Vela. Pueden exigir cookies, una cue
 
 ## Rendimiento
 
-La caché de imágenes del inicio se limita a 6 MiB, o 3 MiB en modo ligero. La cuadrícula de aplicaciones recicla las tarjetas, carga iconos locales de hasta 96 × 96 y limita su caché a 512 KiB. Estos límites no representan la memoria total de la aplicación.
+La caché de imágenes del inicio se limita a 6 MiB, o 3 MiB en modo ligero. La biblioteca de aplicaciones recicla sus celdas y carga iconos locales de hasta 192 × 192, con una caché de 1 MiB. En modo ligero utiliza 128 × 128 y 512 KiB. Las celdas visibles también mantienen su propia referencia a los iconos; cerrar el panel libera esas vistas y la caché. Estos límites no representan la memoria total de la aplicación.
 
 La cuadrícula libera su cargador y sus iconos al cerrarse. Los reproductores se liberan al salir; las webs utilizan un proceso separado. El consumo real depende del dispositivo y de la función abierta.
 
 ## Preview y pantalla de inicio
 
-La versión 1.10.1 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
+La versión 1.10.2 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
 
 [Volver a Vela](../README.md)
