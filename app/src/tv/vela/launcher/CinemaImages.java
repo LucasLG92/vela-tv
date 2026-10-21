@@ -65,8 +65,8 @@ final class CinemaImages {
             if("content".equals(uri.getScheme()))input=context.getContentResolver().openInputStream(uri);
             else {
                 String host=uri.getHost();
-                if(!"https".equals(uri.getScheme())||host==null||
-                    !(host.endsWith(".ytimg.com")||host.equals("ytimg.com")||host.endsWith(".ggpht.com")||host.endsWith(".googleusercontent.com")))
+                if(!"https".equals(uri.getScheme())||host==null||uri.getUserInfo()!=null||
+                    (uri.getPort()!=-1&&uri.getPort()!=443))
                     throw new IOException("Origen de imagen no admitido.");
                 connection=(java.net.HttpURLConnection)new java.net.URL(path).openConnection();
                 connection.setConnectTimeout(8000);connection.setReadTimeout(8000);connection.setInstanceFollowRedirects(false);

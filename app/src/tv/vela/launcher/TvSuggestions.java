@@ -25,7 +25,7 @@ final class TvSuggestions {
                 film.key="youtube:"+cursor.getLong(0);film.title=cursor.getString(1);film.summary=cursor.getString(2);
                 film.thumb=cursor.getString(3);film.art=film.thumb;film.intent=cursor.getString(4);
                 film.section=channels.getOrDefault(cursor.getLong(5),"Desde YouTube");
-                film.provider="YouTube";film.type="video";film.meta="YouTube · "+film.section;
+                film.provider="YouTube";film.packageName=YOUTUBE;film.tvSource=true;film.landscape=true;film.type="video";film.meta="YouTube · "+film.section;
                 if(film.title!=null && film.thumb!=null && film.intent!=null)items.add(film);
             }
         }catch(RuntimeException ignored){}

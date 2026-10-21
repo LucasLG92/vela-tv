@@ -4,17 +4,27 @@
 
 Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abrir. Vela reúne lo que te gusta ver en una interfaz visual, personalizable y pensada para el mando.
 
-**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.4-preview)** · [Ver las 29 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
+**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.11.0-preview)** · [Ver las 32 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
 
-![Inicio de Vela con Oppenheimer y carteles de Plex](gallery/01-inicio.webp)
+![Inicio de Vela con Seguir viendo panorámico](gallery/01-inicio.webp)
 
 ## Dale protagonismo a tu biblioteca
 
-Conecta Plex y deja que tus películas y series llenen la pantalla con sus carteles y fondos originales. Explora la biblioteca por páginas, descubre qué ver y encuentra **Seguir viendo** en su propio espacio.
+Conecta Plex y deja que tus películas y series llenen la pantalla con sus carteles y fondos originales. Retoma películas y capítulos desde **Seguir viendo**, con el tiempo restante a la vista. Justo debajo, **Últimas subidas** reúne las novedades de tu servidor con sus carteles originales. Explora el resto de la biblioteca por páginas.
 
 | Tus películas | Tus series |
 | --- | --- |
 | ![Películas en Vela](gallery/28-peliculas.webp) | ![Series en Vela](gallery/29-series.webp) |
+
+## Retoma una historia. Descubre la siguiente.
+
+Una fila para lo que dejaste a medias y otra para lo que acaba de llegar. Recorre tus títulos con el mando y deja que cada historia llene la pantalla.
+
+| Seguir viendo | Últimas subidas |
+| --- | --- |
+| ![Continúa películas, series y vídeos](gallery/04-seguir-viendo.webp) | ![Novedades de tu biblioteca](gallery/30-ultimas-subidas.webp) |
+
+Las otras aplicaciones pueden aportar su progreso cuando lo comparten con Android TV. Consulta la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
 
 ## Tus apps, reconocibles al instante
 
@@ -54,7 +64,7 @@ Vela carga las imágenes cuando hacen falta y libera recursos al salir, para cui
 
 Instala Vela, conecta tu biblioteca y elige tus aplicaciones. Todo desde la televisión, con un asistente que puedes completar a tu ritmo.
 
-**[Descargar Vela 1.10.4 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.4-preview)**
+**[Descargar Vela 1.11.0 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.11.0-preview)**
 
 Para **Android TV y Google TV con Android 11 o posterior**. Esta versión es una preview. Consulta la [guía de instalación](guide/INSTALL.es.md) y la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
 

@@ -6,6 +6,7 @@ Vela no incluye cuentas, servidores ni ubicaciones del desarrollador. La configu
 | --- | --- |
 | Plex | Plex recibe la autorización del dispositivo. El servidor seleccionado recibe las solicitudes de biblioteca e imágenes con su token. La sesión se guarda localmente y se puede desvincular desde Ajustes. |
 | Avatar | Se consulta el perfil autorizado. La imagen y sus redirecciones se descargan sin reenviar el token a sus servidores de imágenes. |
+| Seguir viendo de otras apps | Con el permiso de TV, se leen títulos, imágenes, enlaces y progreso que las apps instaladas publiquen en Watch Next. Las imágenes se cargan desde sus proveedores o URI locales; no se reenvían credenciales de Plex. No se accede a sus contraseñas ni se importan sus sesiones. |
 | Tiempo | Open-Meteo recibe coordenadas aproximadas redondeadas o el nombre de una ciudad buscada. No se solicita ubicación precisa ni acceso en segundo plano. |
 | TV | TDTChannels recibe las consultas del catálogo y de la guía; los servidores de cada emisora reciben las solicitudes de reproducción y logotipos. |
 | Web integrada | Se abre la web de la emisora dentro de Vela. Esa web gestiona cookies, anuncios, cuentas, restricciones y reproducción protegida según sus propias condiciones. Sus cookies se conservan privadamente en la instalación. No se importan sesiones de otras apps. |

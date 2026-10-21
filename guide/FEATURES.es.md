@@ -6,8 +6,12 @@ Conecta Plex desde el mando y elige tu servidor. Vela utiliza sus carteles y fon
 
 - Películas y series en sus propias vistas.
 - Biblioteca completa por páginas de hasta 24 títulos.
-- Seguir viendo en una fila separada.
+- Seguir viendo en tarjetas panorámicas iguales, con servicio, episodio, progreso y tiempo restante.
+- Últimas subidas de Plex debajo, con carteles verticales y orden por fecha de incorporación.
+- Bordes que se difuminan solo cuando queda contenido fuera de la fila.
 - Apertura del contenido en Plex.
+
+Los títulos pueden aparecer tanto en novedades como en Seguir viendo. Cada fila conserva su posición y se recorre con las flechas. Las otras apps solo aportan los datos que publican en Watch Next de Android TV.
 
 ## Tus aplicaciones
 

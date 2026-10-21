@@ -1,8 +1,8 @@
 # Vela, por dentro
 
-Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **29 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
+Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **32 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
 
-[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.4-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
+[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.11.0-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
 
 ## Tu cine, en primer plano
 
@@ -31,6 +31,20 @@ Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela 
 ## Retoma donde lo dejaste
 
 ![Retoma donde lo dejaste](04-seguir-viendo.webp)
+
+## Acaba de llegar a tu biblioteca
+
+![Últimas subidas](30-ultimas-subidas.webp)
+
+## Explora sin perder el hilo
+
+![Filas con difuminados en los extremos](31-filas-difuminadas.webp)
+
+## Cada servicio, en su sitio
+
+![Seguir viendo desde los servicios compatibles](32-servicios-seguir-viendo.webp)
+
+El contenido de YouTube y Prime ilustra el diseño con progreso de ejemplo; su aparición real depende de lo que cada app comparta con Android TV.
 
 ## Tu biblioteca, página a página
 

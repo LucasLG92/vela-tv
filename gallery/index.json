@@ -2,11 +2,11 @@
   {
     "file": "01-inicio.webp",
     "title": "Tu cine, en primer plano",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.11.0"
   },
   {
     "file": "02-aspecto-menta-compacto.webp",
@@ -29,11 +29,11 @@
   {
     "file": "04-seguir-viendo.webp",
     "title": "Retoma donde lo dejaste",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.11.0"
   },
   {
     "file": "05-biblioteca-paginada.webp",
@@ -259,5 +259,32 @@
     "width": 3840,
     "height": 2160,
     "version": "1.10.2"
+  },
+  {
+    "file": "30-ultimas-subidas.webp",
+    "title": "Acaba de llegar a tu biblioteca",
+    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.11.0"
+  },
+  {
+    "file": "31-filas-difuminadas.webp",
+    "title": "Explora sin perder el hilo",
+    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.11.0"
+  },
+  {
+    "file": "32-servicios-seguir-viendo.webp",
+    "title": "Cada servicio, en su sitio",
+    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.11.0"
   }
 ]

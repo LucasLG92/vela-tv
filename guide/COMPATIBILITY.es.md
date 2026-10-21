@@ -4,11 +4,11 @@ Vela funciona en dispositivos con Android TV o Google TV y Android 11 o posterio
 
 ## Plex
 
-Autoriza tu cuenta en plex.tv/link y elige tu servidor. Los títulos y la calidad de los carteles dependen de tu biblioteca y de las imágenes disponibles en el servidor. Vela abre el contenido en la aplicación de Plex.
+Autoriza tu cuenta en plex.tv/link y elige tu servidor. Los títulos y la calidad de los carteles dependen de tu biblioteca y de las imágenes disponibles en el servidor. Vela abre el contenido en la aplicación de Plex. Últimas subidas utiliza la lista de incorporaciones del servidor y su fecha addedAt; si una serie llega como temporada, muestra el nombre y cartel de la serie. El inicio limita cada fila a doce títulos.
 
 ## YouTube y Prime Video
 
-Gestionan sus cuentas dentro de sus propias aplicaciones. Vela abre esas sesiones y muestra las filas que YouTube comparta con Android TV, si autorizas el acceso correspondiente. No incluye una integración OAuth para obtener el inicio privado ni Ver más tarde de YouTube.
+Gestionan sus cuentas dentro de sus propias aplicaciones. Vela abre esas sesiones y muestra las filas que YouTube comparta con Android TV, si autorizas el acceso correspondiente. Seguir viendo puede reunir títulos de las apps instaladas que publiquen su progreso en Watch Next y permitan leerlo. La presencia de YouTube, Prime u otro servicio no está garantizada: depende de esa app y del dispositivo. Si no comparte duración o posición, Vela muestra Continuar sin inventar un tiempo. No incluye una integración OAuth para obtener el inicio privado ni Ver más tarde de YouTube.
 
 ## Televisión y webs de las emisoras
 
@@ -24,6 +24,6 @@ La cuadrícula libera su cargador y sus iconos al cerrarse. Los reproductores se
 
 ## Preview y pantalla de inicio
 
-La versión 1.10.4 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
+La versión 1.11.0 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
 
 [Volver a Vela](../README.md)

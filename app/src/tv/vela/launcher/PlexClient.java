@@ -115,9 +115,12 @@ final class PlexClient {
         String key, title, summary, thumb, art, meta, type;
         String logo = "";
         String provider = "Plex", intent;
+        String packageName = "com.plexapp.android", episodeLabel = "";
         String section = "Tu biblioteca";
-        float progress = -1;
-        boolean continuing;
+        float progress = -1,thumbAspect;
+        long durationMs,positionMs=-1,lastPlayedMs,addedAtMs;
+        boolean continuing,tvSource,landscape,recentlyAdded;
+        long remainingMs(){return durationMs>0&&positionMs>=0&&positionMs<durationMs?durationMs-positionMs:-1;}
     }
     static final int PAGE_SIZE = 24;
     static final class Section {
@@ -174,6 +177,8 @@ final class PlexClient {
         JSONObject root=new JSONObject(request(uri+"/hubs?count=8&includeExternalMetadata=0",token,null,15000));
         try{mergeContinue(root,new JSONObject(request(uri+"/hubs/continueWatching?count=12",token,null,6000)));}
         catch(Exception ignored){if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();}
+        try{mergeRecent(root,new JSONObject(request(uri+"/library/recentlyAdded?includeExternalMetadata=0&X-Plex-Container-Start=0&X-Plex-Container-Size=24",token,null,6000)));}
+        catch(Exception ignored){if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();}
         String body=root.toString();List<Film> films=parseHubs(root);
         if(server.equals(identity()))prefs.edit().putString("libraryCache", body).putLong("libraryAt", System.currentTimeMillis()).apply();
         return films;
@@ -189,6 +194,15 @@ final class PlexClient {
         JSONArray existing=home.optJSONArray("Hub");for(int i=0;existing!=null&&i<existing.length();i++)merged.put(existing.get(i));
         home.put("Hub",merged);
     }
+    static void mergeRecent(JSONObject root,JSONObject response) throws Exception {
+        JSONObject container=response.optJSONObject("MediaContainer"),home=root.optJSONObject("MediaContainer");if(container==null||home==null)return;
+        JSONArray metadata=container.optJSONArray("Metadata");if(metadata==null)return;
+        if(metadata.length()>PAGE_SIZE)throw new IOException("El servidor no ha respetado el límite de novedades.");
+        JSONArray existing=home.optJSONArray("Hub"),merged=new JSONArray().put(new JSONObject().put("hubIdentifier","vela.recent").put("Metadata",metadata));
+        // The dedicated feed replaces recent hubs, avoiding stale fallback titles after removals.
+        for(int i=0;existing!=null&&i<existing.length();i++){JSONObject hub=existing.optJSONObject(i);if(hub!=null&&!recentHub(hub.optString("hubIdentifier").toLowerCase(Locale.ROOT)))merged.put(hub);}
+        home.put("Hub",merged);
+    }
     List<Film> cached() {
         try { return parseHubs(new JSONObject(prefs.getString("libraryCache", "{}"))); }
         catch (Exception ignored) { return Collections.emptyList(); }
@@ -197,30 +211,39 @@ final class PlexClient {
         List<Film> films = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         Set<String> seriesSeen = new HashSet<>();
-        int movies=0,series=0;
+        int resumed=0,others=0;boolean hasRecent=false;
         JSONObject container = root.optJSONObject("MediaContainer");
         JSONArray hubs = container == null ? null : container.optJSONArray("Hub");
         if (hubs == null) return films;
+        for(int i=0;i<hubs.length();i++){JSONObject hub=hubs.optJSONObject(i);if(hub!=null&&recentHub(hub.optString("hubIdentifier").toLowerCase(Locale.ROOT)))hasRecent=true;}
         // Continue watching first; preserve the server's ordering within each row.
-        for (int pass = 0; pass < 2; pass++) for (int i = 0; i < hubs.length() && films.size() < 24; i++) {
+        for (int pass = 0; pass < 2; pass++) for (int i = 0; i < hubs.length() && films.size() < 48; i++) {
             JSONObject hub = hubs.getJSONObject(i);
             String identifier = hub.optString("hubIdentifier", "").toLowerCase(Locale.ROOT);
             boolean resume = identifier.contains("continue") || identifier.contains("ondeck");
             if (resume != (pass == 0)) continue;
+            boolean recent=recentHub(identifier);if(!resume&&hasRecent&&!recent)continue;
             JSONArray metadata = hub.optJSONArray("Metadata");
-            for (int j = 0; metadata != null && j < metadata.length() && films.size() < 24; j++) {
+            for (int j = 0; metadata != null && j < Math.min(metadata.length(),24) && films.size() < 48; j++) {
                 JSONObject item = metadata.getJSONObject(j);
                 String type = item.optString("type");
+                if(recent&&type.equals("season"))item=new JSONObject(item.toString()).put("type","show").put("ratingKey",item.optString("parentRatingKey")).put("title",item.optString("parentTitle")).put("thumb",item.optString("parentThumb",item.optString("thumb")));
                 String key = item.optString("ratingKey");
-                if ((!type.equals("movie") && !type.equals("episode") && !type.equals("show")) || key.isEmpty() || !seen.add(key)) continue;
+                type=item.optString("type");String group=resume?"resume:":"library:";
+                if ((!type.equals("movie") && !type.equals("episode") && !type.equals("show")) || key.isEmpty() || !seen.add(group+key)) continue;
                 String seriesKey=type.equals("episode")?item.optString("grandparentRatingKey"):type.equals("show")?key:"";
-                if(!seriesKey.isEmpty() && !seriesSeen.add(seriesKey))continue;
-                if(type.equals("movie")){if(movies>=12)continue;movies++;}else{if(series>=12)continue;series++;}
-                films.add(parseFilm(item,resume));
+                if(!seriesKey.isEmpty() && !seriesSeen.add(group+seriesKey))continue;
+                if(resume){if(resumed>=12)continue;resumed++;}else{if(others>=36)continue;others++;}
+                Film film=parseFilm(item,resume);film.recentlyAdded=recent;films.add(film);
             }
         }
-        return films;
+        // Stable sorting merges recent movie/series hubs using Plex's actual added date.
+        films.sort((a,b)->a.continuing!=b.continuing?(a.continuing?-1:1):!a.continuing&&a.recentlyAdded&&b.recentlyAdded?Long.compare(b.addedAtMs,a.addedAtMs):0);
+        List<Film> bounded=new ArrayList<>();resumed=0;others=0;
+        for(Film film:films)if(film.continuing?resumed++<12:others++<12)bounded.add(film);
+        return bounded;
     }
+    private static boolean recentHub(String id){return id.equals("vela.recent")||id.endsWith(".recent")||id.contains("recentlyadded");}
     private static Film parseFilm(JSONObject item,boolean resume) {
         String type=item.optString("type"),key=item.optString("ratingKey");
         if(key.isEmpty()||(!type.equals("movie")&&!type.equals("show")&&!type.equals("episode")))return null;
@@ -239,6 +262,10 @@ final class PlexClient {
         film.meta="Plex"+(year>0?"  ·  "+year:"")+(minutes>0?"  ·  "+minutes+" min":"");
         if(type.equals("episode"))film.meta+="  ·  T"+item.optInt("parentIndex")+" E"+item.optInt("index");
         long duration=item.optLong("duration"),offset=item.optLong("viewOffset");
+        film.durationMs=Math.max(0,duration);film.positionMs=item.has("viewOffset")&&!item.isNull("viewOffset")?Math.max(-1,offset):-1;
+        long last=item.optLong("lastViewedAt");if(last>0&&last<=Long.MAX_VALUE/1000)film.lastPlayedMs=last*1000;
+        long added=item.optLong("addedAt");if(added>0&&added<=Long.MAX_VALUE/1000)film.addedAtMs=added*1000;
+        if(type.equals("episode"))film.episodeLabel="T"+item.optInt("parentIndex")+" · E"+item.optInt("index");
         if(duration>0&&offset>0)film.progress=Math.min(1f,(float)offset/duration);
         film.section=resume?"Seguir viendo":"En tu biblioteca";
         return film;

@@ -26,7 +26,7 @@ public class PlexFeedTest {
                 .put("Metadata",new JSONArray().put(episode).put(movie));
         List<PlexClient.Film> list = PlexClient.parseHubs(new JSONObject().put("MediaContainer",
                 new JSONObject().put("Hub",new JSONArray().put(recent).put(resume))));
-        require(list.size()==3,"duplicates or unsupported media types");
+        require(list.size()==5,"row-local duplicates or unsupported media types");
         require(list.get(0).title.equals("Library series"),"episode must display its series name");
         require(list.get(0).progress==1f,"progress must be bounded");
         require(list.get(1).progress==.5f,"watch progress");
@@ -34,8 +34,9 @@ public class PlexFeedTest {
         require(list.get(1).logo.equals("/library/metadata/11/clearLogo/1"),"title logo must come from real server artwork");
         require(list.get(0).section.equals("Seguir viendo"),"continue watching must come first");
         require(list.get(0).continuing&&list.get(1).continuing&&!list.get(2).continuing,"continue-watching rows must use the hub, not just an offset");
-        require(list.get(2).type.equals("show"),"new series must remain visible");
-        require(list.get(2).logo.isEmpty(),"external artwork must not receive Plex credentials");
+        require(list.get(2).key.equals("11")&&!list.get(2).continuing&&list.get(2).recentlyAdded,"a recently added film may also appear in resume without merging the rows");
+        require(list.get(3).type.equals("show"),"new series must remain visible");
+        require(list.get(3).logo.isEmpty(),"external artwork must not receive Plex credentials");
         require(PlexClient.parseHubs(new JSONObject()).isEmpty(),"empty library must stay empty");
         List<PlexClient.Section> sections=PlexClient.parseSections(new JSONObject().put("MediaContainer",new JSONObject().put("Directory",new JSONArray()
                 .put(new JSONObject().put("key","1").put("type","movie").put("title","Movies"))
@@ -68,6 +69,14 @@ public class PlexFeedTest {
         JSONObject homeHub=new JSONObject().put("MediaContainer",new JSONObject());
         PlexClient.mergeContinue(homeHub,new JSONObject().put("MediaContainer",new JSONObject().put("Hub",new JSONArray().put(resume))));
         require(PlexClient.parseHubs(homeHub).size()==2,"continue-watching hub response shape");
+        JSONObject season=new JSONObject().put("ratingKey","season-1").put("type","season").put("parentRatingKey","series-1").put("parentTitle","Recent series").put("parentThumb","/series/poster").put("addedAt",300);
+        JSONObject older=new JSONObject(movie.toString()).put("addedAt",100),newer=new JSONObject(show.toString()).put("addedAt",400);
+        JSONObject orderedHome=new JSONObject().put("MediaContainer",new JSONObject().put("Hub",new JSONArray().put(resume).put(recent)));
+        PlexClient.mergeRecent(orderedHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray().put(older).put(season).put(newer).put(older))));
+        List<PlexClient.Film> ordered=PlexClient.parseHubs(orderedHome);require(ordered.size()==5&&ordered.get(2).key.equals("13")&&ordered.get(3).key.equals("series-1")&&ordered.get(4).key.equals("11"),"recent feed must sort by addedAt, deduplicate within the row and preserve resume");
+        require(ordered.get(3).thumb.equals("/series/poster")&&ordered.get(3).title.equals("Recent series")&&ordered.get(3).addedAtMs==300000,"new season must use the series title and original poster");
+        PlexClient.mergeRecent(orderedHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray())));require(PlexClient.parseHubs(orderedHome).size()==2,"an empty fresh feed must not resurrect cached recent titles");
+        JSONArray tooMany=new JSONArray();for(int i=0;i<25;i++)tooMany.put(movie);rejected=false;try{PlexClient.mergeRecent(orderedHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",tooMany)));}catch(Exception expected){rejected=true;}require(rejected,"unbounded recently-added response was accepted");
         System.out.println("PASS Plex feed and catalog: real artwork, hub-based continue watching, sections, bounded pages, offset validation, deduplication, unknown totals and empty/last pages");
     }
     private static JSONObject page(JSONArray items,int offset,int total)throws Exception{return new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",items).put("offset",offset).put("totalSize",total));}

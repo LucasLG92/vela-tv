@@ -75,7 +75,8 @@ final class CinemaHomeView extends FrameLayout {
     private boolean artReleased=true,libraryDirty;
     private final Runnable visiblePosters=()->loadVisiblePosters();
     private final Bitmap[] brandBitmaps=new Bitmap[2];
-    private List<PlexClient.Film> films=new ArrayList<>(),youtube=new ArrayList<>();
+    private List<PlexClient.Film> films=new ArrayList<>(),youtube=new ArrayList<>(),watchNext=new ArrayList<>();
+    private int watchGeneration;
     private PlexClient.Film selected;
     private View lastContent,overlayReturn;
     private Bitmap heroBitmap;
@@ -97,8 +98,8 @@ final class CinemaHomeView extends FrameLayout {
         setBackgroundColor(BG);setClipChildren(false);
         stage=new FrameLayout(activity);stage.setClipChildren(false);addView(stage,new LayoutParams(1920,1080));
         surface=new FrameLayout(activity);surface.setClipChildren(false);stage.addView(surface,new LayoutParams(1920,1080));
-        backdrop=new ImageView(activity);backdrop.setScaleType(ImageView.ScaleType.CENTER_CROP);backdrop.setCropToPadding(true);place(backdrop,96,0,1824,970);
-        backdropLeft=new View(activity);backdropLeft.setBackground(new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,new int[]{0xF5090A0D,0x9C090A0D,0x00090A0D}));place(backdropLeft,96,0,1330,970);
+        backdrop=new ImageView(activity);backdrop.setScaleType(ImageView.ScaleType.CENTER_CROP);backdrop.setCropToPadding(true);place(backdrop,96,0,1824,1080);
+        backdropLeft=new View(activity);backdropLeft.setBackground(new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,new int[]{BG,0x9C090A0D,0x00090A0D}));place(backdropLeft,96,0,1330,1080);
         backdropBottom=new View(activity);backdropBottom.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0x00090A0D,0xB8090A0D,BG}));place(backdropBottom,96,535,1824,545);
         backdropShade=new View(activity);backdropShade.setBackgroundColor(BG);place(backdropShade,96,0,1824,1080);
         View top=new View(activity);top.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0x85090A0D,0x00090A0D}));place(top,96,0,1824,180);
@@ -116,7 +117,7 @@ final class CinemaHomeView extends FrameLayout {
         link.setOnFocusChangeListener((v,f)->{if(f){lastContent=v;setSidebar(false);}link.setTextColor(f?BG:WHITE);link.setBackground(round(f?WHITE:0x50FFFFFF,30));lift(v,f?1.06f:1,0,f?14:0);});
         link.setOnClickListener(v->{if(filter==3)enableYouTube();else activity.startActivity(new Intent(activity,PlexLinkActivity.class));});
         rowNote=text("Tus carteles aparecerán al vincular Plex.",20,DIM,Ui.regular);place(rowNote,194,805,1420,60);
-        shelvesScroll=new ScrollView(activity);shelvesScroll.setFocusable(false);shelvesScroll.setVerticalScrollBarEnabled(false);shelvesScroll.setSmoothScrollingEnabled(false);shelvesScroll.setClipToPadding(true);
+        shelvesScroll=new ScrollView(activity);shelvesScroll.setFocusable(false);shelvesScroll.setVerticalScrollBarEnabled(false);shelvesScroll.setSmoothScrollingEnabled(false);shelvesScroll.setClipToPadding(true);shelvesScroll.setClipChildren(true);
         shelfList=new LinearLayout(activity);shelfList.setOrientation(LinearLayout.VERTICAL);shelvesScroll.addView(shelfList,new ScrollView.LayoutParams(-1,-2));place(shelvesScroll,182,724,1658,356);
         shelvesScroll.getViewTreeObserver().addOnScrollChangedListener(()->schedulePosters());
         pager=new FrameLayout(activity);place(pager,194,680,1646,52);
@@ -177,7 +178,21 @@ final class CinemaHomeView extends FrameLayout {
     private GradientDrawable round(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(radius);return d;}
     private TextView button(String s,int size){TextView v=text(s,size,WHITE,Ui.medium);focusable(v,s);v.setContentDescription(null);v.setGravity(Gravity.CENTER);v.setPadding(20,6,20,6);v.setBackground(round(0xFF262831,18));v.setOnFocusChangeListener((view,f)->{v.setBackground(round(f?0xFF454852:0xFF262831,18));lift(v,f?1.035f:1,0,f?16:0);});return v;}
     private Drawable symbol(String name,int size){try(java.io.InputStream in=activity.getAssets().open("symbols/"+name+".png")){Bitmap b=BitmapFactory.decodeStream(in);if(b==null)return null;Drawable d=new BitmapDrawable(getResources(),b);d.setBounds(0,0,size,size);d.setTint(0xFFE1E1E8);return d;}catch(java.io.IOException ignored){return null;}}
-    private Drawable brand(int index){if(index==0)return activity.getDrawable(R.drawable.logo_plex);int b=index-1;if(brandBitmaps[b]==null)try(java.io.InputStream in=activity.getAssets().open("brands/"+(index==1?"youtube":"prime")+".png")){BitmapFactory.Options o=new BitmapFactory.Options();o.inSampleSize=2;brandBitmaps[b]=BitmapFactory.decodeStream(in,null,o);}catch(java.io.IOException ignored){}return brandBitmaps[b]==null?null:new BitmapDrawable(getResources(),brandBitmaps[b]);}
+    private Drawable brand(int index){
+        if(index==0)return activity.getDrawable(R.drawable.logo_plex);int b=index-1;
+        if(brandBitmaps[b]==null)try(java.io.InputStream in=activity.getAssets().open("brands/"+(index==1?"youtube":"prime")+".png")){BitmapFactory.Options o=new BitmapFactory.Options();o.inSampleSize=2;brandBitmaps[b]=BitmapFactory.decodeStream(in,null,o);}catch(java.io.IOException ignored){}
+        Bitmap bitmap=brandBitmaps[b];if(bitmap==null)return null;if(index!=1)return new BitmapDrawable(getResources(),bitmap);
+        // Ignore the official file's transparent canvas without allocating a second bitmap.
+        Rect source=new Rect(Math.round(bitmap.getWidth()*204f/1705),Math.round(bitmap.getHeight()*141f/573),Math.round(bitmap.getWidth()*1498f/1705),Math.round(bitmap.getHeight()*430f/573));
+        return new Drawable(){final Paint paint=new Paint(Paint.FILTER_BITMAP_FLAG);
+            @Override public void draw(Canvas canvas){canvas.drawBitmap(bitmap,source,getBounds(),paint);}
+            @Override public int getIntrinsicWidth(){return source.width();}
+            @Override public int getIntrinsicHeight(){return source.height();}
+            @Override public void setAlpha(int alpha){paint.setAlpha(alpha);invalidateSelf();}
+            @Override public void setColorFilter(ColorFilter filter){paint.setColorFilter(filter);invalidateSelf();}
+            @Override public int getOpacity(){return PixelFormat.TRANSLUCENT;}
+        };
+    }
     private void place(View v,int x,int y,int w,int h){LayoutParams p=new LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;surface.addView(v,p);}
     private void lift(View v,float scale,float y,float z){if(Visuals.reducedMotion(activity)){scale=1;y=0;}v.animate().cancel();v.animate().scaleX(scale).scaleY(scale).translationY(y).translationZ(z).setDuration(Visuals.duration(activity,170)).setInterpolator(EASE).start();}
     @Override protected void onSizeChanged(int w,int h,int ow,int oh){float s=Math.min(w/1920f,h/1080f);stage.setPivotX(0);stage.setPivotY(0);stage.setScaleX(s);stage.setScaleY(s);stage.setTranslationX((w-1920*s)/2);stage.setTranslationY((h-1080*s)/2);}
@@ -338,6 +353,7 @@ final class CinemaHomeView extends FrameLayout {
         else if(libraryDirty){films=plex.cached();libraryDirty=false;if(!browsing())showFilms();}
         if(artReleased||heroBitmap==null||(selected!=null&&!heroKey.equals(selected.provider+selected.key))){artReleased=false;if(selected!=null)selectFilm(selected);main.post(visiblePosters);}
         updateAccount();main.removeCallbacks(tick);tick.run();
+        loadWatchNext();
         updatePager();
         if(plex.connected()&&(films.isEmpty()||SystemClock.elapsedRealtime()-refreshedAt>60_000))refresh();
         if(browsing()&&plex.connected()&&catalogPage==null&&!catalogLoading)loadCatalog(requestedSection,requestedOffset,false);
@@ -363,10 +379,12 @@ final class CinemaHomeView extends FrameLayout {
             }
             CinemaImages.Request request=posterRequests.get(i);
             if(image.getDrawable()!=null||(request!=null&&request.pending()))continue;
-            PlexClient.Film film=posterFilms.get(i);boolean wide=filter==3;
+            PlexClient.Film film=posterFilms.get(i);boolean external=film.tvSource||!film.provider.equals("Plex");
             final int slot=i;
             CinemaImages.Ready ready=b->{if(active&&!closed&&epoch==posterGeneration&&slot<posterImages.size()&&posterImages.get(slot)==image&&posterVisible(slot))image.setImageBitmap(b);};
-            posterRequests.set(i,wide?images.loadTv(film.art,ready):images.load(film.thumb,Appearance.posterWidth(activity),Appearance.posterHeight(activity),ready));
+            View picture=(View)image.getParent();int width=picture.getLayoutParams().width,height=picture.getLayoutParams().height;
+            String path=filter==0&&film.continuing&&!external&&film.art!=null&&!film.art.isEmpty()?film.art:film.thumb;
+            posterRequests.set(i,external?images.loadTv(path,width,height,ready):images.load(path,width,height,ready));
         }
     }
     private boolean posterVisible(int i){
@@ -379,7 +397,8 @@ final class CinemaHomeView extends FrameLayout {
     private void schedulePosters(){main.removeCallbacks(visiblePosters);main.postDelayed(visiblePosters,40);}
     void destroy(){closed=true;pause();images.close();io.shutdownNow();main.removeCallbacksAndMessages(null);}
     void reset(){closeShortcutMenu(false);finishReorder(false);closeOverlay();changeFilter(0);setSidebar(false);play.requestFocus();}
-    void loadYouTube(){io.execute(()->{List<PlexClient.Film> fresh=TvSuggestions.youtube(activity);main.post(()->{if(!closed){youtube=fresh;if(filter==3&&active)showFilms();}});});}
+    void loadYouTube(){loadWatchNext();io.execute(()->{List<PlexClient.Film> fresh=TvSuggestions.youtube(activity);main.post(()->{if(!closed){youtube=fresh;if(filter==3&&active)showFilms();}});});}
+    private void loadWatchNext(){int epoch=++watchGeneration;boolean linked=plex.connected();io.execute(()->{List<PlexClient.Film> fresh=ContinueWatching.read(activity,linked);main.post(()->{if(!closed&&active&&epoch==watchGeneration){watchNext=fresh;if(filter==0)showFilms();}});});}
     private void refresh(){if(loading)return;loading=true;refreshedAt=SystemClock.elapsedRealtime();String server=plex.identity();io.execute(()->{try{List<PlexClient.Film> fresh=plex.library();main.post(()->{if(!closed&&server.equals(plex.identity())){films=fresh;if(active&&filter==0)showFilms();else libraryDirty=true;}});}catch(Exception ignored){main.post(()->{if(!closed&&films.isEmpty()&&!browsing())rowNote.setText("No se ha podido leer Plex. Comprueba el servidor o vuelve a vincularlo.");});}finally{main.post(()->loading=false);}});}
 
     private boolean browsing(){return filter==1||filter==2||filter==4;}
@@ -448,7 +467,8 @@ final class CinemaHomeView extends FrameLayout {
         Shelf(String heading,int railHeight){
             TextView label=text(heading,27,WHITE,Ui.displaySemibold);LayoutParams lp=new LayoutParams(1500,42);lp.leftMargin=12;lp.topMargin=11;root.addView(label,lp);
             posters.setOrientation(LinearLayout.HORIZONTAL);posters.setClipChildren(false);posters.setClipToPadding(false);posters.setPadding(12,18,40,20);
-            rail.setHorizontalScrollBarEnabled(false);rail.setSmoothScrollingEnabled(false);rail.setClipChildren(false);rail.setClipToPadding(false);rail.addView(posters,new HorizontalScrollView.LayoutParams(-2,railHeight));
+            rail.setHorizontalScrollBarEnabled(false);rail.setSmoothScrollingEnabled(false);rail.setClipChildren(true);rail.setClipToPadding(true);rail.setOverScrollMode(OVER_SCROLL_NEVER);
+            rail.setHorizontalFadingEdgeEnabled(true);rail.setFadingEdgeLength(64);rail.addView(posters,new HorizontalScrollView.LayoutParams(-2,railHeight));
             // The shelf viewport's single tree listener also observes horizontal scrolling.
             LayoutParams rp=new LayoutParams(-1,railHeight);rp.topMargin=54;root.addView(rail,rp);
             shelfList.addView(root,new LinearLayout.LayoutParams(-1,railHeight+62));shelves.add(this);
@@ -456,7 +476,7 @@ final class CinemaHomeView extends FrameLayout {
     }
     private void showFilms(){
         if(closed)return;
-        boolean restoreFocus=cards.contains(activity.getCurrentFocus());String restoreKey=selected==null?"":selected.key;View restored=null;
+        boolean restoreFocus=cards.contains(activity.getCurrentFocus());String restoreKey=selected==null?"":filmIdentity(selected);View restored=null;
         pageTitle.setText(filter==0?"Inicio":filter==1?"Películas":filter==2?"Series":filter==4?"Biblioteca":"YouTube");
         styleSidebar();
         posterGeneration++;
@@ -464,56 +484,80 @@ final class CinemaHomeView extends FrameLayout {
         for(ImageView image:posterImages)image.setImageDrawable(null);
         shelfList.removeAllViews();shelves.clear();cards.clear();posterImages.clear();posterFilms.clear();posterRequests.clear();posterRails.clear();shelvesScroll.scrollTo(0,0);updatePager();
         List<PlexClient.Film> visible=new ArrayList<>();
-        if(filter==3)visible.addAll(youtube);else if(browsing()){if(catalogPage!=null)visible.addAll(catalogPage.films);}else visible.addAll(films);
+        if(filter==3)visible.addAll(youtube);else if(browsing()){if(catalogPage!=null)visible.addAll(catalogPage.films);}else visible.addAll(ContinueWatching.merge(films,watchNext,plex.connected()));
+        boolean resumeRow=false;if(filter==0)for(PlexClient.Film film:visible)if(film.continuing){resumeRow=true;break;}
+        int viewport=(resumeRow?resumePictureHeight()+114:Appearance.posterHeight(activity))+104;LayoutParams shelfBounds=(LayoutParams)shelvesScroll.getLayoutParams();shelfBounds.height=viewport;shelfBounds.topMargin=1080-viewport;shelvesScroll.setLayoutParams(shelfBounds);shelvesScroll.setClipBounds(new Rect(0,0,shelfBounds.width,viewport));
         rowNote.setVisibility(visible.isEmpty()?VISIBLE:GONE);shelvesScroll.setVisibility(visible.isEmpty()?GONE:VISIBLE);
         link.setContentDescription(filter==3?"Activar filas de la TV":"Opciones de Plex");
         if(visible.isEmpty()){
             play.setNextFocusDownId(browsing()?pageNext.getId():play.getId());link.setNextFocusDownId(browsing()?pageNext.getId():play.getId());
             selected=null;imageGeneration++;heroBitmap=null;backdrop.setImageDrawable(null);sidebarArt.setImageDrawable(null);titleLogo.setVisibility(GONE);title.setVisibility(VISIBLE);
             title.setText(filter==3?"Todo lo que te gusta.":plex.connected()?"Tu biblioteca, a lo grande.":"Tu cine empieza aquí.");
-            providerMark.setImageDrawable(brand(filter==3?1:0));connection.setText(filter==3?"YouTube":"Tu biblioteca · Plex");meta.setText(filter==3?"Vídeos en tu televisión":"Plex · YouTube · Prime Video");
+            providerMark.setVisibility(VISIBLE);providerMark.setImageDrawable(brand(filter==3?1:0));connection.setText(filter==3?"YouTube":"Tu biblioteca · Plex");meta.setText(filter==3?"Vídeos en tu televisión":"Plex · YouTube · Prime Video");
             summary.setText(filter==3?"Aquí aparecerán las filas que YouTube comparta con tu televisión.":plex.connected()?"No hay títulos disponibles en esta categoría.":"Conecta Plex para descubrir tus películas y series con sus imágenes originales.");
-            play.setText(filter==3?"Abrir YouTube":plex.connected()?"Abrir Plex":"Vincular Plex");rowNote.setText(filter==3?"Activa el acceso a las filas de la TV desde el botón de opciones.":!plex.connected()?"Los carteles aparecerán automáticamente al vincular tu cuenta.":browsing()&&catalogPage==null?Ui.tr("Carregando bibliotecas do Plex…","Loading Plex libraries…","Cargando bibliotecas de Plex…"):Ui.tr("Não há títulos nesta página ou biblioteca.","No titles in this page or library.","No hay títulos en esta página o biblioteca."));return;
+            play.setText(filter==3?"Abrir YouTube":plex.connected()?"Abrir Plex":"Vincular Plex");layoutPlaybackAction();rowNote.setText(filter==3?"Activa el acceso a las filas de la TV desde el botón de opciones.":!plex.connected()?"Los carteles aparecerán automáticamente al vincular tu cuenta.":browsing()&&catalogPage==null?Ui.tr("Carregando bibliotecas do Plex…","Loading Plex libraries…","Cargando bibliotecas de Plex…"):Ui.tr("Não há títulos nesta página ou biblioteca.","No titles in this page or library.","No hay títulos en esta página o biblioteca."));return;
         }
-        PlexClient.Film keep=null;if(selected!=null)for(PlexClient.Film f:visible)if(f.key.equals(selected.key)&&f.provider.equals(selected.provider))keep=f;
+        PlexClient.Film keep=null;if(selected!=null)for(PlexClient.Film f:visible)if(filmIdentity(f).equals(filmIdentity(selected)))keep=f;
         selectFilm(keep==null?visible.get(0):keep);
         if(filter==0){
-            List<PlexClient.Film> continuing=new ArrayList<>(),library=new ArrayList<>();
-            for(PlexClient.Film film:visible)(film.continuing?continuing:library).add(film);
+            List<PlexClient.Film> continuing=new ArrayList<>(),library=new ArrayList<>(),recent=new ArrayList<>();
+            for(PlexClient.Film film:visible)(film.continuing?continuing:film.recentlyAdded?recent:library).add(film);
+            continuing.sort((a,b)->Long.compare(b.lastPlayedMs,a.lastPlayedMs));
             if(!continuing.isEmpty())addShelf(Ui.tr("Continuar assistindo","Continue watching","Seguir viendo"),continuing,false,12);
-            if(!library.isEmpty())addShelf(Ui.tr("Da sua biblioteca","From your library","De tu biblioteca"),library,false,12);
+            if(!recent.isEmpty())addShelf(Ui.tr("Adicionados recentemente","Recently added","Últimas subidas"),recent,false,12);
+            else if(!library.isEmpty())addShelf(Ui.tr("Da sua biblioteca","From your library","De tu biblioteca"),library,false,12);
         }else addShelf(filter==3?Ui.tr("Do YouTube","From YouTube","Desde YouTube"):catalogSection==null?Ui.tr("Sua biblioteca","Your library","Tu biblioteca"):catalogSection.title,visible,filter==3,browsing()?PlexClient.PAGE_SIZE:12);
+        shelfList.setPadding(0,0,0,shelves.isEmpty()?0:Math.max(0,viewport-shelves.get(shelves.size()-1).root.getLayoutParams().height));
         for(int r=0;r<shelves.size();r++){
             Shelf row=shelves.get(r);
             for(int c=0;c<row.items.size();c++){
                 View card=row.items.get(c);card.setNextFocusUpId(r==0?(browsing()?libraryChooser:play).getId():shelves.get(r-1).items.get(Math.min(c,shelves.get(r-1).items.size()-1)).getId());
                 card.setNextFocusDownId(r+1<shelves.size()?shelves.get(r+1).items.get(Math.min(c,shelves.get(r+1).items.size()-1)).getId():card.getId());
-                if(posterFilms.get(cards.indexOf(card)).key.equals(restoreKey))restored=card;
+                if(filmIdentity(posterFilms.get(cards.indexOf(card))).equals(restoreKey))restored=card;
             }
         }
         if(!cards.isEmpty()){play.setNextFocusDownId((browsing()?libraryChooser:cards.get(0)).getId());link.setNextFocusDownId((browsing()?libraryChooser:cards.get(0)).getId());libraryChooser.setNextFocusDownId(cards.get(0).getId());pagePrevious.setNextFocusDownId(cards.get(0).getId());pageNext.setNextFocusDownId(cards.get(0).getId());}
         if(restoreFocus&&!cards.isEmpty())(restored==null?cards.get(0):restored).requestFocus();
         if(active){artReleased=false;main.post(visiblePosters);}
     }
+    private String filmIdentity(PlexClient.Film film){return film.packageName+"|"+film.key+"|"+film.continuing;}
+    private int resumePictureHeight(){return Appearance.posterWidth(activity)*2*9/16;}
     private void addShelf(String heading,List<PlexClient.Film> films,boolean wide,int limit){
-        Shelf row=new Shelf(heading,wide?294:Appearance.posterHeight(activity)+42);int count=0;
+        boolean resumeRow=false;for(PlexClient.Film film:films)if(film.continuing){resumeRow=true;break;}
+        boolean resume=filter==0&&resumeRow;
+        int contentHeight=resume?resumePictureHeight()+54:Appearance.posterHeight(activity);
+        Shelf row=new Shelf(heading,wide?294:contentHeight+42+(resume?60:0));int count=0;
         for(PlexClient.Film film:films){
             if(count++==limit)break;
-            final int width=wide?320:Appearance.posterWidth(activity),height=wide?230:Appearance.posterHeight(activity),pictureHeight=wide?180:height;
-            FrameLayout card=new FrameLayout(activity);focusable(card,film.title+", "+film.provider);card.setClipChildren(false);card.setOutlineProvider(new ViewOutlineProvider(){@Override public void getOutline(View v,Outline o){o.setRoundRect(0,0,v.getWidth(),pictureHeight,14);o.setAlpha(1);}});card.setOutlineAmbientShadowColor(0x99000000);card.setOutlineSpotShadowColor(0xDD000000);
+            boolean captioned=wide||resume;
+            // Continue watching uses one shared 16:9 layout; the library keeps portrait posters.
+            final int pictureHeight=wide?180:resume?resumePictureHeight():contentHeight;
+            final int width=wide?320:resume?Appearance.posterWidth(activity)*2:Appearance.posterWidth(activity);
+            final int height=wide?230:contentHeight+(resume?60:0);
+            FrameLayout card=new FrameLayout(activity);focusable(card,film.title+", "+film.provider+(film.continuing?", "+ContinueWatching.remaining(film):""));card.setClipChildren(false);card.setOutlineProvider(new ViewOutlineProvider(){@Override public void getOutline(View v,Outline o){o.setRoundRect(0,0,v.getWidth(),pictureHeight,14);o.setAlpha(1);}});card.setOutlineAmbientShadowColor(0x99000000);card.setOutlineSpotShadowColor(0xDD000000);
             FrameLayout picture=new FrameLayout(activity);picture.setBackground(round(0xFF1A1C24,14));picture.setClipToOutline(true);card.addView(picture,new LayoutParams(width,pictureHeight));
-            ImageView image=new ImageView(activity);image.setScaleType(wide?ImageView.ScaleType.CENTER_CROP:ImageView.ScaleType.FIT_CENTER);image.setCropToPadding(true);picture.addView(image,new LayoutParams(-1,-1));
-            if(wide){TextView caption=text(film.title,19,0xFFE2E2E9,Ui.medium);caption.setMaxLines(1);caption.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams cp=new LayoutParams(width,36);cp.topMargin=190;card.addView(caption,cp);}
-            if(film.progress>=0){View progress=new View(activity);progress.setBackgroundColor(Appearance.accent(activity));LayoutParams pp=new LayoutParams((int)(width*film.progress),4,Gravity.BOTTOM);picture.addView(progress,pp);}
+            ImageView image=new ImageView(activity);image.setScaleType(ImageView.ScaleType.FIT_CENTER);image.setCropToPadding(true);picture.addView(image,new LayoutParams(-1,-1));
+            if(captioned){TextView caption=text(film.title,19,0xFFE2E2E9,Ui.medium);caption.setMaxLines(wide?1:2);caption.setEllipsize(android.text.TextUtils.TruncateAt.END);caption.setGravity(Gravity.TOP);LayoutParams cp=new LayoutParams(width,wide?36:44);cp.topMargin=pictureHeight+10;card.addView(caption,cp);}
+            if(film.progress>=0){View track=new View(activity);track.setBackgroundColor(0x55FFFFFF);picture.addView(track,new LayoutParams(-1,4,Gravity.BOTTOM));View progress=new View(activity);progress.setBackgroundColor(Appearance.accent(activity));LayoutParams pp=new LayoutParams((int)(width*film.progress),4,Gravity.BOTTOM);picture.addView(progress,pp);}
+            if(resume){
+                Drawable provider=providerBrand(film);int markWidth=0;if(provider!=null){markWidth=film.packageName.equals(TvSuggestions.YOUTUBE)?82:film.packageName.equals("com.amazon.amazonvideo.livingroom")?64:44;ImageView mark=new ImageView(activity);mark.setScaleType(ImageView.ScaleType.FIT_START);mark.setImageDrawable(provider);LayoutParams mp=new LayoutParams(markWidth,20);mp.topMargin=contentHeight+9;card.addView(mark,mp);}
+                TextView episode=text(provider==null?film.provider:film.episodeLabel,14,DIM,Ui.medium);episode.setSingleLine(true);episode.setEllipsize(android.text.TextUtils.TruncateAt.END);episode.setGravity(provider==null?Gravity.LEFT:Gravity.RIGHT);LayoutParams ep=new LayoutParams(provider==null?width:width-markWidth-10,22);ep.leftMargin=provider==null?0:markWidth+10;ep.topMargin=contentHeight+8;card.addView(episode,ep);
+                TextView remaining=text(ContinueWatching.remaining(film),17,WHITE,Ui.medium);remaining.setSingleLine(true);remaining.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams rp=new LayoutParams(width,26);rp.topMargin=contentHeight+32;card.addView(remaining,rp);
+            }
             card.setOnFocusChangeListener((v,f)->{lift(v,f?1.055f:1,f?-6:0,f?26:0);if(f){lastContent=v;setSidebar(false);shelvesScroll.scrollTo(0,row.root.getTop());selectFilm(film);schedulePosters();}});card.setOnClickListener(v->{selectFilm(film);openFilm();});
             LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(width,height);p.rightMargin=28;row.posters.addView(card,p);row.items.add(card);cards.add(card);
             posterImages.add(image);posterFilms.add(film);posterRequests.add(null);posterRails.add(row.rail);
         }
     }
+    private void layoutPlaybackAction(){
+        LayoutParams action=(LayoutParams)play.getLayoutParams();action.width=Math.min(440,Math.max(256,(int)Math.ceil(play.getPaint().measureText(play.getText().toString()))+90));play.setLayoutParams(action);
+        LayoutParams options=(LayoutParams)link.getLayoutParams();options.leftMargin=action.leftMargin+action.width+18;link.setLayoutParams(options);
+    }
+    private Drawable providerBrand(PlexClient.Film film){return film.packageName.equals("com.plexapp.android")?brand(0):film.packageName.equals(TvSuggestions.YOUTUBE)?brand(1):film.packageName.equals("com.amazon.amazonvideo.livingroom")?brand(2):null;}
     private void selectFilm(PlexClient.Film film){
         boolean same=heroKey.equals(film.provider+film.key)&&heroBitmap!=null&&!artReleased;
-        selected=film;title.setText(film.title);providerMark.setImageDrawable(brand(film.provider.equals("YouTube")?1:0));
-        connection.setText(film.section+(film.provider.equals("Plex")?" · "+plex.name():""));meta.setText(film.meta);summary.setText(film.summary);play.setText(film.provider.equals("YouTube")?"Abrir YouTube":"Abrir en Plex");
+        selected=film;title.setText(film.title);Drawable provider=providerBrand(film);providerMark.setImageDrawable(provider);providerMark.setVisibility(provider==null?GONE:VISIBLE);
+        connection.setText(film.section+(!film.tvSource&&film.provider.equals("Plex")?" · "+plex.name():provider==null?" · "+film.provider:""));meta.setText(film.meta+(film.continuing&&film.remainingMs()>0?"  ·  "+ContinueWatching.remaining(film):""));summary.setText(film.summary);play.setText(film.continuing?Ui.tr("Continuar em ","Resume in ","Continuar en ")+film.provider:Ui.tr("Abrir ","Open ","Abrir ")+film.provider);layoutPlaybackAction();
         if(same)return;
         title.setVisibility(VISIBLE);titleLogo.setVisibility(GONE);titleLogo.setImageDrawable(null);titleLogo.setContentDescription(film.title);
         int generation=++imageGeneration;if(heroLoad!=null)main.removeCallbacks(heroLoad);
@@ -522,7 +566,7 @@ final class CinemaHomeView extends FrameLayout {
         heroLoad=()->{
             if(!active||closed||generation!=imageGeneration)return;
             CinemaImages.Ready art=b->{if(active&&!closed&&generation==imageGeneration){heroBitmap=b;heroKey=film.provider+film.key;backdrop.setImageBitmap(b);sidebarArt.setImageBitmap(b);sidebarArt.setVisibility(sidebarOpen?VISIBLE:GONE);}};
-            if(film.provider.equals("YouTube"))heroRequest=images.loadTv(film.art,Visuals.light(activity)?1280:1920,Visuals.light(activity)?720:1080,art);
+            if(film.tvSource||!film.provider.equals("Plex"))heroRequest=images.loadTv(film.art,Visuals.light(activity)?1280:1920,Visuals.light(activity)?720:1080,art);
             else{
                 boolean light=Visuals.light(activity);heroRequest=images.load(film.art,light?1280:1920,light?720:1080,art);
                 logoRequest=images.loadLogo(film.logo,b->{if(active&&!closed&&generation==imageGeneration){titleLogo.setImageBitmap(b);titleLogo.setVisibility(VISIBLE);title.setVisibility(INVISIBLE);}});
@@ -532,7 +576,8 @@ final class CinemaHomeView extends FrameLayout {
     }
     private void openFilm(){
         if(selected==null){if(filter==3)openPackage(TvSuggestions.YOUTUBE,"YouTube");else if(!plex.connected())activity.startActivity(new Intent(activity,PlexLinkActivity.class));else openPackage("com.plexapp.android","Plex");return;}
-        if(selected.provider.equals("YouTube")){try{Intent supplied=Intent.parseUri(selected.intent,Intent.URI_INTENT_SCHEME);Intent safe=new Intent(Intent.ACTION_VIEW,supplied.getData()).setPackage(TvSuggestions.YOUTUBE);if(safe.resolveActivity(activity.getPackageManager())!=null)launch(safe);else openPackage(TvSuggestions.YOUTUBE,"YouTube");}catch(Exception ignored){openPackage(TvSuggestions.YOUTUBE,"YouTube");}return;}
+        refreshedAt=0;
+        if(selected.tvSource||!selected.provider.equals("Plex")){Intent intent=ContinueWatching.launch(activity,selected);if(intent!=null)launch(intent);else openPackage(selected.packageName,selected.provider);return;}
         Intent intent=new Intent(Intent.ACTION_VIEW,Uri.parse(plex.openUri(selected))).setPackage("com.plexapp.android");if(intent.resolveActivity(activity.getPackageManager())!=null)launch(intent);else openPackage("com.plexapp.android","Plex");
     }
     private void openPackage(String pkg,String name){Intent intent=HomeApps.launchIntent(activity.getPackageManager(),pkg);if(intent==null){note(name+" no está instalado.");return;}launch(intent);}

@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.11.0 Preview · 2026-10-21
+
+- Seguir viendo con tarjetas panorámicas uniformes, servicio, episodio, progreso y tiempo restante de Plex y de las apps que lo publiquen en Android TV.
+- Últimas subidas de Plex con carteles verticales, orden por incorporación y hasta doce títulos debajo de Seguir viendo.
+- Difuminados nativos en los extremos al quedar contenido fuera de cada fila.
+- Fondo a toda altura, sin el corte anterior al final del degradado; las filas se recortan dentro de su ventana al desplazarse.
+- Caché de imágenes conservada y carga de arte limitada a lo visible. Capturas nativas 4K y pruebas de navegación, formato, progreso, extremos y privacidad de la configuración.
+
 ## 1.10.4 Preview · 2026-10-21
 
 - El tiempo restante de los programas se muestra en horas y minutos cuando supera una hora: «2 h 15 min» en lugar de «135 min».

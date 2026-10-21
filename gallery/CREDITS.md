@@ -1,10 +1,12 @@
 # Imágenes y créditos
 
-La galería actual muestra capturas nativas de Vela en 4K. Los carteles y fondos de películas y series se han obtenido de una biblioteca de Plex con autorización de su usuario para publicar estas capturas. El perfil, servidor y cuenta están anonimizados; el progreso y la paginación son ejemplos.
+La galería actual muestra capturas nativas de Vela en 4K. Los carteles y fondos de películas y series se han obtenido de una biblioteca de Plex con autorización de su usuario para publicar estas capturas. El perfil, servidor y cuenta están anonimizados; el progreso, episodios, orden de novedades y paginación son ejemplos.
 
 Las imágenes y marcas cinematográficas pertenecen a sus respectivos titulares. Su presencia ilustra la interfaz y no implica afiliación ni patrocinio. La licencia MIT del código **no se aplica a estas imágenes**. No se distribuyen los archivos originales de Plex, credenciales, rutas privadas ni contenido audiovisual de la biblioteca.
 
 Entre los títulos mostrados están Oppenheimer, Origen, Avatar: Fuego y ceniza, Spider-Man: Brand New Day, Gladiator II, Robot salvaje, Superman, Star Wars: The Mandalorian and Grogu, The Last of Us, Stranger Things, Breaking Bad y La muerte del unicornio. La disponibilidad y los carteles de una instalación dependen de su propia biblioteca.
+
+Las capturas de Seguir viendo también utilizan la miniatura original de [Dune: Part Two | Official Trailer](https://www.youtube.com/watch?v=Way9Dexny3w), Warner Bros., y una [imagen promocional de Reacher servida por Prime Video](https://www.primevideo.com/-/es/detail/0H1T1C23B07HLZPPHJSSPMYSL7). Ilustran tarjetas de esos proveedores con datos de reproducción simulados; no acreditan acceso a sus historiales privados. Los originales no se empaquetan en el APK ni se redistribuyen como archivos de arte.
 
 ## Material alternativo para pruebas
 
