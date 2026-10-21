@@ -23,6 +23,8 @@ A partir de **1.12.0 Preview**, entra en **Ajustes → Información y actualizac
 
 Desde **1.12.1 Preview**, **Comprobar automáticamente** y **Descargar automáticamente** vienen activados por defecto. Puedes desactivarlos en esta pantalla; si ya elegiste desactivarlos, esa preferencia se conserva al actualizar. La descarga queda en la caché privada y Vela comprueba su integridad, identidad y firma. Android puede pedir que autorices a Vela a instalar aplicaciones; después debes confirmar cada instalación con el mando. Las cuentas, aplicaciones y preferencias se conservan.
 
+Desde **1.15.1 Preview**, al conceder el permiso de instalación y volver a Vela se retoma el APK pendiente. Si cancelas o no concedes el permiso, puedes pulsar **Instalar** para volver a intentarlo. Si estás en una versión anterior y se queda en esa pantalla tras autorizar el permiso, vuelve a Vela y pulsa **Instalar** otra vez; no hace falta desinstalar ni borrar datos.
+
 Las versiones preview incluyen por defecto las próximas versiones preliminares. Desactiva esa opción para recibir solo versiones estables. Puedes desactivar la comprobación automática.
 
 Si tienes una versión anterior a 1.12.0, descarga e instala esta versión desde Releases una vez. Las versiones antiguas no pueden incorporar el actualizador por sí mismas. No desinstales Vela ni borres sus datos. Las compilaciones firmadas con otra clave no se pueden actualizar con el APK oficial.

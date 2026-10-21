@@ -1,5 +1,12 @@
 # Cambios
 
+## 1.15.1 Preview · 2026-10-21
+
+- La instalación continúa al regresar del permiso de fuentes desconocidas, también si Android recrea Vela. La petición explícita se guarda durante una hora y se vincula al APK exacto.
+- El APK vuelve a comprobarse antes de abrir el instalador del sistema. Denegar el permiso o cancelar permite reintentar sin bucles ni nuevas descargas. Las descargas automáticas nunca inician una instalación.
+- La petición caduca si cambia la versión, desaparece el archivo o falla la verificación. Sin servicios ni consultas permanentes.
+- Pruebas en emulador con la pantalla real de permisos, cierre del proceso por Android, recuperación y confirmación del sistema; pruebas de cancelación, reintento, caducidad, firma y alteración del APK.
+
 ## 1.15.0 Preview · 2026-10-21
 
 - Películas y Series empiezan por las últimas incorporaciones del servidor, con consultas independientes para cada tipo.

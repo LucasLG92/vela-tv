@@ -37,7 +37,7 @@ public final class UpdatesActivity extends Activity {
         automatic=button("",590,()->{Updates.prefs(this).edit().putBoolean("automatic",!Updates.automaticEnabled(this)).apply();render();Updates.automatic(this);});
         download=button("",682,()->{Updates.prefs(this).edit().putBoolean("download",!Updates.automaticDownload(this)).apply();render();Updates.automatic(this);});
         channel=button("",774,()->{Updates.prefs(this).edit().putBoolean("previews",!Updates.previews(this)).putLong("checked",0).putLong("attempt",0).apply();render();Updates.automatic(this);});
-        extra=button("",866,()->{if(Updates.state()!=Updates.IDLE)Updates.cancel();else try{ReleaseFeed.Release release=Updates.available(this);startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(release==null?ReleaseFeed.REPO+"/releases":release.page())));}catch(ActivityNotFoundException absent){message=t("Nenhum navegador disponível.","No browser available.","No hay un navegador disponible.");render();}});
+        extra=button("",866,()->{if(Updates.state()!=Updates.IDLE){Updates.clearInstallationRequest(this);Updates.cancel();}else try{ReleaseFeed.Release release=Updates.available(this);startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(release==null?ReleaseFeed.REPO+"/releases":release.page())));}catch(ActivityNotFoundException absent){message=t("Nenhum navegador disponível.","No browser available.","No hay un navegador disponible.");render();}});
         waitingPermission=state!=null&&state.getBoolean("permission");installAfterDownload=state!=null&&state.getBoolean("installAfterDownload");render();check.requestFocus();
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);getWindow().setBackgroundDrawable(null);
     }
@@ -59,16 +59,28 @@ public final class UpdatesActivity extends Activity {
         String yes=t("Ativada","On","Activada"),no=t("Desativada","Off","Desactivada");automatic.setText(t("Comprovar automaticamente","Check automatically","Comprobar automáticamente")+"  ·  "+(Updates.automaticEnabled(this)?yes:no));download.setText(t("Baixar automaticamente","Download automatically","Descargar automáticamente")+"  ·  "+(Updates.automaticDownload(this)?yes:no));channel.setText(t("Incluir versões prévias","Include preview releases","Incluir versiones preliminares")+"  ·  "+(Updates.previews(this)?yes:no));
         automatic.setEnabled(!busy);download.setEnabled(!busy);channel.setEnabled(!busy);extra.setText(busy?t("Cancelar","Cancel","Cancelar"):t("Ver no GitHub","View on GitHub","Ver en GitHub"));
         if(active&&!busy&&installAfterDownload){installAfterDownload=false;if(ready&&Updates.error().isEmpty())requestInstall();}
+        else if(active&&!busy&&Updates.installationRequested(this)&&getPackageManager().canRequestPackageInstalls())Updates.install(this);
     }
     private void requestInstall(){
+        if(!Updates.requestInstallation(this)){message=t("Não foi possível preparar a instalação. Baixe a atualização novamente.","Could not prepare installation. Download the update again.","No se ha podido preparar la instalación. Descarga la actualización de nuevo.");render();return;}
         if(!getPackageManager().canRequestPackageInstalls()){
             waitingPermission=true;message=t("Permita instalar atualizações do Vela e volte a esta tela.","Allow Vela to install updates and return to this screen.","Permite instalar actualizaciones desde Vela y vuelve a esta pantalla.");
-            try{startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,Uri.parse("package:"+getPackageName())),901);}catch(ActivityNotFoundException missing){waitingPermission=false;message=t("Abra as permissões de instalação nos ajustes da TV.","Open install permissions in TV settings.","Abre los permisos de instalación en los ajustes de la televisión.");render();}return;
+            try{startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,Uri.parse("package:"+getPackageName())),901);}catch(ActivityNotFoundException|SecurityException missing){waitingPermission=false;Updates.clearInstallationRequest(this);message=t("Abra as permissões de instalação nos ajustes da TV.","Open install permissions in TV settings.","Abre los permisos de instalación en los ajustes de la televisión.");render();}return;
         }
         Updates.install(this);
     }
-    @Override protected void onResume(){super.onResume();active=true;Updates.observe(listener);if(waitingPermission){waitingPermission=false;if(getPackageManager().canRequestPackageInstalls()){message="";requestInstall();}}render();Updates.automatic(this);}
-    @Override protected void onPause(){active=false;Updates.forget(listener);super.onPause();}
+    boolean canShowInstaller(){return active;}
+    @Override protected void onResume(){
+        super.onResume();active=true;Updates.observe(listener);
+        if(waitingPermission||Updates.installationRequested(this)){
+            waitingPermission=false;
+            if(getPackageManager().canRequestPackageInstalls())message="";
+            else{Updates.clearInstallationRequest(this);message=t("Permissão não concedida. Você pode tentar instalar novamente.","Permission not granted. You can try installing again.","No se ha concedido el permiso. Puedes volver a intentar la instalación.");}
+            action.requestFocus();
+        }
+        render();Updates.automatic(this);
+    }
+    @Override protected void onPause(){active=false;Updates.forget(listener);if(isFinishing())Updates.clearInstallationRequest(this);super.onPause();}
     @Override protected void onSaveInstanceState(Bundle state){state.putBoolean("permission",waitingPermission);state.putBoolean("installAfterDownload",installAfterDownload);super.onSaveInstanceState(state);}
     @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==902&&result==RESULT_CANCELED)message=t("Instalação cancelada. Você pode tentar novamente.","Installation cancelled. You can try again.","Instalación cancelada. Puedes intentarlo de nuevo.");}
 }

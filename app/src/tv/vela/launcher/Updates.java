@@ -43,6 +43,23 @@ final class Updates {
     private static void changed(){main.post(()->{for(WeakReference<Listener> item:listeners){Listener listener=item.get();if(listener==null)listeners.remove(item);else listener.changed();}});}
     static ReleaseFeed.Release available(Context c){try{return ReleaseFeed.newest(new JSONArray().put(new JSONObject(prefs(c).getString("release","{}"))),version(c),previews(c));}catch(Exception absent){return null;}}
     static boolean ready(Context c,ReleaseFeed.Release release){return release!=null&&release.tag.equals(prefs(c).getString("downloaded",""))&&apk(c).isFile()&&apk(c).length()==release.size;}
+    // Settings can destroy the caller. Persist only an explicit, short-lived install request,
+    // bound to the exact downloaded release; automatic downloads never create one.
+    private static String identity(ReleaseFeed.Release release){return release.tag+"\n"+release.sha256;}
+    static boolean requestInstallation(Context c){
+        ReleaseFeed.Release release=available(c);return ready(c,release)&&prefs(c).edit().putString("installRequest",identity(release)).putLong("installRequestedAt",System.currentTimeMillis()).commit();
+    }
+    static boolean installationRequested(Context c){
+        SharedPreferences p=prefs(c);String requested=p.getString("installRequest","");if(requested.isEmpty())return false;
+        ReleaseFeed.Release release=available(c);long age=System.currentTimeMillis()-p.getLong("installRequestedAt",0);
+        if(age>=0&&age<HOUR&&ready(c,release)&&requested.equals(identity(release)))return true;
+        clearInstallationRequest(c);return false;
+    }
+    static boolean clearInstallationRequest(Context c){return prefs(c).edit().remove("installRequest").remove("installRequestedAt").commit();}
+    static boolean resumeInstallation(Activity activity){
+        if(!installationRequested(activity)||!activity.getPackageManager().canRequestPackageInstalls())return false;
+        activity.startActivity(new Intent(activity,UpdatesActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP));return true;
+    }
     private static synchronized boolean begin(int next,Job job){
         if(state!=IDLE)return false;state=next;progress=0;error="";cancelled=false;changed();
         worker.execute(()->{try{job.run();}catch(Exception failure){if(!cancelled)error=Ui.tr("Não foi possível verificar a atualização. Tente novamente.","Could not verify the update. Please try again.","No se ha podido verificar la actualización. Vuelve a intentarlo.");}finally{HttpURLConnection current=connection;if(current!=null)current.disconnect();connection=null;state=IDLE;changed();}});return true;
@@ -84,8 +101,16 @@ final class Updates {
     }
     static Intent installIntent(Context c){Uri uri=Uri.parse("content://"+c.getPackageName()+".updates/update.apk");Intent intent=new Intent(Intent.ACTION_VIEW).setDataAndType(uri,"application/vnd.android.package-archive").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).putExtra(Intent.EXTRA_RETURN_RESULT,true);intent.setClipData(ClipData.newRawUri("Vela update",uri));return intent;}
     static void install(Activity activity){
-        Context c=activity.getApplicationContext();ReleaseFeed.Release release=available(c);if(!ready(c,release))return;WeakReference<Activity> owner=new WeakReference<>(activity);
-        begin(VERIFYING,()->{verify(c,apk(c),release);main.post(()->{Activity target=owner.get();if(target==null||target.isFinishing()||target.isDestroyed())return;try{target.startActivityForResult(installIntent(target),902);}catch(ActivityNotFoundException missing){error=Ui.tr("Instalador indisponível nesta TV.","Installer unavailable on this TV.","El instalador no está disponible en esta televisión.");changed();}});});
+        Context c=activity.getApplicationContext();ReleaseFeed.Release release=available(c);if(!installationRequested(c))return;WeakReference<Activity> owner=new WeakReference<>(activity);
+        begin(VERIFYING,()->{
+            try{verify(c,apk(c),release);}catch(Exception invalid){clearInstallationRequest(c);throw invalid;}
+            main.post(()->{
+                Activity target=owner.get();if(target==null||target.isFinishing()||target.isDestroyed()||(target instanceof UpdatesActivity&&!((UpdatesActivity)target).canShowInstaller()))return;
+                if(!installationRequested(c))return;
+                if(!clearInstallationRequest(c)){error=Ui.tr("Não foi possível preparar a instalação. Tente novamente.","Could not prepare installation. Please try again.","No se ha podido preparar la instalación. Vuelve a intentarlo.");changed();return;}
+                try{target.startActivityForResult(installIntent(target),902);}catch(ActivityNotFoundException|SecurityException missing){error=Ui.tr("Não foi possível abrir o instalador. Verifique a permissão de instalação e tente novamente.","Could not open the installer. Check install permission and try again.","No se ha podido abrir el instalador. Comprueba el permiso de instalación e inténtalo de nuevo.");changed();}
+            });
+        });
     }
     static void cancel(){cancelled=true;HttpURLConnection current=connection;if(current!=null)current.disconnect();}
     private static void checkCancelled()throws InterruptedIOException{if(cancelled||Thread.currentThread().isInterrupted())throw new InterruptedIOException();}

@@ -30,7 +30,7 @@ public class SettingsActivity extends Activity {
         getWindow().setBackgroundDrawable(null);
     }
     @Override protected void onResume() {
-        super.onResume();if(view==null)return;view.resume();
+        super.onResume();if(view==null||Updates.resumeInstallation(this))return;view.resume();
         if(getIntent().hasExtra("page")){
             int target=getIntent().getIntExtra("page",0);getIntent().removeExtra("page");
             returnToSetup=getIntent().getBooleanExtra("fromSetup",false);getIntent().removeExtra("fromSetup");

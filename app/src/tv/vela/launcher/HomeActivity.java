@@ -44,7 +44,7 @@ public class HomeActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
-        if (home != null) home.resume();
+        if (home != null&&!Updates.resumeInstallation(this)) home.resume();
     }
 
     @Override protected void onPause() {
