@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.15.0 Preview · 2026-10-21
+
+- Películas y Series empiezan por las últimas incorporaciones del servidor, con consultas independientes para cada tipo.
+- Filtros y órdenes nativos publicados por las bibliotecas de Plex, y equivalentes de Jellyfin con valores reales del servidor: género, año, estado de visto y otros metadatos disponibles.
+- Búsqueda por título, selección múltiple, combinaciones entre campos y orden ascendente o descendente. Los filtros se aplican a todo el catálogo y reinician la paginación; las bibliotecas conservan su selección durante la navegación.
+- Listas de opciones con filas recicladas, búsqueda, páginas de 24 valores y límites de respuesta. La hoja y su trabajo pendiente se liberan al salir, sin añadir trabajadores ni ampliar la caché de imágenes.
+- Comprobaciones nativas del mando, cancelación de borradores, restablecimiento, filtros globales, orden y separación de películas/series. Transporte Plex simulado y servidor Jellyfin 12.2 real; pruebas de metadatos y regresión de Seguir viendo.
+
 ## 1.14.0 Preview · 2026-10-21
 
 - Menú de Seguir viendo al mantener OK, con Marcar como visto para la película o episodio seleccionado de Plex o Jellyfin. La acción se guarda en el usuario conectado al servidor.

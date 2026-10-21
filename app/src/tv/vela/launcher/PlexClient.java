@@ -151,11 +151,13 @@ final class PlexClient {
         }
         return result;
     }
-    LibraryPage page(Section section,int offset) throws Exception {
-        if(!connected()||offset<0||!section.key.matches("[0-9]+"))throw new IOException("Biblioteca no disponible.");
-        String url=prefs.getString("serverUri","")+"/library/sections/"+section.key+"/all?sort=titleSort%3Aasc"
-                +"&includeExternalMetadata=0&X-Plex-Container-Start="+offset+"&X-Plex-Container-Size="+PAGE_SIZE;
-        return parsePage(new JSONObject(request(url,prefs.getString("serverToken",""),null,15000)),offset);
+    LibraryPage page(Section section,int offset)throws Exception{return page(section,offset,new CatalogFilters.Query());}
+    LibraryPage page(Section section,int offset,CatalogFilters.Query query)throws Exception{return parsePage(catalogJson(CatalogFilters.plexPath(section,offset,query),4*1024*1024),offset);}
+    private JSONObject catalogJson(String path,int limit)throws Exception{Map<String,?> values=prefs.getAll();String base=(String)values.get("serverUri"),token=(String)values.get("serverToken");if(base==null||token==null||token.isEmpty())throw new IOException("Plex not linked");return new JSONObject(new String(bytes(base+path,token,null,12000,limit),StandardCharsets.UTF_8));}
+    CatalogFilters.Options filters(Section section)throws Exception{if(!section.key.matches("[0-9]+"))throw new IOException("Invalid section");return CatalogFilters.plexOptions(catalogJson("/library/sections/"+section.key+"/all?includeMeta=1&includeAdvanced=1&X-Plex-Container-Start=0&X-Plex-Container-Size=0",1024*1024),section);}
+    CatalogFilters.Choices choices(Section section,CatalogFilters.Facet facet,int offset,String search)throws Exception{
+        if(!facet.fixed.isEmpty()||facet.path.isEmpty())return CatalogFilters.slice(facet.fixed,offset,search);String route=CatalogFilters.safePlexFacet(facet.path,section);if(route.isEmpty()||!CatalogFilters.field(facet.id)||offset<0||search.length()>80)throw new IOException("Invalid filter options");
+        String path=route+(route.contains("?")?"&":"?")+"X-Plex-Container-Start="+offset+"&X-Plex-Container-Size="+CatalogFilters.CHOICES;if(!search.isEmpty())path+="&"+CatalogFilters.encode(facet.id+".query")+"="+CatalogFilters.encode(search);return CatalogFilters.plexChoices(catalogJson(path,512*1024),offset,search);
     }
     static LibraryPage parsePage(JSONObject root,int offset) throws Exception {
         JSONObject container=root.optJSONObject("MediaContainer");
@@ -307,6 +309,7 @@ final class PlexClient {
         connection.setRequestProperty("X-Plex-Product", PRODUCT);
         connection.setRequestProperty("X-Plex-Version", "1.0.0");
         connection.setRequestProperty("X-Plex-Platform", "Android");
+        connection.setRequestProperty("Accept-Language",Locale.getDefault().toLanguageTag());connection.setRequestProperty("X-Plex-Language",Locale.getDefault().toLanguageTag());
         if (!token.isEmpty()) connection.setRequestProperty("X-Plex-Token", token);
         try {
             connection.setRequestMethod(method);

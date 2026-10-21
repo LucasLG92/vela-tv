@@ -29,7 +29,10 @@ final class CinemaHomeView extends FrameLayout {
     private final HomeStatusView headerStatus;
     private final TextView updateHint;
     private final Updates.Listener updateListener=()->updateAvailable();
-    private final TextView libraryChooser,pagePrevious,pageNext,pageStatus;
+    private final TextView libraryChooser,pagePrevious,pageNext,pageStatus,catalogFilter,catalogSort;
+    private CatalogFilterSheet filterSheet;
+    private CatalogFilters.Query catalogQuery=new CatalogFilters.Query();
+    private final Map<String,CatalogFilters.Query> catalogQueries=new HashMap<>();
     private final FrameLayout pager;
     private final ScrollView shelvesScroll;
     private final LinearLayout shelfList;
@@ -130,8 +133,10 @@ final class CinemaHomeView extends FrameLayout {
         shelfList=new LinearLayout(activity);shelfList.setOrientation(LinearLayout.VERTICAL);shelvesScroll.addView(shelfList,new ScrollView.LayoutParams(-1,-2));place(shelvesScroll,182,724,1658,356);
         shelvesScroll.getViewTreeObserver().addOnScrollChangedListener(()->schedulePosters());
         pager=new FrameLayout(activity);place(pager,194,680,1646,52);
-        libraryChooser=button("",21);libraryChooser.setSingleLine(true);libraryChooser.setEllipsize(android.text.TextUtils.TruncateAt.END);pager.addView(libraryChooser,new LayoutParams(560,48));libraryChooser.setOnClickListener(v->showLibrarySections());
-        pageStatus=text("",20,DIM,Ui.medium);pageStatus.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);LayoutParams ps=new LayoutParams(650,48);ps.leftMargin=574;pager.addView(pageStatus,ps);
+        libraryChooser=button("",21);libraryChooser.setSingleLine(true);libraryChooser.setEllipsize(android.text.TextUtils.TruncateAt.END);pager.addView(libraryChooser,new LayoutParams(360,48));libraryChooser.setOnClickListener(v->showLibrarySections());
+        catalogFilter=button(Ui.tr("Filtros ▾","Filters ▾","Filtros ▾"),20);LayoutParams fp=new LayoutParams(200,48);fp.leftMargin=376;pager.addView(catalogFilter,fp);catalogFilter.setOnClickListener(v->showCatalogFilters(false));
+        catalogSort=button("",20);catalogSort.setSingleLine();catalogSort.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams so=new LayoutParams(300,48);so.leftMargin=592;pager.addView(catalogSort,so);catalogSort.setOnClickListener(v->showCatalogFilters(true));
+        pageStatus=text("",20,DIM,Ui.medium);pageStatus.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);LayoutParams ps=new LayoutParams(310,48);ps.leftMargin=914;pager.addView(pageStatus,ps);
         pagePrevious=button(Ui.tr("‹ Anterior","‹ Previous","‹ Anterior"),20);LayoutParams pp=new LayoutParams(172,48);pp.leftMargin=1250;pager.addView(pagePrevious,pp);pagePrevious.setOnClickListener(v->{if(!catalogLoading&&catalogPage!=null&&catalogPage.offset>0)loadCatalog(catalogSection.key,Math.max(0,catalogPage.offset-PlexClient.PAGE_SIZE),true);});
         pageNext=button(Ui.tr("Seguinte ›","Next ›","Siguiente ›"),20);LayoutParams pn=new LayoutParams(202,48);pn.leftMargin=1440;pager.addView(pageNext,pn);pageNext.setOnClickListener(v->{if(catalogLoading)return;if(catalogError)loadCatalog(requestedSection,requestedOffset,true);else if(catalogPage!=null&&catalogPage.hasNext())loadCatalog(catalogSection.key,catalogPage.nextOffset(),true);});
         scrim=new View(activity);scrim.setBackgroundColor(Color.BLACK);scrim.setAlpha(0);stage.addView(scrim,new LayoutParams(1920,1080));
@@ -359,7 +364,7 @@ final class CinemaHomeView extends FrameLayout {
         refreshSidebarApps();
         Visuals.sidebarBlur(sidebarArt);
         String id=plex.identity();
-        if(!id.equals(displayedServer)){cancelCatalog();catalogError=false;catalogSections=Collections.emptyList();catalogSection=null;catalogPage=null;requestedSection="";requestedOffset=0;selected=null;images.clear();displayedServer=id;films=plex.cached();refreshedAt=0;libraryDirty=false;showFilms();}
+        if(!id.equals(displayedServer)){cancelCatalog();catalogError=false;catalogSections=Collections.emptyList();catalogSection=null;catalogPage=null;catalogQueries.clear();catalogQuery=new CatalogFilters.Query();requestedSection="";requestedOffset=0;selected=null;images.clear();displayedServer=id;films=plex.cached();refreshedAt=0;libraryDirty=false;showFilms();}
         else if(libraryDirty){films=plex.cached();libraryDirty=false;if(!browsing())showFilms();}
         if(artReleased||heroBitmap==null||(selected!=null&&!heroKey.equals(selected.provider+selected.key))){artReleased=false;if(selected!=null)selectFilm(selected);main.post(visiblePosters);}
         updateAccount();main.removeCallbacks(tick);tick.run();
@@ -368,7 +373,7 @@ final class CinemaHomeView extends FrameLayout {
         if(plex.connected()&&(films.isEmpty()||SystemClock.elapsedRealtime()-refreshedAt>60_000))refresh();
         if(browsing()&&plex.connected()&&catalogPage==null&&!catalogLoading)loadCatalog(requestedSection,requestedOffset,false);
     }
-    void pause(){active=false;Updates.forget(updateListener);if(installedApps!=null)closeOverlay();accountGeneration++;if(avatarRequest!=null)avatarRequest.cancel();avatarRequest=null;accountRequestKey="";headerStatus.stop();cancelCatalog();closeShortcutMenu(false);finishReorder(false);confirmHeld=false;consumeConfirmUp=false;for(View button:appButtons){button.cancelLongPress();button.setPressed(false);}main.removeCallbacks(tick);main.removeCallbacks(visiblePosters);if(heroLoad!=null)main.removeCallbacks(heroLoad);}
+    void pause(){if(filterSheet!=null)closeOverlay();active=false;Updates.forget(updateListener);if(installedApps!=null)closeOverlay();accountGeneration++;if(avatarRequest!=null)avatarRequest.cancel();avatarRequest=null;accountRequestKey="";headerStatus.stop();cancelCatalog();closeShortcutMenu(false);finishReorder(false);confirmHeld=false;consumeConfirmUp=false;for(View button:appButtons){button.cancelLongPress();button.setPressed(false);}main.removeCallbacks(tick);main.removeCallbacks(visiblePosters);if(heroLoad!=null)main.removeCallbacks(heroLoad);}
     private void updateAvailable(){
         if(!active)return;ReleaseFeed.Release release=Updates.available(activity);
         updateHint.setVisibility(release==null?GONE:VISIBLE);
@@ -420,7 +425,7 @@ final class CinemaHomeView extends FrameLayout {
     private boolean accepts(PlexClient.Section section,int kind){return kind==4||(kind==1&&section.type.equals("movie"))||(kind==2&&section.type.equals("show"));}
     private void cancelCatalog(){catalogGeneration++;catalogLoading=false;if(catalogWork!=null){catalogWork.cancel(true);catalogWork=null;}}
     private void changeFilter(int kind){
-        cancelCatalog();
+        if(filterSheet!=null)closeOverlay();cancelCatalog();
         if(kind!=filter){catalogPage=null;requestedOffset=0;requestedSection=catalogSection!=null&&accepts(catalogSection,kind)?catalogSection.key:"";}
         if(catalogSection!=null&&!accepts(catalogSection,kind))catalogSection=null;
         filter=kind;catalogError=false;showFilms();
@@ -430,17 +435,18 @@ final class CinemaHomeView extends FrameLayout {
         if(!active||closed||!browsing()||!plex.connected())return;
         cancelCatalog();catalogLoading=true;catalogError=false;requestedSection=sectionKey;requestedOffset=offset;updatePager();
         final int epoch=catalogGeneration,kind=filter;final String server=plex.identity();
-        final List<PlexClient.Section> known=catalogSections;
+        final List<PlexClient.Section> known=catalogSections;final Map<String,CatalogFilters.Query> queries=new HashMap<>();for(Map.Entry<String,CatalogFilters.Query> e:catalogQueries.entrySet())queries.put(e.getKey(),e.getValue().copy());
         catalogWork=io.submit(()->{
             try{
                 List<PlexClient.Section> sections=known.isEmpty()?plex.sections():known;
                 PlexClient.Section chosen=null;
                 for(PlexClient.Section s:sections)if(accepts(s,kind)){if(chosen==null)chosen=s;if(s.key.equals(sectionKey)){chosen=s;break;}}
                 final PlexClient.Section section=chosen;
-                final PlexClient.LibraryPage page=section==null?null:plex.page(section,offset);
+                final CatalogFilters.Query query=section==null?new CatalogFilters.Query():queries.getOrDefault(section.key,new CatalogFilters.Query());
+                final PlexClient.LibraryPage page=section==null?null:plex.page(section,offset,query);
                 main.post(()->{
                     if(closed||!active||epoch!=catalogGeneration||filter!=kind||!server.equals(plex.identity()))return;
-                    catalogLoading=false;catalogWork=null;catalogSections=sections;catalogSection=section;catalogPage=page;
+                    catalogLoading=false;catalogWork=null;catalogSections=sections;catalogSection=section;catalogPage=page;catalogQuery=query;
                     if(section!=null)requestedSection=section.key;
                     selected=null;showFilms();
                     if(section==null)rowNote.setText(Ui.tr("Não há bibliotecas de filmes ou séries disponíveis nesta categoria.","No movie or series libraries available in this category.","No hay bibliotecas de películas o series disponibles en esta categoría."));
@@ -452,6 +458,7 @@ final class CinemaHomeView extends FrameLayout {
     private void updatePager(){
         boolean visible=browsing()&&plex.connected();pager.setVisibility(visible?VISIBLE:GONE);if(!visible)return;
         libraryChooser.setText(catalogSection==null?Ui.tr("Escolher biblioteca ▾","Choose library ▾","Elegir biblioteca ▾"):catalogSection.title+" ▾");
+        catalogFilter.setText(Ui.tr("Filtros","Filters","Filtros")+(catalogQuery.count()==0?" ▾":" · "+catalogQuery.count()+" ▾"));catalogSort.setText((catalogQuery.descending&&(catalogQuery.sort.isEmpty()||catalogQuery.sort.equals("addedAt")||catalogQuery.sort.equals("DateCreated"))?Ui.tr("Últimas adições","Latest additions","Últimas subidas"):CatalogFilterSheet.sortLabel(catalogQuery.sort,catalogQuery.sort)+(catalogQuery.descending?" ↓":" ↑"))+" ▾");catalogFilter.setEnabled(!catalogLoading&&catalogSection!=null);catalogSort.setEnabled(!catalogLoading&&catalogSection!=null);catalogFilter.setAlpha(catalogFilter.isEnabled()?1:.55f);catalogSort.setAlpha(catalogSort.isEnabled()?1:.55f);
         libraryChooser.setEnabled(!catalogLoading&&!catalogSections.isEmpty());libraryChooser.setAlpha(libraryChooser.isEnabled()?1:.55f);
         String status=catalogLoading?Ui.tr("Carregando…","Loading…","Cargando…"):catalogError?Ui.tr("Sem conexão · Tentar novamente","Offline · Retry","Sin conexión · Reintentar"):"";
         if(status.isEmpty()&&catalogPage!=null){int start=catalogPage.received==0?0:catalogPage.offset+1,end=catalogPage.offset+catalogPage.received;status=start+"–"+end+(catalogPage.total<0?"":Ui.tr(" de "," of "," de ")+catalogPage.total);}
@@ -460,6 +467,12 @@ final class CinemaHomeView extends FrameLayout {
         pageNext.setText(catalogError?Ui.tr("Tentar novamente","Retry","Reintentar"):Ui.tr("Seguinte ›","Next ›","Siguiente ›"));
         pageNext.setEnabled(!catalogLoading&&(catalogError||(catalogPage!=null&&catalogPage.hasNext())));pageNext.setAlpha(pageNext.isEnabled()?1:.4f);
     }
+    private void showCatalogFilters(boolean sorting){
+        if(catalogLoading||catalogSection==null)return;final String identity=plex.identity(),section=catalogSection.key;PlexClient.Section source=catalogSection;
+        startOverlay(sorting?Ui.tr("Ordenar biblioteca","Sort library","Ordenar biblioteca"):Ui.tr("Filtrar biblioteca","Filter library","Filtrar biblioteca"),sorting?catalogSort:catalogFilter);
+        filterSheet=new CatalogFilterSheet(activity,plex,source,catalogQuery,sorting,io,query->{if(!active||closed||!identity.equals(plex.identity())||catalogSection==null||!section.equals(catalogSection.key))return;catalogQueries.put(section,query.copy());catalogQuery=query;closeOverlay();catalogPage=null;selected=null;showFilms();loadCatalog(section,0,true);},this::closeOverlay);LayoutParams p=new LayoutParams(1920,870);p.topMargin=170;overlay.addView(filterSheet,p);
+    }
+    private void releaseFilterSheet(){if(filterSheet!=null){filterSheet.release();filterSheet=null;}}
     private boolean firstPoster(View view){for(Shelf row:shelves)if(!row.items.isEmpty()&&view==row.items.get(0))return true;return false;}
     private void showLibrarySections(){
         if(catalogLoading||catalogSections.isEmpty())return;
@@ -531,7 +544,7 @@ final class CinemaHomeView extends FrameLayout {
                 if(filmIdentity(posterFilms.get(cards.indexOf(card))).equals(restoreKey))restored=card;
             }
         }
-        if(!cards.isEmpty()){play.setNextFocusDownId((browsing()?libraryChooser:cards.get(0)).getId());link.setNextFocusDownId((browsing()?libraryChooser:cards.get(0)).getId());libraryChooser.setNextFocusDownId(cards.get(0).getId());pagePrevious.setNextFocusDownId(cards.get(0).getId());pageNext.setNextFocusDownId(cards.get(0).getId());}
+        if(!cards.isEmpty()){play.setNextFocusDownId((browsing()?libraryChooser:cards.get(0)).getId());link.setNextFocusDownId((browsing()?libraryChooser:cards.get(0)).getId());libraryChooser.setNextFocusDownId(cards.get(0).getId());catalogFilter.setNextFocusDownId(cards.get(0).getId());catalogSort.setNextFocusDownId(cards.get(0).getId());pagePrevious.setNextFocusDownId(cards.get(0).getId());pageNext.setNextFocusDownId(cards.get(0).getId());}
         if(restoreFocus&&!cards.isEmpty())(restored==null?cards.get(0):restored).requestFocus();
         if(active){artReleased=false;main.post(visiblePosters);}
     }
@@ -624,8 +637,8 @@ final class CinemaHomeView extends FrameLayout {
     private void launch(Intent intent){try{activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}catch(ActivityNotFoundException|SecurityException e){note("No se ha podido abrir esta opción.");}}
     private void note(String s){Toast.makeText(activity,s,Toast.LENGTH_SHORT).show();}
     private void releaseAppsGrid(){if(installedApps!=null){installedApps.release();installedApps=null;}}
-    private TextView startOverlay(String heading,View from){releaseAppsGrid();overlayReturn=from;setSidebar(false);surface.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);overlay.removeAllViews();overlay.setBackgroundColor(0xFD0C0D12);overlay.setVisibility(VISIBLE);TextView h=text(heading,46,WHITE,Ui.displaySemibold);LayoutParams p=new LayoutParams(1400,70);p.leftMargin=84;p.topMargin=68;overlay.addView(h,p);TextView close=button(Ui.tr("Fechar","Close","Cerrar"),20);p=new LayoutParams(140,56);p.leftMargin=1692;p.topMargin=76;overlay.addView(close,p);close.setOnClickListener(v->closeOverlay());return close;}
-    private void closeOverlay(){if(overlay.getVisibility()!=VISIBLE)return;releaseAppsGrid();overlay.setVisibility(GONE);overlay.removeAllViews();surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(overlayReturn!=null&&overlayReturn.isAttachedToWindow())overlayReturn.requestFocus();else play.requestFocus();}
+    private TextView startOverlay(String heading,View from){releaseFilterSheet();releaseAppsGrid();overlayReturn=from;setSidebar(false);surface.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);overlay.removeAllViews();overlay.setBackgroundColor(0xFD0C0D12);overlay.setVisibility(VISIBLE);TextView h=text(heading,46,WHITE,Ui.displaySemibold);LayoutParams p=new LayoutParams(1400,70);p.leftMargin=84;p.topMargin=68;overlay.addView(h,p);TextView close=button(Ui.tr("Fechar","Close","Cerrar"),20);p=new LayoutParams(140,56);p.leftMargin=1692;p.topMargin=76;overlay.addView(close,p);close.setOnClickListener(v->closeOverlay());return close;}
+    private void closeOverlay(){if(overlay.getVisibility()!=VISIBLE)return;releaseFilterSheet();releaseAppsGrid();overlay.setVisibility(GONE);overlay.removeAllViews();surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(overlayReturn!=null&&overlayReturn.isAttachedToWindow())overlayReturn.requestFocus();else play.requestFocus();}
     private void showApps(View from){
         View close=startOverlay(Ui.tr("Seus apps","Your apps","Tus apps"),from);
         overlay.setBackground(new android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.TL_BR,new int[]{0xFF171E2B,0xFF090C12}));
@@ -653,7 +666,7 @@ final class CinemaHomeView extends FrameLayout {
             if(code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT)return true;
         }
         if(confirm)confirmHeld=event.getAction()==KeyEvent.ACTION_DOWN&&(appButtons.contains(activity.getCurrentFocus())||cards.contains(activity.getCurrentFocus()));
-        int key=event.getKeyCode();if(key==KeyEvent.KEYCODE_BACK){if(event.getAction()==KeyEvent.ACTION_UP){if(overlay.getVisibility()==VISIBLE)closeOverlay();else if(sidebarOpen)leaveSidebar();else activeSide().requestFocus();}return true;}
+        int key=event.getKeyCode();if(key==KeyEvent.KEYCODE_BACK){if(event.getAction()==KeyEvent.ACTION_UP){if(overlay.getVisibility()==VISIBLE){if(filterSheet==null||!filterSheet.back())closeOverlay();}else if(sidebarOpen)leaveSidebar();else activeSide().requestFocus();}return true;}
         if(key==KeyEvent.KEYCODE_DPAD_LEFT&&overlay.getVisibility()!=VISIBLE&&!sidebarOpen){View focus=activity.getCurrentFocus();if(focus==play||focus==libraryChooser||firstPoster(focus)){if(event.getAction()==KeyEvent.ACTION_DOWN)activeSide().requestFocus();return true;}}
         if(key==KeyEvent.KEYCODE_DPAD_RIGHT&&browsing()&&!sidebarOpen&&overlay.getVisibility()!=VISIBLE&&!cards.isEmpty()&&activity.getCurrentFocus()==cards.get(cards.size()-1)&&catalogPage!=null&&catalogPage.hasNext()){
             if(event.getAction()==KeyEvent.ACTION_DOWN&&!catalogLoading)loadCatalog(catalogSection.key,catalogPage.nextOffset(),true);return true;

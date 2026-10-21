@@ -25,6 +25,9 @@ final class LibraryClient {
     List<PlexClient.Film> library()throws Exception{return isJellyfin()?jf().library():plex.library();}
     List<PlexClient.Section> sections()throws Exception{return isJellyfin()?jf().sections():plex.sections();}
     PlexClient.LibraryPage page(PlexClient.Section section,int offset)throws Exception{return isJellyfin()?jf().page(section,offset):plex.page(section,offset);}
+    PlexClient.LibraryPage page(PlexClient.Section section,int offset,CatalogFilters.Query query)throws Exception{return isJellyfin()?jf().page(section,offset,query):plex.page(section,offset,query);}
+    CatalogFilters.Options filters(PlexClient.Section section)throws Exception{return isJellyfin()?jf().filters(section):plex.filters(section);}
+    CatalogFilters.Choices choices(PlexClient.Section section,CatalogFilters.Facet facet,int offset,String search)throws Exception{return isJellyfin()?jf().choices(section,facet,offset,search):plex.choices(section,facet,offset,search);}
     byte[] image(String path,int width,int height)throws IOException{return image(path,width,height,false);}
     byte[] image(String path,int width,int height,boolean transparent)throws IOException{return isJellyfin()?jf().image(path,width,height,transparent):plex.image(path,width,height,transparent);}
     byte[] avatar()throws Exception{return isJellyfin()?jf().avatar():plex.avatarImage(plex.prefs.getString("accountToken",""));}

@@ -60,11 +60,19 @@ final class JellyfinClient {
             if(kind.equals("movies"))out.add(new PlexClient.Section(key+".movie",name,"movie"));else if(kind.equals("tvshows"))out.add(new PlexClient.Section(key+".show",name,"show"));else if(kind.isEmpty()||kind.equals("mixed")){out.add(new PlexClient.Section(key+".movie",name,"movie"));out.add(new PlexClient.Section(key+".show",name,"show"));}}
         return out;
     }
-    PlexClient.LibraryPage page(PlexClient.Section section,int offset)throws Exception{
+    PlexClient.LibraryPage page(PlexClient.Section section,int offset)throws Exception{return page(section,offset,new CatalogFilters.Query());}
+    PlexClient.LibraryPage page(PlexClient.Section section,int offset,CatalogFilters.Query query)throws Exception{
         Session scope=stored();String[] key=section.key.split("\\.");if(offset<0||key.length!=2||id(key[0]).isEmpty()||!(key[1].equals("movie")||key[1].equals("show")))throw new IOException("Invalid library page");
-        String path="/Items?userId="+scope.userId+"&parentId="+key[0]+"&recursive=true&includeItemTypes="+(key[1].equals("movie")?"Movie":"Series")+"&sortBy=SortName&sortOrder=Ascending&startIndex="+offset+"&limit="+PlexClient.PAGE_SIZE+"&fields="+FIELDS+"&enableImages=true&imageTypeLimit=1&enableUserData=true";
+        String path="/Items?userId="+scope.userId+"&parentId="+key[0]+"&recursive=true&includeItemTypes="+(key[1].equals("movie")?"Movie":"Series")+CatalogFilters.jellyfinQuery(query)+"&startIndex="+offset+"&limit="+PlexClient.PAGE_SIZE+"&fields="+FIELDS+"&enableImages=true&imageTypeLimit=1&enableUserData=true";
         JSONObject root=authenticated(scope,path);JSONArray items=root.optJSONArray("Items");int count=items==null?0:items.length();if(count>PlexClient.PAGE_SIZE||root.optInt("StartIndex",offset)!=offset)throw new IOException("Server did not respect pagination");
         return new PlexClient.LibraryPage(parse(items,false,false,PlexClient.PAGE_SIZE),offset,root.has("TotalRecordCount")?Math.max(0,root.optInt("TotalRecordCount")):-1,count);
+    }
+    CatalogFilters.Options filters(PlexClient.Section section)throws Exception{
+        Session scope=stored();String[] key=section.key.split("\\.");if(key.length!=2||id(key[0]).isEmpty())throw new IOException("Invalid library");String query="?userId="+scope.userId+"&parentId="+key[0]+"&includeItemTypes="+(section.type.equals("show")?"Series":"Movie")+"&recursive=true";
+        JSONObject legacy=authenticated(scope,"/Items/Filters"+query),modern;try{modern=authenticated(scope,"/Items/Filters2"+query);}catch(Status error){if(error.status!=404)throw error;modern=new JSONObject();}return CatalogFilters.jellyfinOptions(legacy,modern,section);
+    }
+    CatalogFilters.Choices choices(PlexClient.Section section,CatalogFilters.Facet facet,int offset,String search)throws Exception{
+        if(!facet.fixed.isEmpty()||facet.path.isEmpty())return CatalogFilters.slice(facet.fixed,offset,search);Session scope=stored();String parent=section.key.split("\\.")[0];if(id(parent).isEmpty()||offset<0||search.length()>80||!Arrays.asList("/Studios","/Persons").contains(facet.path))throw new IOException("Invalid filter options");String path=facet.path+"?userId="+scope.userId+"&parentId="+parent+"&startIndex="+offset+"&limit="+CatalogFilters.CHOICES+"&enableImages=false&enableTotalRecordCount=true"+(facet.path.equals("/Studios")?"&includeItemTypes="+(section.type.equals("show")?"Series":"Movie"):"");if(!search.isEmpty())path+="&searchTerm="+CatalogFilters.encode(search);return CatalogFilters.jellyfinChoices(authenticated(scope,path),offset);
     }
     List<PlexClient.Film> library()throws Exception{
         Session scope=stored();String before=identity(scope),uid=scope.userId,query="&includeItemTypes=Movie,Episode&limit=24&fields="+FIELDS+"&enableImages=true&imageTypeLimit=1&enableUserData=true";
@@ -115,7 +123,7 @@ final class JellyfinClient {
     private byte[] bytes(String base,String path,String token,JSONObject body,int limit,boolean image)throws IOException{
         validateAddress(base);if(!path.startsWith("/")||path.startsWith("//")||path.contains("..")||path.contains("\\")||path.matches(".*[\\r\\n].*"))throw new IOException("Invalid Jellyfin endpoint");if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();
         HttpURLConnection c=(HttpURLConnection)new URL(base+path).openConnection();c.setInstanceFollowRedirects(false);c.setConnectTimeout(6000);c.setReadTimeout(8000);c.setRequestProperty("Accept",image?"image/*":"application/json");
-        c.setRequestProperty("Authorization","MediaBrowser Client=\"Vela\", Device=\"Android TV\", DeviceId=\""+prefs.getString("device","")+"\", Version=\"1.14.0\""+(token.isEmpty()?"":", Token=\""+token+"\""));
+        c.setRequestProperty("Authorization","MediaBrowser Client=\"Vela\", Device=\"Android TV\", DeviceId=\""+prefs.getString("device","")+"\", Version=\"1.15.0\""+(token.isEmpty()?"":", Token=\""+token+"\""));
         try{if(body!=null){byte[] encoded=body.toString().getBytes(StandardCharsets.UTF_8);c.setRequestMethod("POST");c.setDoOutput(true);c.setFixedLengthStreamingMode(encoded.length);c.setRequestProperty("Content-Type","application/json");try(OutputStream out=c.getOutputStream()){out.write(encoded);}}
             int status=c.getResponseCode();if(status!=200&&status!=204)throw new Status(status);if(c.getContentLengthLong()>limit)throw new IOException("Jellyfin response too large");String mime=c.getContentType();if(image&&(mime==null||!mime.toLowerCase(Locale.ROOT).startsWith("image/")))throw new IOException("Not an image");
             try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] block=new byte[8192];int count;long start=System.nanoTime();while((count=in.read(block))!=-1){if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(out.size()+count>limit||System.nanoTime()-start>20_000_000_000L)throw new IOException("Jellyfin response limit");out.write(block,0,count);}return out.toByteArray();}

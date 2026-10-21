@@ -48,3 +48,7 @@ Consulta las nuevas versiones desde Ajustes. Vela las busca automáticamente una
 ## Un capítulo visto. El siguiente, a mano.
 
 Mantén OK en Seguir viendo para marcar una película o episodio como visto en Plex o Jellyfin. La fila se actualiza desde tu servidor y muestra el siguiente capítulo pendiente disponible. El historial de tus series decide qué viene después, con los mismos límites de tarjetas e imágenes. [Guía de uso](SEGUIR-VIENDO.es.md).
+
+## Encuentra justo lo que te apetece
+
+Películas y Series con las últimas incorporaciones primero, filtros de su servidor, búsqueda por título y órdenes ascendente o descendente. Combina campos y conserva su selección entre páginas, de forma independiente para cada biblioteca. [Guía de filtros](FILTROS.es.md).

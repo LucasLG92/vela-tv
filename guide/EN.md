@@ -4,7 +4,7 @@
 
 Your movies, series, apps and live TV, brought together in a home screen made for your remote. Connect Plex or Jellyfin, pick your favorites and make Vela feel like yours.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.14.0-preview)** · [33 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.15.0-preview)** · [33 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
 
 ![Vela home screen](../gallery/01-inicio.webp)
 
@@ -23,3 +23,5 @@ For Android TV and Google TV running Android 11 or later. **1.13.0 Preview.** St
 [Privacy](PRIVACY.es.md) · [Credits and media information](../NOTICE.md) · [Build](BUILD.md) · [MIT license](../LICENSE)
 
 Hold OK on Continue watching to mark the selected movie or episode as watched in the linked Plex or Jellyfin account. Upcoming available episodes come from Plex Continue Watching / On Deck or Jellyfin Next Up. Other apps may share next episodes through Android TV; their watched state is managed in their own app.
+
+Movies and Series now default to latest server additions. Filter and sort the entire server catalog with independent per-library query state, real server values and paged, recycled option lists. Plex descriptors and Jellyfin equivalents are supported; Plex's nested advanced-condition editor remains in its original app.

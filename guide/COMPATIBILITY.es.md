@@ -39,3 +39,11 @@ La cuadrícula libera su cargador y sus iconos al cerrarse. Los reproductores se
 La integración de Jellyfin de 1.13.0 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
 
 [Volver a Vela](../README.md)
+
+## Filtros y ordenación del catálogo
+
+Desde 1.15, Películas y Series consultan las páginas ordenadas por fecha de incorporación descendente. Plex utiliza addedAt y Jellyfin DateCreated, con el título como segundo criterio estable. Son las fechas del servidor y no las fechas de estreno.
+
+Plex publica descriptores para sus filtros y órdenes. Vela utiliza los correspondientes al tipo elegido y solo permite rutas locales de esa sección. Jellyfin aporta los valores de sus endpoints de filtros y los criterios equivalentes de Items. Las listas de idiomas y géneros dependen de los metadatos; Jellyfin puede devolver géneros por nombre cuando no hay identificadores. El editor de condiciones anidadas de Plex no forma parte de esta interfaz. Consulta la [guía de filtros](FILTROS.es.md) para los campos y límites.
+
+Se han verificado en emulador los filtros de Plex con transporte HTTPS simulado y Jellyfin con servidor 12.2 real, incluidos año, géneros combinados y favoritos. No se afirma haber validado todas las versiones de Plex/Jellyfin ni estos controles en una televisión física.

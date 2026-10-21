@@ -331,5 +331,23 @@
     "width": 3840,
     "height": 2160,
     "version": "1.14.0"
+  },
+  {
+    "file": "38-filtros-biblioteca.webp",
+    "title": "Encuentra justo lo que te apetece",
+    "source": "native clean-emulator 4K capture; owned Jellyfin 12.2 demo server; actual server filter values and order controls; synthetic metadata and authorized original artwork",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.15.0"
+  },
+  {
+    "file": "39-ordenar-biblioteca.webp",
+    "title": "El orden lo eliges tú",
+    "source": "native clean-emulator 4K capture; owned Jellyfin 12.2 demo server; actual server filter values and order controls; synthetic metadata and authorized original artwork",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.15.0"
   }
 ]

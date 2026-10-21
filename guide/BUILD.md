@@ -56,7 +56,7 @@ python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port>
 
 The fixture builder produces synthetic future APKs inside `out/`, including intentionally wrong signers and packages. Never distribute them. The native test refuses physical devices or a linked Plex account, checks signed archives, bounded/cancelled transfers, the read-only installer grant, daily checks and remote controls, then restores update preferences. It does not confirm a system installation. The separate release validation for 1.12.0 completed an actual self-update through Android's installer on a clean emulator and verified retained preferences.
 
-Official update releases must keep the existing signing key and a strictly increasing Android versionCode. Use a semantic tag such as `v1.14.0-preview`, the matching versionName `1.14.0-preview`, and the asset name `Vela-1.14.0-preview.apk`. Publish it as a release, mark previews accordingly, and verify GitHub's `sha256` asset digest. The updater ignores drafts, assets without that digest, unrelated paths, downgrades and mismatched signatures. CI artifacts use an ephemeral key and are not official updates.
+Official update releases must keep the existing signing key and a strictly increasing Android versionCode. Use a semantic tag such as `v1.15.0-preview`, the matching versionName `1.15.0-preview`, and the asset name `Vela-1.15.0-preview.apk`. Publish it as a release, mark previews accordingly, and verify GitHub's `sha256` asset digest. The updater ignores drafts, assets without that digest, unrelated paths, downgrades and mismatched signatures. CI artifacts use an ephemeral key and are not official updates.
 
 ## Jellyfin integration test
 
@@ -73,3 +73,9 @@ The private JSON contains `base` (HTTP loopback plus port), `username`, `passwor
 `--test watched` intercepts HTTPS inside the instrumentation process. It verifies the Plex per-item PUT request and token header, real remote long-press and release behavior, duplicate submission, errors, account changes, cache and next-episode replacement. It never contacts a Plex account. The runner refuses physical devices and stops the test app process afterwards so the fake transport cannot survive that test.
 
 The Jellyfin fixture test now writes watched state to its disposable user and verifies advancement to the next episode using the real server. Reset the fixture progress before repeating it. Never run these mutation checks against a personal library. Both native tests preserve Vela preferences; no fixture credentials, videos or original movie art belong in the public APK.
+
+## Catalog filter checks
+
+The Plex feed script also runs CatalogFiltersTest: native descriptors, default recent order, safe routes, reserved query fields, AND/OR encoding and bounded value pages. `--test catalog-filters` uses a clean emulator and isolated Plex HTTPS transport to exercise actual remote controls, drafts, reset, global filters, independent movies/series, sorting, lazy metadata, recycled option rows and pause/release. The runner stops that process to remove its test transport.
+
+The real Jellyfin fixture requires 30 movie entries split between years 2020/2025 and genres Action/Drama, plus a series and seeded resume positions. The integration test verifies actual filter metadata (including name-based fallback), combined year/genre, OR between genres, empty favorites, native sort, recent defaults and independent category state. Prepare those synthetic fixture metadata before running it; do not use a personal library. Captures are native 4K with original authorized artwork and synthetic fixture metadata. No fixtures belong in the APK.
