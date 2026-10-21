@@ -4,7 +4,7 @@
 
 Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abrir. Vela reúne lo que te gusta ver en una interfaz visual, personalizable y pensada para el mando.
 
-**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.15.1-preview)** · [Ver las 39 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
+**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.16.0-preview)** · [Ver las 39 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
 
 ![Inicio de Vela con Seguir viendo panorámico](gallery/01-inicio.webp)
 
@@ -68,6 +68,8 @@ Encuentra tus canales, consulta qué están poniendo y mira cuánto queda de cad
 
 ![Canales y programación en Vela](https://raw.githubusercontent.com/LucasLG92/vela-tv/v1.10.4-preview/gallery/25-television.webp)
 
+Conecta también tu **IPTV por Xtream**: categorías, favoritos, guía y reproducción dentro de Vela, con tu cuenta cifrada en la televisión. Accede a TiviMate cuando lo prefieras. [Conectar tu IPTV](guide/IPTV.es.md).
+
 ## Incluso las pausas tienen su momento
 
 Paisajes en movimiento o fondos de tu biblioteca, con reloj y tiempo. Elige qué quieres ver cuando descansas del mando.
@@ -90,7 +92,7 @@ Las nuevas versiones llegan desde GitHub a tu televisión. Vela busca actualizac
 
 Instala Vela, conecta tu biblioteca y elige tus aplicaciones. Todo desde la televisión, con un asistente que puedes completar a tu ritmo.
 
-**[Descargar Vela 1.15.1 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.15.1-preview)**
+**[Descargar Vela 1.16.0 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.16.0-preview)**
 
 Para **Android TV y Google TV con Android 11 o posterior**. Esta versión es una preview. Consulta la [guía de instalación](guide/INSTALL.es.md) y la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
 

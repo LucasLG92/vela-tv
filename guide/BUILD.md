@@ -57,7 +57,7 @@ python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port>
 
 The fixture builder produces synthetic future APKs inside `out/`, including intentionally wrong signers and packages. Never distribute them. The native test refuses physical devices or a linked Plex account, checks signed archives, bounded/cancelled transfers, the read-only installer grant, daily checks and remote controls, then restores update preferences. It does not confirm a system installation. The native suite also checks persisted requests, activity recreation, expiry, APK identity, post-permission tampering, cancellation and duplicate launches. The `update-permission` host test uses a clean emulator in Spanish and the real Android Settings switch: it grants the permission, forces background process death while Settings is open, then checks the recreated process reaches the system install confirmation, denial, retry and cold Home/Settings entry. It never confirms the synthetic installation and restores update preferences and the previous app-op. The separate release validation for 1.12.0 completed an actual self-update through Android's installer on a clean emulator and verified retained preferences.
 
-Official update releases must keep the existing signing key and a strictly increasing Android versionCode. Use a semantic tag such as `v1.15.1-preview`, the matching versionName `1.15.1-preview`, and the asset name `Vela-1.15.1-preview.apk`. Publish it as a release, mark previews accordingly, and verify GitHub's `sha256` asset digest. The updater ignores drafts, assets without that digest, unrelated paths, downgrades and mismatched signatures. CI artifacts use an ephemeral key and are not official updates.
+Official update releases must keep the existing signing key and a strictly increasing Android versionCode. Use a semantic tag such as `v1.16.0-preview`, the matching versionName `1.16.0-preview`, and the asset name `Vela-1.16.0-preview.apk`. Publish it as a release, mark previews accordingly, and verify GitHub's `sha256` asset digest. The updater ignores drafts, assets without that digest, unrelated paths, downgrades and mismatched signatures. CI artifacts use an ephemeral key and are not official updates.
 
 ## Jellyfin integration test
 
@@ -80,3 +80,15 @@ The Jellyfin fixture test now writes watched state to its disposable user and ve
 The Plex feed script also runs CatalogFiltersTest: native descriptors, default recent order, safe routes, reserved query fields, AND/OR encoding and bounded value pages. `--test catalog-filters` uses a clean emulator and isolated Plex HTTPS transport to exercise actual remote controls, drafts, reset, global filters, independent movies/series, sorting, lazy metadata, recycled option rows and pause/release. The runner stops that process to remove its test transport.
 
 The real Jellyfin fixture requires 30 movie entries split between years 2020/2025 and genres Action/Drama, plus a series and seeded resume positions. The integration test verifies actual filter metadata (including name-based fallback), combined year/genre, OR between genres, empty favorites, native sort, recent defaults and independent category state. Prepare those synthetic fixture metadata before running it; do not use a personal library. Captures are native 4K with original authorized artwork and synthetic fixture metadata. No fixtures belong in the APK.
+
+## Xtream live-TV integration checks
+
+Build/install Vela, then run on a clean emulator without personal Plex, Jellyfin or IPTV accounts:
+
+```sh
+python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port> --test xtream --xtream-fixture /private/path/session.json
+```
+
+The private fixture JSON contains `base` (HTTP loopback plus port), `username` and `password` for an owned disposable API. Never pass a personal provider. Forward its port with ADB reverse. The fixture needs live categories 1/2/3 with 30/10001/0 channels, IDs 101 onwards in category 1, Base64 now/next listings ending about 135 minutes ahead, a small PNG logo and synthetic 320px HLS video. No provider credentials, recordings or fixture videos belong in Vela or the public repository.
+
+The test exercises protected native login, device-key encryption, failed auth and redirects, bounded pages and large/empty/last categories, favorites, logo decoding, guide timing, actual HLS decoding, cross-page channel zapping, pause/release and unlink. It restores preferences and the runner removes the private fixture file. TiviMate's own session, history and private storage are never inspected. The ordinary live-TV and progress suites cover the public catalog and existing channel cards.

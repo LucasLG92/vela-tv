@@ -17,11 +17,13 @@ final class LiveTvLogos {
     private final LruCache<String,Bitmap> cache=new LruCache<String,Bitmap>(768){@Override protected int sizeOf(String key,Bitmap b){return Math.max(1,b.getAllocationByteCount()/1024);}};
     private int epoch;private boolean closed;
     LiveTvLogos(Context c){context=c.getApplicationContext();}
-    void load(String url,ImageView view){
-        if(closed||!LiveTvData.https(url))return;Bitmap ready=cache.get(url);if(ready!=null){view.setImageBitmap(ready);return;}final int generation=epoch;
+    void load(String url,ImageView view){load(url,view,false);}
+    void load(LiveTvData.Channel channel,ImageView view){load(channel.logo,view,!channel.xtreamId.isEmpty());}
+    private void load(String url,ImageView view,boolean privateLogo){
+        if(closed||url.isEmpty()||!(LiveTvData.https(url)||privateLogo&&url.startsWith("http://")))return;Bitmap ready=cache.get(url);if(ready!=null){view.setImageBitmap(ready);return;}final int generation=epoch;
         try{jobs.add(io.submit(()->{try{
             File file=LiveTvData.cached(context,"logo-"+LiveTvData.hash(url)+".img");
-            if(!LiveTvData.fresh(file,7*86400_000L))LiveTvData.download(url,file,512*1024);
+            if(!LiveTvData.fresh(file,7*86400_000L)){if(privateLogo)XtreamClient.logo(url,file);else LiveTvData.download(url,file,512*1024);}
             BitmapFactory.Options options=new BitmapFactory.Options();options.inJustDecodeBounds=true;BitmapFactory.decodeFile(file.getPath(),options);
             if(options.outWidth<=0||options.outHeight<=0||options.outWidth>8192||options.outHeight>8192)return;
             options.inSampleSize=1;while(Math.max(options.outWidth,options.outHeight)/options.inSampleSize>256)options.inSampleSize*=2;options.inJustDecodeBounds=false;

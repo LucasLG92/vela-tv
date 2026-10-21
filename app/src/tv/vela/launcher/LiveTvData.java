@@ -16,15 +16,16 @@ final class LiveTvData {
     static final String EPG="https://www.tdtchannels.com/epg/TV.json";
     static final int PAGE_SIZE=12,MAX_CHANNELS=1200;
     static SharedPreferences prefs(Context c){return c.getSharedPreferences("live-tv",0);}
-    static String source(Context c){String value=prefs(c).getString("source","").trim();return value.isEmpty()?CATALOG:value;}
+    static String source(Context c){XtreamClient xtream=new XtreamClient(c);if(xtream.active())return xtream.source();String value=prefs(c).getString("source","").trim();return value.isEmpty()?CATALOG:value;}
     static String hash(String value){try{byte[] bytes=MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));StringBuilder out=new StringBuilder();for(byte b:bytes)out.append(String.format(Locale.ROOT,"%02x",b&255));return out.toString();}catch(Exception e){throw new IllegalStateException(e);}}
     static boolean https(String value){try{URL u=new URL(value);return u.getProtocol().equals("https")&&u.getUserInfo()==null&&!u.getHost().isEmpty();}catch(Exception e){return false;}}
     static boolean webUrl(String value){return value!=null&&value.length()<=4096&&https(value)&&value.indexOf('\\')<0&&!value.matches("(?s).*[\\x00-\\x20\\x7f].*");}
     static final class Channel {
-        final String id,name,group,logo,web;
+        final String id,name,group,logo,web,xtreamId,xtreamAccount;
         final List<String> streams;
-        Channel(String id,String name,String group,String logo,String web,List<String> streams){this.id=id.isEmpty()?hash(name+"|"+web):id;this.name=name;this.group=group;this.logo=logo;this.web=web;this.streams=Collections.unmodifiableList(streams);}
-        boolean playable(){return !streams.isEmpty();}
+        Channel(String id,String name,String group,String logo,String web,List<String> streams){this(id,name,group,logo,web,streams,"","");}
+        Channel(String id,String name,String group,String logo,String web,List<String> streams,String xtreamId,String xtreamAccount){this.id=id.isEmpty()?hash(name+"|"+web):id;this.name=name;this.group=group;this.logo=logo;this.web=web;this.streams=Collections.unmodifiableList(streams);this.xtreamId=xtreamId;this.xtreamAccount=xtreamAccount;}
+        boolean playable(){return !streams.isEmpty()||!xtreamId.isEmpty();}
     }
     static final class Catalog {
         final String source;final List<Channel> channels;final boolean cached;
@@ -113,7 +114,7 @@ final class LiveTvData {
     }
     static Set<String> favorites(Context c,String source){return new LinkedHashSet<>(prefs(c).getStringSet("favorites-"+hash(source),Collections.emptySet()));}
     static void toggle(Context c,String source,String id){Set<String> chosen=favorites(c,source);if(!chosen.remove(id))chosen.add(id);prefs(c).edit().putStringSet("favorites-"+hash(source),chosen).apply();}
-    static void setSource(Context c,String url){prefs(c).edit().putString("source",url.trim()).apply();File folder=new File(c.getCacheDir(),"live-tv");File[] files=folder.listFiles((dir,name)->name.startsWith("catalog-"));if(files!=null)for(File file:files)if(file.isFile())file.delete();}
+    static void setSource(Context c,String url){prefs(c).edit().putBoolean("xtream",false).putString("source",url.trim()).apply();File folder=new File(c.getCacheDir(),"live-tv");File[] files=folder.listFiles((dir,name)->name.startsWith("catalog-"));if(files!=null)for(File file:files)if(file.isFile())file.delete();}
     static File cached(Context c,String name){File folder=new File(c.getCacheDir(),"live-tv");folder.mkdirs();return new File(folder,name);}
     static boolean fresh(File file,long limit){long age=System.currentTimeMillis()-file.lastModified();return file.isFile()&&age>=0&&age<limit;}
     static byte[] read(File file,int limit)throws IOException{try(InputStream in=new FileInputStream(file);ByteArrayOutputStream out=new ByteArrayOutputStream()){copy(in,out,limit);return out.toByteArray();}}

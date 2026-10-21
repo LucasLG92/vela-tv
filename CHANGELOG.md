@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.16.0 Preview · 2026-10-21
+
+- IPTV por Xtream dentro de TV: conexión privada en la televisión, categorías del proveedor, páginas de doce canales, logotipos, favoritos y guía actual/siguiente con tiempo restante.
+- Cuenta y favoritos cifrados con AES-GCM y Android Keystore. Formulario protegido contra capturas, sin campos guardados ni cuentas incorporadas al APK público. HTTP requiere una elección explícita.
+- Reproducción nativa HLS/MPEG-TS, cambio de canal entre páginas, liberación del decodificador al salir y acceso separado a TiviMate cuando está instalado.
+- Procesamiento de categorías por flujo con límites de datos y tiempo. Se conserva el presupuesto de logotipos y se consulta solo la guía visible, sin servicio permanente.
+- Pruebas con una API local propia y vídeo sintético: 10.001 canales conservando doce registros por página, cifrado, autenticación, guía, favoritos, reproducción real, cambio de canal, pausa y eliminación de cuenta. Las credenciales de una cuenta personal no se han utilizado en las pruebas.
+
 ## 1.15.1 Preview · 2026-10-21
 
 - La instalación continúa al regresar del permiso de fuentes desconocidas, también si Android recrea Vela. La petición explícita se guarda durante una hora y se vincula al APK exacto.

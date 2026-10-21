@@ -29,7 +29,7 @@ Elige entre Nieve, Azul, Menta, Lavanda, Arena y Rosa. Ajusta el tamaño de los 
 
 ## Tu televisión en directo
 
-Explora canales por categorías, consulta la programación y guarda favoritos. Cada tarjeta muestra el tiempo restante y una barra de progreso del programa en emisión cuando la guía dispone de un horario válido. Si queda más de una hora, muestra horas y minutos (por ejemplo, «2 h 15 min»); si son horas exactas, omite los minutos. Se actualiza cada minuto y pasa al siguiente programa disponible; si falta la guía o el horario ha caducado, no muestra un contador. Puedes usar el catálogo de TDTChannels o añadir una lista M3U HTTPS. Las emisoras que lo necesiten pueden abrir su web oficial dentro de Vela, con controles para el mando.
+Explora canales por categorías, consulta la programación y guarda favoritos. Cada tarjeta muestra el tiempo restante y una barra de progreso del programa en emisión cuando la guía dispone de un horario válido. Si queda más de una hora, muestra horas y minutos (por ejemplo, «2 h 15 min»); si son horas exactas, omite los minutos. Se actualiza cada minuto y pasa al siguiente programa disponible; si falta la guía o el horario ha caducado, no muestra un contador. Puedes usar el catálogo de TDTChannels, añadir una lista M3U HTTPS o conectar tu cuenta Xtream. IPTV ofrece categorías, favoritos, guía y reproducción nativa por páginas de doce canales; la cuenta se guarda cifrada en la televisión. Incluye un acceso a TiviMate cuando está instalado. [Configurar IPTV](IPTV.es.md). Las emisoras que lo necesiten pueden abrir su web oficial dentro de Vela, con controles para el mando.
 
 ## Tus pausas
 

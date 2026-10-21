@@ -227,11 +227,11 @@
   {
     "file": "26-listas-tv.webp",
     "title": "Tu lista, tus canales",
-    "source": "native 4K clean-emulator capture",
+    "source": "native 4K clean-emulator capture; no IPTV account configured",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.16.0"
   },
   {
     "file": "27-reproductor-video-demo.webp",

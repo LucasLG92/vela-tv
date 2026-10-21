@@ -34,3 +34,5 @@ El manifiesto con las fuentes y hashes está en [tests/gallery/assets/sources.js
 - Catálogo, programación y logotipos de TV: [TDTChannels](https://github.com/LaQuay/TDTChannels); marcas y emisiones de sus respectivos titulares. No se redistribuyen grabaciones.
 - Marcas de las aplicaciones: [fuentes y avisos](../app/assets/brands/sources.txt).
 - Tiempo de la ciudad de demostración: Open-Meteo, CC BY 4.0.
+
+La captura `26-listas-tv.webp` corresponde al selector nativo de fuentes de Vela 1.16 en un emulador limpio. Muestra las opciones públicas, M3U y Xtream sin datos de ningún proveedor o abonado. El formulario de cuenta está protegido contra capturas y no se publica.

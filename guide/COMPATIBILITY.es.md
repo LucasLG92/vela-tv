@@ -24,7 +24,7 @@ Gestionan sus cuentas dentro de sus propias aplicaciones. Vela abre esas sesione
 
 ## Televisión y webs de las emisoras
 
-El catálogo y la guía proceden de TDTChannels. La disponibilidad de las señales depende de su emisor, región y compatibilidad de reproducción. Puedes añadir tu propia lista M3U HTTPS.
+El catálogo y la guía proceden de TDTChannels. La disponibilidad de las señales depende de su emisor, región y compatibilidad de reproducción. Puedes añadir tu propia lista M3U HTTPS o conectar un servicio Xtream para el directo. Las categorías se consultan por separado y se procesan por páginas; la guía depende de los horarios del proveedor. HLS y MPEG-TS utilizan el reproductor y los códecs de Android. TiviMate puede abrirse como aplicación aparte cuando está instalado; sus listas e historial son propios. [Detalles y límites de IPTV](IPTV.es.md).
 
 Las webs oficiales pueden abrirse dentro de Vela. Pueden exigir cookies, una cuenta o requisitos de DRM. Que se cargue una web no certifica la reproducción de su directo. La compatibilidad de cada emisora debe comprobarse en el dispositivo.
 
