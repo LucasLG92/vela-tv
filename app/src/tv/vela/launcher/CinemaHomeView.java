@@ -35,6 +35,7 @@ final class CinemaHomeView extends FrameLayout {
     private final TextView shortcutTitle,shortcutMove,shortcutRemove;
     private final ScrollView appScroll;
     private final FrameLayout appPanel;
+    private InstalledAppsGrid installedApps;
     private final Handler main=new Handler(Looper.getMainLooper());
     private final ExecutorService io=Visuals.worker(1);
     private final PlexClient plex;
@@ -341,17 +342,17 @@ final class CinemaHomeView extends FrameLayout {
         if(plex.connected()&&(films.isEmpty()||SystemClock.elapsedRealtime()-refreshedAt>60_000))refresh();
         if(browsing()&&plex.connected()&&catalogPage==null&&!catalogLoading)loadCatalog(requestedSection,requestedOffset,false);
     }
-    void pause(){active=false;accountGeneration++;if(avatarRequest!=null)avatarRequest.cancel();avatarRequest=null;accountRequestKey="";headerStatus.stop();cancelCatalog();closeShortcutMenu(false);finishReorder(false);confirmHeld=false;consumeConfirmUp=false;for(View button:appButtons){button.cancelLongPress();button.setPressed(false);}main.removeCallbacks(tick);main.removeCallbacks(visiblePosters);if(heroLoad!=null)main.removeCallbacks(heroLoad);}
+    void pause(){active=false;if(installedApps!=null)closeOverlay();accountGeneration++;if(avatarRequest!=null)avatarRequest.cancel();avatarRequest=null;accountRequestKey="";headerStatus.stop();cancelCatalog();closeShortcutMenu(false);finishReorder(false);confirmHeld=false;consumeConfirmUp=false;for(View button:appButtons){button.cancelLongPress();button.setPressed(false);}main.removeCallbacks(tick);main.removeCallbacks(visiblePosters);if(heroLoad!=null)main.removeCallbacks(heroLoad);}
     void releaseImages(){
         imageGeneration++;posterGeneration++;artReleased=true;if(heroLoad!=null)main.removeCallbacks(heroLoad);
         images.clear();heroBitmap=null;heroKey="";backdrop.setImageDrawable(null);sidebarArt.setImageDrawable(null);titleLogo.setImageDrawable(null);titleLogo.setVisibility(GONE);title.setVisibility(VISIBLE);
         accountGeneration++;avatarRequest=null;accountImageKey="";accountRequestKey="";accountIcon.setImageDrawable(null);accountInitial.setVisibility(VISIBLE);
         for(ImageView image:posterImages)image.setImageDrawable(null);
         for(int i=0;i<posterRequests.size();i++)posterRequests.set(i,null);
-        overlay.removeAllViews();overlay.setVisibility(GONE);overlayReturn=null;
+        releaseAppsGrid();overlay.removeAllViews();overlay.setVisibility(GONE);overlayReturn=null;
         surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
     }
-    void trimMemory(){if(!active)releaseImages();else images.trim();}
+    void trimMemory(){if(!active)releaseImages();else{images.trim();if(installedApps!=null)installedApps.trim();}}
     private void loadVisiblePosters(){
         if(!active||closed)return;
         int epoch=posterGeneration;
@@ -537,20 +538,22 @@ final class CinemaHomeView extends FrameLayout {
     private void openPackage(String pkg,String name){Intent intent=HomeApps.launchIntent(activity.getPackageManager(),pkg);if(intent==null){note(name+" no está instalado.");return;}launch(intent);}
     private void launch(Intent intent){try{activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}catch(ActivityNotFoundException|SecurityException e){note("No se ha podido abrir esta opción.");}}
     private void note(String s){Toast.makeText(activity,s,Toast.LENGTH_SHORT).show();}
-    private void startOverlay(String heading,View from){overlayReturn=from;setSidebar(false);surface.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);overlay.removeAllViews();overlay.setVisibility(VISIBLE);TextView h=text(heading,46,WHITE,Ui.displaySemibold);LayoutParams p=new LayoutParams(1400,70);p.leftMargin=84;p.topMargin=68;overlay.addView(h,p);TextView close=button("Cerrar",20);p=new LayoutParams(140,56);p.leftMargin=1692;p.topMargin=76;overlay.addView(close,p);close.setOnClickListener(v->closeOverlay());}
-    private void closeOverlay(){if(overlay.getVisibility()!=VISIBLE)return;overlay.setVisibility(GONE);surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(overlayReturn!=null&&overlayReturn.isAttachedToWindow())overlayReturn.requestFocus();else play.requestFocus();}
+    private void releaseAppsGrid(){if(installedApps!=null){installedApps.release();installedApps=null;}}
+    private TextView startOverlay(String heading,View from){releaseAppsGrid();overlayReturn=from;setSidebar(false);surface.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);overlay.removeAllViews();overlay.setVisibility(VISIBLE);TextView h=text(heading,46,WHITE,Ui.displaySemibold);LayoutParams p=new LayoutParams(1400,70);p.leftMargin=84;p.topMargin=68;overlay.addView(h,p);TextView close=button(Ui.tr("Fechar","Close","Cerrar"),20);p=new LayoutParams(140,56);p.leftMargin=1692;p.topMargin=76;overlay.addView(close,p);close.setOnClickListener(v->closeOverlay());return close;}
+    private void closeOverlay(){if(overlay.getVisibility()!=VISIBLE)return;releaseAppsGrid();overlay.setVisibility(GONE);overlay.removeAllViews();surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(overlayReturn!=null&&overlayReturn.isAttachedToWindow())overlayReturn.requestFocus();else play.requestFocus();}
     private FrameLayout appTile(String pkg,String name,int index){FrameLayout tile=new FrameLayout(activity);focusable(tile,name);tile.setBackground(round(0xFF20232C,24));tile.setOnFocusChangeListener((v,f)->{v.setBackground(round(f?0xFF393D49:0xFF20232C,24));lift(v,f?1.04f:1,f?-3:0,f?22:0);});ImageView logo=new ImageView(activity);logo.setScaleType(ImageView.ScaleType.FIT_CENTER);if(index<3)logo.setImageDrawable(brand(index));else logo.setImageDrawable(SidebarApps.icon(activity,pkg));tile.addView(logo,new LayoutParams(index==0?155:index==3?70:245,index==0?72:index==3?70:85,Gravity.CENTER));if(index==3){TextView label=text(name,18,WHITE,Ui.medium);label.setGravity(Gravity.CENTER);LayoutParams p=new LayoutParams(-1,30,Gravity.BOTTOM);p.bottomMargin=8;tile.addView(label,p);}tile.setOnClickListener(v->openPackage(pkg,name));return tile;}
     private void showApps(View from){
-        startOverlay(Ui.tr("Seus apps","Your apps","Tus apps"),from);Set<String> seen=new HashSet<>();int featured=0;
+        View close=startOverlay(Ui.tr("Seus apps","Your apps","Tus apps"),from);Set<String> seen=new HashSet<>();List<View> favorites=new ArrayList<>();int featured=0;
         for(String pkg:SidebarApps.slots(activity)){
             if(!SidebarApps.launchable(activity,pkg)||!seen.add(pkg))continue;
             int brand=pkg.equals("com.plexapp.android")?0:pkg.equals(SidebarApps.YOUTUBE)?1:pkg.equals("com.amazon.amazonvideo.livingroom")?2:3;
-            FrameLayout tile=appTile(pkg,SidebarApps.label(activity,pkg),brand);LayoutParams p=new LayoutParams(394,176);p.leftMargin=84+featured*422;p.topMargin=196;overlay.addView(tile,p);if(featured==0)tile.requestFocus();if(++featured==4)break;
+            FrameLayout tile=appTile(pkg,SidebarApps.label(activity,pkg),brand);LayoutParams p=new LayoutParams(394,176);p.leftMargin=84+featured*422;p.topMargin=196;overlay.addView(tile,p);favorites.add(tile);if(featured==0)tile.requestFocus();if(++featured==4)break;
         }
         int top=featured==0?196:408;
-        TextView installed=text(Ui.tr("Todos os aplicativos","All apps","Todas las aplicaciones"),24,WHITE,Ui.displaySemibold);LayoutParams ip=new LayoutParams(1600,48);ip.leftMargin=84;ip.topMargin=top;overlay.addView(installed,ip);
-        ScrollView scroll=new ScrollView(activity);LayoutParams sp=new LayoutParams(1752,986-top-68);sp.leftMargin=76;sp.topMargin=top+68;overlay.addView(scroll,sp);GridLayout grid=new GridLayout(activity);grid.setColumnCount(5);grid.setPadding(8,8,8,16);scroll.addView(grid);
-        for(SidebarApps.Choice choice:SidebarApps.choices(activity)){if(!seen.add(choice.pkg))continue;TextView tile=button(choice.label,21);tile.setContentDescription(choice.label);tile.setOnClickListener(v->openPackage(choice.pkg,choice.label));GridLayout.LayoutParams p=new GridLayout.LayoutParams();p.width=320;p.height=100;p.setMargins(0,0,28,26);grid.addView(tile,p);if(featured==0&&grid.getChildCount()==1)tile.requestFocus();}
+        TextView installed=text(Ui.tr("Todos os seus apps","All your apps","Todas tus apps"),24,WHITE,Ui.displaySemibold);LayoutParams ip=new LayoutParams(1600,48);ip.leftMargin=84;ip.topMargin=top;overlay.addView(installed,ip);
+        TextView status=text(Ui.tr("Carregando aplicativos…","Loading apps…","Cargando aplicaciones…"),21,DIM,Ui.regular);LayoutParams empty=new LayoutParams(1600,90);empty.leftMargin=84;empty.topMargin=top+80;overlay.addView(status,empty);
+        installedApps=new InstalledAppsGrid(activity,seen,favorites,close,status,choice->openPackage(choice.pkg,choice.label));LayoutParams grid=new LayoutParams(1752,986-top-68);grid.leftMargin=76;grid.topMargin=top+68;overlay.addView(installedApps,grid);
+        for(View favorite:favorites)favorite.setNextFocusDownId(installedApps.getId());
     }
     private void option(String label,int y,Runnable action,boolean focus){TextView v=button(label,23);LayoutParams p=new LayoutParams(740,82);p.leftMargin=84;p.topMargin=y;overlay.addView(v,p);v.setOnClickListener(w->action.run());if(focus)v.requestFocus();}
     private void showSettings(View from){startOverlay("Ajustes",from);option(Ui.tr("Contas e serviços","Accounts and services","Cuentas y servicios"),210,()->activity.startActivity(new Intent(activity,SettingsActivity.class).putExtra("page",14)),true);option("Inicio y salvapantallas",316,()->activity.startActivity(new Intent(activity,SettingsActivity.class)),false);option("Ajustes de la televisión",422,()->launch(new Intent(Settings.ACTION_SETTINGS)),false);}

@@ -1,15 +1,21 @@
-# Vela TV
+# Vela
 
-A native, remote-friendly launcher for Android TV and Google TV, Android 11+. It offers real Plex artwork, a paged library, separate Continue Watching, configurable app shortcuts, live TV, screensavers and compact clock/weather.
+## Your TV. Your way.
 
-Version **1.10.0 is a preview**. Appearance adds six accent colors, three poster sizes and three background intensities without continuous home-screen animation. Resetting appearance preserves accounts, apps and location.
+Your movies, series, apps and live TV, brought together in a home screen made for your remote. Connect Plex, pick your favorites and make Vela feel like yours.
 
-Download the APK from [Releases](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.0-preview). Configure your own accounts and location on the device. The public APK contains no personal server, city, credentials or signing material. [Build instructions](BUILD.md) · [Screenshot gallery](../gallery/README.md).
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.1-preview)** · [29 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
 
-Plex authorization uses its device code flow. YouTube and Prime sessions remain in their own apps; Vela does not claim private YouTube recommendations or Watch Later through its own OAuth integration. The integrated TV website player preserves each broadcaster's login, consent and playback requirements. Loading a page is not proof that its actual broadcast works on a TV.
+![Vela home screen](../gallery/01-inicio.webp)
 
-The home screen uses bounded image caches and releases artwork on exit. WebView is loaded only for a selected web channel in a dedicated process that ends after closing. Total memory varies; there is no zero-RAM claim.
+- **Put your library first.** Original Plex posters and backdrops, a paged library and a separate Continue watching row.
+- **Recognize every app.** Original app icons, favorites within reach and a grid made for directional navigation.
+- **Make it yours.** Six accent colors, three poster sizes, backdrop choices and a sidebar you can reorder with a long press of OK.
+- **Find something live.** Browse channels, see what's on, save favorites and add an HTTPS M3U playlist.
+- **Enjoy the pause.** Moving landscapes or Plex backdrops with a clock and weather.
 
-Screenshots are actual native 4K emulator captures. Movie and series artwork was retrieved from Plex with the user's permission; their profile, server name and account details are anonymized. The emulator contains no valid account credentials. Watch progress, pagination and the weather city are examples. Original Plex artwork files are not distributed in the source or APK. The openly licensed Blender assets remain available as an alternative test fixture. The space-video screensaver illustration uses NASA/JSC demo footage rather than redistributing community screensaver footage. See [credits](../gallery/CREDITS.md).
+Vela loads artwork when needed and releases resources when you leave. The home screen has no continuous video or animation loop.
 
-Code is MIT, derived from Free My TV with its copyright retained. Fonts, artwork, trademarks, catalogs and remote videos have their own licenses and terms: [notices](../NOTICE.md).
+For Android TV and Google TV running Android 11 or later. **1.10.1 Preview.** Streaming availability depends on each service and device; see [compatibility](COMPATIBILITY.es.md). YouTube and Prime Video manage sign-in in their own apps. Vela uses the rows YouTube shares with Android TV.
+
+[Privacy](PRIVACY.es.md) · [Credits and media information](../NOTICE.md) · [Build](BUILD.md) · [MIT license](../LICENSE)

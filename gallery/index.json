@@ -1,91 +1,102 @@
 [
   {
     "file": "01-inicio.webp",
-    "title": "Inicio con carteles y reloj",
+    "title": "Tu cine, en primer plano",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "02-aspecto-menta-compacto.webp",
-    "title": "Menta y carteles compactos",
+    "title": "Un estilo más compacto",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "03-aspecto-lavanda-grande.webp",
-    "title": "Lavanda y carteles grandes",
+    "title": "El cine, a lo grande",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "04-seguir-viendo.webp",
-    "title": "Seguir viendo separado",
+    "title": "Retoma donde lo dejaste",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "05-biblioteca-paginada.webp",
-    "title": "Biblioteca por páginas: estado de ejemplo 25–33 de 33",
+    "title": "Tu biblioteca, página a página",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "06-menu-lateral.webp",
-    "title": "Menú lateral con seis accesos",
+    "title": "Todo a mano",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "07-menu-accesos.webp",
-    "title": "Mover o quitar sin desinstalar",
+    "title": "Elige tus accesos",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "08-ordenar-accesos.webp",
-    "title": "Ordenar con el mando",
+    "title": "El orden lo pones tú",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "09-todas-las-apps.webp",
-    "title": "Todas las aplicaciones",
+    "title": "Tus apps, con sus iconos originales",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "10-ajustes.webp",
-    "title": "Ajustes nativos",
+    "title": "Tus ajustes",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "11-apariencia.webp",
-    "title": "Personalizar apariencia",
+    "title": "Hazlo tuyo",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "12-colores.webp",
@@ -93,7 +104,8 @@
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "13-carteles.webp",
@@ -101,15 +113,17 @@
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "14-fondo.webp",
-    "title": "Intensidad del fondo",
+    "title": "El fondo, a tu gusto",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "15-rendimiento.webp",
@@ -117,118 +131,133 @@
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "16-accesos.webp",
-    "title": "Configurar los accesos",
+    "title": "Tus accesos favoritos",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "17-cuentas.webp",
-    "title": "Cuentas y servicios con servidor anonimizado",
+    "title": "Tus cuentas y servicios",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "18-salvapantallas-ajustes.webp",
-    "title": "Ajustes del salvapantallas",
+    "title": "Diseña tus pausas",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "19-ubicacion-demo.webp",
-    "title": "Ubicación: Reikiavik de demostración",
+    "title": "El tiempo, a tu manera",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "20-salvapantallas-plex-demo.webp",
-    "title": "Salvapantallas de Plex con fondo real de Oppenheimer",
+    "title": "Tu biblioteca, también al descansar",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "21-salvapantallas-aereos.webp",
-    "title": "Salvapantallas de vídeo: demostración con material NASA/JSC",
+    "title": "Paisajes en movimiento",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "22-cuentas-sin-vincular.webp",
-    "title": "Cuentas sin una sesión real",
+    "title": "Conecta lo que te gusta",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "23-asistente.webp",
-    "title": "Bienvenida del asistente",
+    "title": "Bienvenido a Vela",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "24-asistente-cuentas.webp",
-    "title": "Cuentas en el asistente",
+    "title": "Tus servicios, desde el primer día",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "25-television.webp",
-    "title": "Catálogo público de TV",
+    "title": "Encuentra tu próximo directo",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "26-listas-tv.webp",
-    "title": "Listas y ajustes de TV",
+    "title": "Tu lista, tus canales",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "27-reproductor-video-demo.webp",
-    "title": "Reproductor nativo con vídeo de prueba CC0",
+    "title": "Reproducción a pantalla completa",
     "source": "native 4K clean-emulator capture",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "28-peliculas.webp",
-    "title": "Películas de Plex",
+    "title": "Tus películas",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   },
   {
     "file": "29-series.webp",
-    "title": "Series de Plex",
+    "title": "Tus series",
     "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
     "personal_data": false,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "version": "1.10.1"
   }
 ]

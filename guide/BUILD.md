@@ -40,3 +40,5 @@ python tests/test_artwork_device.py --serial <serial> --test tv-web
 Appearance tests exercise remote navigation, all poster sizes, clipping, original aspect ratio, chooser persistence, cache limits and reset isolation. TV tests distinguish loading a broadcaster page from decoding its actual broadcast. HTML5 fixture playback is not evidence that every broadcaster works on a physical TV.
 
 This preview's appearance and publication gallery were tested on an Android 16 emulator. Earlier launcher features were exercised on an Android 11 TCL; that does not certify the entire preview build for that model or other manufacturers. Validate before changing a real device's preferred home.
+
+La prueba de la cuadrícula se ejecuta con `python tests/test_artwork_device.py --serial <emulador> --adb-port <puerto> --test apps-grid`. Comprueba iconos, navegación, apertura de la app elegida y liberación de recursos.

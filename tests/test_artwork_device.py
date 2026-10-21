@@ -6,9 +6,9 @@ import argparse,os,subprocess
 parser=argparse.ArgumentParser()
 parser.add_argument('--serial',required=True)
 parser.add_argument('--adb-port',default='5037')
-parser.add_argument('--test',choices=['artwork','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-web','appearance','gallery'],default='artwork')
+parser.add_argument('--test',choices=['artwork','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-web','appearance','gallery','apps-grid'],default='artwork')
 args=parser.parse_args()
-test_class={'artwork':'ArtworkLifecycleTest','ambient':'AndroidAmbientTest','weather':'AndroidWeatherTest','sidebar':'AndroidSidebarTest','reorder':'AndroidSidebarReorderTest','remove':'AndroidSidebarRemoveTest','catalog':'AndroidCatalogTest','home-status':'AndroidHomeStatusTest','account':'AndroidAccountHeaderTest','personalization':'AndroidPersonalizationTest','live-tv':'AndroidLiveTvTest','tv-web':'AndroidTvWebTest','appearance':'AndroidAppearanceTest','gallery':'AndroidGalleryTest'}[args.test]
+test_class={'artwork':'ArtworkLifecycleTest','ambient':'AndroidAmbientTest','weather':'AndroidWeatherTest','sidebar':'AndroidSidebarTest','reorder':'AndroidSidebarReorderTest','remove':'AndroidSidebarRemoveTest','catalog':'AndroidCatalogTest','home-status':'AndroidHomeStatusTest','account':'AndroidAccountHeaderTest','personalization':'AndroidPersonalizationTest','live-tv':'AndroidLiveTvTest','tv-web':'AndroidTvWebTest','appearance':'AndroidAppearanceTest','gallery':'AndroidGalleryTest','apps-grid':'AndroidAppsGridTest'}[args.test]
 root=Path(__file__).resolve().parents[1]
 sdk=Path(os.environ['ANDROID_HOME']);jdk=Path(os.environ['JAVA_HOME'])
 bt=max((sdk/'build-tools').iterdir(),key=lambda p:tuple(int(x) for x in p.name.split('.')))

@@ -1,68 +1,60 @@
-# Galería de Vela · 4K
+# Vela, por dentro
 
-**29 capturas nativas a 3840 × 2160**, codificadas en WebP de alta calidad. Son pantallas reales de Vela en un emulador independiente, sin arte generado ni montajes.
+Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **29 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
 
-Los carteles y fondos de películas y series proceden de Plex y se han obtenido con autorización del usuario para estas capturas. El perfil y el servidor se presentan de forma anónima. No se publican su avatar, cuenta, credenciales, biblioteca completa, rutas o enlaces privados. No hay una sesión real de Plex en el emulador de documentación; las imágenes se preparan por separado.
+[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.1-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
 
-El progreso de Seguir viendo, la paginación y la ubicación son ejemplos, no el historial ni la ciudad del usuario. Los accesos de Plex, YouTube TV y Prime usan aplicaciones de prueba para documentar la barra, no sesiones reales.
+## Tu cine, en primer plano
 
-El catálogo y los logotipos de TV son públicos y reales. El reproductor muestra un vídeo CC0 de MDN, no una emisión de pago. El salvapantallas de vídeo utiliza material de demostración NASA/JSC; no se publican fotogramas de los vídeos comunitarios sujetos a uso personal. Las capturas no certifican los directos de todas las emisoras en un dispositivo físico.
+![Tu cine, en primer plano](01-inicio.webp)
 
-La mayor resolución de esta documentación no modifica el APK ni sus límites de memoria. La calidad y el contenido de cada instalación dependen de su biblioteca, pantalla y ajustes.
+## Tus apps, con sus iconos originales
 
-[Imágenes y créditos](CREDITS.md) · [Volver al proyecto](../README.md)
+![Tus apps, con sus iconos originales](09-todas-las-apps.webp)
 
-## Inicio con carteles y reloj
+## Tus películas
 
-![Inicio con carteles y reloj](01-inicio.webp)
+![Tus películas](28-peliculas.webp)
 
-## Películas de Plex
+## Tus series
 
-![Películas de Plex](28-peliculas.webp)
+![Tus series](29-series.webp)
 
-## Series de Plex
+## Un estilo más compacto
 
-![Series de Plex](29-series.webp)
+![Un estilo más compacto](02-aspecto-menta-compacto.webp)
 
-## Menta y carteles compactos
+## El cine, a lo grande
 
-![Menta y carteles compactos](02-aspecto-menta-compacto.webp)
+![El cine, a lo grande](03-aspecto-lavanda-grande.webp)
 
-## Lavanda y carteles grandes
+## Retoma donde lo dejaste
 
-![Lavanda y carteles grandes](03-aspecto-lavanda-grande.webp)
+![Retoma donde lo dejaste](04-seguir-viendo.webp)
 
-## Seguir viendo separado
+## Tu biblioteca, página a página
 
-![Seguir viendo separado](04-seguir-viendo.webp)
+![Tu biblioteca, página a página](05-biblioteca-paginada.webp)
 
-## Biblioteca por páginas: estado de ejemplo 25–33 de 33
+## Todo a mano
 
-![Biblioteca por páginas: estado de ejemplo 25–33 de 33](05-biblioteca-paginada.webp)
+![Todo a mano](06-menu-lateral.webp)
 
-## Menú lateral con seis accesos
+## Elige tus accesos
 
-![Menú lateral con seis accesos](06-menu-lateral.webp)
+![Elige tus accesos](07-menu-accesos.webp)
 
-## Mover o quitar sin desinstalar
+## El orden lo pones tú
 
-![Mover o quitar sin desinstalar](07-menu-accesos.webp)
+![El orden lo pones tú](08-ordenar-accesos.webp)
 
-## Ordenar con el mando
+## Tus ajustes
 
-![Ordenar con el mando](08-ordenar-accesos.webp)
+![Tus ajustes](10-ajustes.webp)
 
-## Todas las aplicaciones
+## Hazlo tuyo
 
-![Todas las aplicaciones](09-todas-las-apps.webp)
-
-## Ajustes nativos
-
-![Ajustes nativos](10-ajustes.webp)
-
-## Personalizar apariencia
-
-![Personalizar apariencia](11-apariencia.webp)
+![Hazlo tuyo](11-apariencia.webp)
 
 ## Seis colores de acento
 
@@ -72,58 +64,65 @@ La mayor resolución de esta documentación no modifica el APK ni sus límites d
 
 ![Tres tamaños de cartel](13-carteles.webp)
 
-## Intensidad del fondo
+## El fondo, a tu gusto
 
-![Intensidad del fondo](14-fondo.webp)
+![El fondo, a tu gusto](14-fondo.webp)
 
 ## Imagen y rendimiento
 
 ![Imagen y rendimiento](15-rendimiento.webp)
 
-## Configurar los accesos
+## Tus accesos favoritos
 
-![Configurar los accesos](16-accesos.webp)
+![Tus accesos favoritos](16-accesos.webp)
 
-## Cuentas y servicios con servidor anonimizado
+## Tus cuentas y servicios
 
-![Cuentas y servicios con servidor anonimizado](17-cuentas.webp)
+![Tus cuentas y servicios](17-cuentas.webp)
 
-## Ajustes del salvapantallas
+## Diseña tus pausas
 
-![Ajustes del salvapantallas](18-salvapantallas-ajustes.webp)
+![Diseña tus pausas](18-salvapantallas-ajustes.webp)
 
-## Ubicación: Reikiavik de demostración
+## El tiempo, a tu manera
 
-![Ubicación: Reikiavik de demostración](19-ubicacion-demo.webp)
+![El tiempo, a tu manera](19-ubicacion-demo.webp)
 
-## Salvapantallas de Plex con fondo real de Oppenheimer
+## Tu biblioteca, también al descansar
 
-![Salvapantallas de Plex con fondo real de Oppenheimer](20-salvapantallas-plex-demo.webp)
+![Tu biblioteca, también al descansar](20-salvapantallas-plex-demo.webp)
 
-## Salvapantallas de vídeo: demostración con material NASA/JSC
+## Paisajes en movimiento
 
-![Salvapantallas de vídeo: demostración con material NASA/JSC](21-salvapantallas-aereos.webp)
+![Paisajes en movimiento](21-salvapantallas-aereos.webp)
 
-## Cuentas sin una sesión real
+## Conecta lo que te gusta
 
-![Cuentas sin una sesión real](22-cuentas-sin-vincular.webp)
+![Conecta lo que te gusta](22-cuentas-sin-vincular.webp)
 
-## Bienvenida del asistente
+## Bienvenido a Vela
 
-![Bienvenida del asistente](23-asistente.webp)
+![Bienvenido a Vela](23-asistente.webp)
 
-## Cuentas en el asistente
+## Tus servicios, desde el primer día
 
-![Cuentas en el asistente](24-asistente-cuentas.webp)
+![Tus servicios, desde el primer día](24-asistente-cuentas.webp)
 
-## Catálogo público de TV
+## Encuentra tu próximo directo
 
-![Catálogo público de TV](25-television.webp)
+![Encuentra tu próximo directo](25-television.webp)
 
-## Listas y ajustes de TV
+## Tu lista, tus canales
 
-![Listas y ajustes de TV](26-listas-tv.webp)
+![Tu lista, tus canales](26-listas-tv.webp)
 
-## Reproductor nativo con vídeo de prueba CC0
+## Reproducción a pantalla completa
 
-![Reproductor nativo con vídeo de prueba CC0](27-reproductor-video-demo.webp)
+![Reproducción a pantalla completa](27-reproductor-video-demo.webp)
+
+<details>
+<summary>Sobre estas capturas</summary>
+
+Capturas nativas a 3840 × 2160 de un emulador Android. Los carteles y fondos de Plex se utilizan con autorización del usuario; perfil, servidor y cuenta se presentan de forma anónima. Progreso, paginación y ciudad son ejemplos. No se publican credenciales, avatar ni archivos originales de la biblioteca. Los accesos de servicios utilizan aplicaciones de prueba. El vídeo de TV es una prueba CC0 de MDN y el salvapantallas de vídeo muestra material NASA/JSC. Consulta los [créditos y detalles de las imágenes](CREDITS.md) y la [compatibilidad](../guide/COMPATIBILITY.es.md).
+
+</details>

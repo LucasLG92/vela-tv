@@ -8,7 +8,7 @@ Entre los títulos mostrados están Oppenheimer, Origen, Avatar: Fuego y ceniza,
 
 ## Material alternativo para pruebas
 
-Los siguientes recursos abiertos permanecen en `tests/gallery/assets/` para generar una galería alternativa sin utilizar una biblioteca personal. También se usaron en la primera versión de la documentación. No forman parte del APK. No se redibuja ni se genera arte mediante IA.
+Los siguientes recursos abiertos permanecen en `tests/gallery/assets/` para generar una galería alternativa sin utilizar una biblioteca personal. No forman parte del APK. No se redibuja ni se genera arte mediante IA.
 
 | Archivo de prueba | Autor | Fuente | Licencia |
 | --- | --- | --- | --- |

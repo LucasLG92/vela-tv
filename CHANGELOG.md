@@ -1,5 +1,12 @@
 # Cambios
 
+## 1.10.1 Preview · 2026-10-21
+
+- Tus apps muestra los iconos originales en una cuadrícula con tarjetas recicladas y navegación por mando.
+- Iconos locales bajo demanda, caché de 512 KiB y liberación al cerrar, pausar o cambiar de pantalla.
+- Navegación entre favoritas y aplicaciones, con límites claros en las filas y columnas.
+- Presentación del proyecto renovada y textos de cuentas y salvapantallas más directos.
+
 ## Galería 4K · 2026-10-21
 
 - 29 capturas nativas de alta resolución, con carteles y fondos reales de Plex autorizados por el usuario.
