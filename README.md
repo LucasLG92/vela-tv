@@ -4,13 +4,13 @@
 
 Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abrir. Vela reúne lo que te gusta ver en una interfaz visual, personalizable y pensada para el mando.
 
-**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.12.1-preview)** · [Ver las 33 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
+**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.13.0-preview)** · [Ver las 35 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
 
 ![Inicio de Vela con Seguir viendo panorámico](gallery/01-inicio.webp)
 
 ## Dale protagonismo a tu biblioteca
 
-Conecta Plex y deja que tus películas y series llenen la pantalla con sus carteles y fondos originales. Retoma películas y capítulos desde **Seguir viendo**, con el tiempo restante a la vista. Justo debajo, **Últimas subidas** reúne las novedades de tu servidor con sus carteles originales. Explora el resto de la biblioteca por páginas.
+Conecta Plex o Jellyfin y deja que tus películas y series llenen la pantalla con sus carteles y fondos originales. Retoma películas y capítulos desde **Seguir viendo**, con el tiempo restante a la vista. Justo debajo, **Últimas subidas** reúne las novedades de tu servidor con sus carteles originales. Elige la biblioteca que quieres mostrar y conserva tus conexiones. Explora el resto de la biblioteca por páginas.
 
 | Tus películas | Tus series |
 | --- | --- |
@@ -25,6 +25,14 @@ Una fila para lo que dejaste a medias y otra para lo que acaba de llegar. Recorr
 | ![Continúa películas, series y vídeos](gallery/04-seguir-viendo.webp) | ![Novedades de tu biblioteca](gallery/30-ultimas-subidas.webp) |
 
 Las otras aplicaciones pueden aportar su progreso cuando lo comparten con Android TV. Consulta la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
+
+## Tu biblioteca también puede ser Jellyfin
+
+Conecta tu servidor con un código, elige tu biblioteca y vuelve a tus películas y series. Carteles originales, novedades y Seguir viendo con el tiempo restante del servidor. Plex y Jellyfin tienen su propio acceso; tú eliges cuál aparece en Inicio.
+
+![Biblioteca de Jellyfin en Vela](gallery/34-jellyfin-inicio.webp)
+
+[Conectar Jellyfin](guide/JELLYFIN.es.md)
 
 ## Tus apps, reconocibles al instante
 
@@ -70,7 +78,7 @@ Las nuevas versiones llegan desde GitHub a tu televisión. Vela busca actualizac
 
 Instala Vela, conecta tu biblioteca y elige tus aplicaciones. Todo desde la televisión, con un asistente que puedes completar a tu ritmo.
 
-**[Descargar Vela 1.12.1 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.12.1-preview)**
+**[Descargar Vela 1.13.0 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.13.0-preview)**
 
 Para **Android TV y Google TV con Android 11 o posterior**. Esta versión es una preview. Consulta la [guía de instalación](guide/INSTALL.es.md) y la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
 

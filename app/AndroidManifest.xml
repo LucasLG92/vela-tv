@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tv.vela.launcher"
-    android:versionCode="29"
-    android:versionName="1.12.1-preview">
+    android:versionCode="30"
+    android:versionName="1.13.0-preview">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -17,6 +17,7 @@
          (for "All Apps"). -->
     <queries>
         <package android:name="com.plexapp.android" />
+        <package android:name="org.jellyfin.androidtv" />
         <package android:name="com.netflix.ninja" />
         <package android:name="com.google.android.youtube.tv" />
         <package android:name="com.amazon.amazonvideo.livingroom" />
@@ -55,7 +56,7 @@
         android:icon="@drawable/icon"
         android:banner="@drawable/banner"
         android:allowBackup="false"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="true">
 
         <!-- The app's icon opens the settings (switch between Vela and the original home screen). -->
         <activity
@@ -119,6 +120,9 @@
 
         <!-- The home screen. Its own process (:home): if it ever crashes, the safety net in the main process still
              works. It only becomes the TV's home screen in Vela mode (cmd package set-home-activity). -->
+        <!-- Jellyfin permits HTTP only for explicitly chosen private-network servers; other transports require HTTPS. -->
+        <activity android:name=".JellyfinLinkActivity" android:process=":home" android:exported="false" android:screenOrientation="landscape" android:theme="@style/Vela.Home" />
+
         <activity
             android:name=".PlexLinkActivity"
             android:process=":home"

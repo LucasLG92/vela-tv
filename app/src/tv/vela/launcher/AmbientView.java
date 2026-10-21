@@ -71,10 +71,10 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
         if(infoPinned()){chrome.setAlpha(1);minute.run();}
         if(AmbientPrefs.weather(getContext())){weather=new AmbientWeather(getContext(),(snapshot,message)->{if(!active)return;weatherSnapshot=snapshot;weatherMessage=message;updateInfo();});weather.start();}
         if(plexMode){
-            PlexClient plex=new PlexClient(getContext());images=new CinemaImages(getContext(),plex);
+            LibraryClient plex=new LibraryClient(getContext());images=new CinemaImages(getContext(),plex);
             io.execute(()->{List<PlexClient.Film> library=plex.cached();if(library.isEmpty()&&plex.connected())try{library=plex.library();}catch(Exception ignored){}
                 Set<String> seen=new HashSet<>();List<PlexClient.Film> unique=new ArrayList<>();for(PlexClient.Film film:library)if(film.art!=null&&!film.art.isEmpty()&&seen.add(film.art))unique.add(film);
-                main.post(()->{if(!active)return;films=unique;if(films.isEmpty())message("Vincula Plex o comprueba tu servidor para ver los fondos de tu biblioteca.");else next();});
+                main.post(()->{if(!active)return;films=unique;if(films.isEmpty())message(Ui.tr("Conecte Plex ou Jellyfin ou confira o servidor para ver sua biblioteca.","Link Plex or Jellyfin or check the server to see your library.","Vincula Plex o Jellyfin o comprueba el servidor para ver tu biblioteca."));else next();});
             });
         }else{
             video.setVisibility(VISIBLE);
@@ -116,7 +116,7 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
         if(request!=null)request.cancel();if(timeout!=null)main.removeCallbacks(timeout);
         index=(index+1)%films.size();PlexClient.Film film=films.get(index);int epoch=++generation;
         boolean light=Visuals.light(getContext());
-        timeout=()->{if(!active||epoch!=generation)return;failures++;if(failures>=films.size())message("No se han podido leer las imágenes de Plex. Comprueba el servidor.");else nextPhoto();};main.postDelayed(timeout,12_000);
+        timeout=()->{if(!active||epoch!=generation)return;failures++;if(failures>=films.size())message(Ui.tr("Não foi possível ler as imagens da biblioteca. Confira o servidor.","Could not read library images. Check the server.","No se han podido leer las imágenes de tu biblioteca. Comprueba el servidor."));else nextPhoto();};main.postDelayed(timeout,12_000);
         request=images.load(film.art,light?1280:1920,light?720:1080,b->{
             if(!active||epoch!=generation)return;if(timeout!=null)main.removeCallbacks(timeout);failures=0;status.setVisibility(GONE);veil.setAlpha(0);
             ImageView old=currentPhoto,next=old==photoA?photoB:photoA;next.animate().cancel();next.setScaleX(1);next.setScaleY(1);next.setImageBitmap(b);next.setAlpha(0f);currentPhoto=next;
@@ -125,7 +125,7 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
             if(!Visuals.reducedMotion(getContext())&&ValueAnimator.areAnimatorsEnabled()){
                 pan=ObjectAnimator.ofPropertyValuesHolder(next,PropertyValuesHolder.ofFloat(View.SCALE_X,1,1.045f),PropertyValuesHolder.ofFloat(View.SCALE_Y,1,1.045f));pan.setDuration(AmbientPrefs.seconds(getContext())*1000L);pan.setInterpolator(new android.view.animation.LinearInterpolator());pan.start();
             }
-            showCaption(film.title,"Tu biblioteca · Plex");main.removeCallbacks(advance);main.postDelayed(advance,AmbientPrefs.seconds(getContext())*1000L);
+            showCaption(film.title,Ui.tr("Sua biblioteca · ","Your library · ","Tu biblioteca · ")+film.provider);main.removeCallbacks(advance);main.postDelayed(advance,AmbientPrefs.seconds(getContext())*1000L);
         });
     }
     private void showCaption(String name,String by){

@@ -7,7 +7,7 @@ final class AmbientPrefs {
     private AmbientPrefs() {}
     static SharedPreferences get(Context c){return c.getSharedPreferences("ambient",Context.MODE_PRIVATE);}
     static boolean plex(Context c){return "plex".equals(get(c).getString("style","aerial"));}
-    static String styleName(Context c){return plex(c)?"Biblioteca de Plex":"Aéreos";}
+    static String styleName(Context c){return plex(c)?Ui.tr("Sua biblioteca","Your library","Tu biblioteca"):"Aéreos";}
     static void infoDefaults(Context c){SharedPreferences p=get(c);if(!p.getBoolean("info_v2",false))p.edit().putBoolean("info_v2",true).putBoolean("clock",true).putBoolean("weather",true).apply();}
     static boolean clock(Context c){infoDefaults(c);return get(c).getBoolean("clock",true);}
     static boolean weather(Context c){infoDefaults(c);return get(c).getBoolean("weather",true);}

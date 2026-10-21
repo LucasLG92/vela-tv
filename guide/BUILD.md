@@ -23,6 +23,7 @@ The scripts create `vela.keystore` locally on the first build. Keep it privately
 ```sh
 python tests/test_home_mode.py
 python tests/test_plex_feed.py
+python tests/test_jellyfin_feed.py
 python tests/test_updates.py
 python tools/audit_publication.py
 ```
@@ -56,3 +57,13 @@ python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port>
 The fixture builder produces synthetic future APKs inside `out/`, including intentionally wrong signers and packages. Never distribute them. The native test refuses physical devices or a linked Plex account, checks signed archives, bounded/cancelled transfers, the read-only installer grant, daily checks and remote controls, then restores update preferences. It does not confirm a system installation. The separate release validation for 1.12.0 completed an actual self-update through Android's installer on a clean emulator and verified retained preferences.
 
 Official update releases must keep the existing signing key and a strictly increasing Android versionCode. Use a semantic tag such as `v1.13.0-preview`, the matching versionName `1.13.0-preview`, and the asset name `Vela-1.13.0-preview.apk`. Publish it as a release, mark previews accordingly, and verify GitHub's `sha256` asset digest. The updater ignores drafts, assets without that digest, unrelated paths, downgrades and mismatched signatures. CI artifacts use an ephemeral key and are not official updates.
+
+## Jellyfin integration test
+
+`tests/test_jellyfin_feed.py` validates synthetic metadata, ticks, pagination inputs, image IDs and URL rules without a server. The native test uses an explicitly selected clean emulator and an owned Jellyfin fixture with 30 movies, a series, artwork and seeded playback positions. Install the official Jellyfin Android TV app on that emulator to validate the item route. Forward the fixture port with `adb -s <emulator-serial> reverse tcp:<port> tcp:<port>`.
+
+```sh
+python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port> --test jellyfin --jellyfin-fixture /private/path/session.json
+```
+
+The private JSON contains `base` (HTTP loopback plus port), `username`, `password`, `token` and `userId` for the disposable fixture only. Never use a personal server or account. The native test refuses physical devices, non-loopback fixtures and linked personal libraries, restores app preferences and removes the runtime fixture file. It authorizes Quick Connect with that fixture token, exercises both login paths, pages, original images, source switching, screensaver and unlink. It intercepts the actual home action to check the item ID routed to the installed official app; this does not certify playback of every codec. No fixture videos, credentials or movie artwork are packaged in Vela.

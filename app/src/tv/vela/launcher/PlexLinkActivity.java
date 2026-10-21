@@ -75,7 +75,7 @@ public class PlexLinkActivity extends Activity {
     private void showServers() throws Exception {
             List<PlexClient.Server> servers = plex.servers();
             if (servers.size() == 1) {
-                try { plex.select(servers.get(0)); main.post(() -> { if (!closed) { setResult(RESULT_OK); finish(); } }); return; }
+                try { plex.select(servers.get(0)); main.post(() -> { if (!closed) { LibraryClient.activate(this,"Plex");setResult(RESULT_OK); finish(); } }); return; }
                 catch (Exception e) { error(e.getMessage()); return; }
             }
             main.post(() -> {
@@ -89,7 +89,7 @@ public class PlexLinkActivity extends Activity {
                     button.setOnClickListener(v -> {
                         detail.setText(t("Conectando a ","Connecting to ","Conectando con ") + server.name + "…"); button.setEnabled(false);
                         io.execute(() -> {
-                            try { plex.select(server); main.post(() -> { if (!closed) { setResult(RESULT_OK); finish(); } }); }
+                            try { plex.select(server); main.post(() -> { if (!closed) { LibraryClient.activate(this,"Plex");setResult(RESULT_OK); finish(); } }); }
                             catch (Exception e) { main.post(() -> { if (!closed) { detail.setText(e.getMessage()); button.setEnabled(true); } }); }
                         });
                     });

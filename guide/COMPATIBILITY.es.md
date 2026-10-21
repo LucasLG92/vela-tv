@@ -6,6 +6,14 @@ Vela funciona en dispositivos con Android TV o Google TV y Android 11 o posterio
 
 Autoriza tu cuenta en plex.tv/link y elige tu servidor. Los títulos y la calidad de los carteles dependen de tu biblioteca y de las imágenes disponibles en el servidor. Vela abre el contenido en la aplicación de Plex. Últimas subidas utiliza la lista de incorporaciones del servidor y su fecha addedAt; si una serie llega como temporada, muestra el nombre y cartel de la serie. El inicio limita cada fila a doce títulos.
 
+## Jellyfin
+
+Conecta la dirección completa de tu servidor, incluido su prefijo de URL si utiliza uno. Quick Connect se autoriza desde otra sesión de Jellyfin; si el servidor lo desactiva, utiliza usuario y contraseña. No necesitas una clave de API de administrador. HTTPS funciona con certificados válidos para Android; no se aceptan certificados inválidos mediante una excepción de la app. HTTP se admite para servidores en red local, sin cifrado, y se rechaza para direcciones públicas.
+
+El inicio usa la API del servidor para carteles, últimos añadidos, bibliotecas y progreso. Cada fila se limita a doce títulos y las páginas a 24. Las temporadas recientes se representan por la serie. Los tiempos de reproducción ausentes no se inventan. El salvapantallas de biblioteca utiliza el proveedor elegido. Solo una biblioteca personal está activa en cada momento; no se mezclan los catálogos de Plex y Jellyfin.
+
+Para abrir la ficha de un título necesitas Jellyfin para Android TV, configurado con el mismo servidor y usuario. Vela transmite únicamente el identificador del título a esa app; no le entrega el token ni copia su sesión. El control de reproducción y la compatibilidad de formatos corresponden a Jellyfin. Se han comprobado la API y el recorrido de Vela con Jellyfin Server 12.2 y el destino de apertura de la app oficial Android TV 0.19.10, en emulador Android 16. Los endpoints antiguos tienen fallback, pero no se afirma haber validado todas las versiones o fabricantes.
+
 ## YouTube y Prime Video
 
 Gestionan sus cuentas dentro de sus propias aplicaciones. Vela abre esas sesiones y muestra las filas que YouTube comparta con Android TV, si autorizas el acceso correspondiente. Seguir viendo puede reunir títulos de las apps instaladas que publiquen su progreso en Watch Next y permitan leerlo. La presencia de YouTube, Prime u otro servicio no está garantizada: depende de esa app y del dispositivo. Si no comparte duración o posición, Vela muestra Continuar sin inventar un tiempo. No incluye una integración OAuth para obtener el inicio privado ni Ver más tarde de YouTube.
@@ -24,6 +32,6 @@ La cuadrícula libera su cargador y sus iconos al cerrarse. Los reproductores se
 
 ## Preview y pantalla de inicio
 
-La versión 1.11.0 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
+La integración de Jellyfin de 1.13.0 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
 
 [Volver a Vela](../README.md)

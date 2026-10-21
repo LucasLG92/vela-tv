@@ -9,7 +9,7 @@ final class Personalization {
     static synchronized void prepare(Context c){
         SharedPreferences p=prefs(c);if(p.getBoolean("initialized",false))return;
         boolean existing=!c.getSharedPreferences("plex",0).getString("accountToken","").isEmpty()
-                ||SidebarApps.prefs(c).contains("slots")||AmbientWeather.prefs(c).contains("city")
+                ||!JellyfinClient.prefs(c).getString("token","").isEmpty()||SidebarApps.prefs(c).contains("slots")||AmbientWeather.prefs(c).contains("city")
                 ||HomeMode.FREE.equals(HomeMode.state(c).optString("mode"));
         // Older private builds supplied a city at build time. Preserve it before moving to a neutral APK.
         if(existing&&!AmbientWeather.prefs(c).contains("city")){

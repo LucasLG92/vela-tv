@@ -295,5 +295,23 @@
     "width": 3840,
     "height": 2160,
     "version": "1.12.1"
+  },
+  {
+    "file": "34-jellyfin-inicio.webp",
+    "title": "Jellyfin, en tu inicio",
+    "source": "native clean-emulator 4K capture; owned Jellyfin 12.2 demo server; authorized original artwork and synthetic fixture titles/progress",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.13.0"
+  },
+  {
+    "file": "35-jellyfin-cuenta.webp",
+    "title": "Tu servidor. Tu biblioteca.",
+    "source": "native clean-emulator 4K capture; owned Jellyfin 12.2 demo server; authorized original artwork and synthetic fixture titles/progress",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.13.0"
   }
 ]

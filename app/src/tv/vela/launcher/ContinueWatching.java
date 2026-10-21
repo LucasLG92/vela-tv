@@ -12,14 +12,15 @@ final class ContinueWatching {
     static final int LIMIT=12;
     static final String[] COLUMNS={"_id","package_name","title","short_description","poster_art_uri","thumbnail_uri","intent_uri","duration_millis","last_playback_position_millis","last_engagement_time_utc_millis","watch_next_type","browsable","season_display_number","episode_display_number","type","poster_art_aspect_ratio","poster_thumbnail_aspect_ratio"};
     private ContinueWatching(){}
-    static List<PlexClient.Film> read(Context context,boolean plexConnected){
+    static List<PlexClient.Film> read(Context context,boolean plexConnected){return read(context,plexConnected?"com.plexapp.android":"");}
+    static List<PlexClient.Film> read(Context context,String linkedPackage){
         List<PlexClient.Film> result=new ArrayList<>();
         if(context.checkSelfPermission(TvSuggestions.PERMISSION)!=PackageManager.PERMISSION_GRANTED)return result;
         try(Cursor cursor=context.getContentResolver().query(TvContract.WatchNextPrograms.CONTENT_URI,COLUMNS,null,null,"last_engagement_time_utc_millis DESC")){
             if(cursor==null)return result;Map<String,String> names=new HashMap<>();Set<String> seen=new HashSet<>();int scanned=0;
             while(cursor.moveToNext()&&scanned++<240){
                 PlexClient.Film film=parse(cursor);if(film==null||film.packageName.equals(context.getPackageName()))continue;
-                String pkg=film.packageName;if(plexConnected&&pkg.equals("com.plexapp.android"))continue;
+                String pkg=film.packageName;if(pkg.equals(linkedPackage))continue;
                 if(!names.containsKey(pkg))names.put(pkg,SidebarApps.launchable(context,pkg)?SidebarApps.label(context,pkg):"");
                 if(names.get(pkg).isEmpty()||!seen.add(pkg+"|"+film.intent))continue;
                 film.provider=names.get(pkg);film.meta=film.provider+(film.episodeLabel.isEmpty()?"":" · "+film.episodeLabel);result.add(film);
@@ -57,8 +58,11 @@ final class ContinueWatching {
     private static String value(Cursor cursor,int index){return cursor.isNull(index)?"":cursor.getString(index);}
     static boolean imageUri(String path){try{Uri uri=Uri.parse(path);return "content".equals(uri.getScheme())||("https".equals(uri.getScheme())&&uri.getHost()!=null&&uri.getUserInfo()==null);}catch(RuntimeException invalid){return false;}}
     static List<PlexClient.Film> merge(List<PlexClient.Film> plex,List<PlexClient.Film> shared,boolean plexConnected){
+        return merge(plex,shared,plexConnected?"com.plexapp.android":"");
+    }
+    static List<PlexClient.Film> merge(List<PlexClient.Film> plex,List<PlexClient.Film> shared,String linkedPackage){
         List<PlexClient.Film> result=new ArrayList<>(plex);Set<String> seen=new HashSet<>();for(PlexClient.Film film:plex)seen.add(film.packageName+"|"+film.key);
-        for(PlexClient.Film film:shared){if(plexConnected&&film.packageName.equals("com.plexapp.android"))continue;if(seen.add(film.packageName+"|"+film.key))result.add(film);}
+        for(PlexClient.Film film:shared){if(film.packageName.equals(linkedPackage))continue;if(seen.add(film.packageName+"|"+film.key))result.add(film);}
         return result;
     }
     static String remaining(PlexClient.Film film){

@@ -1,12 +1,20 @@
 # Vela, por dentro
 
-Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **33 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
+Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **35 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
 
-[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.12.1-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
+[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.13.0-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
 
 ## Tu cine, en primer plano
 
 ![Tu cine, en primer plano](01-inicio.webp)
+
+## Jellyfin, en tu inicio
+
+![Jellyfin con progreso y carteles de su servidor](34-jellyfin-inicio.webp)
+
+## Tu servidor. Tu biblioteca.
+
+![Una cuenta de Jellyfin vinculada](35-jellyfin-cuenta.webp)
 
 ## Tus apps, con sus iconos originales
 
@@ -141,6 +149,6 @@ El contenido de YouTube y Prime ilustra el diseño con progreso de ejemplo; su a
 <details>
 <summary>Sobre estas capturas</summary>
 
-Capturas nativas a 3840 × 2160 de un emulador Android. Galería de Vela 1.10.2 con la vista de Televisión actualizada en 1.10.4. Los carteles y fondos de Plex se utilizan con autorización del usuario; perfil, servidor y cuenta se presentan de forma anónima. Progreso, paginación y ciudad son ejemplos. No se publican credenciales, avatar ni archivos originales de la biblioteca. Los accesos de servicios utilizan aplicaciones de prueba. El vídeo de TV es una prueba CC0 de MDN y el salvapantallas de vídeo muestra material NASA/JSC. Consulta los [créditos y detalles de las imágenes](CREDITS.md) y la [compatibilidad](../guide/COMPATIBILITY.es.md).
+Capturas nativas a 3840 × 2160 de un emulador Android. Galería con capturas de distintas versiones de Vela, incluidas Inicio y Actualizaciones de 1.12 y Jellyfin de 1.13. Las capturas de Jellyfin proceden de un servidor local de demostración: los carteles son originales y el progreso se ha preparado para mostrar la interfaz. Los carteles y fondos de Plex se utilizan con autorización del usuario; perfil, servidor y cuenta se presentan de forma anónima. Progreso, paginación y ciudad son ejemplos. No se publican credenciales, avatar ni archivos originales de la biblioteca. Los accesos de servicios utilizan aplicaciones de prueba. El vídeo de TV es una prueba CC0 de MDN y el salvapantallas de vídeo muestra material NASA/JSC. Consulta los [créditos y detalles de las imágenes](CREDITS.md) y la [compatibilidad](../guide/COMPATIBILITY.es.md).
 
 </details>

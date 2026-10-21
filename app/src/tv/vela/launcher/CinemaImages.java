@@ -22,7 +22,7 @@ final class CinemaImages {
         void cancel() { synchronized(pending) { ready=null; } }
         boolean pending() { synchronized(pending) { return ready!=null; } }
     }
-    private final PlexClient plex;
+    private final LibraryClient plex;
     private final Context context;
     private final File folder;
     private final ThreadPoolExecutor io=Visuals.worker(2);
@@ -32,7 +32,8 @@ final class CinemaImages {
     private int generation;
     private boolean closed;
 
-    CinemaImages(Context c,PlexClient plex) {
+    CinemaImages(Context c,PlexClient plex){this(c,new LibraryClient(c,plex));}
+    CinemaImages(Context c,LibraryClient plex) {
         this.plex=plex;context=c.getApplicationContext();
         folder=new File(c.getCacheDir(),"plex-art");folder.mkdirs();
         images=new LruCache<String,Bitmap>(Visuals.cacheKb(c)) {
@@ -50,9 +51,8 @@ final class CinemaImages {
             ()->plex.image(path,650,182,true),ready);
     }
     Request loadAvatar(Ready ready) {
-        String token=plex.prefs.getString("accountToken","");
-        if(token.isEmpty())return new Request(null);
-        return enqueue("plex-avatar:"+PlexClient.profileKey(token),96,96,()->plex.avatarImage(token),ready);
+        String key=plex.profileKey();if(key.isEmpty())return new Request(null);
+        return enqueue("library-avatar:"+key,96,96,()->plex.avatar(),ready);
     }
     Request loadTv(String path,Ready ready) {
         return loadTv(path,352,198,ready);
@@ -133,7 +133,7 @@ final class CinemaImages {
                 // Immutable pixels stay on the GPU; logos retain their original alpha channel.
                 options.inPreferredConfig=Bitmap.Config.HARDWARE;
                 Bitmap bitmap;
-                if(key.startsWith("plex-avatar:"))bitmap=ImageDecoder.decodeBitmap(ImageDecoder.createSource(file),(decoder,info,source)->{
+                if(key.startsWith("library-avatar:"))bitmap=ImageDecoder.decodeBitmap(ImageDecoder.createSource(file),(decoder,info,source)->{
                     int w=info.getSize().getWidth(),h=info.getSize().getHeight();float scale=Math.min(1f,96f/Math.max(w,h));
                     decoder.setTargetSize(Math.max(1,Math.round(w*scale)),Math.max(1,Math.round(h*scale)));decoder.setAllocator(ImageDecoder.ALLOCATOR_HARDWARE);
                 });

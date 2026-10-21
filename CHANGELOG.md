@@ -1,5 +1,15 @@
 # Cambios
 
+## 1.13.0 Preview · 2026-10-21
+
+- Integración nativa con Jellyfin: servidor propio, Quick Connect o acceso con usuario y contraseña, nombre del servidor e imagen de perfil cuando está disponible.
+- Carteles y fondos originales, Seguir viendo con duración y posición del servidor, Últimas subidas y catálogo de películas y series en páginas de 24 títulos.
+- Selector de biblioteca de Inicio entre Plex y Jellyfin, sin desvincular la otra cuenta. Los fondos de biblioteca del salvapantallas siguen la biblioteca elegida.
+- Apertura de la ficha del título en Jellyfin para Android TV; la app debe estar configurada con el mismo servidor y usuario.
+- HTTPS para servidores remotos y HTTP solo para servidores elegidos en red local. Sin contraseñas persistentes ni credenciales en enlaces de reproducción.
+- Se reutilizan los límites de imágenes y trabajadores existentes. Pruebas con servidor Jellyfin 12.2 real y app oficial Android TV 0.19.10 en emulador.
+
+
 ## 1.12.1 Preview · 2026-10-21
 
 - Búsqueda y descarga de nuevas versiones activadas por defecto. Se mantienen la consulta diaria al abrir Vela, los límites de descarga y la verificación de firma e integridad.

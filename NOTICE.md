@@ -2,7 +2,7 @@
 
 Vela deriva de [Free My TV](https://github.com/simbasjungles/free-my-tv), publicado bajo la licencia MIT. Se conservan el copyright original y su licencia en [LICENSE](LICENSE) y en los avisos incluidos en la aplicación.
 
-El nombre, la interfaz de Vela y sus ampliaciones no implican afiliación con el proyecto original, Apple, Plex, YouTube, Amazon, TDTChannels ni TDT España.
+El nombre, la interfaz de Vela y sus ampliaciones no implican afiliación con el proyecto original, Apple, Plex, Jellyfin, YouTube, Amazon, TDTChannels ni TDT España.
 
 | Componente | Fuente y licencia |
 | --- | --- |
@@ -10,6 +10,7 @@ El nombre, la interfaz de Vela y sus ampliaciones no implican afiliación con el
 | Inter | SIL Open Font License; [texto](app/assets/fonts/OFL.txt) |
 | Material Symbols | Apache 2.0; [aviso](app/assets/symbols/LICENSE-material-symbols.txt) |
 | Canales y programación | [TDTChannels](https://github.com/LaQuay/TDTChannels), Apache 2.0; [fuentes](app/assets/licenses/live-tv-sources.txt) |
+| Icono de Jellyfin | Jellyfin contributors; [original](https://github.com/jellyfin/jellyfin-ux/blob/master/branding/SVG/icon-transparent-white.svg), CC BY-SA 4.0; [licencia](app/assets/brands/JELLYFIN-ARTWORK-LICENSE.txt). Se conservan las formas del icono blanco al convertirlo de SVG a Android Vector Drawable. La licencia del recurso gráfico es independiente de la del código. |
 | Identificadores de las aplicaciones | Marcas de sus propietarios; [fuentes](app/assets/brands/sources.txt) |
 | Vídeos del salvapantallas | No se incluyen archivos de vídeo; sus enlaces y condiciones de uso personal se describen en [fuentes](app/assets/ambient/sources.txt). La licencia MIT del código no concede derechos sobre esos vídeos. |
 | Tiempo y búsqueda de ciudades | [Open-Meteo](https://open-meteo.com/), CC BY 4.0; GeoNames según los avisos de la aplicación |

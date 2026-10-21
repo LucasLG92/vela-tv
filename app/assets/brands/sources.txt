@@ -24,3 +24,7 @@ Additional Material UI icons (person, movie, video_library): https://github.com/
 
 YouTube sidebar icon: unmodified official icon from https://www.gstatic.com/marketing-cms/89/d9/cf95c4f345709f4998dc581221b0/youtube-icon.zip
 Entry: YouTube_Icon/Digital/01 Red/yt_icon_red_digital.png
+
+Jellyfin white icon: Jellyfin contributors, CC BY-SA 4.0.
+Original: https://github.com/jellyfin/jellyfin-ux/blob/master/branding/SVG/icon-transparent-white.svg
+Android vector uses identical path data, converted from SVG. License: JELLYFIN-ARTWORK-LICENSE.txt

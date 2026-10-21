@@ -65,6 +65,7 @@ final class SidebarApps {
     private static String[] detected(Context c){
         List<String> out=new ArrayList<>();
         for(String pkg:DEFAULTS)if(launchable(c,pkg))out.add(pkg);
+        if(launchable(c,JellyfinClient.PACKAGE))out.add(JellyfinClient.PACKAGE);
         if(out.isEmpty())for(Choice choice:choices(c)){out.add(choice.pkg);if(out.size()==4)break;}
         return out.toArray(new String[0]);
     }
