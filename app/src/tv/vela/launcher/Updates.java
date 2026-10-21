@@ -32,7 +32,7 @@ final class Updates {
     static SharedPreferences prefs(Context c){return c.getSharedPreferences("updates",Context.MODE_PRIVATE);}
     static String version(Context c){try{return c.getPackageManager().getPackageInfo(c.getPackageName(),0).versionName;}catch(Exception absent){return "0.0.0";}}
     static boolean automaticEnabled(Context c){return prefs(c).getBoolean("automatic",true);}
-    static boolean automaticDownload(Context c){return prefs(c).getBoolean("download",false);}
+    static boolean automaticDownload(Context c){return prefs(c).getBoolean("download",true);}
     static boolean previews(Context c){return prefs(c).getBoolean("previews",version(c).contains("-"));}
     static File apk(Context c){return new File(new File(c.getCacheDir(),"updates"),"update.apk");}
     static int state(){return state;}

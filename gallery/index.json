@@ -290,10 +290,10 @@
   {
     "file": "33-actualizaciones.webp",
     "title": "Siempre al día",
-    "source": "native clean-emulator 4K capture; update preferences, no linked account or private data",
+    "source": "native clean-emulator 4K capture; automatic check and download defaults; no linked account or private data",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.12.0"
+    "version": "1.12.1"
   }
 ]

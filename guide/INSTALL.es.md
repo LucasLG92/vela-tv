@@ -21,7 +21,7 @@ No borres los datos de la app para actualizarla. Las actualizaciones deben utili
 
 A partir de **1.12.0 Preview**, entra en **Ajustes → Información y actualizaciones → Actualizaciones**. Vela comprueba las publicaciones públicas de GitHub una vez al día al abrirse; también puedes pulsar **Buscar ahora**. El aviso aparece en Inicio si hay una versión nueva.
 
-Puedes activar **Descargar automáticamente**. La descarga queda en la caché privada y Vela comprueba su integridad, identidad y firma. Android puede pedir que autorices a Vela a instalar aplicaciones; después debes confirmar cada instalación con el mando. Las cuentas, aplicaciones y preferencias se conservan.
+Desde **1.12.1 Preview**, **Comprobar automáticamente** y **Descargar automáticamente** vienen activados por defecto. Puedes desactivarlos en esta pantalla; si ya elegiste desactivarlos, esa preferencia se conserva al actualizar. La descarga queda en la caché privada y Vela comprueba su integridad, identidad y firma. Android puede pedir que autorices a Vela a instalar aplicaciones; después debes confirmar cada instalación con el mando. Las cuentas, aplicaciones y preferencias se conservan.
 
 Las versiones preview incluyen por defecto las próximas versiones preliminares. Desactiva esa opción para recibir solo versiones estables. Puedes desactivar la comprobación automática.
 

@@ -1,5 +1,12 @@
 # Cambios
 
+## 1.12.1 Preview · 2026-10-21
+
+- Búsqueda y descarga de nuevas versiones activadas por defecto. Se mantienen la consulta diaria al abrir Vela, los límites de descarga y la verificación de firma e integridad.
+- Las personas que hayan desactivado alguna opción conservan su elección. Ambas opciones siguen disponibles en Ajustes.
+- Android sigue pidiendo confirmar la instalación. No se añade un servicio permanente ni se cambian cuentas, aplicaciones o ubicación.
+
+
 ## 1.12.0 Preview · 2026-10-21
 
 - Al bajar o subir entre filas, el encabezado y la tarjeta seleccionada permanecen visibles. Los títulos de dos líneas y los textos del bloque principal disponen de espacio y límites explícitos.

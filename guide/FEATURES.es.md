@@ -37,6 +37,6 @@ El asistente inicial te guía para conectar Plex, elegir aplicaciones y configur
 
 ## Siempre al día
 
-Consulta las nuevas versiones desde Ajustes. Vela las busca automáticamente una vez al día al abrirse y puede dejarlas descargadas si lo activas. Android te pide confirmar la instalación; tus cuentas y preferencias se conservan. La primera actualización desde una versión anterior a 1.12.0 se instala manualmente.
+Consulta las nuevas versiones desde Ajustes. Vela las busca automáticamente una vez al día al abrirse y las deja descargadas por defecto. Puedes desactivar ambas opciones en Ajustes. Android te pide confirmar la instalación; tus cuentas y preferencias se conservan. La primera actualización desde una versión anterior a 1.12.0 se instala manualmente.
 
 [Ver las capturas](../gallery/README.md) · [Instalar Vela](INSTALL.es.md) · [Compatibilidad de los servicios](COMPATIBILITY.es.md)
