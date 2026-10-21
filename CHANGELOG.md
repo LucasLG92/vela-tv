@@ -1,5 +1,14 @@
 # Cambios
 
+## 1.12.0 Preview · 2026-10-21
+
+- Al bajar o subir entre filas, el encabezado y la tarjeta seleccionada permanecen visibles. Los títulos de dos líneas y los textos del bloque principal disponen de espacio y límites explícitos.
+- Actualizaciones desde GitHub en Ajustes → Información y actualizaciones → Actualizaciones. Comprobación automática diaria al abrir Vela, aviso discreto en Inicio y descarga automática opcional.
+- Selección de versiones estables o preliminares. Descargas acotadas, comprobación SHA-256, paquete, versión y firma antes de entregar el APK al instalador de Android.
+- Instalación confirmada por el usuario; las versiones anteriores requieren instalar esta actualización manualmente una vez. No se añade un servicio permanente.
+- Pruebas nativas de navegación con mando, títulos largos, transferencias, cancelación, integridad, firma y permisos. Actualización real mediante el instalador de Android comprobada en emulador, conservando preferencias.
+
+
 ## 1.11.0 Preview · 2026-10-21
 
 - Seguir viendo con tarjetas panorámicas uniformes, servicio, episodio, progreso y tiempo restante de Plex y de las apps que lo publiquen en Android TV.

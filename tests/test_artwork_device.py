@@ -6,9 +6,9 @@ import argparse,os,subprocess
 parser=argparse.ArgumentParser()
 parser.add_argument('--serial',required=True)
 parser.add_argument('--adb-port',default='5037')
-parser.add_argument('--test',choices=['artwork','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-web','tv-progress','continue-watching','appearance','gallery','apps-grid'],default='artwork')
+parser.add_argument('--test',choices=['artwork','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-web','tv-progress','continue-watching','appearance','gallery','apps-grid','updates'],default='artwork')
 args=parser.parse_args()
-test_class={'artwork':'ArtworkLifecycleTest','ambient':'AndroidAmbientTest','weather':'AndroidWeatherTest','sidebar':'AndroidSidebarTest','reorder':'AndroidSidebarReorderTest','remove':'AndroidSidebarRemoveTest','catalog':'AndroidCatalogTest','home-status':'AndroidHomeStatusTest','account':'AndroidAccountHeaderTest','personalization':'AndroidPersonalizationTest','live-tv':'AndroidLiveTvTest','tv-web':'AndroidTvWebTest','tv-progress':'AndroidTvProgressTest','continue-watching':'AndroidContinueWatchingTest','appearance':'AndroidAppearanceTest','gallery':'AndroidGalleryTest','apps-grid':'AndroidAppsGridTest'}[args.test]
+test_class={'artwork':'ArtworkLifecycleTest','ambient':'AndroidAmbientTest','weather':'AndroidWeatherTest','sidebar':'AndroidSidebarTest','reorder':'AndroidSidebarReorderTest','remove':'AndroidSidebarRemoveTest','catalog':'AndroidCatalogTest','home-status':'AndroidHomeStatusTest','account':'AndroidAccountHeaderTest','personalization':'AndroidPersonalizationTest','live-tv':'AndroidLiveTvTest','tv-web':'AndroidTvWebTest','tv-progress':'AndroidTvProgressTest','continue-watching':'AndroidContinueWatchingTest','appearance':'AndroidAppearanceTest','gallery':'AndroidGalleryTest','apps-grid':'AndroidAppsGridTest','updates':'AndroidUpdatesTest'}[args.test]
 root=Path(__file__).resolve().parents[1]
 sdk=Path(os.environ['ANDROID_HOME']);jdk=Path(os.environ['JAVA_HOME'])
 bt=max((sdk/'build-tools').iterdir(),key=lambda p:tuple(int(x) for x in p.name.split('.')))
@@ -18,7 +18,7 @@ process='tvweb' if args.test=='tv-web' else 'home'
 manifest=f'''<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="tv.vela.launcher.tests"><application/><instrumentation android:name="tv.vela.launcher.{test_class}" android:targetPackage="tv.vela.launcher" android:targetProcesses="tv.vela.launcher:{process}"/></manifest>'''
 (out/'manifest.xml').write_bytes(manifest.encode('utf-8'))
 def run(a):subprocess.run(list(map(str,a)),check=True)
-assets=['-A',root/'tests/gallery/assets'] if args.test=='gallery' else []
+assets=['-A',root/'tests/gallery/assets'] if args.test=='gallery' else ['-A',root/'out/update-fixtures/assets'] if args.test=='updates' else []
 run([bt/('aapt2'+exe),'link','-o',out/'base.apk','-I',sdk/'platforms/android-34/android.jar','--manifest',out/'manifest.xml','--min-sdk-version','30','--target-sdk-version','33',*assets])
 run([jdk/('bin/javac'+exe),'-encoding','UTF-8','-source','8','-target','8','-cp',os.pathsep.join([str(root/'out/classes'),str(sdk/'platforms/android-34/android.jar')]),'-d',out/'classes',root/('tests/'+test_class+'.java')])
 run([jdk/('bin/jar'+exe),'cf',out/'classes.jar','-C',out/'classes','.'])

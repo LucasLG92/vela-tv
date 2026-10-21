@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tv.vela.launcher"
-    android:versionCode="25"
-    android:versionName="1.11.0-preview">
+    android:versionCode="28"
+    android:versionName="1.12.0-preview">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -10,6 +10,7 @@
     <!-- After the TV boots (and after a TV update), checks that Vela mode is still as you left it. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Android 11+: without this list the app can't "see" the other apps (getLeanbackLaunchIntentForPackage
          returns null). The shelf and streaming apps, the live TV apps and, through the <intent>, every TV app
@@ -74,6 +75,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".UpdatesActivity"
+            android:process=":home"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Vela.Home" />
+
+        <provider
+            android:name=".UpdateProvider"
+            android:authorities="tv.vela.launcher.updates"
+            android:exported="false"
+            android:grantUriPermissions="true" />
 
         <activity
             android:name=".SetupActivity"

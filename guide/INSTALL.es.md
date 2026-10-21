@@ -17,6 +17,16 @@ adb -s <TV_IP>:5555 install -r Vela.apk
 
 No borres los datos de la app para actualizarla. Las actualizaciones deben utilizar la misma clave de firma.
 
+## Actualizar desde la televisión
+
+A partir de **1.12.0 Preview**, entra en **Ajustes → Información y actualizaciones → Actualizaciones**. Vela comprueba las publicaciones públicas de GitHub una vez al día al abrirse; también puedes pulsar **Buscar ahora**. El aviso aparece en Inicio si hay una versión nueva.
+
+Puedes activar **Descargar automáticamente**. La descarga queda en la caché privada y Vela comprueba su integridad, identidad y firma. Android puede pedir que autorices a Vela a instalar aplicaciones; después debes confirmar cada instalación con el mando. Las cuentas, aplicaciones y preferencias se conservan.
+
+Las versiones preview incluyen por defecto las próximas versiones preliminares. Desactiva esa opción para recibir solo versiones estables. Puedes desactivar la comprobación automática.
+
+Si tienes una versión anterior a 1.12.0, descarga e instala esta versión desde Releases una vez. Las versiones antiguas no pueden incorporar el actualizador por sí mismas. No desinstales Vela ni borres sus datos. Las compilaciones firmadas con otra clave no se pueden actualizar con el APK oficial.
+
 ## Elegir la pantalla de inicio
 
 En **Vela → Pantalla de inicio** puedes elegir Vela o volver a **Original**. En equipos que necesiten la conexión ADB local, la propia televisión pedirá autorizarla. El cambio guarda primero la recuperación del inicio original. No cambia automáticamente tus ajustes de imagen, sonido, red ni cuentas.

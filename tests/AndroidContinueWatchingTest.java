@@ -75,7 +75,7 @@ public class AndroidContinueWatchingTest extends Instrumentation {
                     check(Math.abs(ratio-16f/9)<.01,"Resume frame is not panoramic for "+film.provider+" size "+size);
                     if(cardWidth<0){cardWidth=card.getWidth();cardHeight=card.getHeight();}else check(card.getWidth()==cardWidth&&card.getHeight()==cardHeight,"Resume cards have different sizes");
                     TextView remaining=label(card,ContinueWatching.remaining(film));check(remaining!=null&&remaining.getBottom()<=card.getHeight(),"Remaining time is clipped");if(baseline<0)baseline=remaining.getTop();else check(remaining.getTop()==baseline,"Provider times do not align across formats");
-                    TextView caption=label(card,film.title);check(caption!=null&&caption.getTop()>picture.getBottom()&&caption.getBottom()<=picture.getHeight()+54,"Resume title overlaps artwork or provider metadata");
+                    TextView caption=label(card,film.title);check(caption!=null&&caption.getTop()>picture.getBottom()&&caption.getBottom()<=picture.getHeight()+60,"Resume title overlaps artwork or provider metadata");
                 }
                 ui(()->mixed.get(0).requestFocus());for(int i=1;i<mixed.size();i++){sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT);waitForIdleSync();check(a.getCurrentFocus()==mixed.get(i),"Remote skipped a differently shaped card");}
             }
@@ -91,9 +91,23 @@ public class AndroidContinueWatchingTest extends Instrumentation {
             ui(()->{try{set(home,"active",true);set(home,"films",many);}catch(Exception e){throw new RuntimeException(e);}});render(home);
             List<View> rowsCards=(List<View>)field(home,"cards");check(((List<?>)field(home,"shelves")).size()==2&&label((View)field(home,"shelfList"),"Últimas subidas")!=null,"Recent posters are not below Continue watching");
             View newest=rowsCards.get(rowsCards.size()-1);check(newest.getWidth()*3==newest.getHeight()*2,"Latest uploads must keep portrait posters");ui(()->newest.requestFocus());render(home);check(!((PlexClient.Film)field(home,"selected")).continuing,"Refreshing selected the resume copy instead of the recent poster");ScrollView scroll=(ScrollView)field(home,"shelvesScroll");check(scroll.getClipBounds()!=null&&scroll.getClipBounds().height()==scroll.getHeight()&&scroll.getClipChildren(),"Scrolled rows can draw over the hero");sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP);waitForIdleSync();check(a.getCurrentFocus()==((List<View>)field(home,"cards")).get(0),"Remote cannot return from latest uploads to resume");
+            // Real down/up navigation must reveal the heading and complete text at every size.
+            video.title="Un título de YouTube suficientemente largo para ocupar dos líneas completas";
+            for(int size=0;size<3;size++){
+                int choice=size;ui(()->Appearance.set(c,"size",choice));
+                ui(()->{try{set(home,"films",Arrays.asList(movie,recent));set(home,"watchNext",Collections.singletonList(video));}catch(Exception e){throw new RuntimeException(e);}});render(home);
+                List<View> current=(List<View>)field(home,"cards");ui(()->current.get(0).requestFocus());Thread.sleep(250);
+                TextView caption=label(current.get(0),video.title);check(caption.getLineCount()==2,"Fixture did not exercise a two-line caption");check(caption.getLayout().getLineBottom(1)<=caption.getHeight(),"Two-line title clipped its last glyphs at size "+size);
+                TextView hero=(TextView)field(home,"title");check(hero.getLayout().getLineBottom(hero.getLineCount()-1)<=hero.getHeight(),"Hero title clipped at size "+size);
+                sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);waitForIdleSync();Thread.sleep(250);
+                check(a.getCurrentFocus()==current.get(current.size()-1),"Down skipped Latest uploads at size "+size);
+                TextView heading=label((View)field(home,"shelfList"),"Últimas subidas");android.graphics.Rect visibleBox=new android.graphics.Rect();heading.getGlobalVisibleRect(visibleBox);float scale=visibleBox.width()/(float)heading.getWidth();check(visibleBox.height()>=heading.getHeight()*scale-2,"Latest heading clipped after Down at size "+size);
+                check(scroll.getScrollY()==((View)heading.getParent()).getTop(),"Automatic focus scrolling hid the shelf heading");
+                sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP);waitForIdleSync();Thread.sleep(250);check(scroll.getScrollY()==0,"Up did not restore the first heading");
+            }
             View art=(View)field(home,"backdrop"),veil=(View)field(home,"backdropBottom");check(art.getBottom()==veil.getBottom(),"Backdrop stops before its bottom gradient, leaving a seam");
             check(plexBefore.equals(new PlexClient(c).prefs.getAll())&&Arrays.equals(apps,SidebarApps.slots(c)),"Preview changed accounts or app shortcuts");
-            result.putString("result","PASS exact Plex/Watch Next times, filtering, deduplication, safe links and twelve-card limit. Uniform panoramic resume cards in three sizes; portrait Latest uploads below, duplicate-title focus and remote row navigation. Real screenshot pixels verify right/start, both/middle and no right/end fades; full-height backdrop covers the gradient. Cache, playback positions, accounts and shortcuts preserved.");
+            result.putString("result","PASS exact Plex/Watch Next times, filtering, deduplication, safe links and twelve-card limit. Uniform panoramic resume cards in three sizes; portrait Latest uploads below, duplicate-title focus and remote row navigation. Real screenshot pixels verify right/start, both/middle and no right/end fades; full-height backdrop covers the gradient. Long two-line captions and hero titles fit, and real Down/Up preserves full headings in three sizes. Cache, playback positions, accounts and shortcuts preserved.");
         }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));try{android.graphics.Bitmap shot=getUiAutomation().takeScreenshot();try(java.io.OutputStream out=new java.io.FileOutputStream(new java.io.File(c.getExternalFilesDir(null),"continue-failure.png"))){shot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}shot.recycle();}catch(Exception ignored){}}
         finally{if(activity!=null){HomeActivity a=activity;ui(()->a.finish());}restore(personalization,saved);restore(visuals,visualSaved);}
         finish(result.containsKey("error")?1:-1,result);

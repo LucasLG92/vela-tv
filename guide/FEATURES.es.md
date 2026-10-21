@@ -35,4 +35,8 @@ Elige paisajes en movimiento o fondos de Plex para el salvapantallas. Activa el 
 
 El asistente inicial te guía para conectar Plex, elegir aplicaciones y configurar el tiempo. Puedes omitir pasos o repetirlo más adelante. Desde Ajustes también puedes gestionar tus conexiones, el aspecto y el regreso a la pantalla de inicio original.
 
+## Siempre al día
+
+Consulta las nuevas versiones desde Ajustes. Vela las busca automáticamente una vez al día al abrirse y puede dejarlas descargadas si lo activas. Android te pide confirmar la instalación; tus cuentas y preferencias se conservan. La primera actualización desde una versión anterior a 1.12.0 se instala manualmente.
+
 [Ver las capturas](../gallery/README.md) · [Instalar Vela](INSTALL.es.md) · [Compatibilidad de los servicios](COMPATIBILITY.es.md)

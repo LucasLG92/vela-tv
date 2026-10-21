@@ -34,7 +34,7 @@ public class SettingsActivity extends Activity {
         if(getIntent().hasExtra("page")){
             int target=getIntent().getIntExtra("page",0);getIntent().removeExtra("page");
             returnToSetup=getIntent().getBooleanExtra("fromSetup",false);getIntent().removeExtra("fromSetup");
-            if(target==1||target==3||target==9||target==11||target==14||target==15||target==17){entryPage=target;view.render(target);}
+            if(target==1||target==3||target==4||target==9||target==11||target==14||target==15||target==17){entryPage=target;view.render(target);}
         }
         else if(view.page==14||view.page==15)view.render(view.page);
         if(getIntent().getBooleanExtra("plex",false)){getIntent().removeExtra("plex");startActivity(new Intent(this,PlexLinkActivity.class));}
@@ -130,7 +130,7 @@ public class SettingsActivity extends Activity {
                 section("VELA",560);
                 row(Ui.tr("Acessos do menu","Menu shortcuts","Accesos del menú"),"›",602,Ui.tr("Seu menu, seus apps.","Your menu, your apps.","Tu menú, tus apps."),Ui.tr("Adicione, altere ou oculte apps. Para ordenar diretamente na barra, mantenha OK sobre um ícone e mova-o com as setas.","Add, change or hide apps. To reorder directly in the sidebar, hold OK on an icon and move it with the arrows.","Añade, cambia u oculta apps. Para ordenarlas directamente en la barra, mantén OK sobre un icono y muévelo con las flechas."),()->open(11,5));
                 row(Ui.tr("Aparência e desempenho","Appearance and performance","Apariencia y rendimiento"),Visuals.light(activity)?"Ligera":"Alta calidad",682,"Bonito. Y ligero.","Conserva la calidad de las imágenes o elige un consumo menor. Vela libera sus imágenes cuando abres otra aplicación.",()->open(2,6));
-                row("Información y licencias","›",762,"Hecha para tu televisión.","Versión de Vela, información del dispositivo y licencias de los componentes utilizados.",()->open(4,7));
+                row(Ui.tr("Informações e atualizações","Information and updates","Información y actualizaciones"),"›",762,"Hecha para tu televisión.",Ui.tr("Versão, atualizações e licenças do Vela.","Vela version, updates and licenses.","Versión, actualizaciones y licencias de Vela."),()->open(4,7));
             }else if(page==1){
                 section("PANTALLA DE INICIO",0);
                 row("Vela",isVela()?"✓":"Activar","Inicio, salvapantallas y recuperación.",54,"Tu inicio personal.","Activa Vela y su salvapantallas. La app guarda el retorno al inicio original de la televisión antes de completar la configuración.",()->switchHome(true));
@@ -168,6 +168,7 @@ public class SettingsActivity extends Activity {
                 row("Android",Build.VERSION.RELEASE,214,"El sistema de tu TV.","Los ajustes de imagen, sonido, red y cuentas se gestionan desde Ajustes de la TV.",()->{});
                 row("Licencias","›",334,"Créditos y licencias.","Avisos de los componentes de código abierto, tipografías y símbolos utilizados en Vela.",()->open(5,7));
                 row(Ui.tr("Assistente de configuração","Setup guide","Asistente de configuración"),"›",434,Ui.tr("Tudo a seu gosto.","Make it yours.","Todo a tu gusto."),Ui.tr("Revise contas, apps e localização sem apagar sua configuração.","Review accounts, apps and location without erasing your setup.","Repasa cuentas, apps y ubicación sin borrar tu configuración."),()->activity.startActivity(new Intent(activity,SetupActivity.class)));
+                row(Ui.tr("Atualizações","Updates","Actualizaciones"),"›",534,Ui.tr("Sempre em dia.","Always up to date.","Siempre al día."),Ui.tr("Novas versões do GitHub, com verificação automática e instalação confirmada por você.","New GitHub releases, with automatic checks and installation confirmed by you.","Nuevas versiones de GitHub, con comprobación automática e instalación confirmada por ti."),()->activity.startActivity(new Intent(activity,UpdatesActivity.class)));
             }else if(page==6){
                 section("SALVAPANTALLAS",0);
                 row("Estilo",AmbientPrefs.styleName(activity),54,"Una pausa a tu gusto.","Aéreos muestra vídeos de paisajes y ciudades. Plex usa las imágenes originales de tu biblioteca con movimiento suave.",()->render(7));

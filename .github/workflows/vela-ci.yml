@@ -26,8 +26,9 @@ jobs:
         run: python3 tools/audit_publication.py
       - name: Build neutral APK with an ephemeral local signing key
         run: bash build.sh
-      - name: Check recovery and Plex mapping
+      - name: Check recovery, Plex and releases
         run: |
           python3 tests/test_home_mode.py
           python3 tests/test_plex_feed.py
+          python3 tests/test_updates.py
 

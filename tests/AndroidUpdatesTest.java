@@ -1,0 +1,59 @@
+package tv.vela.launcher;
+
+import android.app.*;
+import android.content.*;
+import android.content.pm.*;
+import android.net.Uri;
+import android.os.*;
+import android.view.*;
+import android.widget.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.security.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.json.*;
+
+/** Real signed APK verification, bounded transfers, private provider and TV controls. */
+public class AndroidUpdatesTest extends Instrumentation {
+    private void check(boolean yes,String why){if(!yes)throw new AssertionError(why);}
+    private void ui(Runnable job){runOnMainSync(job);waitForIdleSync();}
+    private void idle()throws Exception{long end=SystemClock.uptimeMillis()+15_000;while(Updates.state()!=Updates.IDLE&&SystemClock.uptimeMillis()<end)Thread.sleep(20);waitForIdleSync();check(Updates.state()==Updates.IDLE,"Worker stuck");}
+    private void rejected(Context c,File file,ReleaseFeed.Release release)throws Exception{boolean failed=false;try{Updates.verify(c,file,release);}catch(Exception expected){failed=true;}check(failed,"Invalid APK accepted: "+file.getName());}
+    private String hash(File file)throws Exception{MessageDigest h=MessageDigest.getInstance("SHA-256");try(InputStream in=new FileInputStream(file)){byte[] block=new byte[8192];int n;while((n=in.read(block))!=-1)h.update(block,0,n);}StringBuilder s=new StringBuilder();for(byte b:h.digest())s.append(String.format(Locale.ROOT,"%02x",b&255));return s.toString();}
+    private File asset(Context c,String name)throws Exception{File target=new File(c.getCacheDir(),name);try(InputStream in=getContext().getAssets().open(name);OutputStream out=new FileOutputStream(target)){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}return target;}
+    private ReleaseFeed.Release release(File file,String version)throws Exception{return new ReleaseFeed.Release("v"+version,version,ReleaseFeed.REPO+"/releases/download/v"+version+"/Vela-"+version+".apk",hash(file),file.length(),true);}
+    private void restore(SharedPreferences p,Map<String,?> map){SharedPreferences.Editor e=p.edit().clear();for(Map.Entry<String,?> item:map.entrySet()){Object v=item.getValue();if(v instanceof Boolean)e.putBoolean(item.getKey(),(Boolean)v);else if(v instanceof Long)e.putLong(item.getKey(),(Long)v);else if(v instanceof String)e.putString(item.getKey(),(String)v);}e.commit();}
+    public void onCreate(Bundle args){super.onCreate(args);start();}
+    public void onStart(){
+        Context c=getTargetContext();Bundle result=new Bundle();UpdatesActivity activity=null;Updates.Transport original=Updates.transport;SharedPreferences p=Updates.prefs(c);Map<String,?> before=new HashMap<>(p.getAll());File future=null,wrongSigner=null,wrongPackage=null;
+        try{
+            check(android.os.Build.MODEL.contains("sdk")||android.os.Build.FINGERPRINT.contains("generic"),"Run only on a clean emulator");check(!new PlexClient(c).connected(),"A private Plex account is linked");Locale.setDefault(new Locale("es","ES"));
+            Map<String,?> plex=new HashMap<>(new PlexClient(c).prefs.getAll()),visuals=new HashMap<>(Visuals.prefs(c).getAll()),setup=new HashMap<>(Personalization.prefs(c).getAll());String[] apps=SidebarApps.slots(c);
+            idle();p.edit().clear().putBoolean("automatic",false).putBoolean("previews",true).commit();
+            future=asset(c,"future.apk");wrongSigner=asset(c,"wrong-signer.apk");wrongPackage=asset(c,"wrong-package.apk");String version;try(InputStream in=getContext().getAssets().open("version.txt")){byte[] b=new byte[96];version=new String(b,0,in.read(b),"UTF-8");}
+            ReleaseFeed.Release release=release(future,version);Updates.verify(c,future,release);
+            rejected(c,wrongSigner,release(wrongSigner,version));rejected(c,wrongPackage,release(wrongPackage,version));File installed=new File(c.getApplicationInfo().sourceDir);rejected(c,installed,release(installed,Updates.version(c)));
+            rejected(c,future,new ReleaseFeed.Release(release.tag,release.version,release.url,new String(new char[64]).replace('\0','0'),release.size,true));
+            check(Updates.allowed(ReleaseFeed.API)&&Updates.allowed(release.url)&&Updates.allowed("https://release-assets.githubusercontent.com/example"),"Official endpoints blocked");
+            for(String url:new String[]{"http://github.com/LucasLG92/vela-tv/releases/download/x/a.apk","https://github.com/evil/vela-tv/releases/download/a.apk","https://github.com.evil.example/a","https://user:pass@github.com/LucasLG92/vela-tv/releases/download/x/a","https://objects.githubusercontent.com:444/a"})check(!Updates.allowed(url),"Unsafe redirect allowed");
+            byte[] feed=new JSONArray().put(release.json()).toString().getBytes("UTF-8");AtomicInteger requests=new AtomicInteger();Updates.transport=url->{requests.incrementAndGet();return new ByteArrayInputStream(feed);};
+            Updates.automatic(c);check(requests.get()==0,"Opt-out ignored");Updates.check(c);idle();check(Updates.available(c).version.equals(version),"New release missing");
+            p.edit().putBoolean("automatic",true).commit();Updates.automatic(c);check(requests.get()==1,"Repeated within daily interval");
+            p.edit().putLong("checked",System.currentTimeMillis()-86_400_001L).putLong("attempt",0).commit();Updates.automatic(c);idle();check(requests.get()==2,"Daily check never retried");p.edit().putBoolean("automatic",false).commit();
+            Updates.transport=url->new ByteArrayInputStream(new byte[32]);Updates.download(c);idle();check(!Updates.ready(c,release)&&!Updates.error().isEmpty(),"Truncated download accepted");check(!new File(Updates.apk(c).getParentFile(),"incoming.part").exists(),"Partial download leaked");
+            Updates.transport=url->new ByteArrayInputStream(new byte[(int)release.size+1]);Updates.download(c);idle();check(!Updates.ready(c,release),"Oversized download accepted");
+            Updates.transport=url->new InputStream(){public int read()throws IOException{try{Thread.sleep(5);}catch(InterruptedException e){throw new IOException(e);}return 0;}public int read(byte[] b,int offset,int count)throws IOException{read();b[offset]=0;return 1;}};Updates.download(c);Thread.sleep(40);Updates.cancel();idle();check(!Updates.ready(c,release)&&!new File(Updates.apk(c).getParentFile(),"incoming.part").exists(),"Cancelled transfer left an installable APK");
+            File valid=future;Updates.transport=url->new FileInputStream(valid);Updates.download(c);idle();check(Updates.ready(c,release)&&Updates.error().isEmpty(),"Valid signed download rejected");
+            Uri uri=Updates.installIntent(c).getData();try(ParcelFileDescriptor descriptor=c.getContentResolver().openFileDescriptor(uri,"r")){check(descriptor!=null&&descriptor.getStatSize()==release.size,"Installer cannot read private APK");}
+            boolean denied=false;try{c.getContentResolver().openFileDescriptor(uri,"rw");}catch(Exception expected){denied=true;}check(denied,"APK provider permits writing");denied=false;try{c.getContentResolver().openFileDescriptor(Uri.parse("content://"+c.getPackageName()+".updates/../shared_prefs/plex.xml"),"r");}catch(Exception expected){denied=true;}check(denied,"Provider allows traversal");
+            ProviderInfo provider=c.getPackageManager().resolveContentProvider(c.getPackageName()+".updates",0);check(provider!=null&&!provider.exported&&provider.grantUriPermissions,"Provider exported or installer grant missing");Intent intent=Updates.installIntent(c);check((intent.getFlags()&Intent.FLAG_GRANT_READ_URI_PERMISSION)!=0&&intent.getClipData()!=null&&intent.resolveActivity(c.getPackageManager())!=null,"System installer intent/grant unavailable");
+            activity=(UpdatesActivity)startActivitySync(new Intent(c,UpdatesActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));UpdatesActivity a=activity;waitForIdleSync();Thread.sleep(500);
+            Field f=UpdatesActivity.class.getDeclaredField("automatic");f.setAccessible(true);TextView automatic=(TextView)f.get(a);ui(()->automatic.requestFocus());sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);waitForIdleSync();check(Updates.automaticEnabled(c),"Remote toggle failed");ui(()->automatic.performClick());check(!Updates.automaticEnabled(c),"Remote toggle did not persist");
+            check(plex.equals(new PlexClient(c).prefs.getAll())&&visuals.equals(Visuals.prefs(c).getAll())&&setup.equals(Personalization.prefs(c).getAll())&&Arrays.equals(apps,SidebarApps.slots(c)),"Updater changed accounts, appearance or apps");
+            result.putString("result","PASS real signed future APK accepted; wrong signer, package, downgrade, hash, truncation, oversize and cancellation rejected. Opt-out/daily checks, read-only private content grant, installer intent and native remote controls verified. Accounts, appearance, setup and apps preserved.");
+        }catch(Throwable e){result.putString("error",android.util.Log.getStackTraceString(e));}
+        finally{if(activity!=null){UpdatesActivity a=activity;ui(()->a.finish());}Updates.cancel();try{idle();}catch(Exception ignored){}Updates.transport=original;restore(p,before);for(File file:new File[]{future,wrongSigner,wrongPackage,Updates.apk(c)})if(file!=null)file.delete();}
+        finish(result.containsKey("error")?1:-1,result);
+    }
+}

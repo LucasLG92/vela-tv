@@ -23,6 +23,7 @@ The scripts create `vela.keystore` locally on the first build. Keep it privately
 ```sh
 python tests/test_home_mode.py
 python tests/test_plex_feed.py
+python tests/test_updates.py
 python tools/audit_publication.py
 ```
 
@@ -42,3 +43,16 @@ Appearance tests exercise remote navigation, all poster sizes, clipping, origina
 This preview's appearance and publication gallery were tested on an Android 16 emulator. Earlier launcher features were exercised on an Android 11 TCL; that does not certify the entire preview build for that model or other manufacturers. Validate before changing a real device's preferred home.
 
 La prueba de la cuadrícula se ejecuta con `python tests/test_artwork_device.py --serial <emulador> --adb-port <puerto> --test apps-grid`. Comprueba iconos, navegación, apertura de la app elegida y liberación de recursos.
+
+## Update checks on a clean emulator
+
+Build and install Vela with the same local key, then run:
+
+```sh
+python tests/build_update_fixtures.py
+python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port> --test updates
+```
+
+The fixture builder produces synthetic future APKs inside `out/`, including intentionally wrong signers and packages. Never distribute them. The native test refuses physical devices or a linked Plex account, checks signed archives, bounded/cancelled transfers, the read-only installer grant, daily checks and remote controls, then restores update preferences. It does not confirm a system installation. The separate release validation for 1.12.0 completed an actual self-update through Android's installer on a clean emulator and verified retained preferences.
+
+Official update releases must keep the existing signing key and a strictly increasing Android versionCode. Use a semantic tag such as `v1.13.0-preview`, the matching versionName `1.13.0-preview`, and the asset name `Vela-1.13.0-preview.apk`. Publish it as a release, mark previews accordingly, and verify GitHub's `sha256` asset digest. The updater ignores drafts, assets without that digest, unrelated paths, downgrades and mismatched signatures. CI artifacts use an ephemeral key and are not official updates.

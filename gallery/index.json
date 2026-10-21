@@ -6,7 +6,7 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.11.0"
+    "version": "1.12.0"
   },
   {
     "file": "02-aspecto-menta-compacto.webp",
@@ -33,7 +33,7 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.11.0"
+    "version": "1.12.0"
   },
   {
     "file": "05-biblioteca-paginada.webp",
@@ -267,7 +267,7 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.11.0"
+    "version": "1.12.0"
   },
   {
     "file": "31-filas-difuminadas.webp",
@@ -276,7 +276,7 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.11.0"
+    "version": "1.12.0"
   },
   {
     "file": "32-servicios-seguir-viendo.webp",
@@ -285,6 +285,15 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.11.0"
+    "version": "1.12.0"
+  },
+  {
+    "file": "33-actualizaciones.webp",
+    "title": "Siempre al día",
+    "source": "native clean-emulator 4K capture; update preferences, no linked account or private data",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.12.0"
   }
 ]
