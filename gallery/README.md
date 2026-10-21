@@ -2,7 +2,7 @@
 
 Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **29 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
 
-[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.3-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
+[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.10.4-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
 
 ## Tu cine, en primer plano
 
@@ -110,7 +110,7 @@ Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela 
 
 ## Encuentra tu próximo directo
 
-![Encuentra tu próximo directo](https://raw.githubusercontent.com/LucasLG92/vela-tv/5cc0669c2f85ec2db37596fe2e38156ced80228e/gallery/25-television.webp)
+![Encuentra tu próximo directo](https://raw.githubusercontent.com/LucasLG92/vela-tv/v1.10.4-preview/gallery/25-television.webp)
 
 ## Tu lista, tus canales
 
@@ -123,6 +123,6 @@ Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela 
 <details>
 <summary>Sobre estas capturas</summary>
 
-Capturas nativas a 3840 × 2160 de un emulador Android. Galería de Vela 1.10.2 con la vista de Televisión actualizada en 1.10.3. Los carteles y fondos de Plex se utilizan con autorización del usuario; perfil, servidor y cuenta se presentan de forma anónima. Progreso, paginación y ciudad son ejemplos. No se publican credenciales, avatar ni archivos originales de la biblioteca. Los accesos de servicios utilizan aplicaciones de prueba. El vídeo de TV es una prueba CC0 de MDN y el salvapantallas de vídeo muestra material NASA/JSC. Consulta los [créditos y detalles de las imágenes](CREDITS.md) y la [compatibilidad](../guide/COMPATIBILITY.es.md).
+Capturas nativas a 3840 × 2160 de un emulador Android. Galería de Vela 1.10.2 con la vista de Televisión actualizada en 1.10.4. Los carteles y fondos de Plex se utilizan con autorización del usuario; perfil, servidor y cuenta se presentan de forma anónima. Progreso, paginación y ciudad son ejemplos. No se publican credenciales, avatar ni archivos originales de la biblioteca. Los accesos de servicios utilizan aplicaciones de prueba. El vídeo de TV es una prueba CC0 de MDN y el salvapantallas de vídeo muestra material NASA/JSC. Consulta los [créditos y detalles de las imágenes](CREDITS.md) y la [compatibilidad](../guide/COMPATIBILITY.es.md).
 
 </details>

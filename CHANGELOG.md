@@ -1,5 +1,11 @@
 # Cambios
 
+## 1.10.4 Preview · 2026-10-21
+
+- El tiempo restante de los programas se muestra en horas y minutos cuando supera una hora: «2 h 15 min» en lugar de «135 min».
+- Las horas exactas se muestran sin «0 min»; los tiempos de hasta una hora conservan los minutos.
+- Se mantienen la actualización por minuto y los límites de la pantalla de canales.
+
 ## 1.10.3 Preview · 2026-10-21
 
 - Minutos restantes y barra de progreso del programa en emisión en cada tarjeta de canal.

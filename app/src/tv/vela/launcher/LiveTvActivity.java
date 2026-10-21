@@ -116,7 +116,10 @@ public class LiveTvActivity extends Activity {
     }
     private String time(long seconds){return new SimpleDateFormat("HH:mm",Ui.locale()).format(new Date(seconds*1000));}
     private String currentText(LiveTvData.Channel ch,LiveTvData.Programme current){return current!=null?current.title:ch.playable()?t("Em direto","Live","En directo"):LiveTvData.webUrl(ch.web)?t("Reprodutor oficial em Vela","Official player in Vela","Reproductor oficial en Vela"):t("Sinal indisponível","Signal unavailable","Señal no disponible");}
-    private static String remainingText(long minutes){return minutes==1?t("Falta 1 min","1 min left","Queda 1 min"):t("Faltam "+minutes+" min",minutes+" min left","Quedan "+minutes+" min");}
+    private static String remainingText(long minutes){
+        String duration=minutes>60?minutes/60+" h"+(minutes%60==0?"":" "+minutes%60+" min"):minutes+" min";
+        return minutes==1?t("Falta "+duration,duration+" left","Queda "+duration):t("Faltam "+duration,duration+" left","Quedan "+duration);
+    }
     private void updateProgrammes(){updateProgrammes(System.currentTimeMillis()/1000);}
     private void updateProgrammes(long now){
         for(int i=0;i<pageChannels.size()&&i<nowLabels.size();i++){

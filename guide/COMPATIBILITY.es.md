@@ -24,6 +24,6 @@ La cuadrícula libera su cargador y sus iconos al cerrarse. Los reproductores se
 
 ## Preview y pantalla de inicio
 
-La versión 1.10.3 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
+La versión 1.10.4 se ha comprobado en un emulador Android 16 y aún requiere validación completa en televisores físicos. La compatibilidad con el botón de inicio y los accesos dedicados del mando depende del fabricante. Sigue la [guía de instalación y recuperación](INSTALL.es.md) y comprueba el regreso a Original antes de usar Vela como inicio permanente.
 
 [Volver a Vela](../README.md)

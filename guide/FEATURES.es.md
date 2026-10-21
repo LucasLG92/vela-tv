@@ -21,7 +21,7 @@ Elige entre Nieve, Azul, Menta, Lavanda, Arena y Rosa. Ajusta el tamaño de los 
 
 ## Tu televisión en directo
 
-Explora canales por categorías, consulta la programación y guarda favoritos. Cada tarjeta muestra los minutos restantes y una barra de progreso del programa en emisión cuando la guía dispone de un horario válido. Se actualiza cada minuto y pasa al siguiente programa disponible; si falta la guía o el horario ha caducado, no muestra un contador. Puedes usar el catálogo de TDTChannels o añadir una lista M3U HTTPS. Las emisoras que lo necesiten pueden abrir su web oficial dentro de Vela, con controles para el mando.
+Explora canales por categorías, consulta la programación y guarda favoritos. Cada tarjeta muestra el tiempo restante y una barra de progreso del programa en emisión cuando la guía dispone de un horario válido. Si queda más de una hora, muestra horas y minutos (por ejemplo, «2 h 15 min»); si son horas exactas, omite los minutos. Se actualiza cada minuto y pasa al siguiente programa disponible; si falta la guía o el horario ha caducado, no muestra un contador. Puedes usar el catálogo de TDTChannels o añadir una lista M3U HTTPS. Las emisoras que lo necesiten pueden abrir su web oficial dentro de Vela, con controles para el mando.
 
 ## Tus pausas
 
