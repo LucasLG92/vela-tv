@@ -34,6 +34,8 @@ final class LiveTvData {
         final long start,end;final String title;
         Programme(long start,long end,String title){this.start=start;this.end=end;this.title=title;}
         boolean current(long now){return start<=now&&end>now;}
+        long remainingMinutes(long now){return current(now)?1+(end-now-1)/60:0;}
+        int progress(long now){return current(now)?(int)Math.max(0,Math.min(1000,1000d*((double)now-start)/((double)end-start))):0;}
     }
     static final class Guide {
         Programme now,next;

@@ -21,6 +21,8 @@ public class LiveTvActivity extends Activity {
     private FrameLayout root,stage,grid,groupList,dialog;
     private final List<View> cards=new ArrayList<>(),categoryButtons=new ArrayList<>();
     private final List<ImageView> images=new ArrayList<>();private final List<TextView> nowLabels=new ArrayList<>();
+    private final List<TextView> remainingLabels=new ArrayList<>();
+    private final List<ProgrammeProgress> programmeBars=new ArrayList<>();
     private TextView status,selection,nowNext,previous,next,pageLabel,sourceButton;
     private HomeStatusView header;
     LiveTvData.Catalog catalog;
@@ -89,17 +91,19 @@ public class LiveTvActivity extends Activity {
     }
     private void styleCategories(){for(View v:categoryButtons)if(!v.hasFocus())v.setBackground(group.equals(v.getTag())?round(0xFF2D4058,14):null);}
     private void renderPage(int requested,boolean focus){
-        if(catalog==null)return;if(logos==null)logos=new LiveTvLogos(this);logos.page();for(ImageView image:images)image.setImageDrawable(null);images.clear();nowLabels.clear();cards.clear();grid.removeAllViews();
+        if(catalog==null)return;if(logos==null)logos=new LiveTvLogos(this);logos.page();for(ImageView image:images)image.setImageDrawable(null);images.clear();nowLabels.clear();remainingLabels.clear();programmeBars.clear();cards.clear();grid.removeAllViews();
         List<LiveTvData.Channel> matches=new ArrayList<>();for(LiveTvData.Channel ch:catalog.channels)if(group.equals(ALL)||group.equals(FAVORITES)&&favorites.contains(ch.id)||group.equals(ch.group))matches.add(ch);filtered=matches;
         page=Math.max(0,Math.min(requested,Math.max(0,(matches.size()-1)/LiveTvData.PAGE_SIZE)));int start=page*LiveTvData.PAGE_SIZE,end=Math.min(matches.size(),start+LiveTvData.PAGE_SIZE);pageChannels=new ArrayList<>(matches.subList(start,end));
         for(int i=0;i<pageChannels.size();i++){
             LiveTvData.Channel ch=pageChannels.get(i);FrameLayout card=new FrameLayout(this);card.setId(View.generateViewId());card.setFocusable(true);card.setClickable(true);card.setDefaultFocusHighlightEnabled(false);card.setContentDescription(ch.name+(favorites.contains(ch.id)?" · ★":""));card.setBackground(round(0xFF233146,21));put(grid,card,(i%4)*350,(i/4)*207,326,188);cards.add(card);
-            TextView fallback=text(ch.name.substring(0,Math.min(2,ch.name.length())).toUpperCase(Ui.locale()),33,0xFF647991,Ui.semibold);fallback.setGravity(Gravity.CENTER);put(card,fallback,96,18,134,74);
-            ImageView logo=new ImageView(this);logo.setScaleType(ImageView.ScaleType.FIT_CENTER);logo.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);put(card,logo,96,18,134,74);images.add(logo);logos.load(ch.logo,logo);
+            TextView fallback=text(ch.name.substring(0,Math.min(2,ch.name.length())).toUpperCase(Ui.locale()),33,0xFF647991,Ui.semibold);fallback.setGravity(Gravity.CENTER);put(card,fallback,96,12,134,68);
+            ImageView logo=new ImageView(this);logo.setScaleType(ImageView.ScaleType.FIT_CENTER);logo.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);put(card,logo,96,12,134,68);images.add(logo);logos.load(ch.logo,logo);
             if(!ch.playable()){TextView external=text(LiveTvData.webUrl(ch.web)?t("Web integrada","In-app web","Web integrada"):t("Sem sinal","No signal","Sin señal"),14,0xFF91A2BB,Ui.medium);external.setGravity(Gravity.RIGHT);put(card,external,196,16,118,24);}
-            TextView name=text(ch.name+(favorites.contains(ch.id)?"  ★":""),24,WHITE,Ui.medium);name.setSingleLine(true);name.setEllipsize(android.text.TextUtils.TruncateAt.END);name.setGravity(Gravity.CENTER);put(card,name,14,106,298,35);
-            TextView current=text("",17,DIM,Ui.regular);current.setSingleLine(true);current.setEllipsize(android.text.TextUtils.TruncateAt.END);current.setGravity(Gravity.CENTER);put(card,current,18,148,290,26);nowLabels.add(current);
-            card.setOnFocusChangeListener((v,has)->{card.setBackground(round(has?WHITE:0xFF233146,21));name.setTextColor(has?INK:WHITE);current.setTextColor(has?0xFF5B677B:DIM);if(has){selected=ch;updateSelection();}card.animate().cancel();card.animate().scaleX(has&&!Visuals.reducedMotion(this)?1.025f:1).scaleY(has&&!Visuals.reducedMotion(this)?1.025f:1).setDuration(Visuals.duration(this,120)).start();});
+            TextView name=text(ch.name+(favorites.contains(ch.id)?"  ★":""),23,WHITE,Ui.medium);name.setSingleLine(true);name.setEllipsize(android.text.TextUtils.TruncateAt.END);name.setGravity(Gravity.CENTER);put(card,name,14,87,298,31);
+            TextView current=text("",17,DIM,Ui.regular);current.setSingleLine(true);current.setEllipsize(android.text.TextUtils.TruncateAt.END);current.setGravity(Gravity.CENTER);put(card,current,18,121,290,25);nowLabels.add(current);
+            TextView remaining=text("",15,DIM,Ui.medium);remaining.setSingleLine(true);remaining.setGravity(Gravity.CENTER);put(card,remaining,18,148,290,24);remainingLabels.add(remaining);
+            ProgrammeProgress progress=new ProgrammeProgress(this);put(card,progress,30,177,266,4);programmeBars.add(progress);
+            card.setOnFocusChangeListener((v,has)->{card.setBackground(round(has?WHITE:0xFF233146,21));name.setTextColor(has?INK:WHITE);current.setTextColor(has?0xFF5B677B:DIM);remaining.setTextColor(has?0xFF5B677B:DIM);progress.focused(has);if(has){selected=ch;updateSelection();}card.animate().cancel();card.animate().scaleX(has&&!Visuals.reducedMotion(this)?1.025f:1).scaleY(has&&!Visuals.reducedMotion(this)?1.025f:1).setDuration(Visuals.duration(this,120)).start();});
             card.setOnClickListener(v->play(ch));card.setOnLongClickListener(v->{longOk=true;card.setPressed(false);toggleFavorite(ch);return true;});
             final int index=i;card.setOnKeyListener((v,key,event)->{if(event.getAction()!=KeyEvent.ACTION_DOWN)return false;if(key==KeyEvent.KEYCODE_DPAD_RIGHT&&index==cards.size()-1&&end<matches.size()){renderPage(page+1,true);consumeUp=key;return true;}if(key==KeyEvent.KEYCODE_DPAD_LEFT&&index==0){if(page>0)renderPage(page-1,true);else if(!categoryButtons.isEmpty())categoryButtons.get(0).requestFocus();consumeUp=key;return true;}return false;});
         }
@@ -111,10 +115,22 @@ public class LiveTvActivity extends Activity {
         updateProgrammes();if(dialog.getVisibility()!=View.VISIBLE&&playback==null){if(focus&&!cards.isEmpty())cards.get(0).requestFocus();else if(getCurrentFocus()==null&&!cards.isEmpty())cards.get(0).requestFocus();}
     }
     private String time(long seconds){return new SimpleDateFormat("HH:mm",Ui.locale()).format(new Date(seconds*1000));}
-    private String currentText(LiveTvData.Channel ch){LiveTvData.Guide entry=guide.get(ch.id);LiveTvData.Programme current=entry==null?null:entry.current(System.currentTimeMillis()/1000);return current!=null?current.title:ch.playable()?t("Em direto","Live","En directo"):LiveTvData.webUrl(ch.web)?t("Reprodutor oficial em Vela","Official player in Vela","Reproductor oficial en Vela"):t("Sinal indisponível","Signal unavailable","Señal no disponible");}
-    private void updateProgrammes(){for(int i=0;i<pageChannels.size()&&i<nowLabels.size();i++)nowLabels.get(i).setText(currentText(pageChannels.get(i)));updateSelection();}
-    private void updateSelection(){
-        if(selected==null){selection.setText("");nowNext.setText("");return;}selection.setText(selected.name+" · "+selected.group);LiveTvData.Guide entry=guide.get(selected.id);long now=System.currentTimeMillis()/1000;LiveTvData.Programme current=entry==null?null:entry.current(now);
+    private String currentText(LiveTvData.Channel ch,LiveTvData.Programme current){return current!=null?current.title:ch.playable()?t("Em direto","Live","En directo"):LiveTvData.webUrl(ch.web)?t("Reprodutor oficial em Vela","Official player in Vela","Reproductor oficial en Vela"):t("Sinal indisponível","Signal unavailable","Señal no disponible");}
+    private static String remainingText(long minutes){return minutes==1?t("Falta 1 min","1 min left","Queda 1 min"):t("Faltam "+minutes+" min",minutes+" min left","Quedan "+minutes+" min");}
+    private void updateProgrammes(){updateProgrammes(System.currentTimeMillis()/1000);}
+    private void updateProgrammes(long now){
+        for(int i=0;i<pageChannels.size()&&i<nowLabels.size();i++){
+            LiveTvData.Channel ch=pageChannels.get(i);LiveTvData.Guide entry=guide.get(ch.id);LiveTvData.Programme current=entry==null?null:entry.current(now);
+            String title=currentText(ch,current),remaining=current==null?"":remainingText(current.remainingMinutes(now));
+            TextView titleView=nowLabels.get(i),remainingView=remainingLabels.get(i);if(!title.contentEquals(titleView.getText()))titleView.setText(title);if(!remaining.contentEquals(remainingView.getText()))remainingView.setText(remaining);
+            int visibility=current==null?View.INVISIBLE:View.VISIBLE;remainingView.setVisibility(visibility);ProgrammeProgress progress=programmeBars.get(i);progress.setVisibility(visibility);progress.value(current==null?0:current.progress(now));
+            cards.get(i).setContentDescription(ch.name+(favorites.contains(ch.id)?" · ★":"")+" · "+title+(remaining.isEmpty()?"":" · "+remaining));
+        }
+        updateSelection(now);
+    }
+    private void updateSelection(){updateSelection(System.currentTimeMillis()/1000);}
+    private void updateSelection(long now){
+        if(selected==null){selection.setText("");nowNext.setText("");return;}selection.setText(selected.name+" · "+selected.group);LiveTvData.Guide entry=guide.get(selected.id);LiveTvData.Programme current=entry==null?null:entry.current(now);
         String line=current!=null?time(current.start)+"–"+time(current.end)+"  "+current.title:t("Programação não disponível","Programme guide unavailable","Programación no disponible");
         if(entry!=null&&entry.next!=null&&entry.next.start>now)line+="   ·   "+time(entry.next.start)+"  "+entry.next.title;nowNext.setText(line);
         if(playback!=null)playback.metadata(line,favorites.contains(selected.id));
@@ -165,6 +181,20 @@ public class LiveTvActivity extends Activity {
     @Override protected void onStop(){clearLogos();super.onStop();}
     @Override protected void onDestroy(){closed=true;clearLogos();if(playback!=null)playback.pause();io.shutdownNow();main.removeCallbacksAndMessages(null);super.onDestroy();}
     @Override public void onTrimMemory(int level){super.onTrimMemory(level);clearLogos();}
+    /** Drawn only when the existing minute tick changes the value or remote focus changes. */
+    private static final class ProgrammeProgress extends View {
+        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final int accent;
+        private int progress;
+        private boolean focused;
+        ProgrammeProgress(Context context){super(context);accent=Appearance.accent(context);setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
+        void value(int value){if(progress==value)return;progress=value;invalidate();}
+        void focused(boolean value){if(focused==value)return;focused=value;invalidate();}
+        @Override protected void onDraw(Canvas canvas){
+            float radius=getHeight()/2f;paint.setColor(focused?0xFFD3DAE4:0xFF40516A);canvas.drawRoundRect(0,0,getWidth(),getHeight(),radius,radius,paint);
+            if(progress>0){paint.setColor(focused?INK:accent);canvas.drawRoundRect(0,0,getWidth()*progress/1000f,getHeight(),radius,radius,paint);}
+        }
+    }
     @Override public boolean dispatchKeyEvent(KeyEvent event){
         int key=event.getKeyCode();if(event.getAction()==KeyEvent.ACTION_UP&&consumeUp==key){consumeUp=-1;return true;}
         if(event.getAction()==KeyEvent.ACTION_UP&&longOk&&(key==KeyEvent.KEYCODE_DPAD_CENTER||key==KeyEvent.KEYCODE_ENTER)){longOk=false;return true;}

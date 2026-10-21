@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.10.3 Preview · 2026-10-21
+
+- Minutos restantes y barra de progreso del programa en emisión en cada tarjeta de canal.
+- Cuenta atrás según la guía, actualizada con el temporizador de minuto existente y sin consultas adicionales.
+- Cambio al siguiente programa y retirada del contador cuando falta un horario válido.
+- Actualizaciones sin reconstruir las tarjetas ni desplazar el foco del mando; se mantienen doce canales por página.
+- Pruebas de límites de horario, datos ausentes, último minuto, cambio de programa y cierre de la pantalla.
+
 ## 1.10.2 Preview · 2026-10-21
 
 - Nueva biblioteca de apps con iconos cuadrados grandes, nombres debajo y seis columnas.
