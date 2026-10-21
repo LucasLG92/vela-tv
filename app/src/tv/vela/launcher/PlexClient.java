@@ -10,7 +10,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-/** Read-only Plex integration. Credentials stay in private app storage, never in the APK or logs. */
+/** Plex library and explicit per-item watched actions. Credentials stay in private app storage, never in the APK or logs. */
 final class PlexClient {
     static final String PRODUCT = "Vela";
     final SharedPreferences prefs;
@@ -119,7 +119,8 @@ final class PlexClient {
         String section = "Tu biblioteca";
         float progress = -1,thumbAspect;
         long durationMs,positionMs=-1,lastPlayedMs,addedAtMs;
-        boolean continuing,tvSource,landscape,recentlyAdded;
+        boolean continuing,tvSource,landscape,recentlyAdded,nextEpisode;
+        String seriesKey="";
         long remainingMs(){return durationMs>0&&positionMs>=0&&positionMs<durationMs?durationMs-positionMs:-1;}
     }
     static final int PAGE_SIZE = 24;
@@ -191,7 +192,7 @@ final class PlexClient {
         if(metadata==null)return;
         JSONArray bounded=new JSONArray();for(int i=0;i<Math.min(12,metadata.length());i++)bounded.put(metadata.get(i));
         JSONArray merged=new JSONArray().put(new JSONObject().put("hubIdentifier","vela.continue").put("Metadata",bounded));
-        JSONArray existing=home.optJSONArray("Hub");for(int i=0;existing!=null&&i<existing.length();i++)merged.put(existing.get(i));
+        JSONArray existing=home.optJSONArray("Hub");for(int i=0;existing!=null&&i<existing.length();i++){JSONObject hub=existing.optJSONObject(i);if(hub!=null){String id=hub.optString("hubIdentifier").toLowerCase(Locale.ROOT);if(!id.contains("continue")&&!id.contains("ondeck"))merged.put(hub);}}
         home.put("Hub",merged);
     }
     static void mergeRecent(JSONObject root,JSONObject response) throws Exception {
@@ -230,11 +231,12 @@ final class PlexClient {
                 if(recent&&type.equals("season"))item=new JSONObject(item.toString()).put("type","show").put("ratingKey",item.optString("parentRatingKey")).put("title",item.optString("parentTitle")).put("thumb",item.optString("parentThumb",item.optString("thumb")));
                 String key = item.optString("ratingKey");
                 type=item.optString("type");String group=resume?"resume:":"library:";
-                if ((!type.equals("movie") && !type.equals("episode") && !type.equals("show")) || key.isEmpty() || !seen.add(group+key)) continue;
+                if ((!type.equals("movie") && !type.equals("episode") && !type.equals("show")) || key.isEmpty()) continue;
+                Film film=parseFilm(item,resume);if(resume&&((film.durationMs>0&&film.positionMs>=film.durationMs)||(item.optInt("viewCount")>0&&film.positionMs<=0)))continue;if(!seen.add(group+key))continue;
                 String seriesKey=type.equals("episode")?item.optString("grandparentRatingKey"):type.equals("show")?key:"";
                 if(!seriesKey.isEmpty() && !seriesSeen.add(group+seriesKey))continue;
                 if(resume){if(resumed>=12)continue;resumed++;}else{if(others>=36)continue;others++;}
-                Film film=parseFilm(item,resume);film.recentlyAdded=recent;films.add(film);
+                film.recentlyAdded=recent;films.add(film);
             }
         }
         // Stable sorting merges recent movie/series hubs using Plex's actual added date.
@@ -263,12 +265,19 @@ final class PlexClient {
         if(type.equals("episode"))film.meta+="  ·  T"+item.optInt("parentIndex")+" E"+item.optInt("index");
         long duration=item.optLong("duration"),offset=item.optLong("viewOffset");
         film.durationMs=Math.max(0,duration);film.positionMs=item.has("viewOffset")&&!item.isNull("viewOffset")?Math.max(-1,offset):-1;
+        film.seriesKey=type.equals("episode")?item.optString("grandparentRatingKey"):"";film.nextEpisode=resume&&type.equals("episode")&&offset<=0&&item.optInt("viewCount")==0;if(film.nextEpisode){film.positionMs=0;if(duration>0)film.progress=0;}
         long last=item.optLong("lastViewedAt");if(last>0&&last<=Long.MAX_VALUE/1000)film.lastPlayedMs=last*1000;
         long added=item.optLong("addedAt");if(added>0&&added<=Long.MAX_VALUE/1000)film.addedAtMs=added*1000;
         if(type.equals("episode"))film.episodeLabel="T"+item.optInt("parentIndex")+" · E"+item.optInt("index");
         if(duration>0&&offset>0)film.progress=Math.min(1f,(float)offset/duration);
         film.section=resume?"Seguir viendo":"En tu biblioteca";
         return film;
+    }
+    static String watchedPath(String key)throws IOException {if(key==null||!key.matches("[0-9]{1,20}"))throw new IOException("Invalid Plex item");return "/:/scrobble?identifier=com.plexapp.plugins.library&key="+key;}
+    void markWatched(String key,String expectedIdentity)throws IOException {
+        String path=watchedPath(key);Map<String,?> snapshot=prefs.getAll();String base=(String)snapshot.get("serverUri"),token=(String)snapshot.get("serverToken"),id=(String)snapshot.get("serverId");
+        if(base==null||token==null||token.isEmpty()||id==null||!expectedIdentity.equals(id+":"+profileKey(token)))throw new IOException("Plex account changed");
+        bytes(base+path,token,null,8000,64*1024,"PUT");if(expectedIdentity.equals(identity()))prefs.edit().remove("libraryCache").remove("libraryAt").commit();
     }
     String openUri(Film film) {
         return "plex://preplay/?metadataKey=" + encode("/library/metadata/" + film.key)
@@ -286,7 +295,8 @@ final class PlexClient {
     private String request(String url, String token, String body, int timeout) throws IOException {
         return new String(bytes(url, token, body, timeout, 4 * 1024 * 1024), StandardCharsets.UTF_8);
     }
-    private byte[] bytes(String url, String token, String body, int timeout, int limit) throws IOException {
+    private byte[] bytes(String url,String token,String body,int timeout,int limit)throws IOException{return bytes(url,token,body,timeout,limit,body==null?"GET":"POST");}
+    private byte[] bytes(String url, String token, String body, int timeout, int limit,String method) throws IOException {
         URL address = new URL(url);
         if (!address.getProtocol().equals("https")) throw new IOException("La conexión debe usar HTTPS.");
         HttpURLConnection connection = (HttpURLConnection) address.openConnection();
@@ -299,6 +309,7 @@ final class PlexClient {
         connection.setRequestProperty("X-Plex-Platform", "Android");
         if (!token.isEmpty()) connection.setRequestProperty("X-Plex-Token", token);
         try {
+            connection.setRequestMethod(method);
             if (body != null) {
                 connection.setRequestMethod("POST"); connection.setDoOutput(true);
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -306,7 +317,8 @@ final class PlexClient {
             }
             int status = connection.getResponseCode();
             if (status == 401) throw new IOException("La sesión de Plex ha caducado. Vuelve a vincularla.");
-            if (status != 200 && status != 201) throw new IOException("Plex no está disponible (" + status + ").");
+            if (status != 200 && status != 201 && status != 204) throw new IOException("Plex no está disponible (" + status + ").");
+            if(status==204)return new byte[0];
             try (InputStream in = connection.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[8192]; int read;
                 while ((read = in.read(buffer)) != -1) {

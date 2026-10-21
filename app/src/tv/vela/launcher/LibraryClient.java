@@ -28,6 +28,11 @@ final class LibraryClient {
     byte[] image(String path,int width,int height)throws IOException{return image(path,width,height,false);}
     byte[] image(String path,int width,int height,boolean transparent)throws IOException{return isJellyfin()?jf().image(path,width,height,transparent):plex.image(path,width,height,transparent);}
     byte[] avatar()throws Exception{return isJellyfin()?jf().avatar():plex.avatarImage(plex.prefs.getString("accountToken",""));}
+    boolean canMarkWatched(PlexClient.Film film){return film!=null&&film.continuing&&!film.tvSource&&("movie".equals(film.type)||"episode".equals(film.type))&&connected()&&film.packageName.equals(packageName());}
+    void markWatched(PlexClient.Film film,String expectedIdentity)throws Exception{
+        if(!canMarkWatched(film)||!expectedIdentity.equals(identity()))throw new IOException("Library account changed");
+        if(film.packageName.equals(JellyfinClient.PACKAGE))jf().markWatched(film.key,expectedIdentity.substring("Jellyfin|".length()));else plex.markWatched(film.key,expectedIdentity.substring("Plex|".length()));
+    }
     Intent open(PlexClient.Film film){
         if(film.packageName.equals(JellyfinClient.PACKAGE)){String id=JellyfinClient.guid(film.key);Intent intent=HomeApps.launchIntent(context.getPackageManager(),JellyfinClient.PACKAGE);return id.isEmpty()||intent==null?null:intent.putExtra("ItemId",id).putExtra("HideSplash",true);}
         return new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(plex.openUri(film))).setPackage("com.plexapp.android");

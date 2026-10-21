@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.14.0 Preview · 2026-10-21
+
+- Menú de Seguir viendo al mantener OK, con Marcar como visto para la película o episodio seleccionado de Plex o Jellyfin. La acción se guarda en el usuario conectado al servidor.
+- Próximos episodios de Plex Continue Watching / On Deck y Jellyfin Next Up, con la etiqueta Siguiente episodio. Prioridad para lo empezado y límites de fila existentes.
+- Respuestas actualizadas de Plex sustituyen las filas anteriores para evitar resucitar contenido visto. La caché de Jellyfin conserva la distinción entre progreso y próximo episodio.
+- Tipos NEXT y NEW de Watch Next para capítulos compartidos por otras apps; su historial se gestiona desde su aplicación.
+- Protección ante pulsación larga, repeticiones de OK, doble envío, cambio de cuenta y errores de red. Pruebas nativas en emulador: Plex con transporte HTTPS simulado y Jellyfin con servidor 12.2 real. No se ha modificado una biblioteca personal durante las pruebas.
+
 ## 1.13.0 Preview · 2026-10-21
 
 - Integración nativa con Jellyfin: servidor propio, Quick Connect o acceso con usuario y contraseña, nombre del servidor e imagen de perfil cuando está disponible.

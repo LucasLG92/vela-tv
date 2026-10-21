@@ -57,6 +57,8 @@ final class CinemaHomeView extends FrameLayout {
     private String[] menuSnapshot;
     private int menuAction;
     private boolean menuConfirmArmed;
+    private boolean watchedBusy;
+    private TextView watchedStatus,watchedMark;
     private final ArrayList<View> cards=new ArrayList<>();
     private final ArrayList<ImageView> posterImages=new ArrayList<>();
     private final ArrayList<PlexClient.Film> posterFilms=new ArrayList<>();
@@ -412,7 +414,7 @@ final class CinemaHomeView extends FrameLayout {
     void reset(){closeShortcutMenu(false);finishReorder(false);closeOverlay();changeFilter(0);setSidebar(false);play.requestFocus();}
     void loadYouTube(){loadWatchNext();io.execute(()->{List<PlexClient.Film> fresh=TvSuggestions.youtube(activity);main.post(()->{if(!closed){youtube=fresh;if(filter==3&&active)showFilms();}});});}
     private void loadWatchNext(){int epoch=++watchGeneration;String linked=plex.connected()?plex.packageName():"";io.execute(()->{List<PlexClient.Film> fresh=ContinueWatching.read(activity,linked);main.post(()->{if(!closed&&active&&epoch==watchGeneration){watchNext=fresh;if(filter==0)showFilms();}});});}
-    private void refresh(){if(loading)return;loading=true;refreshedAt=SystemClock.elapsedRealtime();String server=plex.identity();io.execute(()->{try{List<PlexClient.Film> fresh=plex.library();main.post(()->{if(!closed&&server.equals(plex.identity())){films=fresh;if(active&&filter==0)showFilms();else libraryDirty=true;}});}catch(Exception ignored){main.post(()->{if(!closed&&films.isEmpty()&&!browsing())rowNote.setText(Ui.tr("Não foi possível ler sua biblioteca. Confira o servidor ou conecte novamente.","Could not read your library. Check the server or link again.","No se ha podido leer tu biblioteca. Comprueba el servidor o vuelve a vincularlo."));});}finally{main.post(()->loading=false);}});}
+    private void refresh(){if(loading)return;loading=true;refreshedAt=SystemClock.elapsedRealtime();String server=plex.identity();io.execute(()->{try{List<PlexClient.Film> fresh=plex.library();main.post(()->{if(!closed&&!watchedBusy&&server.equals(plex.identity())){films=fresh;if(active&&filter==0)showFilms();else libraryDirty=true;}});}catch(Exception ignored){main.post(()->{if(!closed&&films.isEmpty()&&!browsing())rowNote.setText(Ui.tr("Não foi possível ler sua biblioteca. Confira o servidor ou conecte novamente.","Could not read your library. Check the server or link again.","No se ha podido leer tu biblioteca. Comprueba el servidor o vuelve a vincularlo."));});}finally{main.post(()->loading=false);}});}
 
     private boolean browsing(){return filter==1||filter==2||filter==4;}
     private boolean accepts(PlexClient.Section section,int kind){return kind==4||(kind==1&&section.type.equals("movie"))||(kind==2&&section.type.equals("show"));}
@@ -557,7 +559,7 @@ final class CinemaHomeView extends FrameLayout {
                 TextView episode=text(provider==null?film.provider:film.packageName.equals(JellyfinClient.PACKAGE)?"Jellyfin"+(film.episodeLabel.isEmpty()?"":" · "+film.episodeLabel):film.episodeLabel,14,DIM,Ui.medium);episode.setSingleLine(true);episode.setEllipsize(android.text.TextUtils.TruncateAt.END);episode.setGravity(provider==null?Gravity.LEFT:Gravity.RIGHT);LayoutParams ep=new LayoutParams(provider==null?width:width-markWidth-10,22);ep.leftMargin=provider==null?0:markWidth+10;ep.topMargin=contentHeight+8;card.addView(episode,ep);
                 TextView remaining=text(ContinueWatching.remaining(film),17,WHITE,Ui.medium);remaining.setSingleLine(true);remaining.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams rp=new LayoutParams(width,26);rp.topMargin=contentHeight+32;card.addView(remaining,rp);
             }
-            card.setOnFocusChangeListener((v,f)->{lift(v,f?1.055f:1,f?-6:0,f?26:0);if(f){lastContent=v;setSidebar(false);revealCard(row,v);main.post(()->{if(v.hasFocus()&&v.isAttachedToWindow())revealCard(row,v);});selectFilm(film);schedulePosters();}});card.setOnClickListener(v->{selectFilm(film);openFilm();});
+            card.setOnFocusChangeListener((v,f)->{lift(v,f?1.055f:1,f?-6:0,f?26:0);if(f){lastContent=v;setSidebar(false);revealCard(row,v);main.post(()->{if(v.hasFocus()&&v.isAttachedToWindow())revealCard(row,v);});selectFilm(film);schedulePosters();}});card.setOnClickListener(v->{selectFilm(film);openFilm();});if(resume)card.setOnLongClickListener(v->showWatchedMenu(film,v));
             LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(width,height);p.rightMargin=28;row.posters.addView(card,p);row.items.add(card);cards.add(card);
             posterImages.add(image);posterFilms.add(film);posterRequests.add(null);posterRails.add(row.rail);
         }
@@ -576,7 +578,7 @@ final class CinemaHomeView extends FrameLayout {
     private void selectFilm(PlexClient.Film film){
         boolean same=heroKey.equals(film.provider+film.key)&&heroBitmap!=null&&!artReleased;
         selected=film;title.setText(film.title);Drawable provider=providerBrand(film);providerMark.setImageDrawable(provider);providerMark.setVisibility(provider==null?GONE:VISIBLE);
-        connection.setText((film.packageName.equals(JellyfinClient.PACKAGE)?film.continuing?Ui.tr("Continuar assistindo","Continue watching","Seguir viendo"):film.recentlyAdded?Ui.tr("Adicionados recentemente","Recently added","Últimas subidas"):Ui.tr("Sua biblioteca","Your library","Tu biblioteca"):film.section)+(!film.tvSource?" · "+plex.name():provider==null?" · "+film.provider:""));meta.setText(film.meta+(film.continuing&&film.remainingMs()>0?"  ·  "+ContinueWatching.remaining(film):""));summary.setText(film.summary);play.setText(film.continuing?Ui.tr("Continuar em ","Resume in ","Continuar en ")+film.provider:Ui.tr("Abrir ","Open ","Abrir ")+film.provider);layoutPlaybackAction();
+        connection.setText((film.packageName.equals(JellyfinClient.PACKAGE)?film.continuing?Ui.tr("Continuar assistindo","Continue watching","Seguir viendo"):film.recentlyAdded?Ui.tr("Adicionados recentemente","Recently added","Últimas subidas"):Ui.tr("Sua biblioteca","Your library","Tu biblioteca"):film.section)+(!film.tvSource?" · "+plex.name():provider==null?" · "+film.provider:""));meta.setText(film.meta+(film.continuing&&film.remainingMs()>0?"  ·  "+ContinueWatching.remaining(film):""));summary.setText(film.summary);play.setText(film.nextEpisode?Ui.tr("Ver em ","Watch in ","Ver en ")+film.provider:film.continuing?Ui.tr("Continuar em ","Resume in ","Continuar en ")+film.provider:Ui.tr("Abrir ","Open ","Abrir ")+film.provider);layoutPlaybackAction();
         if(same)return;
         title.setVisibility(VISIBLE);titleLogo.setVisibility(GONE);titleLogo.setImageDrawable(null);titleLogo.setContentDescription(film.title);
         int generation=++imageGeneration;if(heroLoad!=null)main.removeCallbacks(heroLoad);
@@ -592,6 +594,24 @@ final class CinemaHomeView extends FrameLayout {
             }
         };
         main.postDelayed(heroLoad,90);
+    }
+    private boolean showWatchedMenu(PlexClient.Film film,View from){
+        if(watchedBusy||!film.continuing)return true;consumeConfirmUp=confirmHeld;from.cancelLongPress();from.setPressed(false);from.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        startOverlay(Ui.tr("Continuar assistindo","Continue watching","Seguir viendo"),from);overlay.setBackgroundColor(0xED090A0D);String account=plex.identity();
+        TextView name=text(film.title,40,WHITE,Ui.displaySemibold);name.setMaxLines(2);name.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams np=new LayoutParams(1560,110);np.leftMargin=84;np.topMargin=158;overlay.addView(name,np);
+        TextView info=text(film.provider+(film.episodeLabel.isEmpty()?"":" · "+film.episodeLabel),23,DIM,Ui.medium);LayoutParams ip=new LayoutParams(1540,42);ip.leftMargin=84;ip.topMargin=276;overlay.addView(info,ip);
+        watchedStatus=text("",24,DIM,Ui.regular);watchedStatus.setMaxLines(4);watchedStatus.setGravity(Gravity.TOP);LayoutParams sp=new LayoutParams(1480,160);sp.leftMargin=84;sp.topMargin=704;overlay.addView(watchedStatus,sp);watchedMark=null;
+        boolean supported=plex.canMarkWatched(film);
+        if(supported){option(Ui.tr("Marcar como assistido","Mark as watched","Marcar como visto"),354,()->markWatched(film,account),true);watchedMark=(TextView)overlay.getChildAt(overlay.getChildCount()-1);watchedStatus.setText(film.type.equals("episode")?Ui.tr("Atualiza somente este episódio na sua conta de ","Updates only this episode in your ","Actualiza solo este episodio en tu cuenta de ")+film.provider+".":Ui.tr("Atualiza este filme na sua conta de ","Updates this movie in your ","Actualiza esta película en tu cuenta de ")+film.provider+".");}
+        else watchedStatus.setText(Ui.tr("O estado de reprodução deste app é gerenciado no próprio aplicativo.","This app manages its watched status inside its own application.","El estado de visto de esta app se gestiona dentro de su aplicación."));
+        option(Ui.tr("Abrir em ","Open in ","Abrir en ")+film.provider,supported?460:354,()->{closeOverlay();selectFilm(film);openFilm();},!supported);option(Ui.tr("Cancelar","Cancel","Cancelar"),supported?566:460,this::closeOverlay,false);return true;
+    }
+    private void markWatched(PlexClient.Film film,String account){
+        if(watchedBusy)return;watchedBusy=true;TextView status=watchedStatus,action=watchedMark;if(action!=null)action.setEnabled(false);status.setText(Ui.tr("Salvando no servidor…","Saving to the server…","Guardando en el servidor…"));
+        io.execute(()->{try{
+            plex.markWatched(film,account);List<PlexClient.Film> fresh=null;try{fresh=plex.library();}catch(Exception ignored){}final List<PlexClient.Film> updated=fresh;
+            main.post(()->{watchedBusy=false;if(closed||!account.equals(plex.identity()))return;List<PlexClient.Film> remaining=new ArrayList<>();for(PlexClient.Film f:films)if(!f.continuing||!film.key.equals(f.key)||!film.packageName.equals(f.packageName))remaining.add(f);films=updated==null?remaining:updated;refreshedAt=updated==null?0:SystemClock.elapsedRealtime();if(!active){libraryDirty=true;return;}boolean same=watchedStatus==status&&overlay.getVisibility()==VISIBLE;if(same)closeOverlay();showFilms();if(same&&!cards.isEmpty())cards.get(0).requestFocus();note(Ui.tr("Marcado como assistido","Marked as watched","Marcado como visto"));});
+        }catch(Exception failure){main.post(()->{watchedBusy=false;if(closed||watchedStatus!=status||overlay.getVisibility()!=VISIBLE)return;if(action!=null)action.setEnabled(true);status.setText(Ui.tr("Não foi possível confirmar a alteração. Atualize a biblioteca antes de tentar novamente.","Could not confirm the change. Refresh the library before trying again.","No se ha podido confirmar el cambio. Actualiza la biblioteca antes de volver a intentarlo."));});}});
     }
     private void openFilm(){
         if(selected==null){if(filter==3)openPackage(TvSuggestions.YOUTUBE,"YouTube");else if(!plex.connected())manageLibrary();else openPackage(plex.packageName(),plex.provider());return;}
@@ -619,7 +639,7 @@ final class CinemaHomeView extends FrameLayout {
     private void showInputs(View from){startOverlay("Entradas y televisión",from);List<HomeApps.Item> inputs=HomeApps.allInputs(activity);int n=0;for(HomeApps.Item item:inputs){option(item.label+(item.connected?"":" · Sin señal"),210+n*106,()->{if(item.kind==HomeApps.LIVE_TV){Intent intent=HomeApps.liveTv(activity);if(intent!=null)launch(intent);}else launch(new Intent(Intent.ACTION_VIEW,android.media.tv.TvContract.buildChannelUriForPassthroughInput(item.inputId)));},n==0);n++;}if(n==0)option("Abrir ajustes de la TV",210,()->launch(new Intent(Settings.ACTION_SETTINGS)),true);}
     boolean onKey(KeyEvent event){
         int code=event.getKeyCode();boolean confirm=code==KeyEvent.KEYCODE_DPAD_CENTER||code==KeyEvent.KEYCODE_ENTER||code==KeyEvent.KEYCODE_NUMPAD_ENTER||code==KeyEvent.KEYCODE_BUTTON_A;
-        if(confirm&&event.getAction()==KeyEvent.ACTION_UP&&consumeConfirmUp){consumeConfirmUp=false;confirmHeld=false;reorderConfirmArmed=false;menuConfirmArmed=false;return true;}
+        if(confirm&&consumeConfirmUp){if(event.getAction()==KeyEvent.ACTION_UP){consumeConfirmUp=false;confirmHeld=false;reorderConfirmArmed=false;menuConfirmArmed=false;}return true;}
         if(menuPackage!=null){
             if(confirm){if(event.getAction()==KeyEvent.ACTION_DOWN&&event.getRepeatCount()==0)menuConfirmArmed=true;else if(event.getAction()==KeyEvent.ACTION_UP&&menuConfirmArmed){if(menuAction==0)moveFromShortcutMenu();else removeFromShortcutMenu();}return true;}
             if(code==KeyEvent.KEYCODE_BACK||code==KeyEvent.KEYCODE_ESCAPE){if(event.getAction()==KeyEvent.ACTION_UP)closeShortcutMenu(true);return true;}
@@ -632,7 +652,7 @@ final class CinemaHomeView extends FrameLayout {
             if(code==KeyEvent.KEYCODE_DPAD_UP||code==KeyEvent.KEYCODE_DPAD_DOWN){if(event.getAction()==KeyEvent.ACTION_DOWN)moveReorder(code==KeyEvent.KEYCODE_DPAD_DOWN);return true;}
             if(code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT)return true;
         }
-        if(confirm)confirmHeld=event.getAction()==KeyEvent.ACTION_DOWN&&appButtons.contains(activity.getCurrentFocus());
+        if(confirm)confirmHeld=event.getAction()==KeyEvent.ACTION_DOWN&&(appButtons.contains(activity.getCurrentFocus())||cards.contains(activity.getCurrentFocus()));
         int key=event.getKeyCode();if(key==KeyEvent.KEYCODE_BACK){if(event.getAction()==KeyEvent.ACTION_UP){if(overlay.getVisibility()==VISIBLE)closeOverlay();else if(sidebarOpen)leaveSidebar();else activeSide().requestFocus();}return true;}
         if(key==KeyEvent.KEYCODE_DPAD_LEFT&&overlay.getVisibility()!=VISIBLE&&!sidebarOpen){View focus=activity.getCurrentFocus();if(focus==play||focus==libraryChooser||firstPoster(focus)){if(event.getAction()==KeyEvent.ACTION_DOWN)activeSide().requestFocus();return true;}}
         if(key==KeyEvent.KEYCODE_DPAD_RIGHT&&browsing()&&!sidebarOpen&&overlay.getVisibility()!=VISIBLE&&!cards.isEmpty()&&activity.getCurrentFocus()==cards.get(cards.size()-1)&&catalogPage!=null&&catalogPage.hasNext()){

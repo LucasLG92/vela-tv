@@ -31,14 +31,14 @@ final class ContinueWatching {
         return new ArrayList<>(result.subList(0,Math.min(LIMIT,result.size())));
     }
     static PlexClient.Film parse(Cursor cursor){
-        if(cursor.getInt(10)!=TvContract.WatchNextPrograms.WATCH_NEXT_TYPE_CONTINUE||cursor.getInt(11)!=1)return null;
+        int kind=cursor.getInt(10);boolean next=kind==TvContract.WatchNextPrograms.WATCH_NEXT_TYPE_NEXT||kind==TvContract.WatchNextPrograms.WATCH_NEXT_TYPE_NEW;if(cursor.getInt(11)!=1||(!next&&kind!=TvContract.WatchNextPrograms.WATCH_NEXT_TYPE_CONTINUE)||(next&&cursor.getInt(14)!=TvContract.WatchNextPrograms.TYPE_TV_EPISODE))return null;
         PlexClient.Film film=new PlexClient.Film();film.packageName=value(cursor,1);film.title=value(cursor,2);film.summary=value(cursor,3);film.thumb=value(cursor,4);boolean thumbnail=film.thumb.isEmpty();if(thumbnail)film.thumb=value(cursor,5);film.art=film.thumb;film.intent=value(cursor,6);
         if(!film.packageName.matches("[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+")||film.title.isEmpty()||!imageUri(film.thumb)||film.intent.isEmpty())return null;
         film.durationMs=cursor.isNull(7)?0:Math.max(0,cursor.getLong(7));film.positionMs=cursor.isNull(8)?-1:Math.max(-1,cursor.getLong(8));film.lastPlayedMs=cursor.isNull(9)?0:Math.max(0,cursor.getLong(9));
         if(film.durationMs>0&&film.positionMs>=film.durationMs)return null;
         if(film.durationMs>0&&film.positionMs>=0)film.progress=Math.min(1f,(float)film.positionMs/film.durationMs);
         String season=value(cursor,12),episode=value(cursor,13);if(!season.isEmpty()&&!episode.isEmpty())film.episodeLabel="T"+season+" · E"+episode;
-        film.key="watchnext:"+film.packageName+":"+cursor.getLong(0);film.type="video";film.tvSource=true;film.continuing=true;
+        film.key="watchnext:"+film.packageName+":"+cursor.getLong(0);film.type="video";film.tvSource=true;film.continuing=true;film.nextEpisode=next&&film.positionMs<=0;if(film.nextEpisode){film.positionMs=0;if(film.durationMs>0)film.progress=0;}
         film.thumbAspect=aspect(cursor,thumbnail?16:15);
         if(film.thumbAspect==0)film.thumbAspect=film.packageName.equals(TvSuggestions.YOUTUBE)||cursor.getInt(14)==TvContract.WatchNextPrograms.TYPE_CLIP?16f/9:2f/3;
         film.landscape=film.thumbAspect>=1;
@@ -66,10 +66,11 @@ final class ContinueWatching {
         return result;
     }
     static String remaining(PlexClient.Film film){
-        long ms=film.remainingMs();if(ms<=0)return Ui.tr("Continuar","Resume","Continuar");
-        long minutes=1+(ms-1)/60_000;String duration=minutes>60?minutes/60+" h"+(minutes%60==0?"":" "+minutes%60+" min"):minutes+" min";
+        long ms=film.remainingMs();if(film.nextEpisode){String label=Ui.tr("Próximo episódio","Next episode","Siguiente episodio");return ms>0?label+" · "+duration(ms):label;}if(ms<=0)return Ui.tr("Continuar","Resume","Continuar");
+        long minutes=1+(ms-1)/60_000;String duration=duration(ms);
         return minutes==1?Ui.tr("Falta "+duration,duration+" left","Queda "+duration):Ui.tr("Faltam "+duration,duration+" left","Quedan "+duration);
     }
+    private static String duration(long ms){long minutes=1+(ms-1)/60_000;return minutes>60?minutes/60+" h"+(minutes%60==0?"":" "+minutes%60+" min"):minutes+" min";}
     static Intent launch(Context context,PlexClient.Film film){
         try{
             Intent supplied=Intent.parseUri(film.intent,Intent.URI_INTENT_SCHEME);Uri data=supplied.getData();

@@ -44,3 +44,7 @@ El asistente inicial te guía para conectar Plex, elegir aplicaciones y configur
 Consulta las nuevas versiones desde Ajustes. Vela las busca automáticamente una vez al día al abrirse y las deja descargadas por defecto. Puedes desactivar ambas opciones en Ajustes. Android te pide confirmar la instalación; tus cuentas y preferencias se conservan. La primera actualización desde una versión anterior a 1.12.0 se instala manualmente.
 
 [Ver las capturas](../gallery/README.md) · [Instalar Vela](INSTALL.es.md) · [Compatibilidad de los servicios](COMPATIBILITY.es.md)
+
+## Un capítulo visto. El siguiente, a mano.
+
+Mantén OK en Seguir viendo para marcar una película o episodio como visto en Plex o Jellyfin. La fila se actualiza desde tu servidor y muestra el siguiente capítulo pendiente disponible. El historial de tus series decide qué viene después, con los mismos límites de tarjetas e imágenes. [Guía de uso](SEGUIR-VIENDO.es.md).

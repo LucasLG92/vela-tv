@@ -56,7 +56,7 @@ python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port>
 
 The fixture builder produces synthetic future APKs inside `out/`, including intentionally wrong signers and packages. Never distribute them. The native test refuses physical devices or a linked Plex account, checks signed archives, bounded/cancelled transfers, the read-only installer grant, daily checks and remote controls, then restores update preferences. It does not confirm a system installation. The separate release validation for 1.12.0 completed an actual self-update through Android's installer on a clean emulator and verified retained preferences.
 
-Official update releases must keep the existing signing key and a strictly increasing Android versionCode. Use a semantic tag such as `v1.13.0-preview`, the matching versionName `1.13.0-preview`, and the asset name `Vela-1.13.0-preview.apk`. Publish it as a release, mark previews accordingly, and verify GitHub's `sha256` asset digest. The updater ignores drafts, assets without that digest, unrelated paths, downgrades and mismatched signatures. CI artifacts use an ephemeral key and are not official updates.
+Official update releases must keep the existing signing key and a strictly increasing Android versionCode. Use a semantic tag such as `v1.14.0-preview`, the matching versionName `1.14.0-preview`, and the asset name `Vela-1.14.0-preview.apk`. Publish it as a release, mark previews accordingly, and verify GitHub's `sha256` asset digest. The updater ignores drafts, assets without that digest, unrelated paths, downgrades and mismatched signatures. CI artifacts use an ephemeral key and are not official updates.
 
 ## Jellyfin integration test
 
@@ -67,3 +67,9 @@ python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port>
 ```
 
 The private JSON contains `base` (HTTP loopback plus port), `username`, `password`, `token` and `userId` for the disposable fixture only. Never use a personal server or account. The native test refuses physical devices, non-loopback fixtures and linked personal libraries, restores app preferences and removes the runtime fixture file. It authorizes Quick Connect with that fixture token, exercises both login paths, pages, original images, source switching, screensaver and unlink. It intercepts the actual home action to check the item ID routed to the installed official app; this does not certify playback of every codec. No fixture videos, credentials or movie artwork are packaged in Vela.
+
+## Watched actions on a disposable emulator
+
+`--test watched` intercepts HTTPS inside the instrumentation process. It verifies the Plex per-item PUT request and token header, real remote long-press and release behavior, duplicate submission, errors, account changes, cache and next-episode replacement. It never contacts a Plex account. The runner refuses physical devices and stops the test app process afterwards so the fake transport cannot survive that test.
+
+The Jellyfin fixture test now writes watched state to its disposable user and verifies advancement to the next episode using the real server. Reset the fixture progress before repeating it. Never run these mutation checks against a personal library. Both native tests preserve Vela preferences; no fixture credentials, videos or original movie art belong in the public APK.

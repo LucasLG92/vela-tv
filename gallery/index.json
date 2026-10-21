@@ -313,5 +313,23 @@
     "width": 3840,
     "height": 2160,
     "version": "1.13.0"
+  },
+  {
+    "file": "36-marcar-como-visto.webp",
+    "title": "Un capítulo visto. El siguiente, a mano.",
+    "source": "native clean-emulator 4K capture; owned Jellyfin 12.2 disposable fixture; actual per-item watched state and Next Up; authorized original artwork, synthetic fixture media and metadata",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.14.0"
+  },
+  {
+    "file": "37-siguiente-episodio.webp",
+    "title": "Tus series siguen contigo",
+    "source": "native clean-emulator 4K capture; owned Jellyfin 12.2 disposable fixture; actual per-item watched state and Next Up; authorized original artwork, synthetic fixture media and metadata",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.14.0"
   }
 ]

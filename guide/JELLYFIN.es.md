@@ -8,6 +8,8 @@
 
 Instala **Jellyfin para Android TV** en la televisión e inicia sesión allí con el mismo servidor y usuario. Al elegir un título en Vela, se abre su ficha en esa app; la reproducción se controla desde Jellyfin. Vela no comparte su token con la app ni importa sus contraseñas.
 
+Desde Seguir viendo puedes mantener OK y elegir **Marcar como visto**. Se guarda ese episodio o película en el usuario de Jellyfin vinculado a Vela y se actualiza la fila. **Siguiente episodio** identifica capítulos pendientes que devuelve Next Up; si un capítulo de esa serie está a medias, tiene prioridad. Solo se ofrecen episodios que ya existen en tu servidor.
+
 Puedes mantener Plex y Jellyfin conectados y cambiar entre ellos desde **Ajustes → Cuentas y servicios → Biblioteca de Inicio**. El proveedor elegido se usa también para los fondos del salvapantallas de biblioteca. Cambiar de biblioteca no desvincula la otra cuenta.
 
 **Desvincular de Vela** elimina la sesión y los metadatos locales de Jellyfin e intenta cerrar esa sesión en el servidor. Conserva los contenidos del servidor, la configuración de Plex y la sesión de la app Jellyfin.

@@ -8,7 +8,7 @@ Entre los títulos mostrados están Oppenheimer, Origen, Avatar: Fuego y ceniza,
 
 Las capturas de Seguir viendo también utilizan la miniatura original de [Dune: Part Two | Official Trailer](https://www.youtube.com/watch?v=Way9Dexny3w), Warner Bros., y una [imagen promocional de Reacher servida por Prime Video](https://www.primevideo.com/-/es/detail/0H1T1C23B07HLZPPHJSSPMYSL7). Ilustran tarjetas de esos proveedores con datos de reproducción simulados; no acreditan acceso a sus historiales privados. Los originales no se empaquetan en el APK ni se redistribuyen como archivos de arte.
 
-Las capturas de Jellyfin (34 y 35) se han realizado con Vela 1.13 y un servidor Jellyfin 12.2 local de demostración. Sus imágenes proceden del mismo material autorizado; los títulos, episodios y progresos del servidor son datos de prueba. No muestran una cuenta personal de Jellyfin ni incluyen vídeos de películas.
+Las capturas de Jellyfin (34 a 37) se han realizado con Vela 1.13 / 1.14 y un servidor Jellyfin 12.2 local de demostración. Sus imágenes proceden del mismo material autorizado; los títulos, episodios y progresos del servidor son datos de prueba. Las capturas 36 y 37 muestran una acción de visto y el siguiente episodio devueltos por ese servidor de prueba. No muestran una cuenta personal de Jellyfin ni incluyen vídeos de películas.
 
 ## Material alternativo para pruebas
 
