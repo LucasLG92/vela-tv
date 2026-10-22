@@ -41,3 +41,9 @@ Las capturas `40-guia-horizontal.webp` y `41-proximos-programas.webp` se han tom
 
 
 Las capturas `42-servidores-plex.webp` y `43-vincular-plex.webp` muestran la interfaz nativa de Vela 1.20.2 en un emulador independiente. Los servidores son ficticios y «DEMO» es un código de muestra no funcional. No se ha consultado una cuenta Plex ni se han generado códigos reales. El logo de Plex es el recurso vectorial original que utiliza la aplicación y pertenece a su titular.
+
+## Capturas de la versión 1.21
+
+La galería renueva Inicio, películas, series, aplicaciones, menús y ajustes con la versión 1.21.0, además de la TV integrada, sus fuentes, la guía y el reproductor. Las imágenes actualizadas se identifican por versión en [el índice](index.json). Se conserva el material de cine autorizado descrito arriba, con nombres de biblioteca y progresos de demostración; las cuentas personales no se conectan al emulador de publicación.
+
+Las capturas 25, 26, 27, 40, 41 y 44 a 47 muestran las vistas nativas actuales de TV: lista M3U pública de TDTChannels, logos originales, horarios XMLTV de EPG dobleM y, en el reproductor, una emisión oficial de RTVE consultada al tomar la captura. Son imágenes de la interfaz, sin archivos de vídeo adjuntos. El clima es Reikiavik · Demo y no corresponde a la ubicación personal del desarrollador. No se muestran cuentas Xtream ni direcciones privadas de reproducción.

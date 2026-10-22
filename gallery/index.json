@@ -2,173 +2,192 @@
   {
     "file": "01-inicio.webp",
     "title": "Tu cine, en primer plano",
-    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.12.0"
+    "version": "1.21.0",
+    "sha256": "6c0db94dbe2f5bf69ef7c1a0d04425d42b86b716cee09bac32cd806119250d4f"
   },
   {
     "file": "02-aspecto-menta-compacto.webp",
     "title": "Un estilo más compacto",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "6345da545b4229682466b1b273a75da0a2a8afe2e7866f1ce8aff1643fa05efb"
   },
   {
     "file": "03-aspecto-lavanda-grande.webp",
     "title": "El cine, a lo grande",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "b2d2973a73f5d9be99e461489922ea958f6c681a8e010a4f1800d4d236752f2c"
   },
   {
     "file": "04-seguir-viendo.webp",
     "title": "Retoma donde lo dejaste",
-    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.12.0"
+    "version": "1.21.0",
+    "sha256": "b93f84de97f504d2c8c86904ecf21c135bfb03ce0cb6f5e413e74b3b7f6ead82"
   },
   {
     "file": "05-biblioteca-paginada.webp",
     "title": "Tu biblioteca, página a página",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "7c3e080f0866777f19c2b8dbf0d9956c5ef9eb6715a3db410f630bd98ad2c941"
   },
   {
     "file": "06-menu-lateral.webp",
     "title": "Todo a mano",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "561ef4469735b91e65e7247ef5fbae1800a5a43f7248b113c73bead38faf6614"
   },
   {
     "file": "07-menu-accesos.webp",
     "title": "Elige tus accesos",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "d732ba8a61af8b745d714263ba63c923830e17b1431bb70ebb5c5ffaf4e198b1"
   },
   {
     "file": "08-ordenar-accesos.webp",
     "title": "El orden lo pones tú",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "68b56c6c7e215899241bc2ddb1b6ab4d2649bb73737620659bb84ae8ee0bb368"
   },
   {
     "file": "09-todas-las-apps.webp",
     "title": "Tus apps, con sus iconos originales",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "e7d3ad00ffb0b48d006e724ee4fd5f4779714cdb2318eae8ab3dd1311f1ced4e"
   },
   {
     "file": "10-ajustes.webp",
     "title": "Tus ajustes",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "4ff2ad1222796ec6d7098213b1c2e1c76f538a8e6022bf353d3d68fb652a0ad0"
   },
   {
     "file": "11-apariencia.webp",
     "title": "Hazlo tuyo",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "31725ca4318c637a61b5edaa8c031217a68c8e0656e7a53766948d1681259a0a"
   },
   {
     "file": "12-colores.webp",
     "title": "Seis colores de acento",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "d74365d017223771214d7ce013abcafbfdf93ec9ecebb55d8082bc1ba54601f9"
   },
   {
     "file": "13-carteles.webp",
     "title": "Tres tamaños de cartel",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "5798dab1fa6cf02cd2494eb119ff60977b13004a8c2e1b1f4b8acf0ddc952c83"
   },
   {
     "file": "14-fondo.webp",
     "title": "El fondo, a tu gusto",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "275aa075e55bf0efddf9872dbb14045fe77f6fe773aa3ef7d3eaad9a1367313e"
   },
   {
     "file": "15-rendimiento.webp",
     "title": "Imagen y rendimiento",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "f919ddeb281bb263e789816ebdbdc49c3bae4a430ef0ba82153d70a8d7b01cde"
   },
   {
     "file": "16-accesos.webp",
     "title": "Tus accesos favoritos",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "40b7b4c4031c154f6feb36e180a5ddf4e57a9964650271c465aaf8e16776dfb6"
   },
   {
     "file": "17-cuentas.webp",
     "title": "Tus cuentas y servicios",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "158f2f71877aaf85cd2642e448d6d0443f16e44fad2a3ca8860f95841fc7c1d5"
   },
   {
     "file": "18-salvapantallas-ajustes.webp",
     "title": "Diseña tus pausas",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "89333af4cad52ba7db746236beb9d38d711771d9d8f1d7ed01f1716a1d169c48"
   },
   {
     "file": "19-ubicacion-demo.webp",
     "title": "El tiempo, a tu manera",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "ed9ee201c089d7511e679b5b8ec2f89aec67b32061e36465971452e2695009a5"
   },
   {
     "file": "20-salvapantallas-plex-demo.webp",
@@ -191,11 +210,12 @@
   {
     "file": "22-cuentas-sin-vincular.webp",
     "title": "Conecta lo que te gusta",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "feb6627550e2b9119171af37558dbc46cc8ca57bc55c15c652558d728f5c2626"
   },
   {
     "file": "23-asistente.webp",
@@ -218,83 +238,92 @@
   {
     "file": "25-television.webp",
     "title": "Encuentra tu próximo directo",
-    "source": "native clean-emulator 4K capture; actual TDTChannels public M3U favorites, original broadcaster logos, public dobleM XMLTV, demo weather in Reykjavik; no personal IPTV accounts or location",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.19.1"
+    "version": "1.21.0",
+    "sha256": "a59ce263d730d8f9a6199e39614735055afc736c8a5f45eb661a950e55d743e2"
   },
   {
     "file": "26-listas-tv.webp",
     "title": "Tu lista, tus canales",
-    "source": "native clean-emulator 4K capture; actual TDTChannels public M3U favorites, original broadcaster logos, public dobleM XMLTV, demo weather in Reykjavik; no personal IPTV accounts or location",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.19.1"
+    "version": "1.21.0",
+    "sha256": "39de896d83a69096a704741afffbb83142f416f7e54f51e9b0d34eb4a70be767"
   },
   {
     "file": "27-reproductor-video-demo.webp",
     "title": "Reproducción a pantalla completa",
-    "source": "native clean-emulator 4K capture; actual TDTChannels public M3U favorites, original broadcaster logos, public dobleM XMLTV, demo weather in Reykjavik; no personal IPTV accounts or location",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.19.1"
+    "version": "1.21.0",
+    "sha256": "44c23d0b2812dca0f0228f95e9613d2df5b450033f3c5cef3468cb1953f6e0b7"
   },
   {
     "file": "28-peliculas.webp",
     "title": "Tus películas",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "9635025662a50e7b7d5dc370d35a4e15fd190a092be3d6b57fb2ad2e739acd69"
   },
   {
     "file": "29-series.webp",
     "title": "Tus series",
-    "source": "native 4K clean-emulator capture; Plex artwork authorized separately",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.21.0",
+    "sha256": "29f892b8a0f75e0b1fb087a07bf68cfa54c1cf0eb071bab282b8c8dec7bfe5ac"
   },
   {
     "file": "30-ultimas-subidas.webp",
     "title": "Acaba de llegar a tu biblioteca",
-    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.12.0"
+    "version": "1.21.0",
+    "sha256": "203b20e641fe1acc31f7e0513caa5b177a93fa72a82bed2b279e3fdec628d29b"
   },
   {
     "file": "31-filas-difuminadas.webp",
     "title": "Explora sin perder el hilo",
-    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.12.0"
+    "version": "1.21.0",
+    "sha256": "92bedf1ac779bd1410aaf79069f0e8d335eabdd15b2472f34effa0653029a7d3"
   },
   {
     "file": "32-servicios-seguir-viendo.webp",
     "title": "Cada servicio, en su sitio",
-    "source": "native clean-emulator 4K capture; real authorized Plex artwork and official provider promotional images; simulated progress/order",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.12.0"
+    "version": "1.21.0",
+    "sha256": "d1ed240784496486de1eb4bcc085f119e73588804675769e0222ec207c826c44"
   },
   {
     "file": "33-actualizaciones.webp",
     "title": "Siempre al día",
-    "source": "native clean-emulator 4K capture; automatic check and download defaults; no linked account or private data",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.12.1"
+    "version": "1.21.0",
+    "sha256": "37fc622fa7b5a8c4cad2649212ffd1121526f520f5529f4cb6647c89dbe02a2e"
   },
   {
     "file": "34-jellyfin-inicio.webp",
@@ -353,20 +382,22 @@
   {
     "file": "40-guia-horizontal.webp",
     "title": "Toda la programación, de un vistazo",
-    "source": "native clean-emulator 4K capture; real TDTChannels public channels and original logos; actual current/future EPG dobleM schedules; demo weather in Reykjavik; no personal accounts or location",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.19.1"
+    "version": "1.21.0",
+    "sha256": "fee811ce7321b4a077d033ed99d173d37a176979b2a8da7e93c4b58e1d81ab0e"
   },
   {
     "file": "41-proximos-programas.webp",
     "title": "Descubre lo que viene después",
-    "source": "native clean-emulator 4K capture; real TDTChannels public channels and original logos; actual current/future EPG dobleM schedules; demo weather in Reykjavik; no personal accounts or location",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.19.1"
+    "version": "1.21.0",
+    "sha256": "2e88ad7ce38ffbc7ac96a300a50286d0b78547ba0abbcd304958a2724b3a7efe"
   },
   {
     "file": "42-servidores-plex.webp",
@@ -385,5 +416,45 @@
     "width": 3840,
     "height": 2160,
     "version": "1.20.2"
+  },
+  {
+    "file": "44-tv-navegacion.webp",
+    "title": "El directo comparte tu inicio",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.21.0",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
+    "sha256": "11138f29a1768ecc4309c86832ebfb1ecf2973b3afb2c4695ec90efb2d4e417c"
+  },
+  {
+    "file": "45-tv-categorias.webp",
+    "title": "Cambia de lista con el mando",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.21.0",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
+    "sha256": "cb621c287ba807e46f493661a8e0bac72fc96cc546f00368d5c7c810994d188b"
+  },
+  {
+    "file": "46-ajustes-tv.webp",
+    "title": "Elige cómo ver tus canales",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.21.0",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
+    "sha256": "49437e86e70d5af9e93f2de1caf09684d4b317310572893cf5a8da995502caf9"
+  },
+  {
+    "file": "47-canales-durante-directo.webp",
+    "title": "Tus canales, sobre el directo",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.21.0",
+    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
+    "sha256": "ece42eedc515761f911406340a68eaf1165a89d85d2e563d5337154d10e3b07d"
   }
 ]

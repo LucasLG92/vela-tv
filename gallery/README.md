@@ -1,8 +1,8 @@
 # Vela, por dentro
 
-Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **43 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
+Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **47 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
 
-[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.20.2-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
+[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.21.0-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
 
 ## Tu cine, en primer plano
 
@@ -182,6 +182,26 @@ El contenido de YouTube y Prime ilustra el diseño con progreso de ejemplo; su a
 <details>
 <summary>Sobre estas capturas</summary>
 
-Capturas nativas a 3840 × 2160 de un emulador Android. Galería con capturas de distintas versiones de Vela, incluidas Inicio y Actualizaciones de 1.12 y Jellyfin de 1.13 y las acciones y próximos episodios de 1.14, y filtros y ordenación de 1.15. Las dos pantallas de conexión de Plex corresponden a 1.20.2 y utilizan servidores ficticios y el código no funcional «DEMO». Las pantallas de TV en directo se han actualizado a 1.19.1, con cuadrícula y guía horizontal. Muestran favoritos de la lista M3U pública, programación real de EPG dobleM y las fuentes M3U, Xtream y Antena; no hay ninguna cuenta IPTV personal configurada. Las capturas de Jellyfin proceden de un servidor local de demostración: los carteles son originales y el progreso se ha preparado para mostrar la interfaz. Los carteles y fondos de Plex se utilizan con autorización del usuario; perfil, servidor y cuenta se presentan de forma anónima. Progreso, paginación y ciudad son ejemplos. No se publican credenciales, avatar ni archivos originales de la biblioteca. Los accesos de servicios utilizan aplicaciones de prueba. La captura del reproductor de TV muestra una emisión de RTVE a través de la lista pública y el salvapantallas de vídeo muestra material NASA/JSC. Consulta los [créditos y detalles de las imágenes](CREDITS.md) y la [compatibilidad](../guide/COMPATIBILITY.es.md).
+Capturas nativas a 3840 × 2160 de un emulador independiente. **35 imágenes nuevas o renovadas con Vela 1.21.0**, incluida toda la TV integrada, Inicio, apps y ajustes. Las vistas de Jellyfin y sus filtros conservan las capturas de demostración de 1.13–1.15; las de conexión de Plex corresponden a 1.20.2, con servidores ficticios y código «DEMO». Consulta la versión y procedencia de cada imagen en [el índice](index.json).
+
+La TV utiliza la lista M3U pública de TDTChannels, logos originales, EPG dobleM y una emisión oficial de RTVE. Los carteles de cine se usan con autorización y los progresos se preparan como ejemplo. El clima está identificado como demostración. No se conectan cuentas personales al emulador ni se publican credenciales, perfil, servidor privado o archivos originales de la biblioteca. Los accesos de servicios usan aplicaciones de prueba; el salvapantallas de vídeo muestra material NASA/JSC. [Créditos de las imágenes](CREDITS.md) · [Compatibilidad](../guide/COMPATIBILITY.es.md).
 
 </details>
+
+## El directo comparte tu inicio
+
+![TV dentro de la barra de Vela](44-tv-navegacion.webp)
+
+## Cambia de lista con el mando
+
+![Logos grandes sin columna de categorías](45-tv-categorias.webp)
+
+## Elige cómo ver tus canales
+
+![Guía o Canales, desde Ajustes](46-ajustes-tv.webp)
+
+## Tus canales, sobre el directo
+
+![Programa, progreso y tiempo restante sin salir del vídeo](47-canales-durante-directo.webp)
+
+Derecha abre los canales; OK cambia de emisión y Atrás cierra el panel para seguir viendo.
