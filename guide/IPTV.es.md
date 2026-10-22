@@ -1,10 +1,10 @@
 # Tu televisión, a tu manera
 
-**M3U, Xtream y Antena**, con una misma pantalla para buscar canales, recorrer categorías, consultar la programación y guardar favoritos. El selector compacto de la cabecera permite cambiar de fuente; el engranaje reúne los ajustes y la actualización. Vela recuerda tu última categoría y página, y reproduce solo cuando eliges un canal.
+**M3U, Xtream y Antena**, con una misma pantalla para buscar canales, recorrer categorías, consultar la programación y guardar favoritos. TV en directo se abre desde la barra lateral, justo debajo de Inicio, con el reloj y el tiempo de Vela. El selector de la cabecera cambia de fuente; **Ajustes → TV en directo** reúne la configuración, la actualización y la vista preferida. Vela recuerda tu última categoría y página, y reproduce solo cuando eliges un canal.
 
 ## Tu lista M3U
 
-Abre **Engranaje → Configurar lista M3U**. Introduce la URL de tu lista y, si lo necesitas, una URL XMLTV para la guía. Si la propia lista declara su XMLTV, Vela lo utiliza automáticamente. Pulsa **Guardar y usar M3U**.
+Abre **Ajustes → TV en directo → Configurar lista M3U**. Introduce la URL de tu lista y, si lo necesitas, una URL XMLTV para la guía. Si la propia lista declara su XMLTV, Vela lo utiliza automáticamente. Pulsa **Guardar y usar M3U**.
 
 HTTPS es la opción habitual. Para una lista o señales HTTP, activa **Mi lista o sus señales usan HTTP**. Esa conexión no cifra el tráfico. Las URL con credenciales se introducen en la pantalla protegida de la televisión y se guardan cifradas en el dispositivo.
 
@@ -12,7 +12,7 @@ Se admiten metadatos EXTINF, categorías EXTGRP, logos, identificadores de guía
 
 ## Tu cuenta Xtream
 
-Abre **Engranaje → Cuenta Xtream**. Introduce el servidor, el usuario y la contraseña de tu servicio y pulsa **Conectar y usar en Vela → Ver mis canales**. Cada instalación se configura con su propia cuenta; el APK viene sin cuentas personales.
+Abre **Ajustes → TV en directo → Cuenta Xtream**. Introduce el servidor, el usuario y la contraseña de tu servicio y pulsa **Conectar y usar en Vela → Ver mis canales**. Cada instalación se configura con su propia cuenta; el APK viene sin cuentas personales.
 
 Utiliza HTTPS cuando tu proveedor lo ofrezca. Si necesita HTTP, activa su opción en la pantalla de conexión. La cuenta se valida antes de guardarla. Se muestran sus categorías y sus horarios cuando el servidor los proporciona.
 
@@ -22,7 +22,7 @@ La integración cubre televisión en directo. Las películas a la carta, series 
 
 Selecciona **Antena**. Vela consulta los canales que ya tiene sintonizados el televisor, ordenados por su número, y los reproduce con su sintonizador. También utiliza los logos y los horarios que Android permita leer. Los canales bloqueados por la TV no se incluyen.
 
-Hace falta un televisor con sintonizador compatible y un cable de antena con señal. En una caja o dispositivo HDMI sin sintonizador, esta opción informa de su indisponibilidad. Vela no resintoniza ni cambia el orden de canales de la TV. **Engranaje → Ajustes de antena** abre la configuración que facilite el fabricante; solo se inicia al elegirla.
+Hace falta un televisor con sintonizador compatible y un cable de antena con señal. En una caja o dispositivo HDMI sin sintonizador, esta opción informa de su indisponibilidad. Vela no resintoniza ni cambia el orden de canales de la TV. **Ajustes → TV en directo → Ajustes de antena** abre la configuración que facilite el fabricante; solo se inicia al elegirla.
 
 Si hay canales guardados pero falta el cable o la señal, la lista permanece disponible y el reproductor muestra **Sin señal de antena**. La compatibilidad depende del fabricante y de cómo exponga su sintonizador a Android.
 
@@ -31,7 +31,7 @@ Si hay canales guardados pero falta el cable o la señal, la lista permanece dis
 - **Buscar** localiza canales por nombre. En Xtream consulta el catálogo general del servicio y lo conserva en la caché local.
 - **Mantener OK** abre las opciones del canal para añadirlo a favoritos, quitarlo o elegir su calidad. Los favoritos pertenecen a su fuente y cuenta; admiten hasta 128 entradas.
 - **OK** abre el reproductor de Vela. **CH+ / CH−** cambia de canal, también entre páginas. **Atrás** vuelve a la lista y libera la reproducción.
-- En IPTV, **Otra señal** permite alternar entre los formatos o señales disponibles. Xtream utiliza HLS primero y MPEG-TS como alternativa cuando el servicio los ofrece.
+- La calidad se elige manteniendo OK sobre el canal en la guía o en la vista Canales. Durante la reproducción, Vela gestiona automáticamente sus formatos y señales alternativas. Xtream utiliza HLS primero y MPEG-TS como alternativa cuando el servicio los ofrece.
 - Si una señal IPTV falla, Vela prueba automáticamente otra del mismo canal. Primero intenta el otro formato o una señal de la misma calidad; después, las calidades inferiores más cercanas. Tu calidad elegida sigue guardada para la próxima vez que abras el canal.
 - La guía muestra el programa actual, el siguiente y el tiempo que queda. Los horarios caducados o desconocidos no generan un contador.
 
@@ -39,7 +39,7 @@ Si hay canales guardados pero falta el cable o la señal, la lista permanece dis
 
 El cambio automático está activo para M3U y Xtream cuando la lista incluye señales o calidades alternativas del mismo canal. Un error de reproducción permite pasar a la siguiente señal; una conexión que no arranca tiene un margen de 20 segundos. Durante la reproducción, una comprobación cada cinco segundos detecta si la posición lleva al menos 20 segundos sin avanzar. Las pausas con el mando se respetan.
 
-Vela libera el reproductor anterior antes de abrir la siguiente señal. No hace descargas de prueba ni mantiene reproductores en segundo plano. Cada sesión recorre como máximo ocho variantes y cuatro enlaces por variante, sin repetir la misma URL ni guardar automáticamente la calidad inferior. Si fallan todas, se detiene y permite volver a intentarlo con **Otra señal**. Cambiar de canal, volver a la lista o salir cancela los intentos pendientes.
+Vela libera el reproductor anterior antes de abrir la siguiente señal. No hace descargas de prueba ni mantiene reproductores en segundo plano. Cada sesión recorre como máximo ocho variantes y cuatro enlaces por variante, sin repetir la misma URL ni guardar automáticamente la calidad inferior. Si fallan todas, se detiene y permite volver a intentarlo pulsando **OK**. Cambiar de canal, volver a la lista o salir cancela los intentos pendientes.
 
 Las alternativas proceden de la misma fuente y cuenta; se mantienen separados países, regiones y emisiones +1. Si el proveedor no facilita otra señal del canal, Vela muestra que no está disponible. La antena conserva su aviso de falta de señal y no cambia a una fuente IPTV.
 
@@ -69,7 +69,7 @@ Los fondos toman un tono del propio logo mediante una pequeña muestra de píxel
 
 ## EPG dobleM y XMLTV externo
 
-La guía externa inicial es [guiatv.xml de EPG dobleM](https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiatv.xml), de [davidmuma](https://github.com/davidmuma/EPG_dobleM). **Engranaje → Guía de programación** permite actualizarla, introducir otra URL HTTPS o utilizar únicamente la guía de la fuente. El XML no se incluye en Vela.
+La guía externa inicial es [guiatv.xml de EPG dobleM](https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiatv.xml), de [davidmuma](https://github.com/davidmuma/EPG_dobleM). **Ajustes → TV en directo → Guía de programación** permite actualizarla, introducir otra URL HTTPS o utilizar únicamente la guía de la fuente. El XML no se incluye en Vela.
 
 La descarga y el análisis trabajan por partes en segundo plano. El índice privado en disco guarda los programas vigentes y las siguientes 48 horas, con un límite de 24 MiB. En la cuadrícula se recuperan el programa actual y el siguiente de los doce canales visibles. La vista horizontal consulta seis canales y una ventana de tres horas, con un máximo de 32 programas por canal. La guía se renueva al utilizar TV cuando han pasado cuatro horas; no hay un servicio permanente y una importación fallida conserva el índice anterior. Se limitan la descarga y los datos descomprimidos a 64 MiB, 4.096 canales y 150.000 programas de entrada; se guardan como máximo 100.000 programas dentro de la ventana de tiempo.
 
@@ -81,14 +81,26 @@ Si falta un logo válido del proveedor, Vela intenta el icono original declarado
 
 ## Guía horizontal
 
-Elige **Guía** en la cabecera para recorrer la programación con los canales y sus logos a la izquierda. **Canales** recupera la cuadrícula; Vela recuerda la vista elegida.
+**Guía es la vista inicial**, también al actualizar desde versiones anteriores. Puedes elegir **Guía** o **Canales** en **Ajustes → TV en directo**; esa elección se conserva. La cabecera del directo queda reservada al selector de fuente. En Guía, las categorías aparecen a la izquierda de los logos; se desplazan dentro de su propia zona, sin tapar la ayuda del mando. En Canales, los logos ocupan todo el ancho y arriba/abajo cambia a la lista anterior o siguiente, conservando la columna cuando es posible.
 
 - **Arriba / abajo:** recorrer canales, también entre bloques y páginas.
-- **Izquierda / derecha:** elegir programas. Al llegar al borde, la ventana avanza o retrocede 90 minutos. Los controles de la cabecera permiten hacer lo mismo.
+- **Izquierda / derecha:** elegir programas. Al llegar al borde, la ventana avanza o retrocede 90 minutos. Los controles inferiores permiten hacer lo mismo.
 - **Ahora:** volver al horario actual. Una línea marca la hora en la programación.
 - **OK en el programa actual:** ver el canal. En uno futuro, consultar su horario y, si quieres, abrir el directo del canal.
 - **Mantener OK:** favoritos y calidad. **Atrás** desde la reproducción vuelve a la guía y libera el reproductor.
 
 La programación completa procede del XMLTV externo configurado o de los datos de antena que comparta Android. Cuando una fuente solo facilita el programa actual y el siguiente, se muestran esos datos. Los huecos se indican como **Sin programación**; no se inventan horarios ni se añaden reproducción de programas pasados, grabaciones o recordatorios.
 
-La guía muestra seis filas y tres horas por ventana, hasta las próximas 48 horas disponibles en el índice. Consulta el disco en segundo plano y retiene como máximo 192 programas por bloque. Los programas se dibujan en una sola vista, con seis logos de hasta 128 píxeles y la misma caché de 768 KiB. La hora se actualiza por minuto. No hay vistas de vídeo en segundo plano ni un servicio adicional.
+El pie de la guía muestra el logo, título y horario del programa seleccionado. Si está en emisión, añade el tiempo restante y una barra de progreso; en uno futuro indica Próximamente. Si falta un horario válido, no se inventa un contador.
+
+La guía muestra seis filas ampliadas y tres horas por ventana, hasta las próximas 48 horas disponibles en el índice. Consulta el disco en segundo plano y retiene como máximo 192 programas por bloque. Los programas se dibujan en una sola vista, con seis logos de hasta 128 píxeles y la misma caché de 768 KiB. La hora se actualiza por minuto. No hay vistas de vídeo en segundo plano ni un servicio adicional.
+
+## El mando durante el directo
+
+- **OK:** mostrar u ocultar la información del programa. Si fallan todas las señales disponibles, reintentar la reproducción.
+- **Derecha:** abrir el panel lateral de canales, también con la información visible. El vídeo continúa mientras exploras.
+- **Arriba / abajo en el panel:** recorrer canales. Sus filas muestran logo, programa, progreso y tiempo restante cuando hay guía. La lista utiliza páginas de doce canales y recicla sus filas.
+- **OK en el panel:** cambiar al canal seleccionado y cerrar el panel. **Izquierda o Atrás:** cerrarlo y seguir viendo.
+- **CH+ / CH−**, o **arriba / abajo** con la información oculta: cambiar de canal. **Atrás** sin el panel abierto: volver a la guía o a Canales.
+
+El aviso de directo y la resolución real del vídeo se ocultan a los cuatro segundos; la información del programa, a los seis. El panel de canales usa el mismo reproductor: explorar o pasar de página no inicia otro vídeo. Los tiempos se actualizan por minuto y se muestran en horas y minutos a partir de una hora. No hay botones adicionales de favoritos o cambio manual de señal sobre el vídeo.

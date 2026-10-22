@@ -29,7 +29,14 @@ Elige entre Nieve, Azul, Menta, Lavanda, Arena y Rosa. Ajusta el tamaño de los 
 
 ## Tu televisión en directo
 
-Tres fuentes, una misma experiencia: **M3U, Xtream y Antena**. Encuentra canales por nombre, explora categorías y guarda tus favoritos manteniendo OK. La barra superior permite cambiar de fuente y recuerda la última categoría y página de cada una. Elige cuadrícula o guía horizontal: seis canales y tres horas por ventana, flechas para recorrer la programación y un botón Ahora. Los programas futuros muestran su horario; la reproducción es siempre del directo. Las categorías se desplazan dentro de su propia área y dejan visible la ayuda del mando. Cada tarjeta muestra su logo original, el programa en emisión, el tiempo restante en horas y minutos y una barra de progreso cuando hay horarios válidos. Las categorías usan filas recicladas y cada página conserva solo doce canales. Las listas M3U y las categorías Xtream se indexan en una caché local cifrada para evitar descargarlas al pasar de página. La antena utiliza los canales ya sintonizados en televisores compatibles. [Configurar televisión](IPTV.es.md).
+**M3U, Xtream y Antena**, dentro del mismo inicio de Vela. TV en directo aparece debajo de Inicio en la barra lateral y conserva el reloj y el tiempo. Cambia de fuente en la cabecera; gestiona tus listas y elige la vista desde **Ajustes → TV en directo**.
+
+- **Guía por defecto:** seis canales, categorías a la izquierda, tres horas por ventana y controles inferiores para volver a Ahora o cambiar de horario. El pie muestra el logo y el programa seleccionado, con tiempo restante y progreso si está en emisión.
+- **Canales:** logos grandes en una fila, sin columna de categorías. Arriba y abajo cambian de lista conservando la posición cuando es posible.
+- **Durante el directo:** logo, programa, horario, progreso y siguiente emisión. La calidad y el aviso de directo se muestran al empezar y se ocultan; OK recupera la información. Derecha abre un panel de canales con programación y tiempo restante, sin salir del vídeo. Atrás cierra el panel antes de salir del reproductor.
+- **Una entrada por canal:** mantener OK permite gestionar favoritos y calidad. Si una señal IPTV falla, se prueban sus alternativas del mismo canal; cuando se agotan, OK permite reintentar.
+
+Catálogos indexados en disco, páginas de doce registros, filas recicladas y logos limitados a 128 píxeles. La guía dibuja los programas en una sola vista y no crea tarjetas de canales ocultas. Un único reproductor, sin vídeo de fondo ni un servicio nuevo. Las cuentas y los favoritos pertenecen a su fuente y a esta instalación. [Configurar televisión](IPTV.es.md).
 
 ## Tus pausas
 

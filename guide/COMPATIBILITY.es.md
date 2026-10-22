@@ -24,7 +24,7 @@ Gestionan sus cuentas dentro de sus propias aplicaciones. Vela abre esas sesione
 
 ## TV en directo
 
-Vela reproduce señales directas de listas M3U y servicios Xtream mediante los códecs nativos de Android. HLS y MPEG-TS dependen de los formatos y códecs de la señal. Las categorías, la guía y los logotipos dependen del proveedor. La lista M3U pública inicial y su guía proceden de TDTChannels; las entradas que requieren un navegador o extracción web no se incluyen. [Configuración y límites](IPTV.es.md).
+Vela reproduce señales directas de listas M3U y servicios Xtream mediante los códecs nativos de Android. HLS y MPEG-TS dependen de los formatos y códecs de la señal. Las categorías, la guía y los logotipos dependen del proveedor. La lista M3U inicial procede de TDTChannels y la guía externa inicial es EPG dobleM, con la guía de la fuente como complemento; las entradas que requieren un navegador o extracción web no se incluyen. [Configuración y límites](IPTV.es.md).
 
 La fuente Antena utiliza el sintonizador y la base de canales que el fabricante comparte con Android. Requiere un televisor con sintonizador compatible, canales sintonizados y cable con señal. En dispositivos externos sin sintonizador se muestra su indisponibilidad. La integración no cambia la sintonización ni reproduce canales bloqueados por la TV.
 
@@ -47,3 +47,5 @@ Desde 1.15, Películas y Series consultan las páginas ordenadas por fecha de in
 Plex publica descriptores para sus filtros y órdenes. Vela utiliza los correspondientes al tipo elegido y solo permite rutas locales de esa sección. Jellyfin aporta los valores de sus endpoints de filtros y los criterios equivalentes de Items. Las listas de idiomas y géneros dependen de los metadatos; Jellyfin puede devolver géneros por nombre cuando no hay identificadores. El editor de condiciones anidadas de Plex no forma parte de esta interfaz. Consulta la [guía de filtros](FILTROS.es.md) para los campos y límites.
 
 Se han verificado en emulador los filtros de Plex con transporte HTTPS simulado y Jellyfin con servidor 12.2 real, incluidos año, géneros combinados y favoritos. No se afirma haber validado todas las versiones de Plex/Jellyfin ni estos controles en una televisión física.
+
+La TV integrada y el panel de canales durante la reproducción se han comprobado en un emulador Android 16 con M3U/XMLTV públicos y vídeo decodificado, además de señales locales de prueba. La validación en la TCL Android 11 corresponde a las versiones previas de este mismo diseño; no certifica otros fabricantes ni todos los proveedores. La antena requiere cable y señal: disponer de canales sintonizados no prueba su recepción.

@@ -42,7 +42,7 @@ Las compilaciones públicas mantienen desactivada la opción de deshabilitar paq
 - **Plex:** autoriza el código en `plex.tv/link`. Elige entre tus servidores si aparecen varios. Los carteles, bibliotecas y perfil proceden de esa cuenta.
 - **Jellyfin:** abre Ajustes → Cuentas y servicios → Jellyfin, introduce la dirección completa de tu servidor y autoriza Quick Connect desde otra sesión de Jellyfin. También puedes usar usuario y contraseña. Instala y configura Jellyfin para Android TV con ese mismo servidor y usuario para abrir los títulos. [Guía de Jellyfin](JELLYFIN.es.md).
 - **YouTube y Prime Video:** inicia sesión en sus propias aplicaciones. Vela abre esas sesiones y, para YouTube, las filas que la app comparta con Android TV.
-- **TV:** el catálogo público y la guía proceden de TDTChannels. Puedes añadir una lista M3U HTTPS o conectar tu servicio Xtream desde TV → Lista y ajustes → IPTV · Xtream. Introduce los datos de la cuenta directamente en la televisión. [Configurar IPTV](IPTV.es.md).
+- **TV:** la lista inicial procede de TDTChannels y la guía externa inicial es EPG dobleM, con los horarios de la fuente como complemento. Puedes añadir una lista M3U HTTPS o conectar tu servicio Xtream desde Ajustes → TV en directo → Cuenta Xtream. Introduce los datos de la cuenta directamente en la televisión. [Configurar IPTV](IPTV.es.md).
 - **Tiempo:** utiliza la ubicación aproximada, si la autorizas, o busca tu ciudad. No hay una ciudad personal incorporada en el APK.
 
 ## Personalizar
