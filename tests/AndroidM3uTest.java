@@ -27,6 +27,7 @@ public final class AndroidM3uTest extends Instrumentation {
         Map<String,?> plex=new HashMap<>(new PlexClient(c).prefs.getAll()),xtream=new HashMap<>(c.getSharedPreferences("xtream",0).getAll());String[] sidebar=SidebarApps.slots(c);
         try{
             check(android.os.Build.FINGERPRINT.contains("generic")||android.os.Build.MODEL.contains("sdk"),"Emulator required");
+            prefs.edit().putBoolean("tv-timeline",false).commit();
             File fixture=new File(c.getExternalFilesDir(null),"xtream-fixture.json");JSONObject config=new JSONObject(new String(LiveTvData.read(fixture,8192),"UTF-8"));base=config.getString("base");String password=config.getString("password");check(base.startsWith("http://127.0.0.1:"),"Owned loopback fixture required");String address=base+"/m3u?auth="+XtreamClient.enc(password);
             M3uClient client=new M3uClient(c);client.configure(address,"",true);check(LiveTvData.mode(c).equals("m3u"),"M3U not selected");
             for(Object v:prefs.getAll().values())check(!v.toString().contains(password),"Plaintext M3U credential in preferences");

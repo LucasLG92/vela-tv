@@ -4,7 +4,7 @@
 
 Your movies, series, apps and live TV, brought together in a home screen made for your remote. Connect Plex or Jellyfin, pick your favorites and make Vela feel like yours.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.19.1-preview)** · [41 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.20.0-preview)** · [41 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
 
 ![Vela home screen](../gallery/01-inicio.webp)
 
@@ -19,7 +19,7 @@ Your movies, series, apps and live TV, brought together in a home screen made fo
 
 Vela loads artwork when needed and releases resources when you leave. The home screen has no continuous video or animation loop.
 
-For Android TV and Google TV running Android 11 or later. **1.19.1 Preview.** Streaming availability depends on each service and device; see [compatibility](COMPATIBILITY.es.md). YouTube and Prime Video manage sign-in in their own apps. Vela can also display Continue watching items that installed apps publish through Android TV Watch Next; availability depends on the app and device. Missing playback times are never invented.
+For Android TV and Google TV running Android 11 or later. **1.20.0 Preview.** Streaming availability depends on each service and device; see [compatibility](COMPATIBILITY.es.md). YouTube and Prime Video manage sign-in in their own apps. Vela can also display Continue watching items that installed apps publish through Android TV Watch Next; availability depends on the app and device. Missing playback times are never invented.
 
 [Privacy](PRIVACY.es.md) · [Credits and media information](../NOTICE.md) · [Build](BUILD.md) · [MIT license](../LICENSE)
 
@@ -32,3 +32,5 @@ Movies and Series now default to latest server additions. Filter and sort the en
 Choose **Channels** for large original logos or **Guide** for a horizontal programme timeline. Browse channels and upcoming shows with the remote, see remaining time and jump back to **Now**. M3U, Xtream and compatible antenna tuners share one interface. Hold OK for favorites and quality choices. The guide reads six channels and three hours at a time from its disk index, with no background video previews. [Live TV setup](IPTV.es.md).
 
 ![Horizontal programme guide](../gallery/40-guia-horizontal.webp)
+
+If an IPTV signal fails, Vela tries another signal for the same channel, including a lower quality when available. Your preferred quality stays saved. Startup and playback stalls have a 20-second grace period; explicit pauses are respected. Only one player runs at a time.

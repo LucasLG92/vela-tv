@@ -7,13 +7,13 @@ import argparse,os,subprocess
 parser=argparse.ArgumentParser()
 parser.add_argument('--serial',required=True)
 parser.add_argument('--adb-port',default='5037')
-parser.add_argument('--test',choices=['artwork','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-progress','continue-watching','appearance','gallery','apps-grid','updates','update-permission','jellyfin','watched','catalog-filters','xtream','m3u','tv-logos','tv-redesign','tv-timeline'],default='artwork')
+parser.add_argument('--test',choices=['artwork','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-progress','continue-watching','appearance','gallery','apps-grid','updates','update-permission','jellyfin','watched','catalog-filters','xtream','m3u','tv-logos','tv-redesign','tv-timeline','tv-fallback'],default='artwork')
 parser.add_argument('--jellyfin-fixture',help='Private JSON for an owned loopback Jellyfin fixture; emulator only')
 parser.add_argument('--xtream-fixture',help='Private JSON for an owned loopback Xtream fixture; emulator only')
 args=parser.parse_args()
-if args.test in ('xtream','m3u') and not args.xtream_fixture:parser.error('--xtream-fixture is required')
+if args.test in ('xtream','m3u','tv-fallback') and not args.xtream_fixture:parser.error('--xtream-fixture is required')
 if args.test=='jellyfin' and not args.jellyfin_fixture:parser.error('--jellyfin-fixture is required')
-test_class={'artwork':'ArtworkLifecycleTest','ambient':'AndroidAmbientTest','weather':'AndroidWeatherTest','sidebar':'AndroidSidebarTest','reorder':'AndroidSidebarReorderTest','remove':'AndroidSidebarRemoveTest','catalog':'AndroidCatalogTest','home-status':'AndroidHomeStatusTest','account':'AndroidAccountHeaderTest','personalization':'AndroidPersonalizationTest','live-tv':'AndroidLiveTvTest','tv-progress':'AndroidTvProgressTest','continue-watching':'AndroidContinueWatchingTest','appearance':'AndroidAppearanceTest','gallery':'AndroidGalleryTest','apps-grid':'AndroidAppsGridTest','updates':'AndroidUpdatesTest','update-permission':'AndroidUpdatePermissionTest','jellyfin':'AndroidJellyfinTest','watched':'AndroidWatchedTest','catalog-filters':'AndroidCatalogFiltersTest','xtream':'AndroidXtreamTest','m3u':'AndroidM3uTest','tv-logos':'AndroidTvLogoTest','tv-redesign':'AndroidTvRedesignTest','tv-timeline':'AndroidTvTimelineTest'}[args.test]
+test_class={'artwork':'ArtworkLifecycleTest','ambient':'AndroidAmbientTest','weather':'AndroidWeatherTest','sidebar':'AndroidSidebarTest','reorder':'AndroidSidebarReorderTest','remove':'AndroidSidebarRemoveTest','catalog':'AndroidCatalogTest','home-status':'AndroidHomeStatusTest','account':'AndroidAccountHeaderTest','personalization':'AndroidPersonalizationTest','live-tv':'AndroidLiveTvTest','tv-progress':'AndroidTvProgressTest','continue-watching':'AndroidContinueWatchingTest','appearance':'AndroidAppearanceTest','gallery':'AndroidGalleryTest','apps-grid':'AndroidAppsGridTest','updates':'AndroidUpdatesTest','update-permission':'AndroidUpdatePermissionTest','jellyfin':'AndroidJellyfinTest','watched':'AndroidWatchedTest','catalog-filters':'AndroidCatalogFiltersTest','xtream':'AndroidXtreamTest','m3u':'AndroidM3uTest','tv-logos':'AndroidTvLogoTest','tv-redesign':'AndroidTvRedesignTest','tv-timeline':'AndroidTvTimelineTest','tv-fallback':'AndroidTvFallbackTest'}[args.test]
 root=Path(__file__).resolve().parents[1]
 sdk=Path(os.environ['ANDROID_HOME']);jdk=Path(os.environ['JAVA_HOME'])
 bt=max((sdk/'build-tools').iterdir(),key=lambda p:tuple(int(x) for x in p.name.split('.')))
@@ -32,11 +32,11 @@ run([jdk/('bin/jar'+exe),'uf',out/'base.apk','-C',out,'classes.dex'])
 run([bt/('zipalign'+exe),'-f','4',out/'base.apk',out/'aligned.apk'])
 run([bt/('apksigner'+bat),'sign','--ks',root/'vela.keystore','--ks-pass','pass:vela-local','--out',out/'tests.apk',out/'aligned.apk'])
 adb=[sdk/('platform-tools/adb'+exe),'-P',args.adb_port,'-s',args.serial]
-if args.test in ('jellyfin','watched','catalog-filters','updates','update-permission','xtream','m3u'):
+if args.test in ('jellyfin','watched','catalog-filters','updates','update-permission','xtream','m3u','tv-fallback'):
     assert subprocess.check_output(list(map(str,adb+['shell','getprop','ro.kernel.qemu']))).decode().strip()=='1','This isolated fixture requires an emulator'
 if args.test in ('watched','catalog-filters'):run(adb+['shell','am','force-stop','tv.vela.launcher'])
 run(adb+['install','-r',out/'tests.apk'])
-if args.test in ('xtream','m3u'):run(adb+['push',Path(args.xtream_fixture),'/sdcard/Android/data/tv.vela.launcher/files/xtream-fixture.json'])
+if args.test in ('xtream','m3u','tv-fallback'):run(adb+['push',Path(args.xtream_fixture),'/sdcard/Android/data/tv.vela.launcher/files/xtream-fixture.json'])
 if args.test=='jellyfin':run(adb+['push',Path(args.jellyfin_fixture),'/sdcard/Android/data/tv.vela.launcher/files/jellyfin-fixture.json'])
 install_mode=None
 if args.test=='updates':
@@ -56,6 +56,6 @@ try:
 finally:
     if install_mode is not None:subprocess.run(list(map(str,adb+['shell','appops','set','tv.vela.launcher','REQUEST_INSTALL_PACKAGES',install_mode])),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     if args.test in ('watched','catalog-filters'):subprocess.run(list(map(str,adb+['shell','am','force-stop','tv.vela.launcher'])),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-    if args.test in ('xtream','m3u'):subprocess.run(list(map(str,adb+['shell','rm','-f','/sdcard/Android/data/tv.vela.launcher/files/xtream-fixture.json'])),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    if args.test in ('xtream','m3u','tv-fallback'):subprocess.run(list(map(str,adb+['shell','rm','-f','/sdcard/Android/data/tv.vela.launcher/files/xtream-fixture.json'])),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     if args.test=='jellyfin':subprocess.run(list(map(str,adb+['shell','rm','-f','/sdcard/Android/data/tv.vela.launcher/files/jellyfin-fixture.json'])),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     subprocess.run(list(map(str,adb+['uninstall','tv.vela.launcher.tests'])),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)

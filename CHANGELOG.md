@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.20.0 Preview · 2026-10-22
+
+- Cambio automático de señal en M3U y Xtream: si una emisión falla, se prueban sus otros formatos y variantes del mismo canal, priorizando la misma calidad y después las inferiores.
+- Margen de 20 segundos para iniciar una señal y detectar bloqueos prolongados de reproducción; comprobación de progreso cada cinco segundos y respeto de la pausa con el mando.
+- Se conserva la calidad preferida para la próxima vez. Cambiar de canal, salir o volver a la lista cancela los intentos pendientes. Si fallan todas las señales disponibles, se permite reintentar con Otra señal.
+- Un único reproductor; hasta ocho variantes y cuatro enlaces por variante, sin repetir URL ni realizar descargas de prueba. Sin búsquedas entre otras cuentas, países, regiones o emisiones +1. La antena mantiene su comportamiento propio.
+- Pruebas nativas con señales locales de prueba: errores HTTP, vídeo HLS y MPEG-TS decodificado, salto de FHD a HD/SD, pausa, cambio de canal, liberación y agotamiento de alternativas. Regresión M3U y Xtream con 10.001 canales.
+
 ## 1.19.1 Preview · 2026-10-22
 
 - Guía horizontal junto a la cuadrícula: logos, horarios, línea de hora actual, tiempo restante y botón Ahora. Navegación con el mando entre programas, canales, bloques y páginas; se recuerda la vista elegida.

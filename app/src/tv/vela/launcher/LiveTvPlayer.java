@@ -32,10 +32,18 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     LiveTvData.Channel selected;
     boolean active,rendered,prepared;
     private boolean paused;
-    private int signal;
-    private long startedAt;
+    private TvSignalFallback signals;
+    private TvSignalFallback.Signal signal;
+    private final TvSignalFallback.Progress progress=new TvSignalFallback.Progress();
+    private int generation;
     private final Runnable hide=this::hideControls;
     private final Runnable timeout=()->failed();
+    private final Runnable retry=this::startSignal;
+    private final Runnable watch=new Runnable(){public void run(){
+        if(!active||player==null||!rendered)return;
+        try{if(progress.stalled(SystemClock.elapsedRealtime(),player.getCurrentPosition(),paused)){failed();return;}}catch(IllegalStateException unavailable){failed();return;}
+        main.postDelayed(this,TvSignalFallback.CHECK_INTERVAL_MS);
+    }};
     LiveTvPlayer(LiveTvActivity a,Actions actions){
         super(a);activity=a;this.actions=actions;setBackgroundColor(0xFF000000);setClipChildren(false);setClipToPadding(false);audio=(AudioManager)a.getSystemService(Context.AUDIO_SERVICE);
         video=new SurfaceView(a);video.getHolder().addCallback(this);addView(video,new LayoutParams(-1,-1,Gravity.CENTER));
@@ -48,7 +56,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         programme=text("",23,0xFFB6C3D5,Ui.regular);programme.setSingleLine(true);programme.setEllipsize(android.text.TextUtils.TruncateAt.END);put(panel,programme,100,147,1710,44);
         control(Ui.tr("Canais","Channels","Canales"),100,actions::back);
         favorite=control(Ui.tr("Favorito","Favorite","Favorito"),440,actions::favorite);
-        signalButton=control(Ui.tr("Outra emissão","Other signal","Otra señal"),780,()->{signal++;startSignal();});
+        signalButton=control(Ui.tr("Outra emissão","Other signal","Otra señal"),780,this::otherSignal);
         TextView hint=text(Ui.tr("↑ / ↓ trocar canal    ·    OK controles    ·    Voltar canais","↑ / ↓ change channel    ·    OK controls    ·    Back channels","↑ / ↓ cambiar canal    ·    OK controles    ·    Atrás canales"),18,0xFF8998AF,Ui.regular);put(panel,hint,100,320,1720,36);
     }
     private TextView text(String value,int size,int color,Typeface font){TextView t=new TextView(activity);t.setText(value);t.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);t.setTextColor(color);t.setTypeface(font);t.setIncludeFontPadding(false);t.setGravity(Gravity.CENTER_VERTICAL);return t;}
@@ -61,30 +69,34 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         for(Placement item:placements){LayoutParams p=(LayoutParams)item.view.getLayoutParams();p.width=Math.round(item.w*uiScale);p.height=Math.round(item.h*uiScale);p.leftMargin=Math.round(item.x*uiScale);p.topMargin=Math.round(item.y*uiScale);item.view.setLayoutParams(p);if(item.textSize>0)((TextView)item.view).setTextSize(TypedValue.COMPLEX_UNIT_PX,item.textSize*uiScale);}
         for(TextView b:buttons)if(b.getBackground() instanceof GradientDrawable)((GradientDrawable)b.getBackground()).setCornerRadius(15*uiScale);resize();
     }
-    void select(LiveTvData.Channel ch){selected=ch;signal=0;paused=false;channel.setText((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));signalButton.setVisibility(ch.antenna()?GONE:VISIBLE);showControls();if(active)startSignal();}
+    void select(LiveTvData.Channel ch){selected=ch;signals=new TvSignalFallback(ch);signal=null;paused=false;channel.setText((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));signalButton.setVisibility(ch.antenna()?GONE:VISIBLE);showControls();if(active)startSignal();}
     void metadata(String title,boolean chosen){programme.setText(title);favorite.setText((chosen?"★ ":"☆ ")+Ui.tr("Favorito","Favorite","Favorito"));}
-    void resume(){if(active)return;active=true;setKeepScreenOn(true);if(selected!=null&&(selected.antenna()||video.getHolder().getSurface().isValid()))startSignal();}
+    void resume(){if(active)return;active=true;signals=new TvSignalFallback(selected);signal=null;setKeepScreenOn(true);if(selected!=null&&(selected.antenna()||video.getHolder().getSurface().isValid()))startSignal();}
     void pause(){active=false;main.removeCallbacksAndMessages(null);release();setKeepScreenOn(false);}
     private void startSignal(){
         release();if(!active||selected==null||!selected.playable()||!selected.antenna()&&!video.getHolder().getSurface().isValid())return;
-        message.setVisibility(VISIBLE);message.setText(Ui.tr("Conectando a ","Connecting to ","Conectando con ")+selected.name+"…");panel.setVisibility(VISIBLE);
+        message.setVisibility(VISIBLE);message.setText(Ui.tr("Conectando a ","Connecting to ","Conectando con ")+LiveTvActivity.displayName(selected.name)+"…");panel.setVisibility(VISIBLE);
         if(selected.antenna()){startAntenna();return;}
-        audioFocus=new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MOVIE).build()).setOnAudioFocusChangeListener(focus->{if(focus<0&&active){release();message.setText(Ui.tr("Áudio interrompido. Escolha outra emissão para continuar.","Audio interrupted. Select Other signal to resume.","Audio interrumpido. Elige Otra señal para continuar."));message.setVisibility(VISIBLE);showControls();}},main).build();
+        if(signal==null)signal=nextSignal();if(signal==null){unavailable();return;}
+        if(signals.attempts()>1)message.setText(Ui.tr("Tentando outra emissão…","Trying another signal…","Probando otra señal…"));
+        final int attempt=generation;
+        audioFocus=new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MOVIE).build()).setOnAudioFocusChangeListener(focus->{if(focus<0&&active&&attempt==generation){release();message.setText(Ui.tr("Áudio interrompido. Escolha outra emissão para continuar.","Audio interrupted. Select Other signal to resume.","Audio interrumpido. Elige Otra señal para continuar."));message.setVisibility(VISIBLE);showControls();}},main).build();
         if(audio!=null&&audio.requestAudioFocus(audioFocus)!=AudioManager.AUDIOFOCUS_REQUEST_GRANTED){release();message.setText(Ui.tr("Áudio indisponível. Tente novamente.","Audio unavailable. Try again.","Audio no disponible. Vuelve a intentarlo."));return;}
-        MediaPlayer next=new MediaPlayer();player=next;rendered=false;prepared=false;paused=false;
         try{
+            MediaPlayer next=new MediaPlayer();player=next;rendered=false;prepared=false;paused=false;
             next.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MOVIE).build());
             next.setSurface(video.getHolder().getSurface());next.setScreenOnWhilePlaying(true);
             next.setOnVideoSizeChangedListener((p,w,h)->{if(p==player){resize();format.setText(format.getText().toString().split(" · ")[0]+" · "+h+"p");}});
-            next.setOnPreparedListener(p->{if(active&&p==player){prepared=true;p.start();}});
-            next.setOnInfoListener((p,what,extra)->{if(active&&p==player&&what==MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START){rendered=true;startedAt=SystemClock.elapsedRealtime();main.removeCallbacks(timeout);message.setVisibility(GONE);LiveTvData.prefs(activity).edit().putString("last-"+LiveTvData.hash(LiveTvData.source(activity)),selected.id).apply();delayHide();}return false;});
+            next.setOnPreparedListener(p->{if(active&&p==player){try{prepared=true;p.start();}catch(IllegalStateException unavailable){failed();}}});
+            next.setOnInfoListener((p,what,extra)->{if(active&&p==player&&what==MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START){rendered=true;progress.reset(SystemClock.elapsedRealtime(),p.getCurrentPosition());main.removeCallbacks(timeout);main.removeCallbacks(watch);main.postDelayed(watch,TvSignalFallback.CHECK_INTERVAL_MS);message.setVisibility(GONE);LiveTvData.prefs(activity).edit().putString("last-"+LiveTvData.hash(LiveTvData.source(activity)),selected.id).apply();delayHide();}return false;});
             next.setOnErrorListener((p,what,extra)->{if(active&&p==player)failed();return true;});
             next.setOnCompletionListener(p->{if(active&&p==player)failed();});
-            List<String> urls=selected.xtreamId.isEmpty()?selected.streams:new XtreamClient(activity).streams(selected);if(urls.isEmpty())throw new IllegalStateException();signal=Math.floorMod(signal,urls.size());
-            String path=Uri.parse(urls.get(signal)).getPath();format.setText(path!=null&&path.endsWith(".m3u8")?"HLS":path!=null&&path.endsWith(".ts")?"MPEG-TS":"IPTV");
-            next.setDataSource(activity,Uri.parse(urls.get(signal)),Collections.singletonMap("User-Agent","Vela"));next.prepareAsync();main.postDelayed(timeout,20_000);
+            String path=Uri.parse(signal.url).getPath();format.setText(path!=null&&path.endsWith(".m3u8")?"HLS":path!=null&&path.endsWith(".ts")?"MPEG-TS":"IPTV");
+            next.setDataSource(activity,Uri.parse(signal.url),Collections.singletonMap("User-Agent","Vela"));next.prepareAsync();main.postDelayed(timeout,TvSignalFallback.START_TIMEOUT_MS);
         }catch(Exception e){failed();}
     }
+    private TvSignalFallback.Signal nextSignal(){return signals==null?null:signals.next(ch->ch.xtreamId.isEmpty()?ch.streams:new XtreamClient(activity).streams(ch));}
+    private void otherSignal(){release();if(selected==null)return;signal=nextSignal();if(signal==null){signals=new TvSignalFallback(selected);signal=nextSignal();}startSignal();}
     private void startAntenna(){
         video.setVisibility(GONE);format.setText(Ui.tr("ANTENA","ANTENNA","ANTENA"));TvView next=new TvView(activity);tuner=next;addView(next,0,new LayoutParams(-1,-1));
         next.setCallback(new TvView.TvInputCallback(){
@@ -98,11 +110,14 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         try{next.tune(selected.inputId,android.media.tv.TvContract.buildChannelUri(Long.parseLong(selected.epgId)));next.setStreamVolume(1f);main.postDelayed(timeout,25_000);}catch(RuntimeException unavailable){failed();}
     }
     private void failed(){
-        release();if(!active)return;message.setVisibility(VISIBLE);message.setText(selected!=null&&selected.antenna()?Ui.tr("Sem sinal de antena. Confira o cabo e os canais sintonizados.","No antenna signal. Check the cable and tuned channels.","Sin señal de antena. Comprueba el cable y los canales sintonizados."):Ui.tr("Não foi possível abrir a emissão. Tente Outra emissão ou volte aos canais.","Could not open this signal. Try Other signal or return to channels.","No se ha podido abrir la señal. Prueba Otra señal o vuelve a los canales."));showControls();
+        release();if(!active)return;
+        if(selected!=null&&!selected.antenna()&&(signal=nextSignal())!=null){message.setVisibility(VISIBLE);message.setText(Ui.tr("Tentando outra emissão…","Trying another signal…","Probando otra señal…"));panel.setVisibility(VISIBLE);main.postDelayed(retry,250);return;}
+        unavailable();
     }
+    private void unavailable(){message.setVisibility(VISIBLE);message.setText(selected!=null&&selected.antenna()?Ui.tr("Sem sinal de antena. Confira o cabo e os canais sintonizados.","No antenna signal. Check the cable and tuned channels.","Sin señal de antena. Comprueba el cable y los canales sintonizados."):Ui.tr("Nenhuma emissão disponível. Tente Outra emissão ou volte aos canais.","No signal available. Try Other signal or return to channels.","No hay señales disponibles. Prueba Otra señal o vuelve a los canales."));showControls();}
     private void resize(){if(player==null)return;try{int vw=player.getVideoWidth(),vh=player.getVideoHeight(),w=getWidth(),h=getHeight();if(vw<=0||vh<=0||w<=0||h<=0)return;float s=Math.min(w/(float)vw,h/(float)vh);video.setLayoutParams(new LayoutParams(Math.round(vw*s),Math.round(vh*s),Gravity.CENTER));}catch(IllegalStateException ignored){}}
     private void release(){
-        main.removeCallbacks(timeout);main.removeCallbacks(hide);TvView oldTuner=tuner;tuner=null;if(oldTuner!=null){oldTuner.setCallback(null);oldTuner.reset();removeView(oldTuner);}video.setVisibility(VISIBLE);MediaPlayer old=player;player=null;prepared=false;rendered=false;
+        generation++;main.removeCallbacks(timeout);main.removeCallbacks(hide);main.removeCallbacks(retry);main.removeCallbacks(watch);TvView oldTuner=tuner;tuner=null;if(oldTuner!=null){oldTuner.setCallback(null);oldTuner.reset();removeView(oldTuner);}video.setVisibility(VISIBLE);MediaPlayer old=player;player=null;prepared=false;rendered=false;
         if(old!=null){old.setOnPreparedListener(null);old.setOnInfoListener(null);old.setOnErrorListener(null);old.setOnCompletionListener(null);old.setOnVideoSizeChangedListener(null);old.release();}
         if(audio!=null&&audioFocus!=null)audio.abandonAudioFocusRequest(audioFocus);audioFocus=null;
     }
@@ -116,7 +131,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
             actions.zap(key==KeyEvent.KEYCODE_CHANNEL_UP||key==KeyEvent.KEYCODE_DPAD_UP?1:-1);return true;
         }
         if((key==KeyEvent.KEYCODE_DPAD_CENTER||key==KeyEvent.KEYCODE_ENTER)&&panel.getVisibility()!=VISIBLE){showControls();return true;}
-        if(key==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE&&prepared&&player!=null){try{if(player.isPlaying()){player.pause();paused=true;showControls();}else{player.start();paused=false;delayHide();}}catch(IllegalStateException ignored){}return true;}
+        if(key==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE&&prepared&&player!=null){try{if(player.isPlaying()){player.pause();paused=true;main.removeCallbacks(timeout);showControls();}else{player.start();paused=false;progress.reset(SystemClock.elapsedRealtime(),player.getCurrentPosition());if(!rendered)main.postDelayed(timeout,TvSignalFallback.START_TIMEOUT_MS);delayHide();}}catch(IllegalStateException ignored){}return true;}
         if(panel.getVisibility()==VISIBLE)delayHide();return false;
     }
     @Override public void surfaceCreated(SurfaceHolder holder){if(active&&selected!=null&&!selected.antenna())startSignal();}

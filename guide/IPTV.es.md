@@ -32,7 +32,16 @@ Si hay canales guardados pero falta el cable o la señal, la lista permanece dis
 - **Mantener OK** abre las opciones del canal para añadirlo a favoritos, quitarlo o elegir su calidad. Los favoritos pertenecen a su fuente y cuenta; admiten hasta 128 entradas.
 - **OK** abre el reproductor de Vela. **CH+ / CH−** cambia de canal, también entre páginas. **Atrás** vuelve a la lista y libera la reproducción.
 - En IPTV, **Otra señal** permite alternar entre los formatos o señales disponibles. Xtream utiliza HLS primero y MPEG-TS como alternativa cuando el servicio los ofrece.
+- Si una señal IPTV falla, Vela prueba automáticamente otra del mismo canal. Primero intenta el otro formato o una señal de la misma calidad; después, las calidades inferiores más cercanas. Tu calidad elegida sigue guardada para la próxima vez que abras el canal.
 - La guía muestra el programa actual, el siguiente y el tiempo que queda. Los horarios caducados o desconocidos no generan un contador.
+
+### Si una señal deja de funcionar
+
+El cambio automático está activo para M3U y Xtream cuando la lista incluye señales o calidades alternativas del mismo canal. Un error de reproducción permite pasar a la siguiente señal; una conexión que no arranca tiene un margen de 20 segundos. Durante la reproducción, una comprobación cada cinco segundos detecta si la posición lleva al menos 20 segundos sin avanzar. Las pausas con el mando se respetan.
+
+Vela libera el reproductor anterior antes de abrir la siguiente señal. No hace descargas de prueba ni mantiene reproductores en segundo plano. Cada sesión recorre como máximo ocho variantes y cuatro enlaces por variante, sin repetir la misma URL ni guardar automáticamente la calidad inferior. Si fallan todas, se detiene y permite volver a intentarlo con **Otra señal**. Cambiar de canal, volver a la lista o salir cancela los intentos pendientes.
+
+Las alternativas proceden de la misma fuente y cuenta; se mantienen separados países, regiones y emisiones +1. Si el proveedor no facilita otra señal del canal, Vela muestra que no está disponible. La antena conserva su aviso de falta de señal y no cambia a una fuente IPTV.
 
 ## Ligero al navegar
 
