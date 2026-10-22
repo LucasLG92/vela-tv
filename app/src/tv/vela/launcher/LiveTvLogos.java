@@ -23,14 +23,16 @@ final class LiveTvLogos {
     }
     private final Context context;private final Handler main=new Handler(Looper.getMainLooper());
     private final ThreadPoolExecutor io=Visuals.worker(2);private final List<Future<?>> jobs=new ArrayList<>();
+    private final Map<ImageView,String> bindings=new WeakHashMap<>();
     private final LruCache<String,Bitmap> cache=new LruCache<String,Bitmap>(768){@Override protected int sizeOf(String key,Bitmap b){return Math.max(1,b.getAllocationByteCount()/1024);}};
     private int epoch;private boolean closed;
     LiveTvLogos(Context c){context=c.getApplicationContext();}
     void load(String url,ImageView view){load(url,view,false,false,null);}
     void load(LiveTvData.Channel channel,ImageView view){load(channel.logo,view,true,channel.antenna(),channel);}
     private void load(String url,ImageView view,boolean privateLogo,boolean local,LiveTvData.Channel channel){
-        if(closed)return;String key=channel==null?url:channel.id+":"+url;Bitmap ready=cache.get(key);if(ready!=null){view.setImageBitmap(ready);return;}final int generation=epoch;
-        try{jobs.add(io.submit(()->{try{Bitmap decoded=image(url,privateLogo,local);if(decoded==null&&channel!=null&&!Thread.currentThread().isInterrupted()){String fallback=new XmlTvGuide(context).logo(channel);if(!fallback.equals(url))decoded=image(fallback,true,false);}if(decoded==null)return;Bitmap bitmap=decoded;main.post(()->{if(!closed&&generation==epoch){cache.put(key,bitmap);view.setImageBitmap(bitmap);}else bitmap.recycle();});prune(context);}catch(Exception ignored){/* The name remains visible when no original logo is available. */}}));}catch(RejectedExecutionException ignored){}
+        if(closed)return;String key=channel==null?url:channel.id+":"+url;String previous=bindings.put(view,key);if(!key.equals(previous))view.setImageDrawable(null);Bitmap ready=cache.get(key);if(ready!=null){view.setImageBitmap(ready);return;}final int generation=epoch;
+        jobs.removeIf(Future::isDone);
+        try{jobs.add(io.submit(()->{try{Bitmap decoded=image(url,privateLogo,local);if(decoded==null&&channel!=null&&!Thread.currentThread().isInterrupted()){String fallback=new XmlTvGuide(context).logo(channel);if(!fallback.equals(url))decoded=image(fallback,true,false);}if(decoded==null)return;Bitmap bitmap=decoded;main.post(()->{if(!closed&&generation==epoch){cache.put(key,bitmap);if(key.equals(bindings.get(view)))view.setImageBitmap(bitmap);}else bitmap.recycle();});prune(context);}catch(Exception ignored){/* The name remains visible when no original logo is available. */}}));}catch(RejectedExecutionException ignored){}
     }
     private Bitmap image(String url,boolean privateLogo,boolean local){try{
         if(url.isEmpty()||Thread.currentThread().isInterrupted()||!(local?AntennaClient.localLogo(url):LiveTvData.https(url)||privateLogo&&url.startsWith("http://")))return null;
@@ -40,7 +42,7 @@ final class LiveTvLogos {
         options.inSampleSize=1;while(Math.max(options.outWidth,options.outHeight)/options.inSampleSize>256)options.inSampleSize*=2;options.inJustDecodeBounds=false;Bitmap decoded=BitmapFactory.decodeFile(file.getPath(),options);if(decoded==null)return null;
         float scale=Math.min(1,128f/Math.max(decoded.getWidth(),decoded.getHeight()));Bitmap bitmap=scale<1?Bitmap.createScaledBitmap(decoded,Math.max(1,Math.round(decoded.getWidth()*scale)),Math.max(1,Math.round(decoded.getHeight()*scale)),true):decoded;if(bitmap!=decoded)decoded.recycle();return bitmap;
     }catch(Exception unavailable){return null;}}
-    void page(){epoch++;for(Future<?> job:jobs)job.cancel(true);jobs.clear();io.purge();}
+    void page(){epoch++;for(Future<?> job:jobs)job.cancel(true);jobs.clear();bindings.clear();io.purge();}
     void close(){closed=true;page();io.shutdownNow();main.removeCallbacksAndMessages(null);cache.evictAll();}
     static synchronized void prune(Context c){File folder=LiveTvData.cached(c,"epg.json").getParentFile();File[] parts=folder.listFiles((dir,name)->name.startsWith("fetch-")&&name.endsWith(".part"));if(parts!=null)for(File part:parts)if(System.currentTimeMillis()-part.lastModified()>3600_000)part.delete();File[] files=folder.listFiles((dir,name)->name.startsWith("logo-")&&name.endsWith(".img"));if(files==null)return;Arrays.sort(files,Comparator.comparingLong(File::lastModified).reversed());long bytes=0;for(int i=0;i<files.length;i++){bytes+=files[i].length();if(i>=64||bytes>4*1024*1024)files[i].delete();}}
 }

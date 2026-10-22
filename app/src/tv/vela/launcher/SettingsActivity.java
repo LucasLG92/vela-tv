@@ -19,10 +19,10 @@ import java.util.concurrent.ExecutorService;
 public class SettingsActivity extends Activity {
     private SettingsView view;
     private AmbientView preview;
-    private boolean returnToSetup;
+    private boolean returnToSetup,returnToCaller;
     private int entryPage;
     @Override protected void onCreate(Bundle state) {
-        super.onCreate(state);Watchdog.install(this);Ui.init(this);
+        super.onCreate(state);Watchdog.install(this);Ui.init(this);returnToCaller=getIntent().getBooleanExtra("returnToCaller",false);
         if(!getIntent().getBooleanExtra("fromSetup",false)&&Personalization.launchIfNeeded(this)){finish();return;}
         if(HomeMode.state(this).optBoolean("switchPending"))HomeMode.verify(this);
         view=new SettingsView(this);setContentView(view);
@@ -34,9 +34,9 @@ public class SettingsActivity extends Activity {
         if(getIntent().hasExtra("page")){
             int target=getIntent().getIntExtra("page",0);getIntent().removeExtra("page");
             returnToSetup=getIntent().getBooleanExtra("fromSetup",false);getIntent().removeExtra("fromSetup");
-            if(target==1||target==3||target==4||target==9||target==11||target==14||target==15||target==17||target==21){entryPage=target;view.render(target);}
+            if(target==1||target==3||target==4||target==9||target==11||target==14||target==15||target==17||target==21||target==22){entryPage=target;view.render(target);}
         }
-        else if(view.page==14||view.page==15||view.page==21)view.render(view.page);
+        else if(view.page==14||view.page==15||view.page==21||view.page==22)view.render(view.page);
         if(getIntent().getBooleanExtra("plex",false)){getIntent().removeExtra("plex");startActivity(new Intent(this,PlexLinkActivity.class));}
         if(preview==null&&getIntent().getBooleanExtra("screensaver",false)){getIntent().removeExtra("screensaver");showPreview();}
     }
@@ -126,7 +126,7 @@ public class SettingsActivity extends Activity {
                 row("Ajustes de la TV","›",202,"Tu televisión, a mano.","Imagen, sonido, red, Bluetooth y todos los controles de la televisión.",()->launch(new Intent(Settings.ACTION_SETTINGS)));
                 section("TU CONTENIDO",320);
                 row(Ui.tr("Contas e serviços","Accounts and services","Cuentas y servicios"),"›",362,Ui.tr("Seu conteúdo, conectado.","Your content, connected.","Tu contenido, conectado."),Ui.tr("Gerencie Plex, o servidor e o acesso aos apps de vídeo desta TV.","Manage Plex, your server and access to this TV's video apps.","Gestiona Plex, tu servidor y el acceso a las apps de vídeo de esta televisión."),()->open(14,3));
-                row("YouTube","›",442,"Tus vídeos en la TV.","Permite las filas que YouTube comparte con la televisión. Los recomendados personales y Ver más tarde se abren en YouTube.",()->open(3,4));
+                row(Ui.tr("TV em direto","Live TV","TV en directo"),LiveTvData.guideView(activity)?Ui.tr("Guia","Guide","Guía"):Ui.tr("Canais","Channels","Canales"),442,Ui.tr("Sua televisão, do seu jeito.","Your TV, your way.","Tu televisión, a tu manera."),Ui.tr("Escolha entre guia e canais e gerencie suas fontes M3U, Xtream ou antena.","Choose Guide or Channels and manage your M3U, Xtream or antenna sources.","Elige entre Guía y Canales y gestiona tus fuentes M3U, Xtream o antena."),()->open(22,4));
                 section("VELA",560);
                 row(Ui.tr("Acessos do menu","Menu shortcuts","Accesos del menú"),"›",602,Ui.tr("Seu menu, seus apps.","Your menu, your apps.","Tu menú, tus apps."),Ui.tr("Adicione, altere ou oculte apps. Para ordenar diretamente na barra, mantenha OK sobre um ícone e mova-o com as setas.","Add, change or hide apps. To reorder directly in the sidebar, hold OK on an icon and move it with the arrows.","Añade, cambia u oculta apps. Para ordenarlas directamente en la barra, mantén OK sobre un icono y muévelo con las flechas."),()->open(11,5));
                 row(Ui.tr("Aparência e desempenho","Appearance and performance","Apariencia y rendimiento"),Visuals.light(activity)?"Ligera":"Alta calidad",682,"Bonito. Y ligero.","Conserva la calidad de las imágenes o elige un consumo menor. Vela libera sus imágenes cuando abres otra aplicación.",()->open(2,6));
@@ -245,8 +245,16 @@ public class SettingsActivity extends Activity {
                 row("YouTube",SidebarApps.launchable(activity,SidebarApps.YOUTUBE)?Ui.tr("No app","In the app","En su app"):Ui.tr("Não instalado","Not installed","No instalada"),254,Ui.tr("Sua sessão do YouTube.","Your YouTube session.","Tu sesión de YouTube."),Ui.tr("Entre ou troque de conta no YouTube. Vela pode mostrar as filas que o app compartilha com a TV.","Sign in or switch accounts in YouTube. Vela can show the rows the app shares with the TV.","Inicia sesión o cambia de cuenta dentro de YouTube. Vela puede mostrar las filas que la app comparta con la TV."),()->render(3));
                 providerRow("Prime Video","com.amazon.amazonvideo.livingroom",354);
                 row(Ui.tr("Outros aplicativos","Other apps","Otras aplicaciones"),"›",454,Ui.tr("Seus apps e suas contas.","Your apps and accounts.","Tus apps y tus cuentas."),Ui.tr("Adicione apps instalados ao menu. Cada serviço gerencia sua própria sessão.","Add installed apps to the menu. Each service manages its own session.","Añade las apps instaladas al menú. Cada servicio gestiona su propia sesión."),()->render(11));
-                row(Ui.tr("TV em direto","Live TV","TV en directo"),"›",554,Ui.tr("Seus canais, no Vela.","Your channels, in Vela.","Tus canales, dentro de Vela."),Ui.tr("M3U, Xtream e antena. Canais, favoritos e programação em uma interface nativa.","M3U, Xtream and antenna. Channels, favorites and listings in a native interface.","M3U, Xtream y antena. Canales, favoritos y programación en una interfaz nativa."),()->activity.startActivity(new Intent(activity,LiveTvActivity.class).putExtra("sources",true)));
+                row(Ui.tr("TV em direto","Live TV","TV en directo"),"›",554,Ui.tr("Seus canais, no Vela.","Your channels, in Vela.","Tus canales, dentro de Vela."),Ui.tr("M3U, Xtream e antena. Canais, favoritos e programação em uma interface nativa.","M3U, Xtream and antenna. Channels, favorites and listings in a native interface.","M3U, Xtream y antena. Canales, favoritos y programación en una interfaz nativa."),()->render(22));
                 row(Ui.tr("Biblioteca do início","Home library","Biblioteca de Inicio"),new LibraryClient(activity).provider(),654,Ui.tr("Escolha sua biblioteca.","Choose your library.","Elige tu biblioteca."),Ui.tr("Escolha Plex ou Jellyfin para o início, catálogo e fundos do protetor de tela. As duas contas são mantidas.","Choose Plex or Jellyfin for home, catalog and library screensaver artwork. Both authorizations are kept.","Elige Plex o Jellyfin para Inicio, catálogo y fondos del salvapantallas. Se conservan las dos autorizaciones."),()->render(21));
+            }else if(page==22){
+                section(Ui.tr("TV EM DIRETO","LIVE TV","TV EN DIRECTO"),0);
+                boolean guide=LiveTvData.guideView(activity);
+                row(Ui.tr("Guia","Guide","Guía"),guide?"✓":"",54,Ui.tr("Tudo em uma linha do tempo.","Your TV on a timeline.","Toda tu televisión, en una guía."),Ui.tr("Explore os canais e seus horários lado a lado. É a vista inicial do Vela.","Explore channels and their schedules side by side. This is Vela's default view.","Explora los canales y sus horarios en horizontal. Es la vista predeterminada de Vela."),()->{LiveTvData.guideView(activity,true);render(22);rows.get(0).requestFocus();});
+                row(Ui.tr("Canais","Channels","Canales"),guide?"":"✓",134,Ui.tr("Seus canais em destaque.","Your channels, front and center.","Tus canales, protagonistas."),Ui.tr("Logos grandes e o programa no ar. Use as setas para cima e para baixo para mudar de categoria.","Large logos and the current programme. Use Up and Down to change category.","Logos grandes y el programa en emisión. Usa las flechas arriba y abajo para cambiar de categoría."),()->{LiveTvData.guideView(activity,false);render(22);rows.get(1).requestFocus();});
+                section(Ui.tr("SUAS FONTES","YOUR SOURCES","TUS FUENTES"),300);
+                row(Ui.tr("Listas e ajustes","Playlists and settings","Listas y ajustes"),"›",342,Ui.tr("Seus canais, conectados.","Your channels, connected.","Tus canales, conectados."),Ui.tr("Configure suas listas M3U, conta Xtream, antena e guia de programação.","Configure your M3U playlists, Xtream account, antenna and programme guide.","Configura tus listas M3U, tu cuenta Xtream, la antena y la guía de programación."),()->activity.startActivity(new Intent(activity,LiveTvActivity.class).putExtra("sources",true)));
+                note(Ui.tr("A vista escolhida é aplicada ao voltar à televisão.","Your chosen view applies when you return to TV.","La vista elegida se aplica al volver a la televisión."),470);
             }else if(page==21){
                 section(Ui.tr("BIBLIOTECA DO INÍCIO","HOME LIBRARY","BIBLIOTECA DE INICIO"),0);LibraryClient library=new LibraryClient(activity);PlexClient plex=new PlexClient(activity);JellyfinClient jellyfin=new JellyfinClient(activity);
                 row("Plex",plex.connected()?(library.isJellyfin()?plex.name():"✓ "+plex.name()):Ui.tr("Conectar","Connect","Conectar"),54,"Plex",Ui.tr("Usa esta biblioteca sem desconectar Jellyfin.","Use this library without unlinking Jellyfin.","Usa esta biblioteca sin desvincular Jellyfin."),()->{if(plex.connected()){LibraryClient.activate(activity,"Plex");render(21);}else activity.startActivity(new Intent(activity,PlexLinkActivity.class));});
@@ -343,7 +351,7 @@ public class SettingsActivity extends Activity {
         boolean onKey(KeyEvent e){
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==21){if(e.getAction()==KeyEvent.ACTION_UP)render(14);return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page>=17&&page<=20)){if(e.getAction()==KeyEvent.ACTION_UP){int old=page;render(old==17?2:17);rows.get(old==17?3:old-18).requestFocus();}return true;}
-            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&activity.returnToSetup&&page==activity.entryPage){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
+            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(activity.returnToSetup||activity.returnToCaller)&&page==activity.entryPage){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page==15||page==16)){if(e.getAction()==KeyEvent.ACTION_UP)render(page==16?15:14);return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page!=0){if(e.getAction()==KeyEvent.ACTION_UP){if(page==5){render(4);rows.get(3).requestFocus();}else if(page==12){render(11);rows.get(shortcutSlot<0?SidebarApps.slots(activity).length:Math.min(shortcutSlot,rows.size()-1)).requestFocus();}else if(page==10){render(9);rows.get(1).requestFocus();}else if(page==7||page==8||page==9){int focus=page==9?4:page==8?6:0;render(6);rows.get(focus).requestFocus();}else{render(0);if(returnRow<rows.size())rows.get(returnRow).requestFocus();}}return true;}
             return false;

@@ -15,6 +15,9 @@ final class LiveTvData {
     static final String EPG="https://www.tdtchannels.com/epg/TV.json";
     static final int PAGE_SIZE=12,MAX_CHANNELS=1200;
     static SharedPreferences prefs(Context c){return c.getSharedPreferences("live-tv",0);}
+    // An explicit Settings choice replaces the old last-used-view flag. Existing installs start in Guide too.
+    static boolean guideView(Context c){return !"channels".equals(prefs(c).getString("tv-view","guide"));}
+    static void guideView(Context c,boolean guide){prefs(c).edit().putString("tv-view",guide?"guide":"channels").apply();}
     static String mode(Context c){String mode=prefs(c).getString("mode","");if(mode.equals("antenna"))return mode;return new XtreamClient(c).active()?"xtream":"m3u";}
     static String source(Context c){String mode=mode(c);return mode.equals("antenna")?"antenna":mode.equals("xtream")?new XtreamClient(c).source():M3uClient.identity(c);}
     static void select(Context c,String mode){prefs(c).edit().putString("mode",mode).putBoolean("xtream",mode.equals("xtream")).apply();}

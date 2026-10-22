@@ -27,7 +27,7 @@ final class TvTimelineView extends FrameLayout {
     private Map<String,List<LiveTvData.Programme>> programmes=Collections.emptyMap();
     private final Actions actions;
     private long start,cursor,now;
-    private int row;
+    private int row,rowHeight=ROW;
     private boolean loading;
     TvTimelineView(Context context,Actions actions){
         super(context);this.actions=actions;setWillNotDraw(false);setFocusable(true);setFocusableInTouchMode(true);setClickable(true);setId(View.generateViewId());setDefaultFocusHighlightEnabled(false);
@@ -36,6 +36,7 @@ final class TvTimelineView extends FrameLayout {
         setOnFocusChangeListener((v,focused)->{invalidate();if(focused)notifySelection();});
     }
     static long present(long now){return now-now%1800;}
+    void rowHeight(int pixels){rowHeight=Math.max(ROW,Math.min(120,pixels));requestLayout();invalidate();}
     void data(List<LiveTvData.Channel> visible,Map<String,List<LiveTvData.Programme>> values,long from,LiveTvData.Channel selected,boolean waiting){
         boolean changed=from!=start;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,Math.min(ROWS,visible.size())));programmes=values;
         row=Math.max(0,Math.min(row,channels.size()-1));if(selected!=null)for(int i=0;i<channels.size();i++)if(channels.get(i).id.equals(selected.id))row=i;
@@ -53,24 +54,24 @@ final class TvTimelineView extends FrameLayout {
     @Override protected void onDraw(Canvas c){
         super.onDraw(c);now=System.currentTimeMillis()/1000;int w=getWidth();
         label(c,date.format(new Date(start*1000)),12,31,LABEL-24,18,0xFFA1ADBE,Ui.medium);
-        for(int i=0;i<6;i++){float px=LABEL+(w-LABEL)*i/6f;label(c,time(start+i*1800),px+10,31,(w-LABEL)/6f-20,18,0xFFB4C1D3,Ui.medium);paint.setColor(0x102C3F57);c.drawRect(px,HEADER,px+1,HEADER+channels.size()*ROW,paint);}
+        for(int i=0;i<6;i++){float px=LABEL+(w-LABEL)*i/6f;label(c,time(start+i*1800),px+10,31,(w-LABEL)/6f-20,18,0xFFB4C1D3,Ui.medium);paint.setColor(0x102C3F57);c.drawRect(px,HEADER,px+1,HEADER+channels.size()*rowHeight,paint);}
         for(int i=0;i<channels.size();i++){
-            float top=HEADER+i*ROW;boolean focused=hasFocus()&&row==i;paint.setColor(row==i?0x253B506A:0x102D3C50);c.drawRoundRect(0,top,LABEL-10,top+ROW-8,13,13,paint);
-            label(c,LiveTvActivity.displayName(channels.get(i).name),80,top+36,LABEL-106,21,0xFFF6F7FB,Ui.medium);
-            String quality=channels.get(i).antenna()?channels.get(i).number:TvChannelNames.quality(channels.get(i).name);label(c,quality,80,top+60,LABEL-106,13,0xFF8294AB,Ui.medium);
+            float top=HEADER+i*rowHeight;boolean focused=hasFocus()&&row==i;paint.setColor(row==i?0x253B506A:0x102D3C50);c.drawRoundRect(0,top,LABEL-10,top+rowHeight-8,13,13,paint);
+            label(c,LiveTvActivity.displayName(channels.get(i).name),80,top+36+(rowHeight-ROW)/2f,LABEL-106,21,0xFFF6F7FB,Ui.medium);
+            String quality=channels.get(i).antenna()?channels.get(i).number:TvChannelNames.quality(channels.get(i).name);label(c,quality,80,top+60+(rowHeight-ROW)/2f,LABEL-106,13,0xFF8294AB,Ui.medium);
             List<LiveTvData.Programme> list=programmes.getOrDefault(channels.get(i).id,Collections.emptyList());long edge=start;
-            c.save();c.clipRect(LABEL,top,w,top+ROW-8);
+            c.save();c.clipRect(LABEL,top,w,top+rowHeight-8);
             for(LiveTvData.Programme p:list){if(p.end<=start||p.start>=start+SECONDS)continue;if(p.start>edge)block(c,edge,Math.min(p.start,start+SECONDS),top,null,focused);block(c,Math.max(start,p.start),Math.min(start+SECONDS,p.end),top,p,focused);edge=Math.max(edge,p.end);}
             if(edge<start+SECONDS)block(c,edge,start+SECONDS,top,null,focused);c.restore();
         }
-        if(now>=start&&now<start+SECONDS){float px=x(now);paint.setColor(0xD381B5E9);c.drawCircle(px,HEADER-9,4,paint);c.drawRect(px-.75f,HEADER-5,px+.75f,HEADER+channels.size()*ROW-8,paint);}
+        if(now>=start&&now<start+SECONDS){float px=x(now);paint.setColor(0xD381B5E9);c.drawCircle(px,HEADER-9,4,paint);c.drawRect(px-.75f,HEADER-5,px+.75f,HEADER+channels.size()*rowHeight-8,paint);}
     }
     private void block(Canvas c,long from,long to,float top,LiveTvData.Programme p,boolean focused){
         if(to<=from)return;float left=Math.max(LABEL,x(from))+3,right=Math.min(getWidth(),x(to))-3;if(right-left<3)return;
-        boolean chosen=focused&&(p==null?cursor>=from&&cursor<to:p.start<=cursor&&p.end>cursor);paint.setColor(chosen?0xFFF0F3F8:p==null?0x162D4058:p.current(now)?0xFF293D55:0xFF1D2C40);c.drawRoundRect(left,top,right,top+ROW-8,12,12,paint);
+        boolean chosen=focused&&(p==null?cursor>=from&&cursor<to:p.start<=cursor&&p.end>cursor);paint.setColor(chosen?0xFFF0F3F8:p==null?0x162D4058:p.current(now)?0xFF293D55:0xFF1D2C40);c.drawRoundRect(left,top,right,top+rowHeight-8,12,12,paint);
         String title=p==null?(loading?Ui.tr("Carregando…","Loading…","Cargando…"):Ui.tr("Sem programação","No programme information","Sin programación")):p.title;
-        label(c,title,left+14,top+31,right-left-28,21,chosen?0xFF101B2A:p==null?0xFF8393AA:0xFFF0F3F8,Ui.medium);
-        if(p!=null){String timing=time(p.start)+"–"+time(p.end);if(p.current(now))timing+="  ·  "+LiveTvActivity.remainingText(p.remainingMinutes(now));label(c,timing,left+14,top+59,right-left-28,14,chosen?0xFF4E5D70:0xFFA3B3C8,Ui.regular);}
+        label(c,title,left+14,top+31+(rowHeight-ROW)/2f,right-left-28,21,chosen?0xFF101B2A:p==null?0xFF8393AA:0xFFF0F3F8,Ui.medium);
+        if(p!=null){String timing=time(p.start)+"–"+time(p.end);if(p.current(now))timing+="  ·  "+LiveTvActivity.remainingText(p.remainingMinutes(now));label(c,timing,left+14,top+59+(rowHeight-ROW)/2f,right-left-28,14,chosen?0xFF4E5D70:0xFFA3B3C8,Ui.regular);}
     }
     @Override public boolean onKeyDown(int key,KeyEvent event){
         if(channels.isEmpty())return super.onKeyDown(key,event);
@@ -79,5 +80,5 @@ final class TvTimelineView extends FrameLayout {
         return super.onKeyDown(key,event);
     }
     @Override public boolean onKeyUp(int key,KeyEvent event){if(key==KeyEvent.KEYCODE_DPAD_UP||key==KeyEvent.KEYCODE_DPAD_DOWN||key==KeyEvent.KEYCODE_DPAD_LEFT||key==KeyEvent.KEYCODE_DPAD_RIGHT)return true;return super.onKeyUp(key,event);}
-    int logoY(int index){return HEADER+index*ROW+10;}
+    int logoY(int index){return HEADER+index*rowHeight+(rowHeight-60)/2;}
 }
