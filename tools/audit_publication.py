@@ -15,6 +15,16 @@ for name in files:
         issues.append((name,'private or generated file'))
     if name.startswith('docs/') or name=='.github/workflows/pages.yml':issues.append((name,'inherited website is not part of the public app copy'))
     raw=(root/name).read_bytes()
+    # Native screenshots need pixels and their colour profile, never personal EXIF/XMP.
+    if name.startswith('gallery/') and path.suffix.lower()=='.webp':
+        if raw[:4]!=b'RIFF' or raw[8:12]!=b'WEBP':issues.append((name,'invalid screenshot format'))
+        offset=12
+        while offset+8<=len(raw):
+            tag=raw[offset:offset+4];size=int.from_bytes(raw[offset+4:offset+8],'little')
+            if tag in (b'EXIF',b'XMP '):issues.append((name,'screenshot includes EXIF or XMP metadata'))
+            if offset+8+size>len(raw):issues.append((name,'truncated screenshot chunk'));break
+            offset+=8+size+(size%2)
+
     try:text=raw.decode('utf-8')
     except UnicodeDecodeError:continue
     if re.search(r'(?i)[a-z]:[\\/]+Users[\\/]+[^\\/\s]+',text):issues.append((name,'personal Windows user path'))
