@@ -33,7 +33,7 @@ public final class XtreamLinkActivity extends Activity {
         put(stage,text("VELA",24,0xFFB9C5D6),116,66,650,42);put(stage,text("IPTV · Xtream",57,0xFFF7F7FA),112,132,740,90);
         TextView mark=text("TV",128,0xFFF7F7FA);mark.setGravity(Gravity.CENTER);put(stage,mark,170,338,360,184);
         put(stage,text(t("Sua televisão.\nSeus canais.","Your television.\nYour channels.","Tu televisión.\nTus canales."),43,0xFFF7F7FA),116,570,650,134);
-        TextView description=text(t("Conecte o serviço Xtream que você usa no TiviMate. Canais e programação dentro de Vela. Seus dados ficam cifrados neste dispositivo.","Connect the Xtream service you use in TiviMate. Channels and listings inside Vela. Your account stays encrypted on this device.","Conecta el servicio Xtream que usas en TiviMate. Canales y programación dentro de Vela. Los datos de tu cuenta se guardan cifrados en este dispositivo."),24,0xFFBAC1D0);description.setGravity(Gravity.TOP);description.setMaxLines(7);put(stage,description,116,754,650,230);
+        TextView description=text(t("Conecte seu serviço Xtream. Canais e programação dentro de Vela. Seus dados ficam cifrados neste dispositivo.","Connect your Xtream service. Channels and listings inside Vela. Your account stays encrypted on this device.","Conecta tu servicio Xtream. Canales y programación dentro de Vela. Los datos de tu cuenta se guardan cifrados en este dispositivo."),24,0xFFBAC1D0);description.setGravity(Gravity.TOP);description.setMaxLines(7);put(stage,description,116,754,650,230);
         pane=new FrameLayout(this);pane.setSaveFromParentEnabled(false);put(stage,pane,936,180,840,740);status=text("",21,0xFFBAC1D0);status.setMaxLines(3);status.setGravity(Gravity.TOP);put(stage,status,936,950,840,112);
         setContentView(root);getWindow().setBackgroundDrawable(null);getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
@@ -52,8 +52,7 @@ public final class XtreamLinkActivity extends Activity {
             button(t("Conectar e usar em Vela","Connect and use in Vela","Conectar y usar en Vela"),552,this::connect);button(t("Voltar","Back","Volver"),660,()->{if(client.connected()){editing=false;render();}else finish();});address.requestFocus();
         }else{
             button(t("Ver meus canais","Watch my channels","Ver mis canales"),132,()->{client.activate();setResult(RESULT_OK);finish();});button(t("Alterar conta","Change account","Cambiar cuenta"),240,()->{editing=true;render();});button(t("Eliminar a conta deste dispositivo","Remove account from this device","Eliminar cuenta de este dispositivo"),348,()->{confirm=true;render();});
-            int y=456;if(SidebarApps.launchable(this,XtreamClient.PACKAGE)){button(t("Abrir TiviMate","Open TiviMate","Abrir TiviMate"),y,()->{Intent i=HomeApps.launchIntent(getPackageManager(),XtreamClient.PACKAGE);if(i!=null)startActivity(i);});y+=108;}
-            button(t("Voltar","Back","Volver"),y,this::finish);controls.get(0).requestFocus();
+            button(t("Voltar","Back","Volver"),456,this::finish);controls.get(0).requestFocus();
         }
     }
     private void httpLabel(){http.setText((allowHttp?"✓  ":"○  ")+t("Meu servidor usa HTTP sem cifragem","My server uses HTTP without encryption","Mi servidor usa HTTP sin cifrado"));}

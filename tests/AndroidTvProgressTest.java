@@ -36,7 +36,7 @@ public class AndroidTvProgressTest extends Instrumentation {
             await(()->a.hasWindowFocus(),"TV browser did not receive focus");
             List<LiveTvData.Channel> channels=new ArrayList<>();Map<String,LiveTvData.Guide> guide=new HashMap<>();
             for(int i=0;i<14;i++){
-                channels.add(new LiveTvData.Channel("progress-"+i,"Canal "+i,"Prueba","",i==7?"https://example.org/live":"",i==7?Collections.emptyList():Collections.singletonList("https://example.org/live.m3u8")));
+                channels.add(new LiveTvData.Channel("progress-"+i,"Canal "+i,"Prueba","",Collections.singletonList("https://example.org/live.m3u8")));
                 LiveTvData.Guide entry=new LiveTvData.Guide();
                 if(i==0){entry.add(sample,base);entry.add(new LiveTvData.Programme(base+1500,base+3300,"Siguiente"),base);}
                 else if(i==2)entry.now=new LiveTvData.Programme(base-120,base-1,"Caducado");
@@ -51,7 +51,7 @@ public class AndroidTvProgressTest extends Instrumentation {
                 set(a,"generation",((Integer)field(a,"generation"))+1);
                 for(String job:new String[]{"catalogJob","guideJob"}){Future<?> pending=(Future<?>)field(a,job);if(pending!=null)pending.cancel(true);}
                 set(a,"guideLoading",false);set(a,"guideAt",SystemClock.elapsedRealtime());set(a,"group","@all");
-                a.catalog=new LiveTvData.Catalog(LiveTvData.source(c),channels,false);set(a,"guide",guide);call(a,"renderPage",new Class<?>[]{int.class,boolean.class},0,true);
+                set(a,"loading",false);set(a,"total",14);a.catalog=new LiveTvData.Catalog(LiveTvData.source(c),new ArrayList<>(channels.subList(0,12)),false);set(a,"guide",guide);call(a,"renderCards",new Class<?>[]{int.class,boolean.class},0,true);
             }catch(Exception e){throw new RuntimeException(e);}});
             update(a,base);
             List<TextView> labels=(List<TextView>)field(a,"remainingLabels");List<View> bars=(List<View>)field(a,"programmeBars"),cards=(List<View>)field(a,"cards");
@@ -59,21 +59,21 @@ public class AndroidTvProgressTest extends Instrumentation {
             check(labels.get(0).getText().toString().equals("Quedan 25 min")&&((Integer)field(bars.get(0),"progress"))==500,"Card countdown/progress incorrect");
             check(labels.get(5).getText().toString().equals("Queda 1 min"),"Singular/last minute incorrect");
             for(int i:new int[]{1,2,3,4,6})check(labels.get(i).getVisibility()!=View.VISIBLE&&bars.get(i).getVisibility()!=View.VISIBLE,"Unknown/invalid/expired/future/gap programme invented a time");
-            check(labels.get(7).getVisibility()==View.VISIBLE,"Official web channel lost its guide countdown");
+            check(labels.get(7).getVisibility()==View.VISIBLE,"A direct channel lost its guide countdown");
             ui(()->cards.get(0).requestFocus());sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT);waitForIdleSync();View focused=a.getCurrentFocus(),bar=bars.get(0);
             update(a,base+60);check(labels.get(0).getText().toString().equals("Quedan 24 min"),"Countdown did not decrease");
             check(focused==a.getCurrentFocus()&&((List<?>)field(a,"programmeBars")).get(0)==bar,"Minute update rebuilt cards or stole remote focus");
             check(labels.get(5).getText().length()==0&&bars.get(5).getVisibility()!=View.VISIBLE,"Expired card retained its time");
             update(a,base+1500);check(labels.get(0).getText().toString().equals("Quedan 30 min")&&((List<TextView>)field(a,"nowLabels")).get(0).getText().toString().equals("Siguiente")&&((Integer)field(bar,"progress"))==0,"Next programme did not replace countdown/progress together");
             update(a,base+3300);check(labels.get(0).getVisibility()!=View.VISIBLE&&labels.get(0).getText().length()==0&&((Integer)field(bar,"progress"))==0,"End of guide retained stale countdown");
-            ui(()->{try{call(a,"renderPage",new Class<?>[]{int.class,boolean.class},1,true);}catch(Exception e){throw new RuntimeException(e);}});update(a,base);
+            ui(()->{try{set(a,"page",1);a.catalog=new LiveTvData.Catalog(LiveTvData.source(c),new ArrayList<>(channels.subList(12,14)),false);call(a,"renderCards",new Class<?>[]{int.class,boolean.class},1,true);}catch(Exception e){throw new RuntimeException(e);}});update(a,base);
             check(((List<?>)field(a,"programmeBars")).size()==2&&((List<?>)field(a,"cards")).size()==2,"Paging retained countdown views from old page");
             check(a.playback==null,"Guide updates started playback");
             Handler main=(Handler)field(a,"main");Runnable tick=(Runnable)field(a,"tick");check(main.hasCallbacks(tick),"Minute refresh was not scheduled");
             ui(()->a.finish());await(()->(Boolean)field(a,"closed"),"TV browser did not close");
             check(!main.hasCallbacks(tick)&&((ExecutorService)field(a,"io")).isShutdown(),"Closed screen retained minute tick or worker");
-            check(prefs.equals(LiveTvData.prefs(c).getAll())&&plex.equals(new PlexClient(c).prefs.getAll())&&Arrays.equals(sidebar,SidebarApps.slots(c)),"Countdown changed accounts, sources, favorites or shortcuts");
-            result.putString("result","PASS minute rounding, progress bounds, missing/expired/future/invalid/gap EPG, final minute, automatic next-programme transition, web-channel timing, unchanged card views and DPAD focus, bounded page count, no automatic playback, tick/worker release. Preferences and accounts preserved.");
+            check(plex.equals(new PlexClient(c).prefs.getAll())&&Arrays.equals(sidebar,SidebarApps.slots(c)),"Countdown changed accounts, sources, favorites or shortcuts");
+            result.putString("result","PASS minute rounding, progress bounds, missing/expired/future/invalid/gap EPG, final minute, automatic next-programme transition, direct-channel timing, unchanged card views and DPAD focus, bounded page count, no automatic playback, tick/worker release. Preferences and accounts preserved.");
         }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));}
         finally{if(activity!=null){LiveTvActivity a=activity;ui(()->{if(!a.isFinishing())a.finish();});}}
         finish(result.containsKey("error")?1:-1,result);

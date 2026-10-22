@@ -218,29 +218,29 @@
   {
     "file": "25-television.webp",
     "title": "Encuentra tu próximo directo",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; actual TDTChannels public M3U favorites, original broadcaster logos, public dobleM XMLTV, demo weather in Reykjavik; no personal IPTV accounts or location",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.4"
+    "version": "1.19.1"
   },
   {
     "file": "26-listas-tv.webp",
     "title": "Tu lista, tus canales",
-    "source": "native 4K clean-emulator capture; no IPTV account configured",
+    "source": "native clean-emulator 4K capture; actual TDTChannels public M3U favorites, original broadcaster logos, public dobleM XMLTV, demo weather in Reykjavik; no personal IPTV accounts or location",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.16.0"
+    "version": "1.19.1"
   },
   {
     "file": "27-reproductor-video-demo.webp",
     "title": "Reproducción a pantalla completa",
-    "source": "native 4K clean-emulator capture",
+    "source": "native clean-emulator 4K capture; actual TDTChannels public M3U favorites, original broadcaster logos, public dobleM XMLTV, demo weather in Reykjavik; no personal IPTV accounts or location",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.19.1"
   },
   {
     "file": "28-peliculas.webp",
@@ -349,5 +349,23 @@
     "width": 3840,
     "height": 2160,
     "version": "1.15.0"
+  },
+  {
+    "file": "40-guia-horizontal.webp",
+    "title": "Toda la programación, de un vistazo",
+    "source": "native clean-emulator 4K capture; real TDTChannels public channels and original logos; actual current/future EPG dobleM schedules; demo weather in Reykjavik; no personal accounts or location",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.19.1"
+  },
+  {
+    "file": "41-proximos-programas.webp",
+    "title": "Descubre lo que viene después",
+    "source": "native clean-emulator 4K capture; real TDTChannels public channels and original logos; actual current/future EPG dobleM schedules; demo weather in Reykjavik; no personal accounts or location",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.19.1"
   }
 ]

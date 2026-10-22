@@ -22,17 +22,17 @@ Para abrir la ficha de un título necesitas Jellyfin para Android TV, configurad
 
 Gestionan sus cuentas dentro de sus propias aplicaciones. Vela abre esas sesiones y muestra las filas que YouTube comparta con Android TV, si autorizas el acceso correspondiente. Seguir viendo puede reunir títulos de las apps instaladas que publiquen su progreso en Watch Next y permitan leerlo. También admite los tipos NEXT y NEW cuando la app comparte un próximo capítulo de una serie. Vela no modifica el historial de estas otras apps; el menú ofrece abrirlas para gestionarlo allí. La presencia de YouTube, Prime u otro servicio no está garantizada: depende de esa app y del dispositivo. Si no comparte duración o posición, Vela muestra Continuar sin inventar un tiempo. No incluye una integración OAuth para obtener el inicio privado ni Ver más tarde de YouTube.
 
-## Televisión y webs de las emisoras
+## TV en directo
 
-El catálogo y la guía proceden de TDTChannels. La disponibilidad de las señales depende de su emisor, región y compatibilidad de reproducción. Puedes añadir tu propia lista M3U HTTPS o conectar un servicio Xtream para el directo. Las categorías se consultan por separado y se procesan por páginas; la guía depende de los horarios del proveedor. HLS y MPEG-TS utilizan el reproductor y los códecs de Android. TiviMate puede abrirse como aplicación aparte cuando está instalado; sus listas e historial son propios. [Detalles y límites de IPTV](IPTV.es.md).
+Vela reproduce señales directas de listas M3U y servicios Xtream mediante los códecs nativos de Android. HLS y MPEG-TS dependen de los formatos y códecs de la señal. Las categorías, la guía y los logotipos dependen del proveedor. La lista M3U pública inicial y su guía proceden de TDTChannels; las entradas que requieren un navegador o extracción web no se incluyen. [Configuración y límites](IPTV.es.md).
 
-Las webs oficiales pueden abrirse dentro de Vela. Pueden exigir cookies, una cuenta o requisitos de DRM. Que se cargue una web no certifica la reproducción de su directo. La compatibilidad de cada emisora debe comprobarse en el dispositivo.
+La fuente Antena utiliza el sintonizador y la base de canales que el fabricante comparte con Android. Requiere un televisor con sintonizador compatible, canales sintonizados y cable con señal. En dispositivos externos sin sintonizador se muestra su indisponibilidad. La integración no cambia la sintonización ni reproduce canales bloqueados por la TV.
 
 ## Rendimiento
 
 La caché de imágenes del inicio se limita a 6 MiB, o 3 MiB en modo ligero. La biblioteca de aplicaciones recicla sus celdas y carga iconos locales de hasta 192 × 192, con una caché de 1 MiB. En modo ligero utiliza 128 × 128 y 512 KiB. Las celdas visibles también mantienen su propia referencia a los iconos; cerrar el panel libera esas vistas y la caché. Estos límites no representan la memoria total de la aplicación.
 
-La cuadrícula libera su cargador y sus iconos al cerrarse. Los reproductores se liberan al salir; las webs utilizan un proceso separado. El consumo real depende del dispositivo y de la función abierta.
+La cuadrícula libera su cargador y sus iconos al cerrarse. Los reproductores se liberan al salir; la antena libera su sesión al salir. El consumo real depende del dispositivo y de la función abierta.
 
 ## Preview y pantalla de inicio
 

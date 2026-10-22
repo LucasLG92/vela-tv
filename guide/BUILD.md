@@ -34,7 +34,6 @@ Native device tests require an explicit serial and an installed APK:
 python tests/test_artwork_device.py --serial <serial> --test appearance
 python tests/test_artwork_device.py --serial <serial> --test personalization
 python tests/test_artwork_device.py --serial <serial> --test live-tv
-python tests/test_artwork_device.py --serial <serial> --test tv-web
 ```
 
 `--adb-port` selects a separate ADB server for an emulator. `gallery` requires a clean emulator without a personal Plex session or location and uses openly licensed fixture images. It writes screenshots to the app's external files directory. The demo marker is deliberately non-functional; it never authorizes Plex.
@@ -91,4 +90,16 @@ python tests/test_artwork_device.py --serial <emulator-serial> --adb-port <port>
 
 The private fixture JSON contains `base` (HTTP loopback plus port), `username` and `password` for an owned disposable API. Never pass a personal provider. Forward its port with ADB reverse. The fixture needs live categories 1/2/3 with 30/10001/0 channels, IDs 101 onwards in category 1, Base64 now/next listings ending about 135 minutes ahead, a small PNG logo and synthetic 320px HLS video. No provider credentials, recordings or fixture videos belong in Vela or the public repository.
 
-The test exercises protected native login, device-key encryption, failed auth and redirects, bounded pages and large/empty/last categories, favorites, logo decoding, guide timing, actual HLS decoding, cross-page channel zapping, pause/release and unlink. It restores preferences and the runner removes the private fixture file. TiviMate's own session, history and private storage are never inspected. The ordinary live-TV and progress suites cover the public catalog and existing channel cards.
+The test exercises protected native login, device-key encryption, failed auth and redirects, bounded pages and large/empty/last categories, favorites, logo decoding, guide timing, actual HLS decoding, cross-page channel zapping, pause/release and unlink. It restores preferences and the runner removes the private fixture file. No third-party app sessions or storage are inspected. The ordinary live-TV and progress suites cover the public catalog and existing channel cards.
+
+## M3U and TV navigation checks
+
+`--test m3u --xtream-fixture /private/path/session.json` uses the same owned loopback fixture on a clean emulator. It expects a `/m3u?auth=<fixture password>` endpoint with 10001 channels, two groups, a duplicate alternate signal and one unsupported extraction entry; its header points to a small `/epg.xml` guide. `/metrics` counts requests and `/control?broken=1` switches to an invalid response to test rollback and offline reuse. These fixture details are synthetic and never belong in the public APK. The test verifies encrypted URL storage, indexed twelve-row paging, name/group filters without repeat downloads, bounded XMLTV, explicit native playback, cross-page channel changes, favorites, search, the three source tabs and an empty antenna state. It preserves other accounts.
+
+`--test tv-logos` runs without accounts and checks image URL policy, transparent logos, decoded size, cache budget and page cancellation. The antenna requires a real compatible tuner for picture/sound validation; tests must never scan or write the user's channel database.
+
+## Grouped TV and indexed XMLTV checks
+
+`--test tv-redesign` runs only on an isolated emulator. It verifies grouping before pagination, country/region/+1 separation, FHD defaults, saved quality, old HD favorites, same-ID M3U variants, XMLTV matching and rollback. Optionally place an independently downloaded copy of the public dobleM `guiatv.xml` in the app external-files directory as `redesign-xmltv.xml` to test the full real guide and its declared original logo. The dataset is never included in Vela or this repository. Native UI, playback and logo suites exercise the redesigned grid and lifecycle. Personal IPTV subscriptions must not be used for fixture or mutation tests.
+
+The native horizontal-guide regression runs with `--test tv-timeline`. It checks six-channel/three-hour query bounds, source fallback for XMLTV gaps, remote navigation across catalog pages, future and ended programme details without autoplay, returning to Now, and display preference persistence. It also scrolls 180 recycled categories and verifies that the protected help area remains pixel-identical. The category viewport uses a canvas clip without an offscreen bitmap layer.

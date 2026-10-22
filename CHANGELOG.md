@@ -1,5 +1,16 @@
 # Cambios
 
+## 1.19.1 Preview · 2026-10-22
+
+- Guía horizontal junto a la cuadrícula: logos, horarios, línea de hora actual, tiempo restante y botón Ahora. Navegación con el mando entre programas, canales, bloques y páginas; se recuerda la vista elegida.
+- Las categorías se recortan dentro de una zona fija para que su desplazamiento no tape la ayuda del mando, también en listas largas.
+- Tres fuentes nativas: M3U, Xtream y canales de antena que comparta Android. Se retiran las rutas web y la integración con TiviMate de TV en directo.
+- Logos grandes y una entrada por canal y categoría. Mantener OK permite gestionar favoritos y elegir entre hasta ocho variantes de calidad. Los países, regiones y emisiones +1 se mantienen separados.
+- Catálogos M3U/Xtream procesados por flujo e indexados en disco. EPG dobleM como XMLTV externo inicial; índice de 48 horas y programación de la fuente como complemento. La guía horizontal recupera seis canales, tres horas y hasta 32 programas por canal.
+- Se mantienen los límites de logos, se dibujan los programas sin crear una vista por celda y se libera el reproductor al salir. No se añade un servicio permanente ni vídeo de fondo.
+- Pruebas nativas en emulador con 180 categorías y comprobación visual en TCL, navegación de la guía, calidad, reproducción FHD y conservación de cuentas. Las nuevas capturas públicas proceden de un emulador independiente sin cuentas personales.
+
+
 ## 1.16.0 Preview · 2026-10-21
 
 - IPTV por Xtream dentro de TV: conexión privada en la televisión, categorías del proveedor, páginas de doce canales, logotipos, favoritos y guía actual/siguiente con tiempo restante.
