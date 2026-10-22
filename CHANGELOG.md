@@ -1,5 +1,17 @@
 # Cambios
 
+## 1.21.0 Preview · 2026-10-22
+
+- TV en directo integrada en Inicio: comparte barra lateral, reloj y tiempo, con su acceso justo debajo de Inicio. Al salir de TV se liberan el trabajo pendiente y los logos; durante el directo se libera el arte de navegación.
+- Guía como vista inicial para todas las instalaciones. La elección Guía/Canales se guarda solo desde Ajustes → TV en directo; se retiran el selector de vista y los puntos de opciones de la cabecera.
+- Guía ampliada con seis filas, categorías a la izquierda, controles de horario y Ahora debajo, y pie con logo, programa, horario, tiempo restante y progreso. Las categorías largas conservan la ayuda visible.
+- Canales ocupa todo el ancho sin columna de categorías; arriba/abajo cambia de lista conservando la posición horizontal cuando es posible.
+- Reproductor con logo original, programa actual/siguiente, horarios y progreso. El aviso de directo y la resolución real se ocultan tras cuatro segundos; la información, tras seis. OK vuelve a mostrarla.
+- Derecha abre los canales sobre el vídeo, con su programa y tiempo restante en horas y minutos. Explorar o paginar conserva el mismo decodificador; OK cambia de canal y Atrás/Izquierda cierra el panel. Se retiran los botones Canales, Favorito y Otra señal del reproductor. Tras agotar las señales alternativas, OK reintenta sin un bucle automático.
+- Páginas de doce registros, filas recicladas, seis logos de guía y caché de 768 KiB. Sin tarjetas de canales ocultas en Guía, miniaturas de vídeo ni un servicio adicional. La actualización de los tiempos conserva el foco del mando.
+- Pruebas nativas con M3U y XMLTV públicos, cambio de canal real, ajustes persistentes, 180 categorías, navegación, límites de vistas y liberación. Regresión del cambio automático entre señales de prueba, con un único reproductor.
+- Nuevas capturas nativas en 4K desde un emulador independiente y documentación renovada. Sin cuentas IPTV, sesiones Plex/Jellyfin ni ubicación personal en las imágenes o en el instalador.
+
 ## 1.20.2 Preview · 2026-10-22
 
 - Conexión de Plex rediseñada con el tema de Vela: logo original, código destacado y tarjetas de servidor con foco del color elegido.

@@ -4,7 +4,7 @@
 
 Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abrir. Vela reúne lo que te gusta ver en una interfaz visual, personalizable y pensada para el mando.
 
-**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.20.2-preview)** · [Ver las 43 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
+**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.21.0-preview)** · [Ver las 47 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
 
 ![Inicio de Vela con Seguir viendo panorámico](gallery/01-inicio.webp)
 
@@ -70,17 +70,23 @@ Seis colores de acento, tres tamaños de cartel y distintas intensidades de fond
 
 ## También hay sitio para el directo
 
-Encuentra algo que te apetezca ver. Alterna entre una cuadrícula con logos grandes y una **guía horizontal** para recorrer la programación con el mando. Mira qué están poniendo, cuánto queda y qué viene después; vuelve a **Ahora** con un toque.
+El directo tiene su sitio en Vela, justo debajo de Inicio. Tu barra, tu reloj y tus canales en la misma pantalla. La **guía horizontal** te recibe con logos originales, horarios y el tiempo que queda de cada programa. Recorre lo que viene después o vuelve a **Ahora** desde los controles inferiores.
 
-![Toda la programación, de un vistazo](gallery/40-guia-horizontal.webp)
+![El directo, integrado en Vela](gallery/40-guia-horizontal.webp)
 
-**M3U, Xtream o antena.** Tus canales, favoritos y categorías en una misma pantalla. Las distintas calidades se reúnen en un solo canal: mantén OK para elegir cómo verlo o guardarlo entre tus favoritos.
-
-Si una señal IPTV falla, Vela busca otra del mismo canal, también en menor calidad cuando está disponible. Tú sigues viendo; tu calidad preferida queda guardada.
+**M3U, Xtream o antena.** Tus categorías a la izquierda, tus favoritos a mano y una entrada por canal. El programa seleccionado muestra su logo, horario y progreso al pie de la guía. ¿Prefieres logos grandes? Elige **Canales** en Ajustes y cambia de lista con arriba y abajo.
 
 ![Tus canales, con sus logos originales](gallery/25-television.webp)
 
-[Configurar TV en directo](guide/IPTV.es.md) · [Ver lo que viene después](gallery/41-proximos-programas.webp)
+### Cambia de canal sin salir del directo
+
+Pulsa **derecha** mientras ves un canal. Aparecen sus logos, lo que están emitiendo y cuánto queda, sobre el vídeo que sigue reproduciéndose. Elige otro con OK o cierra el panel con Atrás. Al empezar, Vela muestra la calidad y la información del programa; después se ocultan para dejarte ver. Pulsa OK para recuperar la información.
+
+![Canales y tiempo restante sobre el directo](gallery/47-canales-durante-directo.webp)
+
+Si una señal IPTV falla, Vela prueba otra del mismo canal, también en menor calidad cuando está disponible. Tu calidad preferida queda guardada. Todo con un único reproductor, sin miniaturas de vídeo ni reproducción mientras exploras la guía.
+
+[Configurar TV en directo](guide/IPTV.es.md) · [Elegir Guía o Canales](gallery/46-ajustes-tv.webp) · [Ver lo que viene después](gallery/41-proximos-programas.webp)
 
 ## Incluso las pausas tienen su momento
 
@@ -104,7 +110,7 @@ Las nuevas versiones llegan desde GitHub a tu televisión. Vela busca actualizac
 
 Instala Vela, conecta tu biblioteca y elige tus aplicaciones. Todo desde la televisión, con un asistente que puedes completar a tu ritmo.
 
-**[Descargar Vela 1.20.2 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.20.2-preview)**
+**[Descargar Vela 1.21.0 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.21.0-preview)**
 
 Para **Android TV y Google TV con Android 11 o posterior**. Esta versión es una preview. Consulta la [guía de instalación](guide/INSTALL.es.md) y la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
 
