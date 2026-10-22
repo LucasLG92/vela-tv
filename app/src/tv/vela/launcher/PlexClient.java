@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /** Plex library and explicit per-item watched actions. Credentials stay in private app storage, never in the APK or logs. */
-final class PlexClient {
+class PlexClient {
     static final String PRODUCT = "Vela";
     final SharedPreferences prefs;
     PlexClient(Context context) {

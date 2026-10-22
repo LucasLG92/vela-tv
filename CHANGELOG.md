@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.20.2 Preview · 2026-10-22
+
+- Conexión de Plex rediseñada con el tema de Vela: logo original, código destacado y tarjetas de servidor con foco del color elegido.
+- Servidor seleccionado identificado y listas largas dentro de una zona con desplazamiento; las acciones y la ayuda del mando permanecen visibles.
+- Una conexión fallida conserva la sesión y devuelve el foco al servidor para reintentar con OK. Si falla la consulta de servidores tras autorizar el código, se muestra Reintentar sin descartar la autorización.
+- Recursos vectoriales y vistas nativas, sin imágenes de red, vídeo, desenfoques ni servicios nuevos. El trabajador de conexión se libera al salir.
+- Pruebas nativas con código y servidores ficticios: caducidad, errores, nueve servidores con el mando, selección y liberación de recursos. Dos capturas nuevas en 4K sin datos personales.
+
 ## 1.20.1 Preview · 2026-10-22
 
 - El APK descargado por Vela se elimina al confirmar Android que su versión ya está instalada. La limpieza utiliza el aviso de actualización de la app y se recupera al abrir Vela si ese aviso no llegó.

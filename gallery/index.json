@@ -367,5 +367,23 @@
     "width": 3840,
     "height": 2160,
     "version": "1.19.1"
+  },
+  {
+    "file": "42-servidores-plex.webp",
+    "title": "Tu cine empieza aquí",
+    "source": "native clean-emulator 4K capture; fictional servers from isolated test-only Plex client; no Plex account or requests",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.20.2"
+  },
+  {
+    "file": "43-vincular-plex.webp",
+    "title": "Conecta con un código",
+    "source": "native clean-emulator 4K capture; nonfunctional DEMO code from isolated test-only client; no real device authorization",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.20.2"
   }
 ]

@@ -1,104 +1,116 @@
 package tv.vela.launcher;
 
 import android.app.Activity;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.graphics.Color;
-import android.graphics.Typeface;
+import android.os.*;
+import android.graphics.*;
 import android.graphics.drawable.GradientDrawable;
-import android.view.Gravity;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.*;
 import android.widget.*;
 import org.json.JSONObject;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
-/** Plex's device PIN flow: the user signs in on Plex, never types their password here. */
+/** Plex device authorization in Vela's native TV shell. Passwords are entered only on Plex. */
 public class PlexLinkActivity extends Activity {
     private final Handler main = new Handler(Looper.getMainLooper());
-    private final ScheduledExecutorService io = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledThreadPoolExecutor io = new ScheduledThreadPoolExecutor(1);
     private PlexClient plex;
-    private LinearLayout panel;
-    private TextView detail, code;
+    private FrameLayout stage, pin;
+    private LinearLayout serversPanel;
+    private ScrollView serversScroll;
+    private TextView heading, detail, code, hint, retry;
+    private final List<View> cards = new ArrayList<>();
     private long pinId, expiresAt;
     private String pinCode;
     private ScheduledFuture<?> poll;
-    private boolean closed;
-    private boolean retryShown;
+    private boolean closed, busy;
+    private View attemptedCard;
     private static String t(String pt,String en,String es){return Ui.tr(pt,en,es);}
+    /** A replaceable client also lets isolated native tests exercise the real screen without an account. */
+    PlexClient createClient(){return new PlexClient(this);}
     @Override public void onCreate(Bundle saved) {
-        super.onCreate(saved);
-        Ui.init(this); plex = new PlexClient(this);
-        panel = new LinearLayout(this); panel.setOrientation(LinearLayout.VERTICAL); panel.setGravity(Gravity.CENTER);
-        panel.setPadding(64, 40, 64, 40);
-        panel.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xFF15232D, 0xFF080C12}));
-        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.addView(panel,new ScrollView.LayoutParams(-1,-2));setContentView(scroll);
-        text(t("Sua biblioteca, no início.","Your library, at home.","Tu biblioteca, en el inicio."), 30, Color.WHITE, Ui.displaySemibold);
-        detail = text(t("Conecte Plex para ver seus cartazes e continuar assistindo.","Link Plex to see your posters and continue watching.","Vincula Plex para ver tus carteles y continuar lo que estabas viendo."), 17, 0xFFAFBAC5, Ui.regular);
-        code = text(t("Conectando ao Plex…","Connecting to Plex…","Conectando con Plex…"), 46, 0xFFFFC36B, Ui.displaySemibold);
-        text(t("A senha é informada apenas no Plex.","Enter your password only on Plex.","La contraseña se introduce únicamente en Plex."), 14, 0xFF82909C, Ui.regular);
-        io.execute(() -> {
-            if (!plex.prefs.getString("accountToken", "").isEmpty()) {
-                try { showServers(); return; }
-                catch (Exception ignored) { error(t("Não foi possível consultar seus servidores. Sua sessão foi preservada.","Could not reach your servers. Your session has been kept.","No se han podido consultar tus servidores. Tu sesión se conserva."));return; }
+        super.onCreate(saved);Ui.init(this);Watchdog.install(this);plex=createClient();
+        io.setRemoveOnCancelPolicy(true);io.setKeepAliveTime(10,TimeUnit.SECONDS);io.allowCoreThreadTimeOut(true);
+        FrameLayout root=new FrameLayout(this){@Override protected void onSizeChanged(int w,int h,int ow,int oh){if(stage==null)return;float scale=Math.min(w/1920f,h/1080f);stage.setScaleX(scale);stage.setScaleY(scale);stage.setTranslationX((w-1920*scale)/2);stage.setTranslationY((h-1080*scale)/2);}};
+        root.setBackgroundColor(0xFF11141D);stage=new FrameLayout(this);stage.setPivotX(0);stage.setPivotY(0);root.addView(stage,new FrameLayout.LayoutParams(1920,1080));
+        GradientDrawable glow=new GradientDrawable();glow.setGradientType(GradientDrawable.RADIAL_GRADIENT);glow.setGradientRadius(1260);glow.setGradientCenter(.12f,.38f);glow.setColors(new int[]{0xFF303D50,0xFF11141D});stage.setBackground(glow);
+        TextView brand=text("VELA",24,0xFFB9C5D6);brand.setLetterSpacing(.22f);put(stage,brand,116,66,650,42);
+        put(stage,text(t("Conectar Plex","Connect Plex","Conectar Plex"),58,0xFFF7F7FA),112,132,740,90);
+        ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.logo_plex);logo.setScaleType(ImageView.ScaleType.FIT_START);put(stage,logo,116,324,304,112);
+        TextView title=text(t("Seu cinema.\nSempre com você.","Your cinema.\nAlways with you.","Tu cine.\nSiempre contigo."),49,0xFFF7F7FA);title.setTypeface(Ui.displaySemibold);put(stage,title,116,532,680,142);
+        TextView intro=text(t("Cartazes, novidades e o que você estava assistindo. Sua biblioteca, direto no início do Vela.","Posters, recent additions and what you were watching. Your library, right on Vela’s home screen.","Carteles, novedades y lo que estabas viendo. Tu biblioteca, directamente en el inicio de Vela."),25,0xFFBAC1D0);intro.setMaxLines(5);intro.setGravity(Gravity.TOP);intro.setLineSpacing(6,1);put(stage,intro,116,724,644,190);
+        put(stage,text(t("Sua senha fica no Plex.","Your password stays on Plex.","Tu contraseña se introduce solo en Plex."),19,0xFF8F9AAE),116,976,700,40);
+        heading=text(t("Vincular sua conta","Link your account","Vincular tu cuenta"),37,0xFFF7F7FA);heading.setTypeface(Ui.displaySemibold);put(stage,heading,936,182,840,72);
+        detail=text(t("Preparando uma conexão segura…","Preparing a secure connection…","Preparando una conexión segura…"),24,0xFFBAC1D0);detail.setMaxLines(3);detail.setGravity(Gravity.TOP);put(stage,detail,936,270,840,96);
+        pin=new FrameLayout(this);pin.setBackground(round(0xFF252E40,26));put(stage,pin,936,390,840,248);
+        TextView website=text("plex.tv/link",30,0xFFBAC1D0);website.setGravity(Gravity.CENTER);put(pin,website,32,28,776,52);
+        code=text("····",80,0xFFF7F7FA);code.setTypeface(Ui.displaySemibold);code.setGravity(Gravity.CENTER);code.setLetterSpacing(.16f);code.setSingleLine();code.setEllipsize(TextUtils.TruncateAt.END);code.setSaveEnabled(false);put(pin,code,32,100,776,110);
+        serversScroll=new ScrollView(this);serversScroll.setFillViewport(false);serversScroll.setClipToPadding(true);serversScroll.setPadding(0,0,0,4);serversScroll.setVerticalScrollBarEnabled(false);serversScroll.setVisibility(View.GONE);
+        serversPanel=new LinearLayout(this);serversPanel.setOrientation(LinearLayout.VERTICAL);serversScroll.addView(serversPanel,new ScrollView.LayoutParams(-1,-2));put(stage,serversScroll,936,374,840,496);
+        hint=text("",19,0xFF8F9AAE);put(stage,hint,940,882,836,32);
+        TextView back=button(t("Voltar","Back","Volver"),936,936,232,this::finish);
+        retry=button(t("Tentar novamente","Retry","Reintentar"),1190,936,350,()->{startActivity(new android.content.Intent(this,PlexLinkActivity.class));finish();});retry.setVisibility(View.GONE);
+        setContentView(root);back.requestFocus();
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);getWindow().setBackgroundDrawable(null);
+        io.execute(()->{
+            if(!plex.prefs.getString("accountToken", "").isEmpty()){
+                try{showServers();}catch(Exception ignored){error(t("Não foi possível consultar seus servidores. Sua sessão foi preservada.","Could not reach your servers. Your session has been kept.","No se han podido consultar tus servidores. Tu sesión se conserva."));}return;
             }
-            try {
-                JSONObject pin = plex.createPin();
-                pinId = pin.getLong("id"); pinCode = pin.getString("code");
-                expiresAt = android.os.SystemClock.elapsedRealtime() + pin.optLong("expiresIn", 900) * 1000;
-                main.post(() -> {
-                    if (closed) return;
-                    detail.setText(t("Abra plex.tv/link no celular ou computador e digite este código:","Open plex.tv/link on your phone or computer and enter this code:","Abre plex.tv/link en el móvil u ordenador e introduce este código:"));
-                    code.setText(pinCode);
-                });
-                poll = io.scheduleWithFixedDelay(this::check, 3, 3, TimeUnit.SECONDS);
-            } catch (Exception e) { error(t("Não foi possível conectar. Verifique a Internet e tente novamente.","Could not connect. Check your Internet connection and try again.","No se ha podido iniciar la conexión. Comprueba Internet y vuelve a intentarlo.")); }
+            try{
+                JSONObject created=plex.createPin();pinId=created.getLong("id");pinCode=created.getString("code");expiresAt=SystemClock.elapsedRealtime()+created.optLong("expiresIn",900)*1000;
+                main.post(()->{if(closed)return;detail.setText(t("Abra plex.tv/link no celular ou computador e digite este código.","Open plex.tv/link on your phone or computer and enter this code.","Abre plex.tv/link en el móvil u ordenador e introduce este código."));code.setText(pinCode);hint.setText(t("Esta tela avança quando você autoriza no Plex.","This screen continues when you authorize on Plex.","Esta pantalla continúa al autorizar en Plex."));});
+                poll=io.scheduleWithFixedDelay(this::check,3,3,TimeUnit.SECONDS);
+            }catch(Exception ignored){error(t("Não foi possível conectar. Verifique a Internet e tente novamente.","Could not connect. Check your Internet connection and try again.","No se ha podido iniciar la conexión. Comprueba Internet y vuelve a intentarlo."));}
         });
     }
-    private TextView text(String value, int size, int color, Typeface face) {
-        TextView text = new TextView(this); text.setText(value); text.setTextSize(size); text.setTextColor(color);
-        text.setTypeface(face); text.setGravity(Gravity.CENTER); text.setPadding(0, 12, 0, 12);
-        panel.addView(text, new LinearLayout.LayoutParams(-1, -2)); return text;
+    private TextView text(String value,int size,int color){TextView v=new TextView(this);v.setText(value);v.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);v.setTextColor(color);v.setTypeface(Ui.medium);v.setIncludeFontPadding(false);v.setGravity(Gravity.CENTER_VERTICAL);return v;}
+    private void put(FrameLayout parent,View view,int x,int y,int w,int h){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;parent.addView(view,p);}
+    private GradientDrawable round(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(radius);return d;}
+    private TextView button(String value,int x,int y,int width,Runnable action){TextView v=text(value,24,0xFFF7F7FA);v.setGravity(Gravity.CENTER);v.setId(View.generateViewId());v.setFocusable(true);v.setFocusableInTouchMode(true);v.setDefaultFocusHighlightEnabled(false);v.setBackground(round(0xFF272F40,18));v.setOnFocusChangeListener((view,focused)->{v.setBackground(round(focused?Appearance.accent(this):0xFF272F40,18));v.setTextColor(focused?0xFF171A23:0xFFF7F7FA);});v.setOnClickListener(view->action.run());put(stage,v,x,y,width,72);return v;}
+    private void check(){
+        if(closed)return;
+        if(SystemClock.elapsedRealtime()>=expiresAt){if(poll!=null)poll.cancel(false);error(t("O código expirou. Tente novamente para obter outro.","The code expired. Retry to get another one.","El código ha caducado. Pulsa Reintentar para obtener otro."));return;}
+        try{if(!plex.checkPin(pinId,pinCode))return;}catch(Exception ignored){return;} // Transient PIN requests may recover before expiry.
+        if(poll!=null)poll.cancel(false);
+        try{showServers();}catch(Exception ignored){error(t("Não foi possível consultar seus servidores. Sua sessão foi preservada.","Could not reach your servers. Your session has been kept.","No se han podido consultar tus servidores. Tu sesión se conserva."));}
     }
-    private void check() {
-        if (closed) return;
-        if (android.os.SystemClock.elapsedRealtime() >= expiresAt) {
-            if (poll != null) poll.cancel(false);
-            error(t("O código expirou. Tente novamente para obter outro.","The code expired. Retry to get another one.","El código ha caducado. Pulsa Reintentar para obtener otro.")); return;
-        }
-        try {
-            if (!plex.checkPin(pinId, pinCode)) return;
-            if (poll != null) poll.cancel(false);
-            showServers();
-        } catch (Exception ignored) { /* Transient connection failures can recover before the PIN expires. */ }
+    private void showServers()throws Exception{
+        List<PlexClient.Server> servers=plex.servers();
+        if(servers.size()==1){try{plex.select(servers.get(0));complete();}catch(Exception ignored){main.post(()->{if(!closed){renderServers(servers);selectionError();}});}return;}
+        main.post(()->{if(!closed)renderServers(servers);});
     }
-    private void showServers() throws Exception {
-            List<PlexClient.Server> servers = plex.servers();
-            if (servers.size() == 1) {
-                try { plex.select(servers.get(0)); main.post(() -> { if (!closed) { LibraryClient.activate(this,"Plex");setResult(RESULT_OK); finish(); } }); return; }
-                catch (Exception e) { error(e.getMessage()); return; }
-            }
-            main.post(() -> {
-                if (closed) return;
-                code.setVisibility(android.view.View.GONE);
-                detail.setText(servers.isEmpty() ? t("Nenhum servidor seguro encontrado. Verifique Plex Media Server.","No secure server found. Check Plex Media Server.","No se ha encontrado ningún servidor con conexión segura. Comprueba Plex Media Server.")
-                        : t("Escolha o servidor que deseja mostrar:","Choose the server to show:","Elige el servidor que quieres mostrar:"));
-                for (PlexClient.Server server : servers) {
-                    Button button = new Button(this); button.setText(server.name); button.setAllCaps(false);
-                    panel.addView(button, new LinearLayout.LayoutParams(550, 70));
-                    button.setOnClickListener(v -> {
-                        detail.setText(t("Conectando a ","Connecting to ","Conectando con ") + server.name + "…"); button.setEnabled(false);
-                        io.execute(() -> {
-                            try { plex.select(server); main.post(() -> { if (!closed) { LibraryClient.activate(this,"Plex");setResult(RESULT_OK); finish(); } }); }
-                            catch (Exception e) { main.post(() -> { if (!closed) { detail.setText(e.getMessage()); button.setEnabled(true); } }); }
-                        });
-                    });
-                }
-                if (servers.size() > 0) panel.getChildAt(panel.getChildCount() - servers.size()).requestFocus();
-                else retry();
-            });
+    private void complete(){main.post(()->{if(!closed){LibraryClient.activate(this,"Plex");setResult(RESULT_OK);finish();}});}
+    private void renderServers(List<PlexClient.Server> servers){
+        pin.setVisibility(View.GONE);serversScroll.setVisibility(View.VISIBLE);serversPanel.removeAllViews();cards.clear();retry.setVisibility(View.GONE);busy=false;
+        heading.setText(t("Escolha seu servidor","Choose your server","Elige tu servidor"));
+        detail.setText(servers.isEmpty()?t("Nenhum servidor seguro encontrado. Verifique Plex Media Server e tente novamente.","No secure server found. Check Plex Media Server and try again.","No se ha encontrado un servidor con conexión segura. Comprueba Plex Media Server y reinténtalo."):t("Escolha a biblioteca que deseja ver no início.","Choose the library you want on your home screen.","Elige la biblioteca que quieres ver en Inicio."));
+        hint.setText(servers.isEmpty()?"":t("↑ ↓ Escolher servidor  ·  OK Conectar","↑ ↓ Choose server  ·  OK Connect","↑ ↓ Elegir servidor  ·  OK Conectar"));
+        String selected=plex.prefs.getString("serverId","");View focus=null;
+        for(PlexClient.Server server:servers){boolean current=!selected.isEmpty()&&selected.equals(server.id);View card=serverCard(server,current);cards.add(card);if(focus==null||current)focus=card;}
+        if(focus!=null)focus.requestFocus();else showRetry();
     }
-    private void retry(){if(retryShown)return;retryShown=true;Button retry=new Button(this);retry.setText(t("Tentar novamente","Retry","Reintentar"));retry.setAllCaps(false);panel.addView(retry,new LinearLayout.LayoutParams(550,70));retry.setOnClickListener(v->{startActivity(new android.content.Intent(this,PlexLinkActivity.class));finish();});retry.requestFocus();}
-    private void error(String message) { main.post(() -> { if (!closed) { detail.setText(message); code.setText("Plex");retry(); } }); }
-    @Override protected void onDestroy() { closed = true; if (poll != null) poll.cancel(true); io.shutdownNow(); main.removeCallbacksAndMessages(null); super.onDestroy(); }
+    private View serverCard(PlexClient.Server server,boolean current){
+        FrameLayout card=new FrameLayout(this);card.setId(View.generateViewId());card.setFocusable(true);card.setFocusableInTouchMode(true);card.setDefaultFocusHighlightEnabled(false);card.setBackground(round(0xFF252E40,22));
+        ServerIcon icon=new ServerIcon();put(card,icon,26,26,60,60);
+        TextView name=text(server.name,28,0xFFF7F7FA);name.setTypeface(Ui.semibold);name.setSingleLine();name.setEllipsize(TextUtils.TruncateAt.END);put(card,name,110,22,626,38);
+        String sub=current?t("Selecionado no Vela","Selected in Vela","Seleccionado en Vela"):t("Biblioteca do Plex","Plex library","Biblioteca de Plex");
+        TextView subtitle=text(sub,19,0xFFA5B1C4);subtitle.setSingleLine();put(card,subtitle,110,66,626,28);
+        TextView arrow=text(current?"✓":"›",33,0xFFA5B1C4);arrow.setGravity(Gravity.CENTER);put(card,arrow,756,22,52,68);
+        card.setContentDescription(server.name+", "+sub);card.setOnFocusChangeListener((v,focused)->{int color=focused?0xFF171A23:0xFFF7F7FA;card.setBackground(round(focused?Appearance.accent(this):0xFF252E40,22));name.setTextColor(color);subtitle.setTextColor(focused?0xFF4B5363:0xFFA5B1C4);arrow.setTextColor(focused?0xFF4B5363:0xFFA5B1C4);icon.focused=focused;icon.invalidate();});
+        LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,112);p.bottomMargin=14;serversPanel.addView(card,p);card.setOnClickListener(v->select(server));return card;
+    }
+    private void select(PlexClient.Server server){if(busy||closed)return;attemptedCard=getCurrentFocus();busy=true;detail.setText(t("Conectando a ","Connecting to ","Conectando con ")+server.name+"…");for(View v:cards){v.setEnabled(false);v.setAlpha(.55f);}retry.setVisibility(View.GONE);
+        io.execute(()->{try{plex.select(server);complete();}catch(Exception ignored){main.post(()->{if(!closed)selectionError();});}});
+    }
+    private void selectionError(){busy=false;for(View v:cards){v.setEnabled(true);v.setAlpha(1f);}if(attemptedCard!=null)attemptedCard.requestFocus();detail.setText(t("Não foi possível conectar. Verifique se o servidor está ligado ou escolha outro.","Could not connect. Check that the server is on, or choose another.","No se ha podido conectar. Comprueba que el servidor esté encendido o elige otro."));}
+    private void showRetry(){retry.setVisibility(View.VISIBLE);retry.requestFocus();}
+    private void error(String message){main.post(()->{if(closed)return;pin.setVisibility(View.GONE);detail.setText(message);hint.setText("");showRetry();});}
+    private final class ServerIcon extends View {
+        final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);boolean focused;
+        ServerIcon(){super(PlexLinkActivity.this);}
+        @Override protected void onDraw(Canvas canvas){int color=focused?0xFF4B5363:0xFFB8C7DD;paint.setColor(focused?0x174B5363:0x224D668A);paint.setStyle(Paint.Style.FILL);canvas.drawRoundRect(0,0,60,60,15,15,paint);paint.setColor(color);paint.setStrokeWidth(2.5f);paint.setStyle(Paint.Style.STROKE);canvas.drawRoundRect(14,15,46,45,5,5,paint);canvas.drawLine(14,30,46,30,paint);paint.setStyle(Paint.Style.FILL);canvas.drawCircle(22,23,2,paint);canvas.drawCircle(22,38,2,paint);canvas.drawRoundRect(31,21,39,24,1,1,paint);canvas.drawRoundRect(31,36,39,39,1,1,paint);}
+    }
+    @Override protected void onDestroy(){closed=true;if(poll!=null)poll.cancel(true);io.shutdownNow();main.removeCallbacksAndMessages(null);super.onDestroy();}
 }

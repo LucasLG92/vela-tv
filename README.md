@@ -4,7 +4,7 @@
 
 Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abrir. Vela reúne lo que te gusta ver en una interfaz visual, personalizable y pensada para el mando.
 
-**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.20.1-preview)** · [Ver las 41 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
+**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.20.2-preview)** · [Ver las 43 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
 
 ![Inicio de Vela con Seguir viendo panorámico](gallery/01-inicio.webp)
 
@@ -15,6 +15,12 @@ Conecta Plex o Jellyfin y deja que tus películas y series llenen la pantalla co
 | Tus películas | Tus series |
 | --- | --- |
 | ![Películas en Vela](gallery/28-peliculas.webp) | ![Series en Vela](gallery/29-series.webp) |
+
+## Conecta tu cine
+
+Vincula tu cuenta de Plex con un código y elige tu servidor con el mando. Una conexión sencilla, con el mismo diseño de tu inicio y tu biblioteca a un OK de distancia.
+
+![Conexión de Plex y selección de servidor](gallery/42-servidores-plex.webp)
 
 ## Encuentra justo lo que te apetece
 
@@ -98,7 +104,7 @@ Las nuevas versiones llegan desde GitHub a tu televisión. Vela busca actualizac
 
 Instala Vela, conecta tu biblioteca y elige tus aplicaciones. Todo desde la televisión, con un asistente que puedes completar a tu ritmo.
 
-**[Descargar Vela 1.20.1 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.20.1-preview)**
+**[Descargar Vela 1.20.2 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.20.2-preview)**
 
 Para **Android TV y Google TV con Android 11 o posterior**. Esta versión es una preview. Consulta la [guía de instalación](guide/INSTALL.es.md) y la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
 
