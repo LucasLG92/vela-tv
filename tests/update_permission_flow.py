@@ -11,11 +11,21 @@ def run_flow(adb):
         call('shell','uiautomator','dump','/sdcard/vela-permission-test.xml')
         return list(ET.fromstring(call('exec-out','cat','/sdcard/vela-permission-test.xml')).iter('node'))
     def click(label):
-        matches=[n for n in nodes() if label in n.get('text','')]
+        def controls():
+            matches=[n for n in nodes() if label in n.get('text','') or label in n.get('content-desc','')]
+            focusable=[n for n in matches if n.get('focusable')=='true']
+            return focusable or matches
+        matches=controls()
         assert len(matches)==1,f'Expected one control {label}, found {len(matches)}'
-        x1,y1,x2,y2=map(int,re.findall(r'\d+',matches[0].get('bounds')))
+        target=matches[0]
+        if target.get('focused')=='true':
+            call('shell','input','keyevent','23');return
+        x1,y1,x2,y2=map(int,re.findall(r'\d+',target.get('bounds')))
         call('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
-        call('shell','input','keyevent','23')
+        # Vela's TV controls take focus on the first touch. If a system control
+        # already activated, never send a second OK into the next screen.
+        focused=[n for n in controls() if n.get('focused')=='true']
+        if len(focused)==1:call('shell','input','keyevent','23')
     def top():return call('shell','dumpsys','activity','activities')
     def wait_top(needle):
         end=time.monotonic()+12

@@ -71,7 +71,7 @@ public final class UpdatesActivity extends Activity {
     }
     boolean canShowInstaller(){return active;}
     @Override protected void onResume(){
-        super.onResume();active=true;Updates.observe(listener);
+        super.onResume();Updates.cleanupInstalled(this);active=true;Updates.observe(listener);
         if(waitingPermission||Updates.installationRequested(this)){
             waitingPermission=false;
             if(getPackageManager().canRequestPackageInstalls())message="";

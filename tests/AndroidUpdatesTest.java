@@ -49,6 +49,15 @@ public class AndroidUpdatesTest extends Instrumentation {
             Updates.transport=url->new ByteArrayInputStream(new byte[(int)release.size+1]);Updates.download(c);idle();check(!Updates.ready(c,release),"Oversized download accepted");
             Updates.transport=url->new InputStream(){public int read()throws IOException{try{Thread.sleep(5);}catch(InterruptedException e){throw new IOException(e);}return 0;}public int read(byte[] b,int offset,int count)throws IOException{read();b[offset]=0;return 1;}};Updates.download(c);Thread.sleep(40);Updates.cancel();idle();check(!Updates.ready(c,release)&&!new File(Updates.apk(c).getParentFile(),"incoming.part").exists(),"Cancelled transfer left an installable APK");
             File valid=future;Updates.transport=url->new FileInputStream(valid);Updates.download(c);idle();check(Updates.ready(c,release)&&Updates.error().isEmpty(),"Valid signed download rejected");
+            // Cleanup may run in the receiver process: never touch a pending APK or a writer's partial.
+            File untouched=new File(c.getCacheDir(),"not-an-update.apk");try(OutputStream out=new FileOutputStream(untouched)){out.write(7);}
+            File partial=UpdateFiles.partial(c);try(OutputStream out=new FileOutputStream(partial)){out.write(1);}
+            try(UpdateFiles.Lease lease=UpdateFiles.acquire(c,true)){check(!UpdateFiles.cleanup(c)&&partial.isFile()&&Updates.apk(c).isFile(),"Cleanup touched locked download");}
+            check(UpdateFiles.cleanup(c)&&!partial.exists()&&Updates.ready(c,release)&&untouched.isFile(),"Cleanup removed future APK/unrelated file or left orphan partial");untouched.delete();
+            // The current/older installed APK is obsolete even if release metadata or internet is absent.
+            File staged=new File(c.getCacheDir(),"pending-fixture.apk");check(Updates.apk(c).renameTo(staged),"Cannot save pending fixture");
+            try(InputStream in=new FileInputStream(installed);OutputStream out=new FileOutputStream(Updates.apk(c))){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
+            check(UpdateFiles.cleanup(c)&&!Updates.apk(c).exists(),"Already installed APK was retained");check(staged.renameTo(Updates.apk(c)),"Cannot restore pending fixture");
             Uri uri=Updates.installIntent(c).getData();try(ParcelFileDescriptor descriptor=c.getContentResolver().openFileDescriptor(uri,"r")){check(descriptor!=null&&descriptor.getStatSize()==release.size,"Installer cannot read private APK");}
             boolean denied=false;try{c.getContentResolver().openFileDescriptor(uri,"rw");}catch(Exception expected){denied=true;}check(denied,"APK provider permits writing");denied=false;try{c.getContentResolver().openFileDescriptor(Uri.parse("content://"+c.getPackageName()+".updates/../shared_prefs/plex.xml"),"r");}catch(Exception expected){denied=true;}check(denied,"Provider allows traversal");
             ProviderInfo provider=c.getPackageManager().resolveContentProvider(c.getPackageName()+".updates",0);check(provider!=null&&!provider.exported&&provider.grantUriPermissions,"Provider exported or installer grant missing");Intent intent=Updates.installIntent(c);check((intent.getFlags()&Intent.FLAG_GRANT_READ_URI_PERMISSION)!=0&&intent.getClipData()!=null&&intent.resolveActivity(c.getPackageManager())!=null,"System installer intent/grant unavailable");
@@ -72,7 +81,7 @@ public class AndroidUpdatesTest extends Instrumentation {
             check(c.getPackageManager().canRequestPackageInstalls(),"Runner must grant fixture install permission before instrumentation starts");
             Updates.requestInstallation(c);activity=recreate(activity);hits(installer,1);check(!Updates.installationRequested(c),"Install request not consumed before handing off to Android");
             activity=recreate(activity);idle();check(installer.getHits()==1,"Cancelled installation reopened automatically");
-            UpdatesActivity retry=activity;ui(()->{try{control(retry,"action").performClick();}catch(Exception e){throw new RuntimeException(e);}});hits(installer,2);check(Updates.ready(c,release),"Retry needlessly discarded verified APK");
+            UpdatesActivity retry=activity;ui(()->{try{control(retry,"action").performClick();}catch(Exception e){throw new RuntimeException(e);}});hits(installer,2);check(UpdateFiles.cleanup(c)&&Updates.ready(c,release),"Cleanup discarded cancelled installation instead of allowing retry");
             // Same-sized tampering must still fail after permission: ready() alone is not enough.
             try(RandomAccessFile file=new RandomAccessFile(Updates.apk(c),"rw")){file.seek(128);file.write(file.read()^0xff);}
             Updates.requestInstallation(c);activity=recreate(activity);idle();check(installer.getHits()==2&&!Updates.installationRequested(c)&&!Updates.error().isEmpty(),"Tampered APK resumed into installer");

@@ -34,7 +34,17 @@ final class Updates {
     static boolean automaticEnabled(Context c){return prefs(c).getBoolean("automatic",true);}
     static boolean automaticDownload(Context c){return prefs(c).getBoolean("download",true);}
     static boolean previews(Context c){return prefs(c).getBoolean("previews",version(c).contains("-"));}
-    static File apk(Context c){return new File(new File(c.getCacheDir(),"updates"),"update.apk");}
+    static File apk(Context c){return UpdateFiles.apk(c);}
+    private static boolean installedTag(String tag,String installed){String v=tag.startsWith("v")?tag.substring(1):tag;return ReleaseFeed.validVersion(v)&&ReleaseFeed.validVersion(installed)&&ReleaseFeed.compare(v,installed)<=0;}
+    // The receiver only removes files; preference reconciliation stays in the :home process.
+    static void cleanupInstalled(Context c){
+        if(!UpdateFiles.cleanupOnce(c))return;
+        SharedPreferences p=prefs(c);String installed=version(c);SharedPreferences.Editor edit=p.edit();boolean stale=false;
+        try{if(installedTag(new JSONObject(p.getString("release","{}")).optString("tag_name"),installed)){edit.remove("release");stale=true;}}catch(JSONException ignored){}
+        if(installedTag(p.getString("downloaded",""),installed)){edit.remove("downloaded");stale=true;}
+        if(installedTag(p.getString("installRequest","").split("\n",2)[0],installed)){edit.remove("installRequest").remove("installRequestedAt");stale=true;}
+        if(stale)edit.apply();
+    }
     static int state(){return state;}
     static int progress(){return progress;}
     static String error(){return error;}
@@ -57,6 +67,7 @@ final class Updates {
     }
     static boolean clearInstallationRequest(Context c){return prefs(c).edit().remove("installRequest").remove("installRequestedAt").commit();}
     static boolean resumeInstallation(Activity activity){
+        cleanupInstalled(activity);
         if(!installationRequested(activity)||!activity.getPackageManager().canRequestPackageInstalls())return false;
         activity.startActivity(new Intent(activity,UpdatesActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP));return true;
     }
@@ -65,7 +76,7 @@ final class Updates {
         worker.execute(()->{try{job.run();}catch(Exception failure){if(!cancelled)error=Ui.tr("Não foi possível verificar a atualização. Tente novamente.","Could not verify the update. Please try again.","No se ha podido verificar la actualización. Vuelve a intentarlo.");}finally{HttpURLConnection current=connection;if(current!=null)current.disconnect();connection=null;state=IDLE;changed();}});return true;
     }
     static void automatic(Context context){
-        Context c=context.getApplicationContext();if(!automaticEnabled(c))return;SharedPreferences p=prefs(c);long now=System.currentTimeMillis();
+        Context c=context.getApplicationContext();cleanupInstalled(c);if(!automaticEnabled(c))return;SharedPreferences p=prefs(c);long now=System.currentTimeMillis();
         long checked=p.getLong("checked",0),attempt=p.getLong("attempt",0);
         if((now<checked||now-checked>=DAY)&&(now<attempt||now-attempt>=HOUR))check(c);
         else {ReleaseFeed.Release release=available(c);long last=p.getLong("downloadAttempt",0);if(automaticDownload(c)&&release!=null&&!ready(c,release)&&(now<last||now-last>=HOUR))download(c);}
@@ -82,13 +93,15 @@ final class Updates {
     }
     static void download(Context context){Context c=context.getApplicationContext();ReleaseFeed.Release release=available(c);if(release!=null)begin(DOWNLOADING,()->downloadInside(c,release));}
     private static void downloadInside(Context c,ReleaseFeed.Release release)throws Exception{
+        try(UpdateFiles.Lease lease=UpdateFiles.acquire(c,true)){
         state=DOWNLOADING;progress=0;changed();prefs(c).edit().putLong("downloadAttempt",System.currentTimeMillis()).remove("downloaded").apply();
-        File target=apk(c),folder=target.getParentFile();if(!folder.isDirectory()&&!folder.mkdirs())throw new IOException();File part=new File(folder,"incoming.part");
+        File target=apk(c),part=UpdateFiles.partial(c);
         try{
             try(InputStream in=transport.open(release.url);FileOutputStream out=new FileOutputStream(part)){copy(in,out,ReleaseFeed.MAX_APK,release.size);out.getFD().sync();}
             verify(c,part,release);checkCancelled();if(target.exists()&&!target.delete())throw new IOException();if(!part.renameTo(target))throw new IOException();
             if(!prefs(c).edit().putString("downloaded",release.tag).commit())throw new IOException("Cannot save download");
         }finally{part.delete();}
+        }
     }
     static void verify(Context c,File file,ReleaseFeed.Release release)throws Exception{
         if(file.length()!=release.size)throw new IOException("Size mismatch");MessageDigest hash=MessageDigest.getInstance("SHA-256");

@@ -11,6 +11,7 @@ public class HomeReceiver extends BroadcastReceiver {
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             HomeMode.bootCheck(context);
         } else if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)) {
+            UpdateFiles.cleanup(context);
             HomeMode.verify(context);   // app updated: complete Vela mode if something is missing
         }
     }

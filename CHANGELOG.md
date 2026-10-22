@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.20.1 Preview · 2026-10-22
+
+- El APK descargado por Vela se elimina al confirmar Android que su versión ya está instalada. La limpieza utiliza el aviso de actualización de la app y se recupera al abrir Vela si ese aviso no llegó.
+- Funciona sin red y con las comprobaciones y descargas automáticas desactivadas. Se conservan los APK de versiones pendientes, también al cancelar o fallar una instalación.
+- Se retiran los temporales abandonados del actualizador. Un bloqueo de archivo protege las descargas activas entre el proceso de Inicio y el receptor del sistema; no se añade un servicio ni una comprobación periódica.
+- Solo se gestionan los dos archivos privados del actualizador. Las cuentas, la personalización y los archivos ajenos permanecen intactos.
+- Prueba nativa con sustitución real del paquete Android, recuperación al abrir sin conexión, descargas bloqueadas, conservación de la instalación pendiente y regresión del permiso con cierre/recreación del proceso.
+
 ## 1.20.0 Preview · 2026-10-22
 
 - Cambio automático de señal en M3U y Xtream: si una emisión falla, se prueban sus otros formatos y variantes del mismo canal, priorizando la misma calidad y después las inferiores.

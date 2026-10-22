@@ -25,6 +25,8 @@ Desde **1.12.1 Preview**, **Comprobar automáticamente** y **Descargar automáti
 
 Desde **1.15.1 Preview**, al conceder el permiso de instalación y volver a Vela se retoma el APK pendiente. Si cancelas o no concedes el permiso, puedes pulsar **Instalar** para volver a intentarlo. Si estás en una versión anterior y se queda en esa pantalla tras autorizar el permiso, vuelve a Vela y pulsa **Instalar** otra vez; no hace falta desinstalar ni borrar datos.
 
+Desde **1.20.1 Preview**, Vela elimina automáticamente el APK de su caché privada cuando Android confirma que esa versión ya está instalada. Si la notificación no llega, lo comprueba al volver a abrir Vela, también sin conexión y con las comprobaciones automáticas desactivadas. Las instalaciones pendientes o canceladas conservan su APK para reintentar; los temporales abandonados se limpian sin interrumpir una descarga activa. Esta limpieza se limita a los archivos del actualizador de Vela y no afecta a tus cuentas ni a los APK que guardes manualmente en Descargas.
+
 Las versiones preview incluyen por defecto las próximas versiones preliminares. Desactiva esa opción para recibir solo versiones estables. Puedes desactivar la comprobación automática.
 
 Si tienes una versión anterior a 1.12.0, descarga e instala esta versión desde Releases una vez. Las versiones antiguas no pueden incorporar el actualizador por sí mismas. No desinstales Vela ni borres sus datos. Las compilaciones firmadas con otra clave no se pueden actualizar con el APK oficial.
