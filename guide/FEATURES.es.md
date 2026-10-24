@@ -59,3 +59,9 @@ Mantén OK en Seguir viendo para marcar una película o episodio como visto en P
 ## Encuentra justo lo que te apetece
 
 Películas y Series con las últimas incorporaciones primero, filtros de su servidor, búsqueda por título y órdenes ascendente o descendente. Combina campos y conserva su selección entre páginas, de forma independiente para cada biblioteca. [Guía de filtros](FILTROS.es.md).
+
+## Entradas y ajustes integrados
+
+- Dispositivo HDMI destacado, fila de iconos y selector de familias con el mando. Nombre e icono solo con estado activo compartido por Android. [Detección y modelos](HDMI.es.md).
+- Ajustes, cuentas, actualizaciones, fuentes, apps y entradas dentro de Inicio. [Navegación](ajustes-integrados.md).
+- Superficies grafito y un acento común, sin fotografías ni trabajador de imágenes en Entradas.

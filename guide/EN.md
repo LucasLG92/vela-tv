@@ -4,7 +4,7 @@
 
 Your movies, series, apps and live TV, brought together in a home screen made for your remote. Connect Plex or Jellyfin, pick your favorites and make Vela feel like yours.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.21.0-preview)** · [47 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.22.0-preview)** · [47 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
 
 ![Vela home screen](../gallery/01-inicio.webp)
 
@@ -41,3 +41,7 @@ Press **Right during playback** to browse channels, programme titles and remaini
 If an IPTV signal fails, Vela tries alternatives for the same channel, including a lower quality when available. Your preferred quality stays saved. Startup and playback stalls have a 20-second grace period; explicit pauses are respected. If every alternative fails, press OK to retry. No extra player or background video preview is created.
 
 After Android confirms an update is installed, Vela removes its private downloaded APK. Pending or cancelled installations keep their APK for retry, and active downloads are protected. Cleanup also works offline with automatic checks disabled.
+
+## Integrated settings and HDMI inputs
+
+Settings, accounts, updates, TV sources, apps and inputs share Home and its graphite theme. Pinned apps open with OK; Right on YouTube keeps its available content in Vela. HDMI inputs use native brand vectors and group physical ports with CEC devices. Device identities appear only when Android reports an active connection; otherwise the port stays HDMI 1, HDMI 2, and so on. Hold OK to assign a profile when the TV or an adapter does not identify it. Hardware information depends on the television; arbitrary console generations cannot be reliably fingerprinted.
