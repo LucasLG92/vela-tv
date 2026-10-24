@@ -1,5 +1,17 @@
 # Cambios
 
+## 1.22.0 Preview · 2026-10-24
+
+- Paleta grafito común en Inicio, Ajustes y TV: superficies, campos, guía y progreso acordes con la barra lateral y un único acento elegido por el usuario.
+- Entradas HDMI rediseñadas con un dispositivo destacado, accesos compactos e iconos con los colores de las marcas como vectores nativos. Sin fotografías, descargas ni trabajador de imágenes en la sección.
+- Agrupación de puertos y dispositivos HDMI-CEC, cambios de conexión por eventos y perfiles para consolas Nintendo, PlayStation, Xbox y Sega, equipos de juego, ordenadores, streaming, vídeo y audio. Mantener OK permite asignar un modelo sin cambiar el nombre del puerto en la TV.
+- Un dispositivo solo muestra su nombre e icono con conexión activa compartida por Android. En espera, sin señal o sin identificar se muestra HDMI y su número; un nombre antiguo o una asignación manual no simulan una conexión.
+- OK sobre cualquier aplicación anclada abre su aplicación. La flecha derecha sobre YouTube conserva sus vídeos dentro de Vela; mantener OK sigue permitiendo ordenar y ocultar accesos.
+- Ajustes, cuentas, actualizaciones, fuentes de TV, aplicaciones y entradas se muestran dentro del inicio, con la misma barra lateral, cabecera y tema. La vista previa del salvapantallas usa ese mismo espacio y devuelve el foco al cerrarse.
+- Una sola pantalla interna montada y un historial limitado de rutas sin vistas ni credenciales. Los trabajadores, iconos y carteles ocultos se liberan al salir de su sección; se restaura la página de ajustes si Android recrea el inicio.
+- Se conserva la continuación de una instalación pendiente después del permiso de Android y del cierre del proceso. Los formularios de cuenta y listas se protegen contra capturas y no guardan campos privados en el estado de navegación.
+- El instalador, los permisos, la reproducción de entradas y los ajustes del fabricante siguen siendo pantallas del sistema. Se conserva el acceso independiente de recuperación.
+
 ## 1.21.0 Preview · 2026-10-22
 
 - TV en directo integrada en Inicio: comparte barra lateral, reloj y tiempo, con su acceso justo debajo de Inicio. Al salir de TV se liberan el trabajo pendiente y los logos; durante el directo se libera el arte de navegación.

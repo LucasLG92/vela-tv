@@ -18,3 +18,5 @@ El nombre, la interfaz de Vela y sus ampliaciones no implican afiliación con el
 | Recursos abiertos de las pruebas | Cortos de Blender, CC BY 3.0/4.0; [créditos completos](gallery/CREDITS.md). |
 
 Las cuentas, el progreso y la paginación de las capturas son ejemplos anonimizados. Los carteles cinematográficos originales no se redistribuyen como recursos de la aplicación. Las imágenes abiertas en `tests/gallery/assets/` se conservan como material alternativo para pruebas; tampoco se empaquetan en el APK de Vela.
+
+Los iconos de dispositivos proceden de Simple Icons 9.21.0: contornos originales convertidos a vectores Android y presentados en blanco. [Fuentes y avisos de marcas](app/assets/licenses/device-icons.txt), [CC0 de la colección](app/assets/licenses/simple-icons-CC0.txt) y [aviso de sus autores](app/assets/licenses/simple-icons-DISCLAIMER.txt). No implican afiliación ni aprobación de los fabricantes.

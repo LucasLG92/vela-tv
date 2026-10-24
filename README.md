@@ -4,7 +4,7 @@
 
 Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abrir. Vela reúne lo que te gusta ver en una interfaz visual, personalizable y pensada para el mando.
 
-**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.21.0-preview)** · [Ver las 47 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
+**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.22.0-preview)** · [Ver las 50 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
 
 ![Inicio de Vela con Seguir viendo panorámico](gallery/01-inicio.webp)
 
@@ -60,6 +60,20 @@ Pon tus accesos en el orden que prefieras. Mantén OK para moverlos o quitarlos 
 
 ![Aplicaciones con sus iconos originales](gallery/09-todas-las-apps.webp)
 
+## Tus dispositivos, también en Vela
+
+Entradas comparte el diseño de Inicio: un dispositivo destacado, iconos con los colores de sus marcas y una fila de conexiones para recorrer con el mando. Nintendo, PlayStation, Xbox, Sega, ordenadores, streaming y equipos de vídeo o audio tienen su lugar.
+
+Solo aparece el dispositivo cuando la televisión comunica una conexión activa. Los puertos sin señal muestran **HDMI 1, HDMI 2…**. Mantén OK para elegir el modelo cuando el televisor o un adaptador no lo identifica. [Cómo funciona la detección](guide/HDMI.es.md).
+
+![Entradas HDMI con iconos](gallery/48-entradas-hdmi.webp)
+
+## Todo comparte tu inicio
+
+Ajustes, cuentas, actualizaciones, fuentes de TV, apps y entradas se abren dentro de Vela, con la misma barra lateral y una paleta grafito común. El color de acento que elijas acompaña a toda la interfaz. Los permisos y el instalador siguen perteneciendo a Android.
+
+![Ajustes dentro del inicio de Vela](gallery/10-ajustes.webp)
+
 ## Hazlo tuyo
 
 Seis colores de acento, tres tamaños de cartel y distintas intensidades de fondo. Un aspecto más discreto, más colorido o con el cine a lo grande: tú eliges.
@@ -110,7 +124,7 @@ Las nuevas versiones llegan desde GitHub a tu televisión. Vela busca actualizac
 
 Instala Vela, conecta tu biblioteca y elige tus aplicaciones. Todo desde la televisión, con un asistente que puedes completar a tu ritmo.
 
-**[Descargar Vela 1.21.0 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.21.0-preview)**
+**[Descargar Vela 1.21.0 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.22.0-preview)**
 
 Para **Android TV y Google TV con Android 11 o posterior**. Esta versión es una preview. Consulta la [guía de instalación](guide/INSTALL.es.md) y la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
 
