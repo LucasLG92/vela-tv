@@ -1,6 +1,6 @@
 # Vela, por dentro
 
-Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **47 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
+Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **50 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
 
 [Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.21.0-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
 
@@ -205,3 +205,21 @@ La TV utiliza la lista M3U pública de TDTChannels, logos originales, EPG dobleM
 ![Programa, progreso y tiempo restante sin salir del vídeo](47-canales-durante-directo.webp)
 
 Derecha abre los canales; OK cambia de emisión y Atrás cierra el panel para seguir viendo.
+
+## Tus dispositivos, dentro de Vela
+
+![Entradas HDMI con iconos y dispositivo destacado](48-entradas-hdmi.webp)
+
+## Una entrada para cada momento
+
+![Xbox y las conexiones dentro de Vela](49-xbox-hdmi.webp)
+
+Los equipos sin señal aparecen como HDMI y su número. Los nombres y símbolos se muestran solo con un estado activo publicado por Android.
+
+## Elige qué has conectado
+
+![Perfiles de dispositivos HDMI](50-identificar-hdmi.webp)
+
+Mantén OK sobre una entrada para elegir su modelo o regresar a Automático. Nintendo, PlayStation, Xbox, Sega, ordenadores, streaming y equipos de vídeo o audio tienen sus perfiles.
+
+Las nuevas capturas 1.22 muestran la paleta grafito, los ajustes integrados y las entradas con iconos. Los dispositivos HDMI son datos simulados del emulador que recorren el mismo código de identificación y vistas; no son una comprobación de consolas físicas. Consulta versión y procedencia en el índice.

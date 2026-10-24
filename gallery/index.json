@@ -82,32 +82,32 @@
   {
     "file": "09-todas-las-apps.webp",
     "title": "Tus apps, con sus iconos originales",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "e7d3ad00ffb0b48d006e724ee4fd5f4779714cdb2318eae8ab3dd1311f1ced4e"
+    "version": "1.22.0",
+    "sha256": "405a58ace7da1f1747e77e8c38eeb262991a6232864b9613530a06821bc3a26b"
   },
   {
     "file": "10-ajustes.webp",
     "title": "Tus ajustes",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "4ff2ad1222796ec6d7098213b1c2e1c76f538a8e6022bf353d3d68fb652a0ad0"
+    "version": "1.22.0",
+    "sha256": "c6f9a745ccaa29c42ffffdaa6595ed968c214c8f3d91dff1d7b308267d977dd4"
   },
   {
     "file": "11-apariencia.webp",
     "title": "Hazlo tuyo",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "31725ca4318c637a61b5edaa8c031217a68c8e0656e7a53766948d1681259a0a"
+    "version": "1.22.0",
+    "sha256": "b5b45d250022cc49050a688161317e61af9b18e24281589c53aae881b2924d4b"
   },
   {
     "file": "12-colores.webp",
@@ -162,12 +162,12 @@
   {
     "file": "17-cuentas.webp",
     "title": "Tus cuentas y servicios",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "158f2f71877aaf85cd2642e448d6d0443f16e44fad2a3ca8860f95841fc7c1d5"
+    "version": "1.22.0",
+    "sha256": "80714f3d5d981b48818c6da7fb53d779475ed45fd69e691388d8db9de8098faa"
   },
   {
     "file": "18-salvapantallas-ajustes.webp",
@@ -196,7 +196,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.10.2",
+    "sha256": "e4f0ed5966f116013e388d21b01c696bb1b3263f6dae3bbbb720b13888f76d28"
   },
   {
     "file": "21-salvapantallas-aereos.webp",
@@ -205,17 +206,18 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.10.2",
+    "sha256": "24ed2f0c0f5f82f029055f0eb5d3fc87c114005d3ae1de4cac1fed206e433c34"
   },
   {
     "file": "22-cuentas-sin-vincular.webp",
     "title": "Conecta lo que te gusta",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "feb6627550e2b9119171af37558dbc46cc8ca57bc55c15c652558d728f5c2626"
+    "version": "1.22.0",
+    "sha256": "80714f3d5d981b48818c6da7fb53d779475ed45fd69e691388d8db9de8098faa"
   },
   {
     "file": "23-asistente.webp",
@@ -224,7 +226,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.10.2",
+    "sha256": "ae1a766c04fa047376b067e86359a18fe7bacf57f7ed1bd7bdec93d5fd031306"
   },
   {
     "file": "24-asistente-cuentas.webp",
@@ -233,27 +236,28 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.10.2"
+    "version": "1.10.2",
+    "sha256": "cab81b179219ed3dd6117f1eb939f0541146889b9239389b66b0fe02a937acd5"
   },
   {
     "file": "25-television.webp",
     "title": "Encuentra tu próximo directo",
-    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "a59ce263d730d8f9a6199e39614735055afc736c8a5f45eb661a950e55d743e2"
+    "version": "1.22.0",
+    "sha256": "723fe6b64868c40f6fe2918bd728208960b010a45b96b8c2a6892449d626b597"
   },
   {
     "file": "26-listas-tv.webp",
     "title": "Tu lista, tus canales",
-    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "39de896d83a69096a704741afffbb83142f416f7e54f51e9b0d34eb4a70be767"
+    "version": "1.22.0",
+    "sha256": "d07c6bc7fcc5d4838b8ac64b2df0bdd44763cdbc49c3c61903125e88666e31e9"
   },
   {
     "file": "27-reproductor-video-demo.webp",
@@ -318,12 +322,12 @@
   {
     "file": "33-actualizaciones.webp",
     "title": "Siempre al día",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "37fc622fa7b5a8c4cad2649212ffd1121526f520f5529f4cb6647c89dbe02a2e"
+    "version": "1.22.0",
+    "sha256": "9d39be2cddeb5fdc99fcf5a556e2bcc2e1c6566ffc7d381b17536ea9ed99452b"
   },
   {
     "file": "34-jellyfin-inicio.webp",
@@ -332,7 +336,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.13.0"
+    "version": "1.13.0",
+    "sha256": "80f9da7da84f6aeadd3e0e08a16e423fdf76fa612d3464a623e0df7b5d9b7faf"
   },
   {
     "file": "35-jellyfin-cuenta.webp",
@@ -341,7 +346,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.13.0"
+    "version": "1.13.0",
+    "sha256": "62335a961313f16e78912d35affad2db46453cf6b48552369ad80e1211958697"
   },
   {
     "file": "36-marcar-como-visto.webp",
@@ -350,7 +356,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.14.0"
+    "version": "1.14.0",
+    "sha256": "c3564a5acbff35e0d055a449b2849e97780631b3fbf3659d0a1df0f3748efe5b"
   },
   {
     "file": "37-siguiente-episodio.webp",
@@ -359,7 +366,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.14.0"
+    "version": "1.14.0",
+    "sha256": "0bcb264ef8d646c44271f0c98a5ace816344105002069606d993931d78448982"
   },
   {
     "file": "38-filtros-biblioteca.webp",
@@ -368,7 +376,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.15.0"
+    "version": "1.15.0",
+    "sha256": "9e9dc8a9f4b67050906d2a14d212a2a30f130894f9bbc95bf5c8a01ad8767740"
   },
   {
     "file": "39-ordenar-biblioteca.webp",
@@ -377,27 +386,28 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.15.0"
+    "version": "1.15.0",
+    "sha256": "ed01c95f34a19ad8f136e4e57e2b50c94647568ee1b305feb071513aad0c5e8f"
   },
   {
     "file": "40-guia-horizontal.webp",
     "title": "Toda la programación, de un vistazo",
-    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "fee811ce7321b4a077d033ed99d173d37a176979b2a8da7e93c4b58e1d81ab0e"
+    "version": "1.22.0",
+    "sha256": "fdc483fe67bdd8036208568c16b5292e06fc24b454115a123817293192062f48"
   },
   {
     "file": "41-proximos-programas.webp",
     "title": "Descubre lo que viene después",
-    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "2e88ad7ce38ffbc7ac96a300a50286d0b78547ba0abbcd304958a2724b3a7efe"
+    "version": "1.22.0",
+    "sha256": "b96b0ba664f994d789692508c8155b9b5576100776c7d7768f1ee13ea83786ef"
   },
   {
     "file": "42-servidores-plex.webp",
@@ -406,16 +416,18 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.20.2"
+    "version": "1.20.2",
+    "sha256": "abeb39de0100e2e53a01267eca7ed9e7827871761c53f6435b2cb83343d0c484"
   },
   {
     "file": "43-vincular-plex.webp",
     "title": "Conecta con un código",
-    "source": "native clean-emulator 4K capture; nonfunctional DEMO code from isolated test-only client; no real device authorization",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.20.2"
+    "version": "1.22.0",
+    "sha256": "427da623e5b60ae925e419dee1b15eb22189e09951c338a496fbb8798e4794c8"
   },
   {
     "file": "44-tv-navegacion.webp",
@@ -453,8 +465,38 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
-    "sha256": "ece42eedc515761f911406340a68eaf1165a89d85d2e563d5337154d10e3b07d"
+    "version": "1.22.0",
+    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
+    "sha256": "52683d8e41aac59b2f3443c8796693af44b37fa2948334a18c5dfd8975312d76"
+  },
+  {
+    "file": "48-entradas-hdmi.webp",
+    "title": "Tus dispositivos, dentro de Vela",
+    "source": "native clean-emulator 4K capture; simulated HDMI metadata exercises the actual resolver and UI; native brand vectors, demo weather, no personal devices or accounts",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.22.0",
+    "sha256": "804175e162e4609963132aad675bcdfbd80388a4014e7e899b9d67c9d9863756"
+  },
+  {
+    "file": "49-xbox-hdmi.webp",
+    "title": "Una entrada para cada momento",
+    "source": "native clean-emulator 4K capture; simulated HDMI metadata exercises the actual resolver and UI; native brand vectors, demo weather, no personal devices or accounts",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.22.0",
+    "sha256": "086c90dac2bc4d885d97a0a0a0d288d62f98ea2634170a823a23673d9eea675e"
+  },
+  {
+    "file": "50-identificar-hdmi.webp",
+    "title": "Elige qué has conectado",
+    "source": "native clean-emulator 4K capture; simulated HDMI metadata exercises the actual resolver and UI; native brand vectors, demo weather, no personal devices or accounts",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.22.0",
+    "sha256": "8a60b5f44df5dd04e27eb116b3b790ff0b31a8eedb540fc59d1e729581f0bfed"
   }
 ]
