@@ -1,0 +1,242 @@
+[
+  {
+    "id": "nintendoswitch",
+    "title": "Nintendo Switch",
+    "source": "https://www.nintendo.com/switch/",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#E60012"
+  },
+  {
+    "id": "nintendo",
+    "title": "Nintendo",
+    "source": "https://en.wikipedia.org/wiki/Nintendo#/media/File:Nintendo.svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#8F8F8F"
+  },
+  {
+    "id": "nintendogamecube",
+    "title": "Nintendo GameCube",
+    "source": "https://www.nintendo.com/consumer/systems/nintendogamecube/index.jsp",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#6A5FBB"
+  },
+  {
+    "id": "wii",
+    "title": "Wii",
+    "source": "https://commons.wikimedia.org/wiki/File:Wii.svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#8B8B8B"
+  },
+  {
+    "id": "wiiu",
+    "title": "Wii U",
+    "source": "https://commons.wikipedia.org/wiki/File:WiiU.svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#8B8B8B"
+  },
+  {
+    "id": "playstation",
+    "title": "PlayStation",
+    "source": "https://www.playstation.com/en-us/",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#003791"
+  },
+  {
+    "id": "playstation2",
+    "title": "PlayStation 2",
+    "source": "https://commons.wikimedia.org/wiki/File:PlayStation_2_logo.svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#003791"
+  },
+  {
+    "id": "playstation3",
+    "title": "PlayStation 3",
+    "source": "https://commons.wikimedia.org/wiki/File:PlayStation_3_Logo_neu.svg#/media/File:PS3.svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#003791"
+  },
+  {
+    "id": "playstation4",
+    "title": "PlayStation 4",
+    "source": "https://commons.wikimedia.org/wiki/File:PlayStation_4_logo_and_wordmark.svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#003791"
+  },
+  {
+    "id": "playstation5",
+    "title": "PlayStation 5",
+    "source": "https://www.playstation.com/en-us/ps5/",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#003791"
+  },
+  {
+    "id": "xbox",
+    "title": "Xbox",
+    "source": "https://www.xbox.com/en-US/consoles",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#107C10"
+  },
+  {
+    "id": "sega",
+    "title": "Sega",
+    "source": "https://en.wikipedia.org/wiki/Sega#/media/File:Sega_logo.svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#0089CF"
+  },
+  {
+    "id": "steamdeck",
+    "title": "Steam Deck",
+    "source": "https://partner.steamgames.com/doc/marketing/branding",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": "https://partner.steamgames.com/doc/marketing/branding",
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#1A9FFF"
+  },
+  {
+    "id": "steam",
+    "title": "Steam",
+    "source": "https://partner.steamgames.com/doc/marketing/branding",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": "https://partner.steamgames.com/doc/marketing/branding",
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#000000"
+  },
+  {
+    "id": "asus",
+    "title": "ASUS",
+    "source": "https://www.asus.com",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#000000"
+  },
+  {
+    "id": "windows",
+    "title": "Windows",
+    "source": "https://commons.wikimedia.org/wiki/File:Windows_logo_-_2021_(Black).svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": "https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE1voQq",
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#0078D4"
+  },
+  {
+    "id": "apple",
+    "title": "Apple",
+    "source": "https://www.apple.com",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#000000"
+  },
+  {
+    "id": "appletv",
+    "title": "Apple TV",
+    "source": "https://en.wikipedia.org/wiki/File:Apple_TV_(logo).svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#000000"
+  },
+  {
+    "id": "amazonfiretv",
+    "title": "Amazon Fire TV",
+    "source": "https://www.amazon.com/gp/help/customer/display.html?nodeId=201348270",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#FC4C02"
+  },
+  {
+    "id": "google",
+    "title": "Google",
+    "source": "https://partnermarketinghub.withgoogle.com",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": "https://about.google/brand-resource-center/brand-elements/",
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#4285F4"
+  },
+  {
+    "id": "roku",
+    "title": "Roku",
+    "source": "https://www.roku.com",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": "https://docs.roku.com/published/trademarkguidelines/en/ca",
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#662D91"
+  },
+  {
+    "id": "android",
+    "title": "Android",
+    "source": "https://www.android.com",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#3DDC84"
+  },
+  {
+    "id": "nvidia",
+    "title": "NVIDIA",
+    "source": "https://www.nvidia.com/etc/designs/nvidiaGDC/clientlibs_base/images/NVIDIA-Logo.svg",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#76B900"
+  },
+  {
+    "id": "atari",
+    "title": "Atari",
+    "source": "https://atarivcs.com",
+    "collection": "https://github.com/simple-icons/simple-icons/tree/9.21.0",
+    "collection_license": "CC0-1.0",
+    "brand_guidelines": null,
+    "changes": "SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.",
+    "primary_color": "#E4202E"
+  }
+]

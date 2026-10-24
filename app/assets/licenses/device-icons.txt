@@ -1,0 +1,100 @@
+Device brand icons / Iconos de marcas de dispositivos
+
+Source collection: Simple Icons 9.21.0, CC0-1.0. Original paths converted to Android vectors and tinted white to match Vela. Brand names, logos and trade marks remain with their owners; no affiliation or endorsement is implied. See simple-icons-CC0.txt and simple-icons-DISCLAIMER.txt for the collection notices. Generic connection symbols are Vela drawings, not manufacturer marks.
+
+Nintendo Switch
+https://www.nintendo.com/switch/
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Nintendo
+https://en.wikipedia.org/wiki/Nintendo#/media/File:Nintendo.svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Nintendo GameCube
+https://www.nintendo.com/consumer/systems/nintendogamecube/index.jsp
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Wii
+https://commons.wikimedia.org/wiki/File:Wii.svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Wii U
+https://commons.wikipedia.org/wiki/File:WiiU.svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+PlayStation
+https://www.playstation.com/en-us/
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+PlayStation 2
+https://commons.wikimedia.org/wiki/File:PlayStation_2_logo.svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+PlayStation 3
+https://commons.wikimedia.org/wiki/File:PlayStation_3_Logo_neu.svg#/media/File:PS3.svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+PlayStation 4
+https://commons.wikimedia.org/wiki/File:PlayStation_4_logo_and_wordmark.svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+PlayStation 5
+https://www.playstation.com/en-us/ps5/
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Xbox
+https://www.xbox.com/en-US/consoles
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Sega
+https://en.wikipedia.org/wiki/Sega#/media/File:Sega_logo.svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Steam Deck
+https://partner.steamgames.com/doc/marketing/branding
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Steam
+https://partner.steamgames.com/doc/marketing/branding
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+ASUS
+https://www.asus.com
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Windows
+https://commons.wikimedia.org/wiki/File:Windows_logo_-_2021_(Black).svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Apple
+https://www.apple.com
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Apple TV
+https://en.wikipedia.org/wiki/File:Apple_TV_(logo).svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Amazon Fire TV
+https://www.amazon.com/gp/help/customer/display.html?nodeId=201348270
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Google
+https://partnermarketinghub.withgoogle.com
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Roku
+https://www.roku.com
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Android
+https://www.android.com
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+NVIDIA
+https://www.nvidia.com/etc/designs/nvidiaGDC/clientlibs_base/images/NVIDIA-Logo.svg
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
+Atari
+https://atarivcs.com
+SVG paths converted to Android Vector Drawable without geometry changes; monochrome white tint.
+
