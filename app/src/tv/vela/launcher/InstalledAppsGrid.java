@@ -27,8 +27,12 @@ final class InstalledAppsGrid extends GridView {
     private final View close;
     private final AppsAdapter adapter=new AppsAdapter();
     private volatile boolean released;
+    private int initialPosition;
 
     InstalledAppsGrid(Context context,List<String> featured,View close,TextView status,TextView count,Consumer<SidebarApps.Choice> open){
+        this(context,featured,close,status,count,open,true);
+    }
+    InstalledAppsGrid(Context context,List<String> featured,View close,TextView status,TextView count,Consumer<SidebarApps.Choice> open,boolean connectCloseDown){
         super(context);this.close=close;favorites=new HashSet<>(featured);
         iconSize=Visuals.light(context)?128:192;cacheBytes=Visuals.light(context)?512*1024:1024*1024;
         icons=new LruCache<String,Bitmap>(cacheBytes){@Override protected int sizeOf(String key,Bitmap bitmap){return bitmap.getAllocationByteCount();}};
@@ -36,7 +40,7 @@ final class InstalledAppsGrid extends GridView {
         setNumColumns(COLUMNS);setColumnWidth(264);setHorizontalSpacing(26);setVerticalSpacing(14);setStretchMode(NO_STRETCH);
         setPadding(12,16,12,16);setClipToPadding(false);setClipChildren(false);setGravity(Gravity.LEFT);
         setSelector(new ColorDrawable(Color.TRANSPARENT));setCacheColorHint(Color.TRANSPARENT);setVerticalScrollBarEnabled(false);
-        setAdapter(adapter);setEmptyView(status);close.setNextFocusDownId(getId());
+        setAdapter(adapter);setEmptyView(status);if(connectCloseDown)close.setNextFocusDownId(getId());
         setOnItemClickListener((parent,view,position,id)->{if(!released&&position>=0&&position<choices.size())open.accept(choices.get(position));});
         setOnItemSelectedListener(new OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> parent,View view,int position,long id){highlight();}
@@ -60,10 +64,12 @@ final class InstalledAppsGrid extends GridView {
                 if(released)return;choices.addAll(found);adapter.notifyDataSetChanged();
                 count.setText(choices.size()+Ui.tr(" aplicativos"," apps"," apps"));
                 status.setText(Ui.tr("Nenhum aplicativo disponível.","No apps available.","No hay aplicaciones disponibles."));
-                if(choices.isEmpty())close.requestFocus();else{setSelection(0);requestFocus();}
+                if(choices.isEmpty())close.requestFocus();else{setSelection(Math.min(initialPosition,choices.size()-1));requestFocus();}
             });
         });
     }
+
+    void initialSelection(int position){initialPosition=Math.max(0,position);if(!choices.isEmpty())setSelection(Math.min(initialPosition,choices.size()-1));}
 
     @Override public boolean dispatchKeyEvent(KeyEvent event){
         int key=event.getKeyCode(),position=getSelectedItemPosition();
@@ -151,7 +157,7 @@ final class InstalledAppsGrid extends GridView {
         Tile(){
             super(InstalledAppsGrid.this.getContext());setLayoutParams(new AbsListView.LayoutParams(264,250));
             setFocusable(false);setDefaultFocusHighlightEnabled(false);setClipChildren(false);
-            artwork=new FrameLayout(getContext());artwork.setBackground(shape(0xFF202630,43));artwork.setClipToOutline(true);
+            artwork=new FrameLayout(getContext());artwork.setBackground(shape(VelaTheme.CARD,43));artwork.setClipToOutline(true);
             LayoutParams art=new LayoutParams(192,192,Gravity.TOP|Gravity.CENTER_HORIZONTAL);art.topMargin=10;addView(artwork,art);
             image=new ImageView(getContext());image.setScaleType(ImageView.ScaleType.FIT_CENTER);image.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);artwork.addView(image,new LayoutParams(-1,-1));
             initial=caption(56,Ui.displaySemibold);initial.setTextColor(0xFFB9BDCA);artwork.addView(initial,new LayoutParams(-1,-1));

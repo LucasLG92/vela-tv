@@ -118,7 +118,7 @@ final class Updates {
         begin(VERIFYING,()->{
             try{verify(c,apk(c),release);}catch(Exception invalid){clearInstallationRequest(c);throw invalid;}
             main.post(()->{
-                Activity target=owner.get();if(target==null||target.isFinishing()||target.isDestroyed()||(target instanceof UpdatesActivity&&!((UpdatesActivity)target).canShowInstaller()))return;
+                Activity target=owner.get();if(target==null||target.isFinishing()||target.isDestroyed()||(target instanceof UpdatesActivity&&!((UpdatesActivity)target).canShowInstaller())||(target instanceof HomeActivity&&!((HomeActivity)target).canShowInstaller()))return;
                 if(!installationRequested(c))return;
                 if(!clearInstallationRequest(c)){error=Ui.tr("Não foi possível preparar a instalação. Tente novamente.","Could not prepare installation. Please try again.","No se ha podido preparar la instalación. Vuelve a intentarlo.");changed();return;}
                 try{target.startActivityForResult(installIntent(target),902);}catch(ActivityNotFoundException|SecurityException missing){error=Ui.tr("Não foi possível abrir o instalador. Verifique a permissão de instalação e tente novamente.","Could not open the installer. Check install permission and try again.","No se ha podido abrir el instalador. Comprueba el permiso de instalación e inténtalo de nuevo.");changed();}

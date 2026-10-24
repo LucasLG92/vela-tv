@@ -91,6 +91,8 @@ final class CinemaHomeView extends FrameLayout {
     private int filter,imageGeneration,posterGeneration;
     private HomeLiveTvView liveTv;
     private boolean livePage;
+    private HomeScreenHost panels;
+    private boolean panelReturnLive;
     private long refreshedAt;
     private String displayedServer="";
     private String heroKey="";
@@ -178,8 +180,8 @@ final class CinemaHomeView extends FrameLayout {
         sideLabels.add(accountTitle);
         updateAccount();
         View divider=new View(activity);divider.setBackgroundColor(0x25FFFFFF);LayoutParams dp=new LayoutParams(40,1);dp.leftMargin=18;dp.topMargin=488;sidebar.addView(divider,dp);
-        reorderHint=text("",22,WHITE,Ui.medium);reorderHint.setPadding(26,0,26,0);reorderHint.setBackground(round(0xF0243540,24));reorderHint.setVisibility(GONE);reorderHint.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);LayoutParams rh=new LayoutParams(1320,64);rh.leftMargin=360;rh.topMargin=128;stage.addView(reorderHint,rh);
-        shortcutMenu=new FrameLayout(activity);shortcutMenu.setBackground(round(0xFA202A36,26));shortcutMenu.setElevation(28);shortcutMenu.setVisibility(GONE);LayoutParams sm=new LayoutParams(940,224);sm.leftMargin=360;sm.topMargin=128;stage.addView(shortcutMenu,sm);
+        reorderHint=text("",22,WHITE,Ui.medium);reorderHint.setPadding(26,0,26,0);reorderHint.setBackground(round(0xF0262831,24));reorderHint.setVisibility(GONE);reorderHint.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);LayoutParams rh=new LayoutParams(1320,64);rh.leftMargin=360;rh.topMargin=128;stage.addView(reorderHint,rh);
+        shortcutMenu=new FrameLayout(activity);shortcutMenu.setBackground(round(0xFA262831,26));shortcutMenu.setElevation(28);shortcutMenu.setVisibility(GONE);LayoutParams sm=new LayoutParams(940,224);sm.leftMargin=360;sm.topMargin=128;stage.addView(shortcutMenu,sm);
         shortcutTitle=text("",27,WHITE,Ui.displaySemibold);LayoutParams st=new LayoutParams(888,40);st.leftMargin=26;st.topMargin=17;shortcutMenu.addView(shortcutTitle,st);
         shortcutMove=button(Ui.tr("Mover","Move","Mover"),22);shortcutRemove=button(Ui.tr("Remover da barra","Remove from sidebar","Quitar de la barra"),22);
         TextView[] actions={shortcutMove,shortcutRemove};for(int i=0;i<actions.length;i++){
@@ -215,17 +217,18 @@ final class CinemaHomeView extends FrameLayout {
     private void place(View v,int x,int y,int w,int h){LayoutParams p=new LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;surface.addView(v,p);}
     private void lift(View v,float scale,float y,float z){if(Visuals.reducedMotion(activity)){scale=1;y=0;}v.animate().cancel();v.animate().scaleX(scale).scaleY(scale).translationY(y).translationZ(z).setDuration(Visuals.duration(activity,170)).setInterpolator(EASE).start();}
     @Override protected void onSizeChanged(int w,int h,int ow,int oh){float s=Math.min(w/1920f,h/1080f);stage.setPivotX(0);stage.setPivotY(0);stage.setScaleX(s);stage.setScaleY(s);stage.setTranslationX((w-1920*s)/2);stage.setTranslationY((h-1080*s)/2);}
-    private View activeSide(){if(livePage)return sideButtons.get(6);if(filter!=3)return sideButtons.get(filter==4?3:filter);for(int i=0;i<sidePackages.length;i++)if(SidebarApps.YOUTUBE.equals(sidePackages[i])&&appButtons.get(i).getVisibility()==VISIBLE)return appButtons.get(i);return sideButtons.get(0);}
-    private void styleSide(int i,boolean f){boolean selected=livePage?i==6:filter!=3&&i==(filter==4?3:filter);sideButtons.get(i).setBackground(f?round(Appearance.accent(activity),28):selected?round(Appearance.tint(activity,0x25),28):null);sideLabels.get(i).setTextColor(f?BG:WHITE);sideIcons.get(i).setColorFilter(f?BG:0xFFDDDEE7);}
-    private void styleApp(int slot,boolean focused){if(slot<0)return;boolean moving=reorderOriginal!=null&&slot==reorderSlot;boolean context=sidePackages[slot].equals(menuPackage);appButtons.get(slot).setBackground(moving?round(0xF03D737A,28):focused||context?round(Appearance.tint(activity,0x3C),28):filter==3&&SidebarApps.YOUTUBE.equals(sidePackages[slot])?round(Appearance.tint(activity,0x25),28):null);appButtons.get(slot).setTranslationZ(moving?16:0);}
+    private View activeSide(){if(panels!=null)return sideButtons.get(panels.navigationIndex());if(livePage)return sideButtons.get(6);if(filter!=3)return sideButtons.get(filter==4?3:filter);for(int i=0;i<sidePackages.length;i++)if(SidebarApps.YOUTUBE.equals(sidePackages[i])&&appButtons.get(i).getVisibility()==VISIBLE)return appButtons.get(i);return sideButtons.get(0);}
+    private void styleSide(int i,boolean f){boolean selected=panels!=null?i==panels.navigationIndex():livePage?i==6:filter!=3&&i==(filter==4?3:filter);sideButtons.get(i).setBackground(f?round(Appearance.accent(activity),28):selected?round(Appearance.tint(activity,0x25),28):null);sideLabels.get(i).setTextColor(f?BG:WHITE);sideIcons.get(i).setColorFilter(f?BG:0xFFDDDEE7);}
+    private void styleApp(int slot,boolean focused){if(slot<0)return;boolean moving=reorderOriginal!=null&&slot==reorderSlot;boolean context=sidePackages[slot].equals(menuPackage);appButtons.get(slot).setBackground(moving?round(Appearance.tint(activity,0x99),28):focused||context?round(Appearance.tint(activity,0x3C),28):panels==null&&!livePage&&filter==3&&SidebarApps.YOUTUBE.equals(sidePackages[slot])?round(Appearance.tint(activity,0x25),28):null);appButtons.get(slot).setTranslationZ(moving?16:0);}
     private void styleSidebar(){for(int i=0;i<sideButtons.size();i++)styleSide(i,sideButtons.get(i).hasFocus());for(int i=0;i<appButtons.size();i++)styleApp(i,appButtons.get(i).hasFocus());}
     private void setSidebar(boolean open){if(sidebarOpen==open)return;sidebarOpen=open;LayoutParams p=(LayoutParams)sidebar.getLayoutParams();p.width=open?300:76;sidebar.setLayoutParams(p);List<FrameLayout> buttons=new ArrayList<>(sideButtons);buttons.addAll(appButtons);for(FrameLayout v:buttons){LayoutParams q=(LayoutParams)v.getLayoutParams();q.width=open?284:60;v.setLayoutParams(q);}List<TextView> labels=new ArrayList<>(sideLabels);labels.addAll(appLabels);for(TextView v:labels){v.animate().cancel();v.animate().alpha(open?1:0).setDuration(Visuals.duration(activity,110)).start();}serverLabel.setAlpha(open?1:0);sidebarArt.setVisibility(open&&heroBitmap!=null?VISIBLE:GONE);scrim.animate().alpha(open?.19f:0).setDuration(Visuals.duration(activity,140)).start();}
-    private void leaveSidebar(){setSidebar(false);if(livePage){liveTv.focusContent();return;}View v=lastContent;if(v==null||!v.isAttachedToWindow()||v.getVisibility()!=VISIBLE)v=play;v.requestFocus();}
+    private void leaveSidebar(){setSidebar(false);if(panels!=null){panels.focusContent();return;}if(livePage){liveTv.focusContent();return;}View v=lastContent;if(v==null||!v.isAttachedToWindow()||v.getVisibility()!=VISIBLE)v=play;v.requestFocus();}
     private void activateSide(int i){
-        if(i<=3){if(livePage){leaveLiveTv();resume();}changeFilter(i==3?4:i);setSidebar(false);play.requestFocus();return;}
-        if(i==4)showApps(sideButtons.get(i));else if(i==5)showInputs(sideButtons.get(i));else if(i==6)openLiveTv();else activity.startActivity(new Intent(activity,SettingsActivity.class));
+        if(i<=3){if(panels!=null){closePanel(false);resume();}if(livePage){leaveLiveTv();resume();}changeFilter(i==3?4:i);setSidebar(false);play.requestFocus();return;}
+        if(i==4)showApps(sideButtons.get(i));else if(i==5)showInputs(sideButtons.get(i));else if(i==6)openLiveTv();else openPanel(new Intent(activity,SettingsActivity.class));
     }
     private void openLiveTv(){
+        if(panels!=null)closePanel(false);
         if(livePage){setSidebar(false);liveTv.focusContent();return;}
         pause();releaseImages();surface.setVisibility(INVISIBLE);livePage=true;updateHint.setVisibility(GONE);pageTitle.setText(Ui.tr("TV em direto","Live TV","TV en directo"));
         // The same header and navigation stay attached; TV is a lazy section in this HomeActivity.
@@ -239,6 +242,32 @@ final class CinemaHomeView extends FrameLayout {
     private void leaveLiveTv(){
         if(!livePage)return;livePage=false;HomeLiveTvView old=liveTv;liveTv=null;old.destroy();stage.removeView(old);surface.setVisibility(VISIBLE);pageTitle.setText(filter==0?"Inicio":filter==1?"Películas":filter==2?"Series":"Biblioteca");lastContent=play;styleSidebar();
     }
+    private boolean sidebarFocused(){View focus=activity.getCurrentFocus();for(View v=focus;v!=null;){if(v==sidebar)return true;android.view.ViewParent p=v.getParent();v=p instanceof View?(View)p:null;}return false;}
+    boolean route(Intent intent){if(!HomeScreenHost.handles(intent))return false;if(panels==null)openPanel(intent);else panels.open(panels.screen,intent);return true;}
+    void settings(){openPanel(new Intent(activity,SettingsActivity.class));}
+    boolean showingUpdates(){return panels!=null&&panels.showingUpdates();}
+    boolean canShowInstaller(){return panels!=null&&panels.updatesActive();}
+    private void sharedChrome(){for(View chrome:new View[]{pageTitle,headerStatus,updateHint})if(chrome.getParent()==surface){LayoutParams p=(LayoutParams)chrome.getLayoutParams();surface.removeView(chrome);stage.addView(chrome,stage.indexOfChild(sidebar),p);}}
+    private void openPanel(Intent intent){openPanel(intent,null);}
+    private void openPanel(Intent intent,Bundle saved){
+        if(panels!=null){panels.root(intent);setSidebar(false);styleSidebar();return;}
+        closeOverlay();closeShortcutMenu(false);finishReorder(false);panelReturnLive=livePage;pause();if(livePage)leaveLiveTv();releaseImages();surface.setVisibility(INVISIBLE);sharedChrome();updateHint.setVisibility(GONE);
+        panels=new HomeScreenHost(activity,new HomeScreenHost.Actions(){
+            public void navigation(){sideButtons.get(panels.navigationIndex()).requestFocus();}
+            public View navigationTarget(){return sideButtons.get(panels.navigationIndex());}
+            public void contentFocused(){setSidebar(false);styleSidebar();}
+            public void changed(){refreshSidebarApps();styleSidebar();if(((HomeActivity)activity).foreground()){headerStatus.stop();headerStatus.start();}}
+            public void title(String text){pageTitle.setText(text);refreshSidebarApps();styleSidebar();}
+            public void fullscreen(boolean enabled){sidebar.setVisibility(enabled?GONE:VISIBLE);pageTitle.setVisibility(enabled?GONE:VISIBLE);headerStatus.setVisibility(enabled?GONE:VISIBLE);if(enabled)headerStatus.stop();else if(!closed&&((HomeActivity)activity).foreground())headerStatus.start();}
+            public void exit(){boolean tv=panelReturnLive;closePanel(false);if(tv)openLiveTv();else resume();}
+        });stage.addView(panels,1,new LayoutParams(1920,1080));setSidebar(false);
+        if(saved==null)panels.root(intent);else panels.restore(saved);if(((HomeActivity)activity).foreground())panels.resume();headerStatus.start();styleSidebar();
+    }
+    private void closePanel(boolean restore){if(panels==null)return;HomeScreenHost old=panels;old.destroy();stage.removeView(old);panels=null;surface.setVisibility(VISIBLE);sidebar.setVisibility(VISIBLE);pageTitle.setVisibility(VISIBLE);headerStatus.setVisibility(VISIBLE);pageTitle.setText(filter==0?"Inicio":filter==1?"Películas":filter==2?"Series":filter==3?"YouTube":"Biblioteca");styleSidebar();if(restore)resume();}
+    Bundle savePanels(){if(panels==null)return null;Bundle out=new Bundle();out.putBundle("screens",panels.save());out.putBoolean("returnLive",panelReturnLive);out.putInt("filter",filter);return out;}
+    void restorePanels(Bundle saved){if(saved==null)return;filter=saved.getInt("filter",0);openPanel(null,saved.getBundle("screens"));panelReturnLive=saved.getBoolean("returnLive");}
+    boolean permissionResult(int request,String[] names,int[] results){return panels!=null&&panels.permissionResult(request,names,results);}
+    void activityResult(int request,int result,Intent data){if(panels!=null)panels.activityResult(request,result,data);}
     private void refreshSidebarApps(){
         if(reorderOriginal!=null||menuPackage!=null)return;
         String[] selected=SidebarApps.slots(activity);boolean[] available=new boolean[selected.length];
@@ -256,10 +285,10 @@ final class CinemaHomeView extends FrameLayout {
             TextView label=text(name,21,WHITE,Ui.medium);label.setSingleLine(true);label.setEllipsize(android.text.TextUtils.TruncateAt.END);label.setAlpha(sidebarOpen?1:0);label.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);LayoutParams lp=new LayoutParams(206,56);lp.leftMargin=64;button.addView(label,lp);appLabels.add(label);
             button.setOnFocusChangeListener((v,f)->{if(f)setSidebar(true);styleApp(appButtons.indexOf(v),f);});
             button.setOnLongClickListener(v->openShortcutMenu(v));
-            button.setOnClickListener(v->{if(reorderOriginal!=null||menuPackage!=null)return;if(SidebarApps.YOUTUBE.equals(pkg)){changeFilter(3);setSidebar(false);play.requestFocus();loadYouTube();}else openPackage(pkg,name);});
+            button.setOnClickListener(v->{if(reorderOriginal!=null||menuPackage!=null)return;openPackage(pkg,name);});
             button.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->{if(v.hasFocus()&&sidebarOpen)v.requestRectangleOnScreen(new Rect(0,0,v.getWidth(),v.getHeight()),true);});
             button.setOnKeyListener((v,key,event)->{
-                if(key==KeyEvent.KEYCODE_DPAD_RIGHT){if(event.getAction()==KeyEvent.ACTION_DOWN)leaveSidebar();return true;}
+                if(key==KeyEvent.KEYCODE_DPAD_RIGHT){if(event.getAction()==KeyEvent.ACTION_DOWN&&event.getRepeatCount()==0){if(SidebarApps.YOUTUBE.equals(pkg))openYouTubeContent();else leaveSidebar();}return true;}
                 if(key==KeyEvent.KEYCODE_DPAD_UP||key==KeyEvent.KEYCODE_DPAD_DOWN){if(event.getAction()==KeyEvent.ACTION_DOWN)moveSidebarApp(appButtons.indexOf(v),key==KeyEvent.KEYCODE_DPAD_DOWN);return true;}
                 return false;
             });
@@ -281,21 +310,21 @@ final class CinemaHomeView extends FrameLayout {
     }
     private boolean beginReorder(View view){
         int slot=appButtons.indexOf(view);
-        if(!active||slot<0||!availableApps[slot])return false;
+        if(closed||!((HomeActivity)activity).foreground()||slot<0||!availableApps[slot])return false;
         if(reorderOriginal!=null)return true;
         reorderOriginal=sidePackages.clone();reorderSlot=slot;consumeConfirmUp=confirmHeld;reorderConfirmArmed=false;
         view.cancelLongPress();view.setPressed(false);setSidebar(true);view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         reorderHint.setVisibility(VISIBLE);updateReorderHint();styleSidebar();return true;
     }
     private boolean openShortcutMenu(View view){
-        int slot=appButtons.indexOf(view);if(!active||slot<0||!availableApps[slot])return false;
+        int slot=appButtons.indexOf(view);if(closed||!((HomeActivity)activity).foreground()||slot<0||!availableApps[slot])return false;
         if(reorderOriginal!=null||menuPackage!=null)return true;
         menuPackage=sidePackages[slot];menuSnapshot=sidePackages.clone();menuAction=0;menuConfirmArmed=false;consumeConfirmUp=confirmHeld;
         view.cancelLongPress();view.setPressed(false);view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);setSidebar(true);
         shortcutTitle.setText(SidebarApps.label(activity,menuPackage));shortcutMenu.setVisibility(VISIBLE);shortcutMove.requestFocus();styleShortcutMenu();styleSidebar();return true;
     }
     private void styleShortcutMenu(){
-        TextView[] items={shortcutMove,shortcutRemove};for(int i=0;i<items.length;i++){items[i].setBackground(round(i==menuAction?WHITE:0xFF354151,20));items[i].setTextColor(i==menuAction?BG:WHITE);}
+        TextView[] items={shortcutMove,shortcutRemove};for(int i=0;i<items.length;i++){items[i].setBackground(round(i==menuAction?WHITE:VelaTheme.RAISED,20));items[i].setTextColor(i==menuAction?BG:WHITE);}
     }
     private void closeShortcutMenu(boolean restoreFocus){
         if(menuPackage==null)return;String pkg=menuPackage;menuPackage=null;menuSnapshot=null;menuConfirmArmed=false;shortcutMenu.setVisibility(GONE);styleSidebar();
@@ -348,6 +377,7 @@ final class CinemaHomeView extends FrameLayout {
         int next=slot+(down?1:-1);while(next>=0&&next<sidePackages.length&&!availableApps[next])next+=down?1:-1;
         View target=next>=0&&next<sidePackages.length?appButtons.get(next):sideButtons.get(down?4:3);target.requestFocus();
     }
+    private void openYouTubeContent(){if(panels!=null){closePanel(false);resume();}if(livePage){leaveLiveTv();resume();}changeFilter(3);setSidebar(false);play.requestFocus();loadYouTube();}
     private void enableYouTube(){if(activity.checkSelfPermission(TvSuggestions.PERMISSION)!=PackageManager.PERMISSION_GRANTED)activity.requestPermissions(new String[]{TvSuggestions.PERMISSION},80);else loadYouTube();}
     private void updateAccount(){
         String name=plex.connected()?plex.name():Ui.tr("Conectar biblioteca","Connect library","Conectar biblioteca");
@@ -376,6 +406,7 @@ final class CinemaHomeView extends FrameLayout {
         play.setBackground(round(Appearance.accent(activity),30));styleSidebar();for(int i=0;i<appButtons.size();i++)styleApp(i,appButtons.get(i).hasFocus());showFilms();
     }
     void resume(){
+        if(panels!=null){headerStatus.start();refreshSidebarApps();panels.resume();styleSidebar();return;}
         if(livePage){headerStatus.start();refreshSidebarApps();liveTv.resume();return;}
         active=true;
         Updates.observe(updateListener);updateAvailable();Updates.automatic(activity);
@@ -393,7 +424,7 @@ final class CinemaHomeView extends FrameLayout {
         if(plex.connected()&&(films.isEmpty()||SystemClock.elapsedRealtime()-refreshedAt>60_000))refresh();
         if(browsing()&&plex.connected()&&catalogPage==null&&!catalogLoading)loadCatalog(requestedSection,requestedOffset,false);
     }
-    void pause(){if(livePage){headerStatus.stop();liveTv.pause();return;}if(filterSheet!=null)closeOverlay();active=false;Updates.forget(updateListener);if(installedApps!=null)closeOverlay();accountGeneration++;if(avatarRequest!=null)avatarRequest.cancel();avatarRequest=null;accountRequestKey="";headerStatus.stop();cancelCatalog();closeShortcutMenu(false);finishReorder(false);confirmHeld=false;consumeConfirmUp=false;for(View button:appButtons){button.cancelLongPress();button.setPressed(false);}main.removeCallbacks(tick);main.removeCallbacks(visiblePosters);if(heroLoad!=null)main.removeCallbacks(heroLoad);}
+    void pause(){if(panels!=null){closeShortcutMenu(false);finishReorder(false);confirmHeld=false;consumeConfirmUp=false;headerStatus.stop();panels.pause();return;}if(livePage){headerStatus.stop();liveTv.pause();return;}if(filterSheet!=null)closeOverlay();active=false;Updates.forget(updateListener);if(installedApps!=null)closeOverlay();accountGeneration++;if(avatarRequest!=null)avatarRequest.cancel();avatarRequest=null;accountRequestKey="";headerStatus.stop();cancelCatalog();closeShortcutMenu(false);finishReorder(false);confirmHeld=false;consumeConfirmUp=false;for(View button:appButtons){button.cancelLongPress();button.setPressed(false);}main.removeCallbacks(tick);main.removeCallbacks(visiblePosters);if(heroLoad!=null)main.removeCallbacks(heroLoad);}
     private void updateAvailable(){
         if(!active)return;ReleaseFeed.Release release=Updates.available(activity);
         updateHint.setVisibility(release==null?GONE:VISIBLE);
@@ -406,9 +437,9 @@ final class CinemaHomeView extends FrameLayout {
         for(ImageView image:posterImages)image.setImageDrawable(null);
         for(int i=0;i<posterRequests.size();i++)posterRequests.set(i,null);
         releaseAppsGrid();overlay.removeAllViews();overlay.setVisibility(GONE);overlayReturn=null;
-        surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
+        surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(panels!=null)panels.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
     }
-    void trimMemory(){if(!active)releaseImages();else{images.trim();if(installedApps!=null)installedApps.trim();}}
+    void trimMemory(){if(panels!=null){panels.trimMemory();releaseImages();return;}if(!active)releaseImages();else{images.trim();if(installedApps!=null)installedApps.trim();}}
     private void loadVisiblePosters(){
         if(!active||closed)return;
         int epoch=posterGeneration;
@@ -435,8 +466,8 @@ final class CinemaHomeView extends FrameLayout {
         return card.getRight()>=left&&card.getLeft()<=right&&cardBottom>top&&cardTop<bottom;
     }
     private void schedulePosters(){main.removeCallbacks(visiblePosters);main.postDelayed(visiblePosters,40);}
-    void destroy(){closed=true;pause();if(liveTv!=null){liveTv.destroy();liveTv=null;}images.close();io.shutdownNow();main.removeCallbacksAndMessages(null);}
-    void reset(){if(livePage){leaveLiveTv();resume();}closeShortcutMenu(false);finishReorder(false);closeOverlay();changeFilter(0);setSidebar(false);play.requestFocus();}
+    void destroy(){closed=true;pause();if(panels!=null){panels.destroy();panels=null;}if(liveTv!=null){liveTv.destroy();liveTv=null;}images.close();io.shutdownNow();main.removeCallbacksAndMessages(null);}
+    void reset(){if(panels!=null){closePanel(false);resume();}if(livePage){leaveLiveTv();resume();}closeShortcutMenu(false);finishReorder(false);closeOverlay();changeFilter(0);setSidebar(false);play.requestFocus();}
     void loadYouTube(){loadWatchNext();io.execute(()->{List<PlexClient.Film> fresh=TvSuggestions.youtube(activity);main.post(()->{if(!closed){youtube=fresh;if(filter==3&&active)showFilms();}});});}
     private void loadWatchNext(){int epoch=++watchGeneration;String linked=plex.connected()?plex.packageName():"";io.execute(()->{List<PlexClient.Film> fresh=ContinueWatching.read(activity,linked);main.post(()->{if(!closed&&active&&epoch==watchGeneration){watchNext=fresh;if(filter==0)showFilms();}});});}
     private void refresh(){if(loading)return;loading=true;refreshedAt=SystemClock.elapsedRealtime();String server=plex.identity();io.execute(()->{try{List<PlexClient.Film> fresh=plex.library();main.post(()->{if(!closed&&!watchedBusy&&server.equals(plex.identity())){films=fresh;if(active&&filter==0)showFilms();else libraryDirty=true;}});}catch(Exception ignored){main.post(()->{if(!closed&&films.isEmpty()&&!browsing())rowNote.setText(Ui.tr("Não foi possível ler sua biblioteca. Confira o servidor ou conecte novamente.","Could not read your library. Check the server or link again.","No se ha podido leer tu biblioteca. Comprueba el servidor o vuelve a vincularlo."));});}finally{main.post(()->loading=false);}});}
@@ -657,20 +688,14 @@ final class CinemaHomeView extends FrameLayout {
     private void launch(Intent intent){try{activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}catch(ActivityNotFoundException|SecurityException e){note("No se ha podido abrir esta opción.");}}
     private void note(String s){Toast.makeText(activity,s,Toast.LENGTH_SHORT).show();}
     private void releaseAppsGrid(){if(installedApps!=null){installedApps.release();installedApps=null;}}
-    private TextView startOverlay(String heading,View from){releaseFilterSheet();releaseAppsGrid();overlayReturn=from;setSidebar(false);surface.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);overlay.removeAllViews();overlay.setBackgroundColor(0xFD0C0D12);overlay.setVisibility(VISIBLE);TextView h=text(heading,46,WHITE,Ui.displaySemibold);LayoutParams p=new LayoutParams(1400,70);p.leftMargin=84;p.topMargin=68;overlay.addView(h,p);TextView close=button(Ui.tr("Fechar","Close","Cerrar"),20);p=new LayoutParams(140,56);p.leftMargin=1692;p.topMargin=76;overlay.addView(close,p);close.setOnClickListener(v->closeOverlay());return close;}
-    private void closeOverlay(){if(overlay.getVisibility()!=VISIBLE)return;releaseFilterSheet();releaseAppsGrid();overlay.setVisibility(GONE);overlay.removeAllViews();surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(overlayReturn!=null&&overlayReturn.isAttachedToWindow())overlayReturn.requestFocus();else play.requestFocus();}
-    private void showApps(View from){
-        View close=startOverlay(Ui.tr("Seus apps","Your apps","Tus apps"),from);
-        overlay.setBackground(new android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.TL_BR,new int[]{0xFF171E2B,0xFF090C12}));
-        TextView hint=text(Ui.tr("Seus favoritos primeiro","Your favorites first","Tus favoritas primero"),22,DIM,Ui.regular);LayoutParams hp=new LayoutParams(1200,40);hp.leftMargin=84;hp.topMargin=140;overlay.addView(hint,hp);
-        TextView count=text("",20,DIM,Ui.regular);count.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);LayoutParams cp=new LayoutParams(250,40);cp.leftMargin=1582;cp.topMargin=154;overlay.addView(count,cp);
-        TextView status=text(Ui.tr("Carregando aplicativos…","Loading apps…","Cargando aplicaciones…"),21,DIM,Ui.regular);LayoutParams empty=new LayoutParams(1600,90);empty.leftMargin=84;empty.topMargin=230;overlay.addView(status,empty);
-        installedApps=new InstalledAppsGrid(activity,Arrays.asList(SidebarApps.slots(activity)),close,status,count,choice->openPackage(choice.pkg,choice.label));LayoutParams grid=new LayoutParams(1760,810);grid.leftMargin=76;grid.topMargin=208;overlay.addView(installedApps,grid);
-    }
+    private TextView startOverlay(String heading,View from){releaseFilterSheet();releaseAppsGrid();overlayReturn=from;setSidebar(false);surface.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);if(panels!=null)panels.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);overlay.removeAllViews();overlay.setBackgroundColor(0xFD0C0D12);overlay.setVisibility(VISIBLE);TextView h=text(heading,46,WHITE,Ui.displaySemibold);LayoutParams p=new LayoutParams(1400,70);p.leftMargin=84;p.topMargin=68;overlay.addView(h,p);TextView close=button(Ui.tr("Fechar","Close","Cerrar"),20);p=new LayoutParams(140,56);p.leftMargin=1692;p.topMargin=76;overlay.addView(close,p);close.setOnClickListener(v->closeOverlay());return close;}
+    private void closeOverlay(){if(overlay.getVisibility()!=VISIBLE)return;releaseFilterSheet();releaseAppsGrid();overlay.setVisibility(GONE);overlay.removeAllViews();surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(panels!=null)panels.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(overlayReturn!=null&&overlayReturn.isAttachedToWindow())overlayReturn.requestFocus();else play.requestFocus();}
+    private void showApps(View from){openPanel(new Intent(HomeScreenHost.APPS));}
     private void option(String label,int y,Runnable action,boolean focus){TextView v=button(label,23);LayoutParams p=new LayoutParams(740,82);p.leftMargin=84;p.topMargin=y;overlay.addView(v,p);v.setOnClickListener(w->action.run());if(focus)v.requestFocus();}
-    private void showSettings(View from){startOverlay("Ajustes",from);option(Ui.tr("Contas e serviços","Accounts and services","Cuentas y servicios"),210,()->activity.startActivity(new Intent(activity,SettingsActivity.class).putExtra("page",14)),true);option("Inicio y salvapantallas",316,()->activity.startActivity(new Intent(activity,SettingsActivity.class)),false);option("Ajustes de la televisión",422,()->launch(new Intent(Settings.ACTION_SETTINGS)),false);}
-    private void showInputs(View from){startOverlay("Entradas y televisión",from);List<HomeApps.Item> inputs=HomeApps.allInputs(activity);int n=0;for(HomeApps.Item item:inputs){option(item.label+(item.connected?"":" · Sin señal"),210+n*106,()->{if(item.kind==HomeApps.LIVE_TV){Intent intent=HomeApps.liveTv(activity);if(intent!=null)launch(intent);}else launch(new Intent(Intent.ACTION_VIEW,android.media.tv.TvContract.buildChannelUriForPassthroughInput(item.inputId)));},n==0);n++;}if(n==0)option("Abrir ajustes de la TV",210,()->launch(new Intent(Settings.ACTION_SETTINGS)),true);}
+    private void showSettings(View from){openPanel(new Intent(activity,SettingsActivity.class));}
+    private void showInputs(View from){openPanel(new Intent(HomeScreenHost.INPUTS));}
     boolean onKey(KeyEvent event){
+        if(panels!=null&&menuPackage==null&&reorderOriginal==null&&overlay.getVisibility()!=VISIBLE&&!sidebarFocused())return panels.onKey(event);
         if(livePage&&overlay.getVisibility()!=VISIBLE&&liveTv.onKey(event))return true;
         int code=event.getKeyCode();boolean confirm=code==KeyEvent.KEYCODE_DPAD_CENTER||code==KeyEvent.KEYCODE_ENTER||code==KeyEvent.KEYCODE_NUMPAD_ENTER||code==KeyEvent.KEYCODE_BUTTON_A;
         if(confirm&&consumeConfirmUp){if(event.getAction()==KeyEvent.ACTION_UP){consumeConfirmUp=false;confirmHeld=false;reorderConfirmArmed=false;menuConfirmArmed=false;}return true;}

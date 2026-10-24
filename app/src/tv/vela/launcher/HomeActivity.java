@@ -16,6 +16,11 @@ import android.widget.TextView;
  */
 public class HomeActivity extends Activity {
     private CinemaHomeView home;
+    private boolean foreground;
+    boolean foreground(){return foreground;}
+    TvInputs.Source createInputsSource(){return new TvInputs.SystemSource(this);}
+    PlexClient createPlexClient(){return new PlexClient(this);}
+    boolean canShowInstaller(){return foreground&&home!=null&&home.canShowInstaller();}
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,9 +39,10 @@ public class HomeActivity extends Activity {
             return;
         }
         Ui.init(this);
-        if(Personalization.launchIfNeeded(this)){finish();return;}
+        boolean setup=Personalization.needed(this);
         home = new CinemaHomeView(this);
         setContentView(home);
+        if(savedInstanceState!=null&&savedInstanceState.containsKey("velaScreens"))home.restorePanels(savedInstanceState.getBundle("velaScreens"));else if("settings".equals(getIntent().getStringExtra("velaEntry")))home.settings();else if(setup)home.route(new Intent(this,SetupActivity.class));
         getWindow().getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
                 | android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         getWindow().setBackgroundDrawable(null);
@@ -44,10 +50,12 @@ public class HomeActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
-        if (home != null&&!Updates.resumeInstallation(this)) home.resume();
+        foreground=true;
+        if(home!=null){home.resume();if(!home.showingUpdates())Updates.resumeInstallation(this);}
     }
 
     @Override protected void onPause() {
+        foreground=false;
         if (home != null) home.pause();
         super.onPause();
     }
@@ -68,7 +76,8 @@ public class HomeActivity extends Activity {
     /** Home returns to the opening page with the sidebar closed and the main action focused. */
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (home != null) home.reset();
+        setIntent(intent);
+        if(home!=null){if("settings".equals(intent.getStringExtra("velaEntry")))home.settings();else home.reset();}
     }
 
     @Override protected void onDestroy() {
@@ -83,7 +92,18 @@ public class HomeActivity extends Activity {
 
     @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(requestCode,permissions,results);
+        if(home!=null&&home.permissionResult(requestCode,permissions,results))return;
         if(requestCode==80 && home!=null)home.loadYouTube();
     }
+
+    @Override public void startActivity(Intent intent){
+        if(home!=null){
+            if(intent.getComponent()!=null&&intent.getComponent().getClassName().equals(HomeActivity.class.getName())){home.reset();return;}
+            if(home.route(intent))return;
+        }
+        super.startActivity(intent);
+    }
+    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(home!=null)home.activityResult(request,result,data);}
+    @Override protected void onSaveInstanceState(Bundle state){if(home!=null){Bundle screens=home.savePanels();if(screens!=null)state.putBundle("velaScreens",screens);}super.onSaveInstanceState(state);}
 
 }

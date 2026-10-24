@@ -201,44 +201,10 @@ final class HomeApps {
      */
     private static List<Item> inputs(Context c, boolean all) {
         List<Item> out = new ArrayList<>();
-        TvInputManager tim = (TvInputManager) c.getSystemService(Context.TV_INPUT_SERVICE);
-        if (tim == null) return out;
-        List<TvInputInfo> list = new ArrayList<>();
-        try {
-            for (TvInputInfo info : tim.getTvInputList()) {
-                if (info.getType() == TvInputInfo.TYPE_HDMI && info.getParentId() == null) list.add(info);
-            }
-        } catch (RuntimeException e) {
-            return out;
+        for(TvInputs.Entry entry:TvInputs.list(c)){
+            if(!all&&entry.state!=TvInputs.CONNECTED)continue;
+            Item item=shortcut(INPUT,entry.key,entry.title,"hdmi");item.inputId=entry.inputId;item.number=entry.port.substring(5);item.connected=entry.state==TvInputs.CONNECTED;out.add(item);
         }
-        Collections.sort(list, (a, b) -> a.getId().compareTo(b.getId()));
-        Pattern digit = Pattern.compile("(\\d)");
-        for (int i = 0; i < list.size(); i++) {
-            TvInputInfo info = list.get(i);
-            int number = i + 1;
-            Matcher m = digit.matcher(String.valueOf(info.loadLabel(c)));
-            if (m.find()) number = Integer.parseInt(m.group(1));
-            // TCL TVs report "connected standby" for every port, with or without a device; only truly "connected"
-            // (a device that is on and sending a signal) makes the input show up.
-            int state = TvInputManager.INPUT_STATE_DISCONNECTED;
-            try {
-                state = tim.getInputState(info.getId());
-            } catch (RuntimeException ignored) {
-            }
-            if (!all && state != TvInputManager.INPUT_STATE_CONNECTED) continue;
-            CharSequence custom = null;
-            try {
-                custom = info.loadCustomLabel(c);
-            } catch (RuntimeException ignored) {
-            }
-            String label = custom != null && custom.length() > 0 ? custom.toString() : "HDMI " + number;
-            Item it = shortcut(INPUT, "hdmi" + number, label, "hdmi");
-            it.inputId = info.getId();
-            it.number = String.valueOf(number);
-            it.connected = state == TvInputManager.INPUT_STATE_CONNECTED;
-            out.add(it);
-        }
-        Collections.sort(out, (a, b) -> a.number.compareTo(b.number));
         return out;
     }
 
