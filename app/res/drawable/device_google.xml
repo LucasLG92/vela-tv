@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- google: Simple Icons 9.21.0, CC0 collection; brand rights remain with their owners. Original paths, white tint. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="64dp" android:height="64dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFF7F7FA" android:pathData="M 12.48 10.92 v 3.28 h 7.84 c -.24 1.84 -.853 3.187 -1.787 4.133 c -1.147 1.147 -2.933 2.4 -6.053 2.4 c -4.827 0 -8.6 -3.893 -8.6 -8.72 s 3.773 -8.72 8.6 -8.72 c 2.6 0 4.507 1.027 5.907 2.347 l 2.307 -2.307 C 18.747 1.44 16.133 0 12.48 0 C 5.867 0 .307 5.387 .307 12 s 5.56 12 12.173 12 c 3.573 0 6.267 -1.173 8.373 -3.36 c 2.16 -2.16 2.84 -5.213 2.84 -7.667 c 0 -.76 -.053 -1.467 -.173 -2.053 H 12.48 z" />
+</vector>

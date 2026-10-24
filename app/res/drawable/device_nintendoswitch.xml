@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- nintendoswitch: Simple Icons 9.21.0, CC0 collection; brand rights remain with their owners. Original paths, white tint. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="64dp" android:height="64dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFF7F7FA" android:pathData="M 14.176 24 h 3.674 c 3.376 0 6.15 -2.774 6.15 -6.15 V 6.15 C 24 2.775 21.226 0 17.85 0 H 14.1 c -.074 0 -.15 .074 -.15 .15 v 23.7 c -.001 .076 .075 .15 .226 .15 z m 4.574 -13.199 c 1.351 0 2.399 1.125 2.399 2.398 c 0 1.352 -1.125 2.4 -2.399 2.4 c -1.35 0 -2.4 -1.049 -2.4 -2.4 c -.075 -1.349 1.05 -2.398 2.4 -2.398 z M 11.4 0 H 6.15 C 2.775 0 0 2.775 0 6.15 v 11.7 C 0 21.226 2.775 24 6.15 24 h 5.25 c .074 0 .15 -.074 .15 -.149 V .15 c .001 -.076 -.075 -.15 -.15 -.15 z M 9.676 22.051 H 6.15 c -2.326 0 -4.201 -1.875 -4.201 -4.201 V 6.15 c 0 -2.326 1.875 -4.201 4.201 -4.201 H 9.6 l .076 20.102 z M 3.75 7.199 c 0 1.275 .975 2.25 2.25 2.25 s 2.25 -.975 2.25 -2.25 c 0 -1.273 -.975 -2.25 -2.25 -2.25 s -2.25 .977 -2.25 2.25 z" />
+</vector>

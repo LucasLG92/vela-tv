@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- playstation2: Simple Icons 9.21.0, CC0 collection; brand rights remain with their owners. Original paths, white tint. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="64dp" android:height="64dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFF7F7FA" android:pathData="M 7.46 13.779 v .292 h 4.142 v -3.85 h 3.796 V 9.93 h -4.115 v 3.85 z m 16.248 -3.558 v 1.62 h -7.195 v 2.23 H 24 v -.292 h -7.168 v -1.646 H 24 V 9.929 h -7.487 v .292 z m -16.513 0 v 1.62 H 0 v 2.23 h .292 v -1.938 H 7.46 V 9.929 H 0 v .292 Z" />
+</vector>
