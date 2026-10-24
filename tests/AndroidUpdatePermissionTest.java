@@ -20,6 +20,7 @@ public final class AndroidUpdatePermissionTest extends Instrumentation {
             check(!new PlexClient(c).connected()&&!new JellyfinClient(c).connected(),"Never run with personal accounts");
             SharedPreferences p=Updates.prefs(c);File backup=new File(c.getCacheDir(),"permission-test-preferences.json");
             if(phase.equals("prepare")){
+                File personal=new File(c.getCacheDir(),"permission-test-personalization.json");if(!personal.exists())try(OutputStream out=new FileOutputStream(personal)){out.write(new JSONObject(Personalization.prefs(c).getAll()).toString().getBytes("UTF-8"));}Personalization.complete(c);
                 if(!backup.exists())try(OutputStream out=new FileOutputStream(backup)){out.write(new JSONObject(p.getAll()).toString().getBytes("UTF-8"));}
                 File apk=Updates.apk(c);apk.getParentFile().mkdirs();
                 try(InputStream in=getContext().getAssets().open("future.apk");OutputStream out=new FileOutputStream(apk)){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
@@ -35,6 +36,7 @@ public final class AndroidUpdatePermissionTest extends Instrumentation {
                 JSONObject previous=new JSONObject(new String(bytes,"UTF-8"));SharedPreferences.Editor edit=p.edit().clear();
                 for(Iterator<String> keys=previous.keys();keys.hasNext();){String key=keys.next();Object value=previous.get(key);if(value instanceof Boolean)edit.putBoolean(key,(Boolean)value);else if(value instanceof Number)edit.putLong(key,((Number)value).longValue());else if(value instanceof String)edit.putString(key,(String)value);else throw new AssertionError("Unexpected preference type");}
                 check(edit.commit(),"Cannot restore preferences");backup.delete();Updates.apk(c).delete();
+                File personal=new File(c.getCacheDir(),"permission-test-personalization.json");if(personal.isFile()){byte[] data=new byte[(int)personal.length()];try(DataInputStream in=new DataInputStream(new FileInputStream(personal))){in.readFully(data);}JSONObject old=new JSONObject(new String(data,"UTF-8"));SharedPreferences.Editor restore=Personalization.prefs(c).edit().clear();for(Iterator<String> keys=old.keys();keys.hasNext();){String key=keys.next();Object value=old.get(key);if(value instanceof Boolean)restore.putBoolean(key,(Boolean)value);else if(value instanceof Number)restore.putLong(key,((Number)value).longValue());else if(value instanceof String)restore.putString(key,(String)value);}check(restore.commit(),"Cannot restore setup preferences");personal.delete();}
             }else throw new AssertionError("Unknown test phase");
             result.putString("result","PASS permission fixture "+phase);
         }catch(Throwable failure){result.putString("error",android.util.Log.getStackTraceString(failure));}

@@ -14,8 +14,8 @@ import org.json.*;
 /** Watch Next mapping and the mixed home row, without depending on private accounts. */
 public class AndroidContinueWatchingTest extends Instrumentation {
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
-    private Object field(Object o,String name)throws Exception{Field f=o.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(o);}
-    private void set(Object o,String name,Object value)throws Exception{Field f=o.getClass().getDeclaredField(name);f.setAccessible(true);f.set(o,value);}
+    private Object field(Object o,String name)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
+    private void set(Object o,String name,Object value)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);f.set(o,value);return;}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
     private void render(CinemaHomeView home){ui(()->{try{Method m=home.getClass().getDeclaredMethod("showFilms");m.setAccessible(true);m.invoke(home);}catch(Exception e){throw new RuntimeException(e);}});}
     private MatrixCursor row(Object... values){MatrixCursor cursor=new MatrixCursor(ContinueWatching.COLUMNS);cursor.addRow(Arrays.copyOf(values,ContinueWatching.COLUMNS.length));cursor.moveToFirst();return cursor;}

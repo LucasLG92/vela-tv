@@ -6,7 +6,7 @@ public final class AndroidTvTimelineTest extends Instrumentation {
  private LiveTvActivity tv;
  private interface Ready{boolean ready()throws Exception;}
  private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
- private Object get(Object o,String name)throws Exception{Field f=o.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(o);}
+ private Object get(Object o,String name)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
  private void ui(Runnable r){runOnMainSync(r);waitForIdleSync();}
  private void await(Ready r,String why)throws Exception{long until=SystemClock.elapsedRealtime()+20000;while(SystemClock.elapsedRealtime()<until){waitForIdleSync();if(r.ready())return;Thread.sleep(60);}throw new AssertionError(why);}
  private void restore(SharedPreferences p,Map<String,?> values){SharedPreferences.Editor e=p.edit().clear();for(Map.Entry<String,?> item:values.entrySet()){Object v=item.getValue();String k=item.getKey();if(v instanceof String)e.putString(k,(String)v);else if(v instanceof Boolean)e.putBoolean(k,(Boolean)v);else if(v instanceof Long)e.putLong(k,(Long)v);else if(v instanceof Integer)e.putInt(k,(Integer)v);else if(v instanceof Set)e.putStringSet(k,new HashSet<>((Set<String>)v));}e.commit();}

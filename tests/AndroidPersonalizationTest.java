@@ -12,10 +12,10 @@ import java.util.*;
 
 /** First-run state in isolated local stores; real guide/navigation without modifying personal accounts. */
 public class AndroidPersonalizationTest extends Instrumentation {
-    private Object field(Object o,String n)throws Exception{Field f=o.getClass().getDeclaredField(n);f.setAccessible(true);return f.get(o);}
+    private Object field(Object o,String n)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(n);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(n);}
     private void check(boolean v,String why){if(!v)throw new AssertionError(why);}
     private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
-    private void page(SetupActivity a,int page){ui(()->{try{Method m=SetupActivity.class.getDeclaredMethod("go",int.class);m.setAccessible(true);m.invoke(a,page);}catch(Exception e){throw new RuntimeException(e);}});}
+    private void page(SetupActivity a,int page){ui(()->{try{Method m=SetupScreen.class.getDeclaredMethod("go",int.class);m.setAccessible(true);m.invoke(a.screen,page);}catch(Exception e){throw new RuntimeException(e);}});}
     private void capture(Context c,String name)throws Exception{Thread.sleep(250);Bitmap b=getUiAutomation().takeScreenshot();try(OutputStream out=new FileOutputStream(new File(c.getExternalFilesDir(null),name))){check(b!=null,"Missing screenshot");b.compress(Bitmap.CompressFormat.PNG,100,out);}finally{if(b!=null)b.recycle();}}
     private static final class Store extends ContextWrapper {
         final String id="setup-test-"+UUID.randomUUID()+"-";final File folder;final Set<String> names=new HashSet<>();
@@ -27,6 +27,7 @@ public class AndroidPersonalizationTest extends Instrumentation {
     }
     public void onCreate(Bundle args){super.onCreate(args);start();}
     public void onStart(){Bundle result=new Bundle();Context c=getTargetContext();Store first=null,second=null,legacy=null;SetupActivity setup=null;SettingsActivity settings=null;
+        SharedPreferences personalization=Personalization.prefs(c);Map<String,?> setupBefore=new HashMap<>(personalization.getAll());Personalization.complete(c);
         Map<String,?> accountBefore=new HashMap<>(new PlexClient(c).prefs.getAll());String[] appsBefore=SidebarApps.slots(c);String cityBefore=AmbientWeather.name(c);
         try{
             check(!Personalization.needed(c),"Existing installation was forced through first-run setup");
@@ -61,7 +62,7 @@ public class AndroidPersonalizationTest extends Instrumentation {
             check(Arrays.equals(appsBefore,SidebarApps.slots(c))&&cityBefore.equals(AmbientWeather.name(c)),"Review changed existing apps or location");
             result.putString("result","PASS neutral APK, fresh setup, installed-only app detection, independent client IDs/accounts/location/completion, isolated cache keys, local disconnect, legacy upgrade preserving empty menu, real guide navigation and return from settings, account hub and cancelled disconnect. Personal accounts, apps and location preserved.");
         }catch(Throwable e){result.putString("error",android.util.Log.getStackTraceString(e));}
-        finally{if(setup!=null){SetupActivity a=setup;ui(()->a.finish());}if(settings!=null){SettingsActivity a=settings;ui(()->a.finish());}if(first!=null)first.close();if(second!=null)second.close();if(legacy!=null)legacy.close();}
+        finally{SharedPreferences.Editor setupRestore=personalization.edit().clear();for(Map.Entry<String,?> entry:setupBefore.entrySet()){if(entry.getValue() instanceof Boolean)setupRestore.putBoolean(entry.getKey(),(Boolean)entry.getValue());}setupRestore.commit();if(setup!=null){SetupActivity a=setup;ui(()->a.finish());}if(settings!=null){SettingsActivity a=settings;ui(()->a.finish());}if(first!=null)first.close();if(second!=null)second.close();if(legacy!=null)legacy.close();}
         finish(result.containsKey("error")?1:-1,result);
     }
 }

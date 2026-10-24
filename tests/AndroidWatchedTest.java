@@ -20,8 +20,8 @@ public final class AndroidWatchedTest extends Instrumentation {
     private CinemaHomeView home;
     private HomeActivity activity;
     private void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
-    private Object field(Object o,String n)throws Exception{Field f=o.getClass().getDeclaredField(n);f.setAccessible(true);return f.get(o);}
-    private void set(Object o,String n,Object value)throws Exception{Field f=o.getClass().getDeclaredField(n);f.setAccessible(true);f.set(o,value);}
+    private Object field(Object o,String n)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(n);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(n);}
+    private void set(Object o,String n,Object value)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(n);f.setAccessible(true);f.set(o,value);return;}catch(NoSuchFieldException next){}throw new NoSuchFieldException(n);}
     private void ui(Runnable r){runOnMainSync(r);waitForIdleSync();}
     private interface Ready{boolean ready()throws Exception;}
     private void await(Ready ready,String why)throws Exception{long end=SystemClock.uptimeMillis()+15000;while(SystemClock.uptimeMillis()<end){boolean[] ok={false};ui(()->{try{ok[0]=ready.ready();}catch(Exception e){throw new RuntimeException(e);}});if(ok[0])return;Thread.sleep(50);}throw new AssertionError(why);}

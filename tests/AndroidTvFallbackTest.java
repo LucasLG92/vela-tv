@@ -7,7 +7,7 @@ import java.io.*;import java.lang.reflect.*;import java.util.*;import org.json.*
 public final class AndroidTvFallbackTest extends Instrumentation {
     private interface Ready {boolean get()throws Exception;}
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
-    private Object field(Object o,String name)throws Exception{Field f=o.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(o);}
+    private Object field(Object o,String name)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void ui(Runnable r){runOnMainSync(r);waitForIdleSync();}
     private void await(Ready r,String why)throws Exception{long end=SystemClock.elapsedRealtime()+40_000;while(SystemClock.elapsedRealtime()<end){boolean[] ready={false};ui(()->{try{ready[0]=r.get();}catch(Exception e){throw new RuntimeException(e);}});if(ready[0])return;Thread.sleep(60);}throw new AssertionError(why);}
     private void invoke(Object o,String name)throws Exception{Method m=o.getClass().getDeclaredMethod(name);m.setAccessible(true);ui(()->{try{m.invoke(o);}catch(Exception e){throw new RuntimeException(e);}});}

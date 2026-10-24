@@ -1,7 +1,7 @@
 """Host-controlled permission grant: Android kills Vela, so instrumentation cannot own the flow."""
 import re,subprocess,time,xml.etree.ElementTree as ET
 
-def run_flow(adb):
+def run_flow(adb, integrated=False):
     adb=list(map(str,adb));pkg='tv.vela.launcher'
     def call(*args):return subprocess.check_output(adb+list(args),timeout=30).decode('utf-8','replace')
     def phase(value):
@@ -34,8 +34,10 @@ def run_flow(adb):
             time.sleep(.15)
         raise AssertionError('Did not resume '+needle+': '+str([line.strip() for line in top().splitlines() if 'topResumedActivity' in line or 'mResumedActivity' in line]))
     def open_updates():
-        call('shell','am','start','-n',pkg+'/.SettingsActivity');wait_top('SettingsActivity')
-        click('Información y actualizaciones');click('Actualizaciones');wait_top('UpdatesActivity')
+        if integrated:
+            call('shell','am','start','-n',pkg+'/.HomeActivity');wait_top('HomeActivity');click('Ajustes')
+        else:call('shell','am','start','-n',pkg+'/.SettingsActivity');wait_top('SettingsActivity')
+        click('Información y actualizaciones');click('Actualizaciones');wait_top('HomeActivity' if integrated else 'UpdatesActivity')
     def begin_permission():
         click('Instalar 1.');wait_top('com.android.settings/')
     def wait_installer():
@@ -57,7 +59,7 @@ def run_flow(adb):
         call('shell','am','force-stop',pkg);call('shell','appops','set',pkg,'REQUEST_INSTALL_PACKAGES','default')
         phase('prepare');prepared=True;open_updates();begin_permission()
         # Returning without granting must leave a retry, not a permission/installer loop.
-        return_from_settings('UpdatesActivity')
+        return_from_settings('HomeActivity' if integrated else 'UpdatesActivity')
         assert any('No se ha concedido el permiso' in n.get('text','') for n in nodes()),'Permission denial was not explained'
         begin_permission();old_pid=call('shell','pidof',pkg+':home').strip();assert old_pid
         switches=[n for n in nodes() if n.get('checkable')=='true'];assert len(switches)==1,'Expected one real permission switch'
@@ -69,13 +71,13 @@ def run_flow(adb):
         return_from_settings('installer')
         new_pid=call('shell','pidof',pkg+':home').strip();assert new_pid and new_pid!=old_pid,'Test did not exercise process death'
         # Never approve the synthetic future version. Cancellation must not relaunch it.
-        call('shell','input','keyevent','4');wait_top('UpdatesActivity');time.sleep(.4);wait_top('UpdatesActivity')
+        call('shell','input','keyevent','4');wait_top('HomeActivity' if integrated else 'UpdatesActivity');time.sleep(.4);wait_top('HomeActivity' if integrated else 'UpdatesActivity')
         click('Instalar 1.');wait_installer()
-        call('shell','input','keyevent','4');wait_top('UpdatesActivity')
+        call('shell','input','keyevent','4');wait_top('HomeActivity' if integrated else 'UpdatesActivity')
         for entry in ('SettingsActivity','HomeActivity'):
             phase('queue');call('shell','am','start','-n',pkg+'/.'+entry);wait_installer()
-            call('shell','input','keyevent','4');wait_top('UpdatesActivity')
-        return 'PASS real Settings denial/grant/retry; background process killed during permission flow; recreated process resumed verified APK into Android confirmation once. Cold Settings/Home entry, cancellation and retry work without another download. Synthetic installation never confirmed.'
+            call('shell','input','keyevent','4');wait_top('HomeActivity' if entry=='HomeActivity' else 'UpdatesActivity')
+        return ('PASS integrated Home flow; ' if integrated else 'PASS standalone flow; ')+'real Settings denial/grant/retry; background process killed during permission flow; recreated process resumed verified APK into Android confirmation once. Cold Settings/Home entry, cancellation and retry work without another download. Synthetic installation never confirmed.'
     finally:
         call('shell','am','force-stop',pkg)
         try:

@@ -16,7 +16,7 @@ public final class AndroidTvLogoTest extends Instrumentation {
     private interface Condition {boolean ready()throws Exception;}
     private void check(boolean value,String message){if(!value)throw new AssertionError(message);}
     private void await(Condition condition)throws Exception{long until=System.currentTimeMillis()+8000;while(System.currentTimeMillis()<until){waitForIdleSync();if(condition.ready())return;Thread.sleep(40);}throw new AssertionError("Artwork job did not finish");}
-    private Object field(Object object,String name)throws Exception{Field f=object.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(object);}
+    private Object field(Object object,String name)throws Exception{if(object instanceof ScreenActivity)object=((ScreenActivity)object).screen;for(Class<?> type=object.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(object);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private int pixels(Bitmap bitmap){int found=0;for(int y=0;y<bitmap.getHeight();y++)for(int x=0;x<bitmap.getWidth();x++)if(Color.alpha(bitmap.getPixel(x,y))>0)found++;return found;}
     public void onCreate(Bundle arguments){super.onCreate(arguments);start();}
     public void onStart(){Bundle result=new Bundle();LiveTvLogos[] loader={null};File[] files=new File[2];try{

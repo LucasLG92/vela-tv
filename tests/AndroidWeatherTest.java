@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 /** Uses Madrid as an explicit test city, restores all personal settings, and never changes home mode. */
 public class AndroidWeatherTest extends Instrumentation {
     interface Condition {boolean ready()throws Exception;}
-    private Object field(Object owner,String name)throws Exception{Field f=owner.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(owner);}
+    private Object field(Object owner,String name)throws Exception{if(owner instanceof ScreenActivity)owner=((ScreenActivity)owner).screen;for(Class<?> type=owner.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(owner);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
     private void await(Condition condition,String why)throws Exception{
         long end=SystemClock.uptimeMillis()+30_000;

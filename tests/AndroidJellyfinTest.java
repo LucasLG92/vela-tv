@@ -16,7 +16,7 @@ import org.json.*;
 public final class AndroidJellyfinTest extends Instrumentation {
     private final List<Activity> opened=new ArrayList<>();
     private void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
-    private Object field(Object target,String name)throws Exception{Field f=target.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(target);}
+    private Object field(Object target,String name)throws Exception{if(target instanceof ScreenActivity)target=((ScreenActivity)target).screen;for(Class<?> type=target.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(target);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void ui(Runnable job){runOnMainSync(job);waitForIdleSync();}
     private interface Ready {boolean ready()throws Exception;}
     private void await(Ready ready,String why)throws Exception{long end=SystemClock.uptimeMillis()+30_000;while(SystemClock.uptimeMillis()<end){boolean[] value={false};ui(()->{try{value[0]=ready.ready();}catch(Exception e){throw new RuntimeException(e);}});if(value[0])return;Thread.sleep(100);}throw new AssertionError(why);}

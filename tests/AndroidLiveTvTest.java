@@ -3,7 +3,7 @@ import android.app.*;import android.content.*;import android.os.*;import android
 /** Direct public M3U integration on an isolated emulator. Restores the chosen source. */
 public final class AndroidLiveTvTest extends Instrumentation {
  private interface Ready{boolean ready()throws Exception;}
- private Object field(Object o,String name)throws Exception{Field f=o.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(o);}
+ private Object field(Object o,String name)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
  private void check(boolean value,String message){if(!value)throw new AssertionError(message);}
  private void ui(Runnable r){runOnMainSync(r);waitForIdleSync();}
  private void await(Ready r,String message)throws Exception{long end=SystemClock.elapsedRealtime()+45000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(r.ready())return;Thread.sleep(100);}throw new AssertionError(message);}

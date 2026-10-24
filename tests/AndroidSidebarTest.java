@@ -13,7 +13,7 @@ import java.util.*;
 
 /** Native picker, focus, shortcut routing and restoration; never changes home mode or launches another app. */
 public class AndroidSidebarTest extends Instrumentation {
-    private Object field(Object owner,String name)throws Exception{Field f=owner.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(owner);}
+    private Object field(Object owner,String name)throws Exception{if(owner instanceof ScreenActivity)owner=((ScreenActivity)owner).screen;for(Class<?> type=owner.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(owner);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
     private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
     private void capture(Context c,String file)throws Exception{

@@ -4,7 +4,7 @@ import android.app.*;import android.content.*;import android.os.*;import android
 /** Grouping, selection, XMLTV matching/rollback and bounded native UI on an isolated emulator. */
 public final class AndroidTvRedesignTest extends Instrumentation {
  private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
- private Object field(Object o,String name)throws Exception{Field f=o.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(o);}
+ private Object field(Object o,String name)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
  private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
  private void restore(SharedPreferences p,Map<String,?> before){SharedPreferences.Editor e=p.edit().clear();for(Map.Entry<String,?> item:before.entrySet()){Object v=item.getValue();if(v instanceof String)e.putString(item.getKey(),(String)v);else if(v instanceof Boolean)e.putBoolean(item.getKey(),(Boolean)v);else if(v instanceof Long)e.putLong(item.getKey(),(Long)v);else if(v instanceof Integer)e.putInt(item.getKey(),(Integer)v);else if(v instanceof Set)e.putStringSet(item.getKey(),new HashSet<>((Set<String>)v));}e.commit();}
  public void onCreate(Bundle b){super.onCreate(b);start();}

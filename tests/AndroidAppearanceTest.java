@@ -12,10 +12,10 @@ import java.util.*;
 /** Actual remote navigation and poster geometry; reset must preserve unrelated preferences. */
 public class AndroidAppearanceTest extends Instrumentation {
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
-    private Object field(Object o,String name)throws Exception{Field f=o.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(o);}
-    private void set(Object o,String name,Object value)throws Exception{Field f=o.getClass().getDeclaredField(name);f.setAccessible(true);f.set(o,value);}
+    private Object field(Object o,String name)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
+    private void set(Object o,String name,Object value)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);f.set(o,value);return;}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
-    private void call(Object o,String name){ui(()->{try{Method m=o.getClass().getDeclaredMethod(name);m.setAccessible(true);m.invoke(o);}catch(Exception e){throw new RuntimeException(e);}});}
+    private void call(Object o,String name){final Object target=o instanceof ScreenActivity?((ScreenActivity)o).screen:o;ui(()->{try{Method m=target.getClass().getDeclaredMethod(name);m.setAccessible(true);m.invoke(target);}catch(Exception e){throw new RuntimeException(e);}});}
     private void key(int code){sendKeyDownUpSync(code);waitForIdleSync();}
     private void focused(Activity a)throws Exception{Thread.sleep(700);long end=SystemClock.uptimeMillis()+10_000;while(!a.hasWindowFocus()&&SystemClock.uptimeMillis()<end){android.view.accessibility.AccessibilityNodeInfo root=getUiAutomation().getRootInActiveWindow();if(root!=null&&"com.android.systemui".contentEquals(root.getPackageName()))for(String label:new String[]{"Got it","Entendido"})for(android.view.accessibility.AccessibilityNodeInfo node:root.findAccessibilityNodeInfosByText(label))node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK);Thread.sleep(100);waitForIdleSync();}check(a.hasWindowFocus(),"Activity did not receive window focus");}
     private List<View> rows(Object view)throws Exception{return (List<View>)field(view,"rows");}

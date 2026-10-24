@@ -13,7 +13,7 @@ import java.util.*;
 /** Exercises bounded catalog pages and artwork recycling on the user's privately linked server. */
 public class AndroidCatalogTest extends Instrumentation {
     private CinemaHomeView home;
-    private Object field(Object owner,String name)throws Exception{Field f=owner.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(owner);}
+    private Object field(Object owner,String name)throws Exception{if(owner instanceof ScreenActivity)owner=((ScreenActivity)owner).screen;for(Class<?> type=owner.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(owner);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void set(String name,Object value)throws Exception{Field f=home.getClass().getDeclaredField(name);f.setAccessible(true);f.set(home,value);}
     private void invoke(String name)throws Exception{Method m=home.getClass().getDeclaredMethod(name);m.setAccessible(true);m.invoke(home);}
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}

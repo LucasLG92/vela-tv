@@ -12,8 +12,8 @@ import java.util.concurrent.ExecutorService;
 
 /** Checks real shared weather, readable native header and resource cleanup without changing preferences. */
 public class AndroidHomeStatusTest extends Instrumentation {
-    private Object field(Object object,String name)throws Exception{Field f=object.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(object);}
-    private void set(Object object,String name,Object value)throws Exception{Field f=object.getClass().getDeclaredField(name);f.setAccessible(true);f.set(object,value);}
+    private Object field(Object object,String name)throws Exception{if(object instanceof ScreenActivity)object=((ScreenActivity)object).screen;for(Class<?> type=object.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(object);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
+    private void set(Object object,String name,Object value)throws Exception{if(object instanceof ScreenActivity)object=((ScreenActivity)object).screen;for(Class<?> type=object.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);f.set(object,value);return;}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
     private interface Ready{boolean get()throws Exception;}
     private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}

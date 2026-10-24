@@ -18,7 +18,7 @@ import org.json.*;
 public final class AndroidCatalogFiltersTest extends Instrumentation {
     private HomeActivity activity;private CinemaHomeView home;private volatile String lastSort="";private volatile int metaReads;
     private void check(boolean b,String why){if(!b)throw new AssertionError(why);}
-    private Object field(Object o,String n)throws Exception{Field f=o.getClass().getDeclaredField(n);f.setAccessible(true);return f.get(o);}
+    private Object field(Object o,String n)throws Exception{if(o instanceof ScreenActivity)o=((ScreenActivity)o).screen;for(Class<?> type=o.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(n);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(n);}
     private void ui(Runnable r){runOnMainSync(r);waitForIdleSync();}
     private interface Ready{boolean ready()throws Exception;}
     private void await(Ready r,String why)throws Exception{long end=SystemClock.uptimeMillis()+20000;while(SystemClock.uptimeMillis()<end){boolean[] ok={false};ui(()->{try{ok[0]=r.ready();}catch(Exception e){throw new RuntimeException(e);}});if(ok[0])return;Thread.sleep(60);}throw new AssertionError(why);}

@@ -15,7 +15,7 @@ import java.util.*;
 public final class AndroidM3uTest extends Instrumentation {
     private interface Ready {boolean ready()throws Exception;}
     private void check(boolean value,String text){if(!value)throw new AssertionError(text);}
-    private Object field(Object target,String name)throws Exception{Field f=target.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(target);}
+    private Object field(Object target,String name)throws Exception{if(target instanceof ScreenActivity)target=((ScreenActivity)target).screen;for(Class<?> type=target.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(target);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
     private void await(Ready ready,String reason)throws Exception{long end=SystemClock.elapsedRealtime()+40000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(ready.ready())return;Thread.sleep(100);}throw new AssertionError(reason);}
     private JSONObject get(String url)throws Exception{try(XtreamClient.Response response=new XtreamClient.Response(url,64*1024);ByteArrayOutputStream out=new ByteArrayOutputStream()){LiveTvData.copy(response.in,out,64*1024);return new JSONObject(out.toString("UTF-8"));}}

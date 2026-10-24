@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** Emulator/device instrumentation; requires a privately linked Plex library with real artwork. */
 public class ArtworkLifecycleTest extends Instrumentation {
-    private Object field(Object owner,String name)throws Exception{Field f=owner.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(owner);}
+    private Object field(Object owner,String name)throws Exception{if(owner instanceof ScreenActivity)owner=((ScreenActivity)owner).screen;for(Class<?> type=owner.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(owner);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
     private void awaitArt(CinemaHomeView home)throws Exception{
         long until=SystemClock.uptimeMillis()+20_000;
