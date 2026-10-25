@@ -1,5 +1,10 @@
 # Cambios
 
+## Vela Lite 0.3.4-preview
+
+- Fuente auxiliar de actualizaciones del repositorio para encontrar versiones Lite cuando la API de GitHub alcanza su límite de consultas.
+- Mantiene la comprobación de SHA-256, tamaño, paquete y firma; no necesita una cuenta ni un token de GitHub.
+
 ## 1.23.1 Preview · 2026-10-25
 
 - Tarjeta «A continuación» a la derecha de la información del reproductor, con el próximo programa y su horario.

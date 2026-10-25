@@ -8,6 +8,7 @@ import org.json.*;
 final class LiteReleaseFeed {
     static final String REPO="https://github.com/LucasLG92/vela-tv";
     static final String API="https://api.github.com/repos/LucasLG92/vela-tv/releases?per_page=30";
+    static final String FALLBACK="https://raw.githubusercontent.com/LucasLG92/vela-tv/main/lite/updates.json";
     static final long MAX_APK=16L*1024*1024;
     private static final Pattern VERSION=Pattern.compile("(0|[1-9][0-9]{0,8})\\.(0|[1-9][0-9]{0,8})\\.(0|[1-9][0-9]{0,8})(?:-([0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*))?");
     static final class Release {

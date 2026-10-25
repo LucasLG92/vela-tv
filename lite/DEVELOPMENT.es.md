@@ -30,9 +30,17 @@ Lite recibe **solo versiones Lite**, nunca la APK de Vela completa. Antes de ins
 
 Para distribuir una nueva versión compatible deben aumentarse `versionCode` y `versionName`, conservar el paquete y la firma, y publicarse una release con:
 
-- Etiqueta: `lite-v0.3.3-preview` (con la versión que corresponda).
-- APK: `Vela-Lite-0.3.3-preview.apk`.
+- Etiqueta: `lite-v0.3.4-preview` (con la versión que corresponda).
+- APK: `Vela-Lite-0.3.4-preview.apk`.
 - Recurso subido completamente y con `digest` SHA-256 en la API de GitHub.
+
+Si la API no responde o limita las consultas, se utiliza `lite/updates.json` en el mismo repositorio. El archivo contiene únicamente metadatos de una release Lite ya publicada; se aplican los mismos filtros de origen, nombre, tamaño y SHA-256. Para actualizarlo después de publicar, guarda los metadatos públicos de la release en un JSON local y ejecuta:
+
+```sh
+python lite/tools/update_feed.py --release release.json --apk Vela-Lite-0.3.4-preview.apk
+```
+
+La herramienta exige que la release esté publicada y que el tamaño y SHA-256 coincidan con la APK. Revisa y publica el cambio de `lite/updates.json` con cada release Lite.
 
 Las etiquetas de la versión completa se excluyen. Si todavía no hay una versión Lite más reciente publicada, el actualizador lo indica. La clave privada de firma no se incluye en el código ni en la APK.
 

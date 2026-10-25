@@ -50,4 +50,4 @@ Versión e información, en el mismo panel.
 
 ![Información de Vela Lite](08-informacion.png)
 
-[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.3.3-preview) · [Volver a la presentación](../README.md)
+[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.3.4-preview) · [Volver a la presentación](../README.md)

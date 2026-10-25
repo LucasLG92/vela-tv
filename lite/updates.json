@@ -1,0 +1,16 @@
+[
+  {
+    "tag_name": "lite-v0.3.3-preview",
+    "draft": false,
+    "prerelease": true,
+    "assets": [
+      {
+        "name": "Vela-Lite-0.3.3-preview.apk",
+        "state": "uploaded",
+        "size": 1344965,
+        "digest": "sha256:52d4375eaadb62ca6920d59c513a34dde1792cb82a170aecda02891393b7131f",
+        "browser_download_url": "https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.3.3-preview/Vela-Lite-0.3.3-preview.apk"
+      }
+    ]
+  }
+]

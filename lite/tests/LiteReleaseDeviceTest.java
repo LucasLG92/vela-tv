@@ -14,6 +14,11 @@ public final class LiteReleaseDeviceTest extends Instrumentation {
             LiteReleaseFeed.Release release=manager.available();if(manager.busy()||release==null||!release.version.equals(expected)||!manager.ready())throw new AssertionError("Public automatic download not ready: "+manager.status());LiteUpdateManager.verify(c,LiteUpdateManager.apk(c),release);
             report.put("detected",release.version).put("tag",release.tag).put("sha256",release.sha256).put("bytes",release.size).put("automatic",manager.automatic()).put("automatic_download",manager.autoDownload());
             try(InputStream in=new FileInputStream(LiteUpdateManager.apk(c));OutputStream out=new FileOutputStream(new File(c.getExternalFilesDir(null),"published-update.apk"))){byte[] b=new byte[8192];for(int n;(n=in.read(b))!=-1;)out.write(b,0,n);}
+        }else if(stage.equals("check")){
+            if(!LiteUpdateManager.version(c).equals(expected))throw new AssertionError("Wrong installed release");
+            LiteUpdateManager manager=LiteUpdateManager.get(c);long started=System.currentTimeMillis();manager.check();long deadline=SystemClock.elapsedRealtime()+150000;while(manager.busy()&&SystemClock.elapsedRealtime()<deadline)Thread.sleep(150);
+            if(manager.busy()||LiteUpdateManager.prefs(c).getLong("checked",0)<started)throw new AssertionError("Public release check failed: "+manager.status());
+            report.put("public_check",true).put("status",manager.status()).put("automatic",manager.automatic()).put("automatic_download",manager.autoDownload());
         }else{
             if(!LiteUpdateManager.version(c).equals(expected))throw new AssertionError("Published version not installed");boolean exists=new File(c.getFilesDir(),"lite-updates/update.apk").exists();report.put("installed_apk_cleaned",!exists).put("automatic",LiteUpdateManager.prefs(c).getBoolean("automatic",false)).put("automatic_download",LiteUpdateManager.prefs(c).getBoolean("download",false));if(exists)throw new AssertionError("Installed APK was not cleaned on launch");
         }
