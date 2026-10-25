@@ -20,7 +20,7 @@ Se pueden desactivar los horarios por Internet en Ajustes → Televisión. Si no
 
 Mientras la guía está visible, observa los cambios del proveedor de canales y programas. Al volver desde la sintonización nativa, lee de nuevo el catálogo. Si cambian los identificadores internos tras resintonizar, sustituye las URI antiguas y trata de conservar selección y favoritos por el servicio DVB o por un nombre único. No adivina coincidencias ambiguas. La programación de Internet se relaciona por los nombres, con independencia del número o URI del canal.
 
-El directo utiliza **una única sesión nativa TvView**. OK muestra u oculta información; derecha abre los canales con programa y tiempo restante, arriba y abajo cambian de canal, y Atrás cierra primero el panel y después vuelve a la guía. Mantener OK en la guía o el panel añade o quita favoritos. Los distintivos de directo y resolución desaparecen después del inicio. Se respetan los bloqueos del sintonizador y se ofrece la TV original como alternativa cuando el firmware no permite la reproducción integrada. No incluye grabación, pausa del directo ni reproducción de emisiones pasadas.
+El directo utiliza **una única sesión nativa TvView**. OK muestra u oculta información; derecha, arriba o abajo abren la lista para explorar canales con programa y tiempo restante, OK confirma el canal, CH+/CH− cambian directamente, y Atrás cierra primero el panel y después vuelve a la guía. Mantener OK en la guía, las tarjetas, el panel o la emisión actual añade o quita favoritos. El panel permite alternar entre Lista y Favoritos, conserva el foco al refrescar horarios y reutiliza las seis filas visibles. Si la antena no está disponible o existe un bloqueo parental, mantener OK conserva el acceso de recuperación a la TV original. Los distintivos de directo y resolución desaparecen después del inicio. Se respetan los bloqueos del sintonizador y se ofrece la TV original como alternativa cuando el firmware no permite la reproducción integrada. No incluye grabación, pausa del directo ni reproducción de emisiones pasadas.
 
 ## Actualizaciones de Lite
 
@@ -30,14 +30,14 @@ Lite recibe **solo versiones Lite**, nunca la APK de Vela completa. Antes de ins
 
 Para distribuir una nueva versión compatible deben aumentarse `versionCode` y `versionName`, conservar el paquete y la firma, y publicarse una release con:
 
-- Etiqueta: `lite-v0.3.4-preview` (con la versión que corresponda).
-- APK: `Vela-Lite-0.3.4-preview.apk`.
+- Etiqueta: `lite-v0.4.0-preview` (con la versión que corresponda).
+- APK: `Vela-Lite-0.4.0-preview.apk`.
 - Recurso subido completamente y con `digest` SHA-256 en la API de GitHub.
 
 Si la API no responde o limita las consultas, se utiliza `lite/updates.json` en el mismo repositorio. El archivo contiene únicamente metadatos de una release Lite ya publicada; se aplican los mismos filtros de origen, nombre, tamaño y SHA-256. Para actualizarlo después de publicar, guarda los metadatos públicos de la release en un JSON local y ejecuta:
 
 ```sh
-python lite/tools/update_feed.py --release release.json --apk Vela-Lite-0.3.4-preview.apk
+python lite/tools/update_feed.py --release release.json --apk Vela-Lite-0.4.0-preview.apk
 ```
 
 La herramienta exige que la release esté publicada y que el tamaño y SHA-256 coincidan con la APK. Revisa y publica el cambio de `lite/updates.json` con cada release Lite.

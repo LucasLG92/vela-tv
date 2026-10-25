@@ -1,5 +1,20 @@
 # Cambios
 
+## 1.24.0 Preview · 2026-10-25
+
+- Mantener OK añade o quita favoritos en guía, tarjetas, selector y emisión actual. La pulsación larga no activa también la corta.
+- Panel rápido con Lista y Favoritos, estrellas visibles y foco estable al refrescar la programación, cambiar de página o quitar el último favorito.
+- Las flechas abren la lista para explorar sin cambiar la emisión; OK confirma y Atrás vuelve al vídeo. CH+/CH− permiten cambiar directamente y recorren los límites de página.
+- Favoritos por fuente y un único reproductor, con páginas de doce registros.
+
+## Vela Lite 0.4.0-preview · 2026-10-25
+
+- El mismo manejo del mando, las estrellas y el filtro de favoritos en la reproducción de antena.
+- Recuperación del canal y la categoría al volver a la guía; si el canal queda fuera del filtro, se muestra en Todos.
+- Actualización de horarios y logos sobre las mismas seis filas, conservando el foco y las pulsaciones largas.
+- Corrección del recorte del panel en 4K y comprobación del ajuste de los controles al pasar por 720p.
+- Pruebas nativas con metadatos sintéticos en emulador. La señal de antena y los mandos HDMI-CEC dependen del dispositivo.
+
 ## Vela Lite 0.3.4-preview
 
 - Fuente auxiliar de actualizaciones del repositorio para encontrar versiones Lite cuando la API de GitHub alcanza su límite de consultas.

@@ -29,11 +29,15 @@ final class TvTimelineView extends FrameLayout {
     private long start,cursor,now;
     private int row,rowHeight=ROW;
     private boolean loading;
+    private final TvRemotePress remote;
+    private Set<String> favoriteIds=Collections.emptySet();
+    void favorites(Set<String> ids){favoriteIds=new HashSet<>(ids);invalidate();describe();}
     TvTimelineView(Context context,Actions actions){
         super(context);this.actions=actions;setWillNotDraw(false);setFocusable(true);setFocusableInTouchMode(true);setClickable(true);setId(View.generateViewId());setDefaultFocusHighlightEnabled(false);
+        remote=new TvRemotePress(this,()->performClick(),()->performLongClick());
         setOnClickListener(v->{if(!channels.isEmpty())actions.activate(channels.get(row),programme());});
         setOnLongClickListener(v->{if(!channels.isEmpty())actions.options(channels.get(row));return true;});
-        setOnFocusChangeListener((v,focused)->{invalidate();if(focused)notifySelection();});
+        setOnFocusChangeListener((v,focused)->{if(!focused)remote.cancel();invalidate();if(focused)notifySelection();});
     }
     static long present(long now){return now-now%1800;}
     void rowHeight(int pixels){rowHeight=Math.max(ROW,Math.min(120,pixels));requestLayout();invalidate();}
@@ -48,7 +52,8 @@ final class TvTimelineView extends FrameLayout {
     void minute(long value){now=value;invalidate();if(hasFocus())notifySelection();}
     private List<LiveTvData.Programme> schedule(){return channels.isEmpty()?Collections.emptyList():programmes.getOrDefault(channels.get(row).id,Collections.emptyList());}
     LiveTvData.Programme programme(){for(LiveTvData.Programme p:schedule())if(p.start<=cursor&&p.end>cursor)return p;return null;}
-    private void notifySelection(){if(channels.isEmpty())return;LiveTvData.Programme p=programme();LiveTvData.Channel c=channels.get(row);setContentDescription(LiveTvActivity.displayName(c.name)+" · "+(p==null?Ui.tr("Sem programação","No programme information","Sin programación"):p.title+" · "+time(p.start)+"–"+time(p.end)));actions.selected(c,p);}
+    private void describe(){if(channels.isEmpty())return;LiveTvData.Programme p=programme();LiveTvData.Channel c=channels.get(row);setContentDescription((favoriteIds.contains(c.id)?"★ ":"")+LiveTvActivity.displayName(c.name)+" · "+(p==null?Ui.tr("Sem programação","No programme information","Sin programación"):p.title+" · "+time(p.start)+"–"+time(p.end)));}
+    private void notifySelection(){if(channels.isEmpty())return;describe();actions.selected(channels.get(row),programme());}
     private String time(long value){return clock.format(new Date(value*1000));}
     private float x(long value){return LABEL+(getWidth()-LABEL)*(value-start)/(float)SECONDS;}
     private void label(Canvas c,String value,float x,float baseline,float width,int size,int color,Typeface font){if(width<12)return;paint.setTypeface(font);paint.setTextSize(size);paint.setColor(color);c.drawText(TextUtils.ellipsize(value,paint,width,TextUtils.TruncateAt.END).toString(),x,baseline,paint);}
@@ -58,7 +63,7 @@ final class TvTimelineView extends FrameLayout {
         for(int i=0;i<6;i++){float px=LABEL+(w-LABEL)*i/6f;label(c,time(start+i*1800),px+10,31,(w-LABEL)/6f-20,18,VelaTheme.SECONDARY,Ui.medium);paint.setColor(0x10FFFFFF);c.drawRect(px,HEADER,px+1,HEADER+channels.size()*rowHeight,paint);}
         for(int i=0;i<channels.size();i++){
             float top=HEADER+i*rowHeight;boolean focused=hasFocus()&&row==i;paint.setColor(row==i?0x25363841:0x10262831);c.drawRoundRect(0,top,LABEL-10,top+rowHeight-8,13,13,paint);
-            label(c,LiveTvActivity.displayName(channels.get(i).name),80,top+36+(rowHeight-ROW)/2f,LABEL-106,21,0xFFF6F7FB,Ui.medium);
+            label(c,(favoriteIds.contains(channels.get(i).id)?"★ ":"")+LiveTvActivity.displayName(channels.get(i).name),80,top+36+(rowHeight-ROW)/2f,LABEL-106,21,0xFFF6F7FB,Ui.medium);
             String quality=channels.get(i).antenna()?channels.get(i).number:TvChannelNames.quality(channels.get(i).name);label(c,quality,80,top+60+(rowHeight-ROW)/2f,LABEL-106,13,VelaTheme.MUTED,Ui.medium);
             List<LiveTvData.Programme> list=programmes.getOrDefault(channels.get(i).id,Collections.emptyList());long edge=start;
             c.save();c.clipRect(LABEL,top,w,top+rowHeight-8);
@@ -75,11 +80,14 @@ final class TvTimelineView extends FrameLayout {
         if(p!=null){String timing=time(p.start)+"–"+time(p.end);if(p.current(now))timing+="  ·  "+LiveTvActivity.remainingText(p.remainingMinutes(now));label(c,timing,left+14,top+59+(rowHeight-ROW)/2f,right-left-28,14,chosen?0xFF61636D:VelaTheme.SECONDARY,Ui.regular);}
     }
     @Override public boolean onKeyDown(int key,KeyEvent event){
+        if(remote.key(event))return true;
         if(channels.isEmpty())return super.onKeyDown(key,event);
         if(key==KeyEvent.KEYCODE_DPAD_UP||key==KeyEvent.KEYCODE_DPAD_DOWN){int direction=key==KeyEvent.KEYCODE_DPAD_UP?-1:1,target=row+direction;if(target<0||target>=channels.size()){if(actions.channels(direction))return true;return super.onKeyDown(key,event);}row=target;invalidate();notifySelection();return true;}
         if(key==KeyEvent.KEYCODE_DPAD_LEFT||key==KeyEvent.KEYCODE_DPAD_RIGHT){int direction=key==KeyEvent.KEYCODE_DPAD_LEFT?-1:1;LiveTvData.Programme p=programme();long target=p==null?cursor+direction*1800:direction>0?p.end:p.start-1;if(target<start||target>=start+SECONDS){if(direction<0&&start<=present(now)){return super.onKeyDown(key,event);}actions.time(direction,target);}else cursor(target);return true;}
         return super.onKeyDown(key,event);
     }
-    @Override public boolean onKeyUp(int key,KeyEvent event){if(key==KeyEvent.KEYCODE_DPAD_UP||key==KeyEvent.KEYCODE_DPAD_DOWN||key==KeyEvent.KEYCODE_DPAD_LEFT||key==KeyEvent.KEYCODE_DPAD_RIGHT)return true;return super.onKeyUp(key,event);}
+    @Override protected void onDetachedFromWindow(){remote.cancel();super.onDetachedFromWindow();}
+    @Override public void onWindowFocusChanged(boolean focus){super.onWindowFocusChanged(focus);if(!focus)remote.cancel();}
+    @Override public boolean onKeyUp(int key,KeyEvent event){if(remote.key(event))return true;if(key==KeyEvent.KEYCODE_DPAD_UP||key==KeyEvent.KEYCODE_DPAD_DOWN||key==KeyEvent.KEYCODE_DPAD_LEFT||key==KeyEvent.KEYCODE_DPAD_RIGHT)return true;return super.onKeyUp(key,event);}
     int logoY(int index){return HEADER+index*rowHeight+(rowHeight-60)/2;}
 }

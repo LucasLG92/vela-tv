@@ -2,9 +2,9 @@ name: Vela Lite · Build and public checks
 on:
   push:
     branches: [main]
-    paths: ['lite/**', 'tools/audit_publication.py', 'app/src/tv/vela/launcher/Device*.java', 'app/src/tv/vela/launcher/TvInputs.java', 'app/src/tv/vela/launcher/TvTimelineView.java', 'app/src/tv/vela/launcher/UpNextView.java', '.github/workflows/lite.yml']
+    paths: ['lite/**', 'tools/audit_publication.py', 'app/src/tv/vela/launcher/Device*.java', 'app/src/tv/vela/launcher/TvInputs.java', 'app/src/tv/vela/launcher/TvTimelineView.java', 'app/src/tv/vela/launcher/UpNextView.java', 'app/src/tv/vela/launcher/TvRemotePress.java', '.github/workflows/lite.yml']
   pull_request:
-    paths: ['lite/**', 'tools/audit_publication.py', 'app/src/tv/vela/launcher/Device*.java', 'app/src/tv/vela/launcher/TvInputs.java', 'app/src/tv/vela/launcher/TvTimelineView.java', 'app/src/tv/vela/launcher/UpNextView.java', '.github/workflows/lite.yml']
+    paths: ['lite/**', 'tools/audit_publication.py', 'app/src/tv/vela/launcher/Device*.java', 'app/src/tv/vela/launcher/TvInputs.java', 'app/src/tv/vela/launcher/TvTimelineView.java', 'app/src/tv/vela/launcher/UpNextView.java', 'app/src/tv/vela/launcher/TvRemotePress.java', '.github/workflows/lite.yml']
 permissions:
   contents: read
 jobs:

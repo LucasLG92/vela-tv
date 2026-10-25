@@ -50,3 +50,17 @@ Las compilaciones públicas mantienen desactivada la opción de deshabilitar paq
 **Ajustes → Aspecto → Personalizar apariencia** ofrece color, tamaño de carteles y fondo. Se aplican al volver a Inicio. Restaurar apariencia conserva cuentas, apps y ubicación.
 
 En la barra, mantener OK sobre una app abre **Mover** y **Quitar de la barra**. Quitar no desinstala la aplicación. Puedes añadir más accesos desde Ajustes.
+
+
+## Televisión con el mando
+
+| Situación | Acción |
+| --- | --- |
+| Mantener OK en un canal o durante la emisión | Añadir o quitar el favorito; la estrella confirma su estado. |
+| Flechas arriba, abajo o derecha durante la emisión | Explorar canales sin detener el vídeo. |
+| OK en la lista o la guía | Ver el canal seleccionado. |
+| Lista / Favoritos en el panel rápido | Cambiar el conjunto de canales que se está explorando. |
+| CH+ / CH− | Cambiar directamente de canal. |
+| Atrás en el panel | Cerrar y seguir con la emisión actual. |
+
+Si la antena está bloqueada o no responde en Lite, mantener OK conserva el acceso a la TV original como recuperación. Los favoritos pertenecen a la fuente correspondiente y se guardan en el dispositivo.
