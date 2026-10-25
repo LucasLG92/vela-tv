@@ -4,7 +4,7 @@
 
 Tus entradas HDMI, la televisión por antena y tus aplicaciones, en un inicio visual y fácil de recorrer con el mando. **Vela Lite está pensada para la televisión que acompaña a tu TV Box, consola u ordenador.**
 
-**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.5.0-preview/Vela-Lite-0.5.0-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
+**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.5.1-preview/Vela-Lite-0.5.1-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
 
 **Android TV / Google TV · Android 8.0 o posterior · APK de unos 1,3 MB · Vista previa**
 
@@ -30,9 +30,15 @@ Con **OK**, la información de la emisión muestra también **A continuación** 
 
 ## Tus canales, a tu manera
 
+Un menú con iconos a la izquierda y un panel grafito a la derecha, con el mismo estilo de Ajustes y el fondo de tu televisión.
+
 En **Organizar**, elige un favorito con OK, muévelo con arriba o abajo y confirma con OK. Atrás cancela. Oculta el canal seleccionado en la guía, recupera canales ocultos y elige las categorías que quieres mostrar. Los cambios se guardan en Vela Lite, sin modificar la sintonización de la televisión.
 
 **Recientes** conserva hasta doce canales abiertos correctamente. El panel del directo reúne Lista, Favoritos y Recientes, con un botón **Canal anterior**. La identidad DVB permite conservar la organización tras resintonizar; cuando no está disponible se usa un nombre único, evitando confundir canales del mismo nombre.
+
+![Organizador de canales en el tema de Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.5.1-preview/Vela-Lite-Organizar-tema-demo.png)
+
+*Captura nativa con datos de demostración.*
 
 ## Tus aplicaciones, a mano
 

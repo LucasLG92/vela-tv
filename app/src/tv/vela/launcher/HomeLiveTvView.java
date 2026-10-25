@@ -17,7 +17,7 @@ final class HomeLiveTvView extends FrameLayout {
     interface Host {void focusNavigation();void contentFocused(View view);void modal(boolean open);}
     private static final int BG=0xFF090A0D,WHITE=0xFFF7F7FA,DIM=0xFFB0B2BC;
     private static final String ALL="@all",FAVORITES="@favorites";
-    private TvChannelOrganizer organizer;private final List<TvCatalogCache.Group> allGroups=new ArrayList<>();
+    private TextView organizeAction;private TvChannelOrganizer organizer;private final List<TvCatalogCache.Group> allGroups=new ArrayList<>();
     private final Activity activity;private final FrameLayout videoHost;private final Host host;
     private final Handler main=new Handler(Looper.getMainLooper());private final ExecutorService io=Visuals.worker(2);
     private final XtreamClient xtream;private final M3uClient m3u;private final AntennaClient antenna;
@@ -42,7 +42,7 @@ final class HomeLiveTvView extends FrameLayout {
     HomeLiveTvView(Activity activity,FrameLayout videoHost,Host host){
         super(activity);this.activity=activity;this.videoHost=videoHost;this.host=host;xtream=new XtreamClient(activity);m3u=new M3uClient(activity);antenna=new AntennaClient(activity);setClipChildren(false);
         glow=new View(activity);GradientDrawable shade=new GradientDrawable();shade.setGradientType(GradientDrawable.RADIAL_GRADIENT);shade.setGradientCenter(.81f,.37f);shade.setGradientRadius(900);shade.setColors(new int[]{VelaTheme.PANEL,BG});glow.setBackground(shade);put(this,glow,0,0,1920,1080);View bottom=new View(activity);GradientDrawable fade=new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0x00090A0D,BG,BG});fade.setColors(new int[]{0x00090A0D,BG,BG},new float[]{0,.48f,1});bottom.setBackground(fade);put(this,bottom,0,410,1920,670);
-        origin=button("",19);put(this,origin,194,138,138,46);origin.setOnClickListener(v->sourcePicker());TextView organize=button(t("Organizar","Organize","Organizar"),19);put(this,organize,344,138,126,46);organize.setOnClickListener(v->organize());
+        origin=button("",19);put(this,origin,194,138,138,46);origin.setOnClickListener(v->sourcePicker());TextView organize=button(t("Organizar","Organize","Organizar"),19);organizeAction=organize;put(this,organize,344,138,126,46);organize.setOnClickListener(v->organize());
         hero=new FrameLayout(activity);put(this,hero,194,220,1646,448);
         TextView live=text(t("EM DIRETO","LIVE NOW","EN DIRECTO"),16,0xFFDAA5A9);live.setLetterSpacing(.15f);put(hero,live,0,0,900,30);
         title=text(t("Sua televisão, aqui.","Your TV, right here.","Tu televisión, aquí."),57,WHITE);title.setTypeface(Ui.displaySemibold);title.setMaxLines(2);title.setEllipsize(TextUtils.TruncateAt.END);title.setLineSpacing(0,.96f);put(hero,title,0,58,1010,146);
@@ -84,7 +84,7 @@ final class HomeLiveTvView extends FrameLayout {
     private TextView button(String value,int size){TextView v=text(value,size,WHITE);v.setId(View.generateViewId());v.setFocusable(true);v.setFocusableInTouchMode(true);v.setDefaultFocusHighlightEnabled(false);v.setSingleLine();v.setEllipsize(TextUtils.TruncateAt.END);v.setGravity(Gravity.CENTER);v.setPadding(16,0,16,0);v.setBackground(round(0xFF24262F,23));v.setOnFocusChangeListener((view,focus)->{v.setTextColor(focus?BG:WHITE);v.setBackground(round(focus?Appearance.accent(activity):v.isSelected()?Appearance.tint(activity,0x25):0xFF24262F,23));if(focus)host.contentFocused(v);});return v;}
     private void save(){if(source.isEmpty())return;SharedPreferences.Editor e=LiveTvData.prefs(activity).edit().putString("tv-group-"+LiveTvData.hash(source),group).putInt("tv-page-"+LiveTvData.hash(source),page);if(selected!=null)e.putString("last-"+LiveTvData.hash(source),selected.id).putString("last-family-"+LiveTvData.hash(source),TvChannelNames.family(selected));e.apply();}
     void resume(){if(closed)return;boolean wantedView=LiveTvData.guideView(activity);if(guideMode!=wantedView){guideMode=wantedView;applyView();}active=true;String identity=LiveTvData.source(activity);if(!source.equals(identity)){if(player!=null){player.pause();videoHost.removeView(player);player=null;}source=identity;total=0;mode=LiveTvData.mode(activity);group=LiveTvData.prefs(activity).getString("tv-group-"+LiveTvData.hash(source),"");page=LiveTvData.prefs(activity).getInt("tv-page-"+LiveTvData.hash(source),0);selected=null;}origin.setText((mode.equals("xtream")?"Xtream":mode.equals("antenna")?t("Antena","Antenna","Antena"):"M3U")+"  ⌄");if(player!=null)player.resume();else load(page,true);main.removeCallbacks(tick);tick.run();}
-    void pause(){save();active=false;pickerEpoch++;if(pickerJob!=null)pickerJob.cancel(true);epoch++;guideEpoch++;timelineEpoch++;guideLoading=false;if(catalogJob!=null)catalogJob.cancel(true);if(guideJob!=null)guideJob.cancel(true);if(timelineJob!=null)timelineJob.cancel(true);main.removeCallbacks(tick);main.removeCallbacks(switchCategory);categoryPending=false;if(player!=null)player.pause();if(logos!=null){logos.close();logos=null;}heroLogo.setImageDrawable(null);detailLogo.setImageDrawable(null);detailLogoId="";for(ImageView i:logosOnScreen)i.setImageDrawable(null);}
+    void pause(){if(organizer!=null)closeSheet();save();active=false;pickerEpoch++;if(pickerJob!=null)pickerJob.cancel(true);epoch++;guideEpoch++;timelineEpoch++;guideLoading=false;if(catalogJob!=null)catalogJob.cancel(true);if(guideJob!=null)guideJob.cancel(true);if(timelineJob!=null)timelineJob.cancel(true);main.removeCallbacks(tick);main.removeCallbacks(switchCategory);categoryPending=false;if(player!=null)player.pause();if(logos!=null){logos.close();logos=null;}heroLogo.setImageDrawable(null);detailLogo.setImageDrawable(null);detailLogoId="";for(ImageView i:logosOnScreen)i.setImageDrawable(null);}
     void destroy(){if(closed)return;pause();closed=true;if(player!=null){videoHost.removeView(player);player=null;}closeSheet();io.shutdownNow();main.removeCallbacksAndMessages(null);}
     private String groupName(List<TvCatalogCache.Group> values,String id){for(TvCatalogCache.Group g:values)if(g.id.equals(id))return g.name;return "";}
     private void load(int requested,boolean focus){
@@ -160,7 +160,7 @@ final class HomeLiveTvView extends FrameLayout {
     }
     private void browse(){pickerEpoch++;if(pickerJob!=null)pickerJob.cancel(true);if(player!=null){player.pause();videoHost.removeView(player);player=null;}render(true);save();loadGuide();}
     private void openSheet(String name){host.modal(true);sheet.removeAllViews();sheet.setVisibility(VISIBLE);TextView heading=text(name,40,WHITE);put(sheet,heading,82,54,1500,78);}
-    private void closeSheet(){if(organizer!=null){organizer.close();organizer=null;}if(sheet.getVisibility()==VISIBLE){sheet.setVisibility(GONE);sheet.removeAllViews();host.modal(false);}}
+    private void closeSheet(){if(organizer!=null){organizer.close();organizer=null;organizerChrome(false);}if(sheet.getVisibility()==VISIBLE){sheet.setVisibility(GONE);sheet.removeAllViews();host.modal(false);}}
     private void action(String name,int y,Runnable run){TextView b=button(name,24);put(sheet,b,82,y,980,70);b.setOnClickListener(v->{closeSheet();run.run();});if(y==174)b.requestFocus();}
     private String displayGroup(String value){return value.replaceFirst("(?i)^ES\\s*[|:]\\s*","");}
     private int categoryIndex(){for(int i=0;i<groups.size();i++)if(groups.get(i).id.equals(group))return i;return 0;}
@@ -172,8 +172,13 @@ final class HomeLiveTvView extends FrameLayout {
         if(catalogJob!=null)catalogJob.cancel(true);if(guideJob!=null)guideJob.cancel(true);if(timelineJob!=null)timelineJob.cancel(true);syncCategories();status.setText(t("Carregando ","Loading ","Cargando ")+displayGroup(groupName(groups,group))+"…");
         main.removeCallbacks(switchCategory);main.postDelayed(switchCategory,120);
     }
+    private void organizerChrome(boolean open){
+        sheet.setBackgroundColor(open?Color.TRANSPARENT:0xFF101219);
+        for(View view:new View[]{origin,organizeAction,hero,channelPane,guidePane,category,categoryViewport,categoryHelp,previous,next,pages,status})view.setVisibility(open?INVISIBLE:VISIBLE);
+        if(!open)applyView();
+    }
     private void organize(){
-        if(loading||closed)return;openSheet("");sheet.removeAllViews();String scope=source,currentMode=mode;LiveTvData.Channel current=selected;List<TvCatalogCache.Group> categories=new ArrayList<>(allGroups);TvPersonalization personal=new TvPersonalization(activity,scope);
+        if(loading||closed||organizer!=null)return;openSheet("");sheet.removeAllViews();organizerChrome(true);String scope=source,currentMode=mode;LiveTvData.Channel current=selected;List<TvCatalogCache.Group> categories=new ArrayList<>(allGroups);TvPersonalization personal=new TvPersonalization(activity,scope);
         organizer=new TvChannelOrganizer(activity,new TvChannelOrganizer.Provider(){
             public List<TvPersonalization.Item> items(int tab)throws Exception{if(tab==0)return TvChannelLibrary.favoriteItems(activity,currentMode,scope);if(tab==1)return personal.hidden();List<TvPersonalization.Item> out=new ArrayList<>();if(tab==2){for(TvCatalogCache.Group g:categories)if(!g.id.equals(ALL))out.add(new TvPersonalization.Item(g.id,displayGroup(g.name),personal.groupHidden(g.id)));}else for(LiveTvData.Channel c:TvChannelLibrary.recent(activity,scope))out.add(new TvPersonalization.Item(TvChannelLibrary.key(c),TvChannelNames.display(c.name)));return out;}
             public void activate(int tab,String key)throws Exception{if(tab==1){if(key.equals("@selected")){if(current!=null&&!personal.hide(TvChannelLibrary.key(current),TvChannelNames.display(current.name),true))throw new IllegalStateException();}else personal.hide(key,"",false);}else if(tab==2){String label=groupName(categories,key);if(!personal.hideGroup(key,label,!personal.groupHidden(key)))throw new IllegalStateException();}else if(tab==3){for(LiveTvData.Channel c:TvChannelLibrary.recent(activity,scope))if(TvChannelLibrary.key(c).equals(key)){main.post(()->playRecent(c));break;}}}

@@ -1,5 +1,14 @@
 # Cambios
 
+## 1.25.2 Preview y Vela Lite 0.5.1 Preview · 2026-10-25
+
+- Organizar utiliza el mismo panel grafito de Ajustes: categorías con iconos a la izquierda, filas redondeadas a la derecha, Inter y el color de acento configurado.
+- Mantiene el fondo original de TV y oculta la guía bajo el panel para evitar texto superpuesto. No abre otra actividad ni añade desenfoques, imágenes o animaciones.
+- Navegación por categorías con arriba y abajo; derecha entra en las opciones, izquierda vuelve y Atrás cancela un movimiento o regresa al menú antes de cerrar.
+- Foco estable al vaciar una lista, filas recicladas y cierre del organizador al salir de TV. Las actualizaciones de programación de Lite no interrumpen una edición.
+- Verificación nativa del tema, foco, orden, acciones, fondo integrado y liberación de recursos en ambas ediciones.
+
+
 ## 1.25.1 Preview · 2026-10-25
 
 - Selector de fuente y Organizar alineados dentro de la columna izquierda, sin solapar la fecha ni reducir el espacio de la guía.
