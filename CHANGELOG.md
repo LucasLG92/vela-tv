@@ -1,5 +1,11 @@
 # Cambios
 
+## 1.25.1 Preview · 2026-10-25
+
+- Selector de fuente y Organizar alineados dentro de la columna izquierda, sin solapar la fecha ni reducir el espacio de la guía.
+- Comprobación nativa de los límites de la cabecera.
+
+
 ## 1.25.0 Preview y Vela Lite 0.5.0 Preview · 2026-10-25
 
 - Panel Organizar integrado y compartido entre ambas ediciones: orden manual de favoritos con OK y flechas; guardar o cancelar con el mando.

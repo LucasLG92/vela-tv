@@ -2,7 +2,7 @@
 
 Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **52 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
 
-[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.25.0-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
+[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.25.1-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
 
 ## Tu cine, en primer plano
 
