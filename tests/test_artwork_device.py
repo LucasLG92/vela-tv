@@ -7,13 +7,14 @@ import argparse,os,subprocess
 parser=argparse.ArgumentParser()
 parser.add_argument('--serial',required=True)
 parser.add_argument('--adb-port',default='5037')
-parser.add_argument('--test',choices=['artwork','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-progress','continue-watching','appearance','gallery','apps-grid','updates','update-permission','jellyfin','watched','catalog-filters','xtream','m3u','tv-logos','tv-redesign','tv-timeline','tv-fallback','plex-link','home-tv','integrated-settings','inputs','integrated-update-permission'],default='artwork')
+parser.add_argument('--no-captures',action='store_true',help='Skip optional live-video captures on emulators whose compositor cannot capture a decoder surface')
+parser.add_argument('--test',choices=['artwork','up-next','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-progress','continue-watching','appearance','gallery','apps-grid','updates','update-permission','jellyfin','watched','catalog-filters','xtream','m3u','tv-logos','tv-redesign','tv-timeline','tv-fallback','plex-link','home-tv','integrated-settings','inputs','integrated-update-permission'],default='artwork')
 parser.add_argument('--jellyfin-fixture',help='Private JSON for an owned loopback Jellyfin fixture; emulator only')
 parser.add_argument('--xtream-fixture',help='Private JSON for an owned loopback Xtream fixture; emulator only')
 args=parser.parse_args()
 if args.test in ('xtream','m3u','tv-fallback') and not args.xtream_fixture:parser.error('--xtream-fixture is required')
 if args.test=='jellyfin' and not args.jellyfin_fixture:parser.error('--jellyfin-fixture is required')
-test_class={'artwork':'ArtworkLifecycleTest','ambient':'AndroidAmbientTest','weather':'AndroidWeatherTest','sidebar':'AndroidSidebarTest','reorder':'AndroidSidebarReorderTest','remove':'AndroidSidebarRemoveTest','catalog':'AndroidCatalogTest','home-status':'AndroidHomeStatusTest','account':'AndroidAccountHeaderTest','personalization':'AndroidPersonalizationTest','live-tv':'AndroidLiveTvTest','tv-progress':'AndroidTvProgressTest','continue-watching':'AndroidContinueWatchingTest','appearance':'AndroidAppearanceTest','gallery':'AndroidGalleryTest','apps-grid':'AndroidAppsGridTest','updates':'AndroidUpdatesTest','update-permission':'AndroidUpdatePermissionTest','jellyfin':'AndroidJellyfinTest','watched':'AndroidWatchedTest','catalog-filters':'AndroidCatalogFiltersTest','xtream':'AndroidXtreamTest','m3u':'AndroidM3uTest','tv-logos':'AndroidTvLogoTest','tv-redesign':'AndroidTvRedesignTest','tv-timeline':'AndroidTvTimelineTest','tv-fallback':'AndroidTvFallbackTest','plex-link':'AndroidPlexLinkTest','integrated-update-permission':'AndroidUpdatePermissionTest','inputs':'AndroidInputsTest','integrated-settings':'AndroidIntegratedSettingsTest','home-tv':'AndroidHomeLiveTvTest'}[args.test]
+test_class={'up-next':'AndroidUpNextTest','artwork':'ArtworkLifecycleTest','ambient':'AndroidAmbientTest','weather':'AndroidWeatherTest','sidebar':'AndroidSidebarTest','reorder':'AndroidSidebarReorderTest','remove':'AndroidSidebarRemoveTest','catalog':'AndroidCatalogTest','home-status':'AndroidHomeStatusTest','account':'AndroidAccountHeaderTest','personalization':'AndroidPersonalizationTest','live-tv':'AndroidLiveTvTest','tv-progress':'AndroidTvProgressTest','continue-watching':'AndroidContinueWatchingTest','appearance':'AndroidAppearanceTest','gallery':'AndroidGalleryTest','apps-grid':'AndroidAppsGridTest','updates':'AndroidUpdatesTest','update-permission':'AndroidUpdatePermissionTest','jellyfin':'AndroidJellyfinTest','watched':'AndroidWatchedTest','catalog-filters':'AndroidCatalogFiltersTest','xtream':'AndroidXtreamTest','m3u':'AndroidM3uTest','tv-logos':'AndroidTvLogoTest','tv-redesign':'AndroidTvRedesignTest','tv-timeline':'AndroidTvTimelineTest','tv-fallback':'AndroidTvFallbackTest','plex-link':'AndroidPlexLinkTest','integrated-update-permission':'AndroidUpdatePermissionTest','inputs':'AndroidInputsTest','integrated-settings':'AndroidIntegratedSettingsTest','home-tv':'AndroidHomeLiveTvTest'}[args.test]
 root=Path(__file__).resolve().parents[1]
 sdk=Path(os.environ['ANDROID_HOME']);jdk=Path(os.environ['JAVA_HOME'])
 bt=max((sdk/'build-tools').iterdir(),key=lambda p:tuple(int(x) for x in p.name.split('.')))
@@ -32,7 +33,7 @@ run([jdk/('bin/jar'+exe),'uf',out/'base.apk','-C',out,'classes.dex'])
 run([bt/('zipalign'+exe),'-f','4',out/'base.apk',out/'aligned.apk'])
 run([bt/('apksigner'+bat),'sign','--ks',root/'vela.keystore','--ks-pass','pass:vela-local','--out',out/'tests.apk',out/'aligned.apk'])
 adb=[sdk/('platform-tools/adb'+exe),'-P',args.adb_port,'-s',args.serial]
-if args.test in ('jellyfin','watched','catalog-filters','updates','update-permission','xtream','m3u','tv-fallback','plex-link','home-tv','integrated-settings','inputs','integrated-update-permission'):
+if args.test in ('up-next','jellyfin','watched','catalog-filters','updates','update-permission','xtream','m3u','tv-fallback','plex-link','home-tv','integrated-settings','inputs','integrated-update-permission'):
     assert subprocess.check_output(list(map(str,adb+['shell','getprop','ro.kernel.qemu']))).decode().strip()=='1','This isolated fixture requires an emulator'
 if args.test in ('watched','catalog-filters'):run(adb+['shell','am','force-stop','tv.vela.launcher'])
 run(adb+['install','-r',out/'tests.apk'])
@@ -49,7 +50,7 @@ try:
     if args.test in ('update-permission','integrated-update-permission'):
         from update_permission_flow import run_flow
         result=run_flow(adb,integrated=args.test=='integrated-update-permission')+'\nINSTRUMENTATION_CODE: -1\n'
-    else:result=subprocess.check_output(list(map(str,adb+['shell','am','instrument','-w','tv.vela.launcher.tests/tv.vela.launcher.'+test_class])),timeout=240).decode('utf-8','replace')
+    else:result=subprocess.check_output(list(map(str,adb+['shell','am','instrument','-w']+(['-e','captures','false'] if args.no_captures else [])+['tv.vela.launcher.tests/tv.vela.launcher.'+test_class])),timeout=240).decode('utf-8','replace')
     (out/('result-'+args.test+'.txt')).write_text(result,encoding='utf-8')
     print(result)
     assert 'INSTRUMENTATION_CODE: -1' in result,'Artwork lifecycle test failed'

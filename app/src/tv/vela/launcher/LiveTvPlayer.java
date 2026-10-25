@@ -17,8 +17,8 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     interface Actions {void back();void zap(int direction);void channels(int page);void choose(LiveTvData.Channel channel);}
     private final android.app.Activity activity;private final Actions actions;
     final SurfaceView video;private final FrameLayout stage,panel,intro,quickDrawer;
-    private final TextView channel,programme,message,format,programmeTiming,nextProgramme,quickGroup,quickStatus,quickPrevious,quickNext,quickClose;
-    private final ProgressBar programmeProgress;private final LiveTvLogos.LogoView channelLogo;
+    private final TextView channel,programme,message,format,programmeTiming,quickGroup,quickStatus,quickPrevious,quickNext,quickClose;
+    private final UpNextView nextProgramme;private final ProgressBar programmeProgress;private final LiveTvLogos.LogoView channelLogo;
     private final ListView quickList;private final BaseAdapter quickAdapter;
     private LiveTvLogos artwork;private boolean pickerLoading;private int pickerDirection;
     List<LiveTvData.Channel> pickerChannels=Collections.emptyList();Map<String,LiveTvData.Guide> pickerGuide=Collections.emptyMap();int pickerPage,pickerTotal;
@@ -26,9 +26,9 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     TvView tuner;
     private final Handler main=new Handler(Looper.getMainLooper());
     private final List<Placement> placements=new ArrayList<>();
-    private float uiScale=1;
+    private float uiScale=1;private int controlsWidth,controlsHeight;
     private static final class Placement {
-        final View view;final int x,y,w,h;final float textSize;
+        final View view;final int x,y,h;int w;final float textSize;
         Placement(View v,int left,int top,int width,int height){view=v;x=left;y=top;w=width;h=height;textSize=v instanceof TextView?((TextView)v).getTextSize():0;}
     }
     MediaPlayer player;
@@ -59,10 +59,10 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         panel=new FrameLayout(a);GradientDrawable shade=new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0x00000000,0xEB090B10,0xF5090B10,0xFF090B10});shade.setColors(new int[]{0x00000000,0xEB090B10,0xF5090B10,0xFF090B10},new float[]{0,.18f,.62f,1});panel.setBackground(shade);put(stage,panel,0,752,1920,328);
         channelLogo=new LiveTvLogos.LogoView(a,"");channelLogo.setScaleType(ImageView.ScaleType.FIT_CENTER);channelLogo.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);put(panel,channelLogo,88,68,88,88);
         channel=text("",23,0xFFC5CAD3,Ui.medium);channel.setSingleLine();channel.setEllipsize(android.text.TextUtils.TruncateAt.END);put(panel,channel,216,52,1516,34);
-        programme=text("",37,0xFFF7F7FA,Ui.displaySemibold);programme.setSingleLine();programme.setEllipsize(android.text.TextUtils.TruncateAt.END);put(panel,programme,216,92,1516,55);
-        programmeTiming=text("",19,0xFFC5CAD3,Ui.medium);put(panel,programmeTiming,216,153,1516,28);
-        nextProgramme=text("",18,0xFF9DA7B7,Ui.regular);nextProgramme.setSingleLine();nextProgramme.setEllipsize(android.text.TextUtils.TruncateAt.END);put(panel,nextProgramme,216,189,1516,26);
-        programmeProgress=new ProgressBar(a,null,android.R.attr.progressBarStyleHorizontal);programmeProgress.setMax(1000);programmeProgress.setProgressTintList(android.content.res.ColorStateList.valueOf(Appearance.accent(a)));programmeProgress.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(VelaTheme.RAISED));put(panel,programmeProgress,216,231,1516,4);
+        programme=text("",37,0xFFF7F7FA,Ui.displaySemibold);programme.setMaxLines(2);programme.setGravity(Gravity.TOP);programme.setEllipsize(android.text.TextUtils.TruncateAt.END);put(panel,programme,216,92,1516,96);
+        programmeTiming=text("",19,0xFFC5CAD3,Ui.medium);put(panel,programmeTiming,216,195,1516,28);
+        nextProgramme=new UpNextView(a);put(panel,nextProgramme,1216,46,616,194);
+        programmeProgress=new ProgressBar(a,null,android.R.attr.progressBarStyleHorizontal);programmeProgress.setMax(1000);programmeProgress.setProgressTintList(android.content.res.ColorStateList.valueOf(Appearance.accent(a)));programmeProgress.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(VelaTheme.RAISED));put(panel,programmeProgress,216,242,1516,4);
         TextView hint=text(Ui.tr("↑ ↓ Trocar canal    ·    → Lista de canais    ·    OK Informação    ·    Voltar Sair","↑ ↓ Change channel    ·    → Channel list    ·    OK Information    ·    Back Exit","↑ ↓ Cambiar canal    ·    → Lista de canales    ·    OK Información    ·    Atrás Salir"),16,0xFF929CAE,Ui.regular);put(panel,hint,216,274,1516,25);
         quickDrawer=new FrameLayout(a);quickDrawer.setBackground(round(VelaTheme.INK));quickDrawer.setVisibility(GONE);put(stage,quickDrawer,1224,32,664,1016);
         TextView heading=text(Ui.tr("Canais","Channels","Canales"),34,0xFFF7F7FA,Ui.displaySemibold);put(quickDrawer,heading,32,30,470,54);
@@ -83,17 +83,21 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     private void put(FrameLayout parent,View v,int x,int y,int w,int h){placements.add(new Placement(v,x,y,w,h));LayoutParams p=new LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;parent.addView(v,p);}
     private GradientDrawable round(int color){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(15*uiScale);return d;}
     /** Size the small controls once per viewport change; avoid a scaled render layer over SurfaceView. */
-    @Override protected void onSizeChanged(int w,int h,int ow,int oh){
+    @Override protected void onMeasure(int width,int height){scaleControls(MeasureSpec.getSize(width),MeasureSpec.getSize(height));super.onMeasure(width,height);}
+    @Override protected void onSizeChanged(int w,int h,int ow,int oh){resize();}
+    private void scaleControls(int w,int h){
+        if(w<=0||h<=0||w==controlsWidth&&h==controlsHeight)return;controlsWidth=w;controlsHeight=h;
         uiScale=Math.min(w/1920f,h/1080f);stage.setTranslationX((w-1920*uiScale)/2);stage.setTranslationY((h-1080*uiScale)/2);
         for(Placement item:placements){LayoutParams p=(LayoutParams)item.view.getLayoutParams();p.width=Math.round(item.w*uiScale);p.height=Math.round(item.h*uiScale);p.leftMargin=Math.round(item.x*uiScale);p.topMargin=Math.round(item.y*uiScale);item.view.setLayoutParams(p);if(item.textSize>0)((TextView)item.view).setTextSize(TypedValue.COMPLEX_UNIT_PX,item.textSize*uiScale);}
-        ((GradientDrawable)quickDrawer.getBackground()).setCornerRadius(28*uiScale);quickAdapter.notifyDataSetChanged();resize();
+        ((GradientDrawable)quickDrawer.getBackground()).setCornerRadius(28*uiScale);quickAdapter.notifyDataSetChanged();
     }
-    void select(LiveTvData.Channel ch){closeChannels(false);selected=ch;channelLogo.setImageDrawable(null);if(artwork==null)artwork=new LiveTvLogos(activity);artwork.page();artwork.load(ch,channelLogo);intro.setVisibility(VISIBLE);signals=new TvSignalFallback(ch);signal=null;paused=false;channel.setText((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));showControls();if(active)startSignal();}
+    void select(LiveTvData.Channel ch){closeChannels(false);selected=ch;metadata(null,null);channelLogo.setImageDrawable(null);if(artwork==null)artwork=new LiveTvLogos(activity);artwork.page();artwork.load(ch,channelLogo);intro.setVisibility(VISIBLE);signals=new TvSignalFallback(ch);signal=null;paused=false;channel.setText((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));showControls();if(active)startSignal();}
     void metadata(LiveTvData.Programme current,LiveTvData.Programme next){
         long now=System.currentTimeMillis()/1000;if(current!=null&&!current.current(now))current=null;
         programme.setText(current==null?Ui.tr("Programação não disponível","Programme information unavailable","Programación no disponible"):current.title);
         programmeTiming.setText(current==null?"":Ui.time(current.start*1000)+"–"+Ui.time(current.end*1000)+"  ·  "+LiveTvActivity.remainingText(current.remainingMinutes(now)));
-        nextProgramme.setText(next==null||next.start<=now?"":Ui.tr("A seguir  ·  ","Up next  ·  ","A continuación  ·  ")+Ui.time(next.start*1000)+"  "+next.title);
+        boolean upcoming=next!=null&&(current==null||next.start>=current.end)&&nextProgramme.bind(next.title,next.start,next.end,now);if(!upcoming)nextProgramme.bind(null,0,0,now);
+        int width=upcoming?922:1516;for(Placement item:placements)if((item.view==channel||item.view==programme||item.view==programmeTiming||item.view==programmeProgress)&&item.w!=width){item.w=width;LayoutParams p=(LayoutParams)item.view.getLayoutParams();p.width=Math.round(width*uiScale);item.view.setLayoutParams(p);}
         programmeProgress.setVisibility(current==null?INVISIBLE:VISIBLE);programmeProgress.setProgress(current==null?0:current.progress(now));
         // Reuse the host minute tick; an open channel list needs no extra timer.
         if(quickDrawer.getVisibility()==VISIBLE)quickAdapter.notifyDataSetChanged();

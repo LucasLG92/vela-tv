@@ -1,5 +1,17 @@
 # Cambios
 
+## 1.23.1 Preview · 2026-10-25
+
+- Tarjeta «A continuación» a la derecha de la información del reproductor, con el próximo programa y su horario.
+- Títulos en dos líneas, retirada de los datos al cambiar de canal y espacio completo para la emisión actual si falta la siguiente.
+- Actualización de la programación al cambiar de emisión y ajuste de los controles al cambiar la resolución de la ventana.
+
+## Vela Lite 0.3.3-preview
+
+- La misma tarjeta de próximo programa en la reproducción por antena.
+- Selección del siguiente programa por horario y retención de solo la emisión actual y la siguiente por canal.
+- Consulta limitada de horarios del día para incluir programas que empiezan después de una emisión larga, reutilizando la guía y el refresco existentes.
+
 ## 1.23.0 Preview · 2026-10-25
 
 - Ajustes por categorías con iconos, panel de detalle amplio y filas alineadas en el tema grafito de Vela.

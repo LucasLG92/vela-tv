@@ -4,7 +4,7 @@
 
 Tus entradas HDMI, la televisión por antena y tus aplicaciones, en un inicio visual y fácil de recorrer con el mando. **Vela Lite está pensada para la televisión que acompaña a tu TV Box, consola u ordenador.**
 
-**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.3.2-preview/Vela-Lite-0.3.2-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
+**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.3.3-preview/Vela-Lite-0.3.3-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
 
 **Android TV / Google TV · Android 8.0 o posterior · APK de unos 1,3 MB · Vista previa**
 
@@ -25,6 +25,8 @@ La guía pública de **dobleM** completa los horarios de los canales que tengas 
 ![Guía de televisión y tiempo restante](gallery/02-guia.png)
 
 Al ver un canal, pulsa **derecha** para abrir la lista con los programas y el tiempo restante. OK muestra la información; Atrás te devuelve a la guía. La reproducción utiliza el sintonizador de la televisión.
+
+Con **OK**, la información de la emisión muestra también **A continuación** a la derecha: el próximo programa y su horario. Los datos proceden de la guía de antena y de dobleM; si no están disponibles, la tarjeta se oculta.
 
 ## Tus aplicaciones, a mano
 

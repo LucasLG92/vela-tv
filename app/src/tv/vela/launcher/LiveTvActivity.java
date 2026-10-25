@@ -247,7 +247,7 @@ public class LiveTvActivity extends Activity {
         if(timelineMode&&playback==null&&selected!=null){timelineSelection(selected,timeline.programme());return;}if(selected==null){selection.setText("");nowNext.setText("");return;}selection.setText(displayName(selected.name)+" · "+categoryName(selected.group));LiveTvData.Guide entry=guide.get(selected.id);LiveTvData.Programme current=entry==null?null:entry.current(now);
         String line=current!=null?time(current.start)+"–"+time(current.end)+"  "+current.title:t("Programação não disponível","Programme guide unavailable","Programación no disponible");
         if(entry!=null&&entry.next!=null&&entry.next.start>now)line+="   ·   "+time(entry.next.start)+"  "+entry.next.title;nowNext.setText(line);
-        if(playback!=null)playback.metadata(current,entry==null?null:entry.next);
+        if(playback!=null){playback.metadata(current,entry==null?null:entry.next);if(entry!=null&&entry.next!=null&&entry.next.start<=now&&!guideLoading&&SystemClock.elapsedRealtime()-guideAt>=15000)loadGuide();}
     }
     private void toggleFavorite(LiveTvData.Channel ch){
         if(catalog==null||loading)return;boolean added=!TvChannelNames.favorite(ch,favorites);if(added&&favorites.size()>=128){Toast.makeText(this,t("Máximo 128 favoritos.","Maximum 128 favorites.","Máximo 128 favoritos."),Toast.LENGTH_SHORT).show();return;}

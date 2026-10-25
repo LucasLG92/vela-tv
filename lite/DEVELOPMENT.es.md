@@ -30,8 +30,8 @@ Lite recibe **solo versiones Lite**, nunca la APK de Vela completa. Antes de ins
 
 Para distribuir una nueva versión compatible deben aumentarse `versionCode` y `versionName`, conservar el paquete y la firma, y publicarse una release con:
 
-- Etiqueta: `lite-v0.3.2-preview` (con la versión que corresponda).
-- APK: `Vela-Lite-0.3.2-preview.apk`.
+- Etiqueta: `lite-v0.3.3-preview` (con la versión que corresponda).
+- APK: `Vela-Lite-0.3.3-preview.apk`.
 - Recurso subido completamente y con `digest` SHA-256 en la API de GitHub.
 
 Las etiquetas de la versión completa se excluyen. Si todavía no hay una versión Lite más reciente publicada, el actualizador lo indica. La clave privada de firma no se incluye en el código ni en la APK.

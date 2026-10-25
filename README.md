@@ -4,7 +4,7 @@
 
 Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abrir. Vela reúne lo que te gusta ver en una interfaz visual, personalizable y pensada para el mando.
 
-**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.23.0-preview)** · [Ver las 52 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
+**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.23.1-preview)** · [Ver las 52 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
 
 **[Vela Lite · HDMI, antena y apps para tu televisión](lite/README.md)**
 
@@ -98,6 +98,8 @@ El directo tiene su sitio en Vela, justo debajo de Inicio. Tu barra, tu reloj y 
 
 ### Cambia de canal sin salir del directo
 
+Con la información del canal abierta, **A continuación** muestra a la derecha el próximo programa y su horario. La tarjeta utiliza los datos de la guía y se oculta cuando no hay programación disponible.
+
 Pulsa **derecha** mientras ves un canal. Aparecen sus logos, lo que están emitiendo y cuánto queda, sobre el vídeo que sigue reproduciéndose. Elige otro con OK o cierra el panel con Atrás. Al empezar, Vela muestra la calidad y la información del programa; después se ocultan para dejarte ver. Pulsa OK para recuperar la información.
 
 ![Canales y tiempo restante sobre el directo](gallery/47-canales-durante-directo.webp)
@@ -128,7 +130,7 @@ Las nuevas versiones llegan desde GitHub a tu televisión. Vela busca actualizac
 
 Instala Vela, conecta tu biblioteca y elige tus aplicaciones. Todo desde la televisión, con un asistente que puedes completar a tu ritmo.
 
-**[Descargar Vela 1.23.0 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.23.0-preview)**
+**[Descargar Vela 1.23.1 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.23.1-preview)**
 
 Para **Android TV y Google TV con Android 11 o posterior**. Esta versión es una preview. Consulta la [guía de instalación](guide/INSTALL.es.md) y la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
 
