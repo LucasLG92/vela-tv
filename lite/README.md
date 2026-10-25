@@ -4,7 +4,7 @@
 
 Tus entradas HDMI, la televisión por antena y tus aplicaciones, en un inicio visual y fácil de recorrer con el mando. **Vela Lite está pensada para la televisión que acompaña a tu TV Box, consola u ordenador.**
 
-**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.3.1-preview/Vela-Lite-0.3.1-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
+**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.3.2-preview/Vela-Lite-0.3.2-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
 
 **Android TV / Google TV · Android 8.0 o posterior · APK de unos 1,3 MB · Vista previa**
 

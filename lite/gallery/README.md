@@ -32,4 +32,4 @@ Búsqueda y descarga automáticas de nuevas versiones de Vela Lite.
 
 ![Siempre al día](05-actualizaciones.png)
 
-[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.3.1-preview) · [Volver a la presentación](../README.md)
+[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.3.2-preview) · [Volver a la presentación](../README.md)

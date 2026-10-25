@@ -2,7 +2,7 @@
 
 Vela Lite se instala en una televisión Android TV / Google TV con Android 8.0 o posterior. Si usas una TV Box, instálala en la propia pantalla para acceder a sus entradas y antena.
 
-1. Descarga la **APK de Vela Lite** desde la [release oficial](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.3.1-preview) y envíala al televisor con el método que utilices para instalar APK.
+1. Descarga la **APK de Vela Lite** desde la [release oficial](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.3.2-preview) y envíala al televisor con el método que utilices para instalar APK.
 2. Abre el archivo y confirma la instalación. Android puede pedir permiso a la aplicación desde la que lo abres.
 3. Abre **Vela Lite**. En **Ajustes → Sistema → Pantalla de inicio**, elígela como inicio predeterminado cuando el firmware lo permita.
 4. Entra en **Televisión** y permite leer la guía. Los canales deben estar previamente sintonizados en la aplicación de TV del fabricante.

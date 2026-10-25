@@ -1,5 +1,10 @@
 # Cambios
 
+## Vela Lite 0.3.2-preview
+
+- Compatibilidad de la verificación de firma con televisores Android 9 y 10 que no devuelven `SigningInfo` para APK descargadas. Se mantiene la comprobación de integridad, paquete, versión y coincidencia exacta de firma mediante el gestor de paquetes de Android.
+- Instalación inicial o actualización manual desde la APK para las versiones Lite anteriores afectadas; las siguientes actualizaciones utilizan el flujo automático.
+
 ## Vela Lite 0.3.1-preview
 
 Primera distribución pública de Vela Lite para la televisión que acompaña a una TV Box, consola u otro equipo HDMI. Incluye entradas con perfiles de dispositivo, antena con guía horizontal y programación dobleM, favoritos, cajón de apps y ajustes integrados.
