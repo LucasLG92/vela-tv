@@ -30,18 +30,55 @@
     "file": "04-ajustes.png",
     "title": "Todo en su sitio",
     "caption": "Ajustes agrupados por categorías, con opciones alineadas en el tema de Vela.",
-    "width": 1920,
-    "height": 1080,
-    "source": "native_android_tv",
-    "personal_data": false
+    "width": 3840,
+    "height": 2160,
+    "source": "native clean-emulator 4K capture; no accounts, location or private connections",
+    "personal_data": false,
+    "version": "0.3.2-preview",
+    "sha256": "899048a0bde1d12a83d248e06c99cdd1f74be8de36199c78616ff5563120d78b"
   },
   {
     "file": "05-actualizaciones.png",
     "title": "Siempre al día",
     "caption": "Búsqueda y descarga automáticas de nuevas versiones de Vela Lite.",
-    "width": 1920,
-    "height": 1080,
-    "source": "native_android_tv",
-    "personal_data": false
+    "width": 3840,
+    "height": 2160,
+    "source": "native clean-emulator 4K capture; no accounts, location or private connections",
+    "personal_data": false,
+    "version": "0.3.2-preview",
+    "sha256": "ea6e8f9642a512e322eab1120fe408c8b64adf832f3b8ba94b81119c2dfe0bd5"
+  },
+  {
+    "file": "06-aspecto.png",
+    "title": "Dale tu estilo",
+    "caption": "Fondo, reloj, movimiento y pantalla inicial.",
+    "source": "native clean-emulator 4K capture; no accounts, location or private connections",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.3.2-preview",
+    "sha256": "786cb244274847c6e310de567b655e1486590ca134e44f5387a282f2e6ae0d6d"
+  },
+  {
+    "file": "07-sistema.png",
+    "title": "Los controles de tu televisión",
+    "caption": "El inicio y los ajustes de tu televisor, a mano.",
+    "source": "native clean-emulator 4K capture; no accounts, location or private connections",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.3.2-preview",
+    "sha256": "db5f174f5abec8add4d5525dbbe838a94496590a787c336f0061e642c4867690"
+  },
+  {
+    "file": "08-informacion.png",
+    "title": "Conoce tu Vela Lite",
+    "caption": "Versión, información y licencias.",
+    "source": "native clean-emulator 4K capture; no accounts, location or private connections",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.3.2-preview",
+    "sha256": "5c1cb266e1cddded8f06576c18097cfa99a3a7063e82fc73e388bebe94392e64"
   }
 ]

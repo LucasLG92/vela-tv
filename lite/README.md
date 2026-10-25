@@ -40,6 +40,8 @@ Elige entre fondo grafito o negro, muestra el reloj, reduce el movimiento al enf
 
 ![Ajustes integrados en Vela Lite](gallery/04-ajustes.png)
 
+[Aspecto](gallery/06-aspecto.png) · [Sistema](gallery/07-sistema.png) · [Información](gallery/08-informacion.png)
+
 ## Siempre al día
 
 Vela Lite busca y descarga automáticamente sus nuevas versiones desde GitHub. Cuando haya una actualización preparada, solo tendrás que confirmar la instalación en Android. Después elimina la APK instalada al volver a abrir el inicio.

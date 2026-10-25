@@ -1,10 +1,10 @@
 # Tu televisión, a tu manera
 
-**M3U, Xtream y Antena**, con una misma pantalla para buscar canales, recorrer categorías, consultar la programación y guardar favoritos. TV en directo se abre desde la barra lateral, justo debajo de Inicio, con el reloj y el tiempo de Vela. El selector de la cabecera cambia de fuente; **Ajustes → TV en directo** reúne la configuración, la actualización y la vista preferida. Vela recuerda tu última categoría y página, y reproduce solo cuando eliges un canal.
+**M3U, Xtream y Antena**, con una misma pantalla para buscar canales, recorrer categorías, consultar la programación y guardar favoritos. TV en directo se abre desde la barra lateral, justo debajo de Inicio, con el reloj y el tiempo de Vela. El selector de la cabecera cambia de fuente; **Ajustes → Televisión** reúne la configuración, la actualización y la vista preferida. Vela recuerda tu última categoría y página, y reproduce solo cuando eliges un canal.
 
 ## Tu lista M3U
 
-Abre **Ajustes → TV en directo → Configurar lista M3U**. Introduce la URL de tu lista y, si lo necesitas, una URL XMLTV para la guía. Si la propia lista declara su XMLTV, Vela lo utiliza automáticamente. Pulsa **Guardar y usar M3U**.
+Abre **Ajustes → Televisión → Listas y ajustes → Configurar lista M3U**. Introduce la URL de tu lista y, si lo necesitas, una URL XMLTV para la guía. Si la propia lista declara su XMLTV, Vela lo utiliza automáticamente. Pulsa **Guardar y usar M3U**.
 
 HTTPS es la opción habitual. Para una lista o señales HTTP, activa **Mi lista o sus señales usan HTTP**. Esa conexión no cifra el tráfico. Las URL con credenciales se introducen en la pantalla protegida de la televisión y se guardan cifradas en el dispositivo.
 
@@ -12,7 +12,7 @@ Se admiten metadatos EXTINF, categorías EXTGRP, logos, identificadores de guía
 
 ## Tu cuenta Xtream
 
-Abre **Ajustes → TV en directo → Cuenta Xtream**. Introduce el servidor, el usuario y la contraseña de tu servicio y pulsa **Conectar y usar en Vela → Ver mis canales**. Cada instalación se configura con su propia cuenta; el APK viene sin cuentas personales.
+Abre **Ajustes → Televisión → Listas y ajustes → Cuenta Xtream**. Introduce el servidor, el usuario y la contraseña de tu servicio y pulsa **Conectar y usar en Vela → Ver mis canales**. Cada instalación se configura con su propia cuenta; el APK viene sin cuentas personales.
 
 Utiliza HTTPS cuando tu proveedor lo ofrezca. Si necesita HTTP, activa su opción en la pantalla de conexión. La cuenta se valida antes de guardarla. Se muestran sus categorías y sus horarios cuando el servidor los proporciona.
 
@@ -22,7 +22,7 @@ La integración cubre televisión en directo. Las películas a la carta, series 
 
 Selecciona **Antena**. Vela consulta los canales que ya tiene sintonizados el televisor, ordenados por su número, y los reproduce con su sintonizador. También utiliza los logos y los horarios que Android permita leer. Los canales bloqueados por la TV no se incluyen.
 
-Hace falta un televisor con sintonizador compatible y un cable de antena con señal. En una caja o dispositivo HDMI sin sintonizador, esta opción informa de su indisponibilidad. Vela no resintoniza ni cambia el orden de canales de la TV. **Ajustes → TV en directo → Ajustes de antena** abre la configuración que facilite el fabricante; solo se inicia al elegirla.
+Hace falta un televisor con sintonizador compatible y un cable de antena con señal. En una caja o dispositivo HDMI sin sintonizador, esta opción informa de su indisponibilidad. Vela no resintoniza ni cambia el orden de canales de la TV. **Ajustes → Televisión → Listas y ajustes → Ajustes de antena** abre la configuración que facilite el fabricante; solo se inicia al elegirla.
 
 Si hay canales guardados pero falta el cable o la señal, la lista permanece disponible y el reproductor muestra **Sin señal de antena**. La compatibilidad depende del fabricante y de cómo exponga su sintonizador a Android.
 
@@ -69,7 +69,7 @@ Los fondos toman un tono del propio logo mediante una pequeña muestra de píxel
 
 ## EPG dobleM y XMLTV externo
 
-La guía externa inicial es [guiatv.xml de EPG dobleM](https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiatv.xml), de [davidmuma](https://github.com/davidmuma/EPG_dobleM). **Ajustes → TV en directo → Guía de programación** permite actualizarla, introducir otra URL HTTPS o utilizar únicamente la guía de la fuente. El XML no se incluye en Vela.
+La guía externa inicial es [guiatv.xml de EPG dobleM](https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiatv.xml), de [davidmuma](https://github.com/davidmuma/EPG_dobleM). **Ajustes → Televisión → Listas y ajustes → Guía de programación** permite actualizarla, introducir otra URL HTTPS o utilizar únicamente la guía de la fuente. El XML no se incluye en Vela.
 
 La descarga y el análisis trabajan por partes en segundo plano. El índice privado en disco guarda los programas vigentes y las siguientes 48 horas, con un límite de 24 MiB. En la cuadrícula se recuperan el programa actual y el siguiente de los doce canales visibles. La vista horizontal consulta seis canales y una ventana de tres horas, con un máximo de 32 programas por canal. La guía se renueva al utilizar TV cuando han pasado cuatro horas; no hay un servicio permanente y una importación fallida conserva el índice anterior. Se limitan la descarga y los datos descomprimidos a 64 MiB, 4.096 canales y 150.000 programas de entrada; se guardan como máximo 100.000 programas dentro de la ventana de tiempo.
 
@@ -81,7 +81,7 @@ Si falta un logo válido del proveedor, Vela intenta el icono original declarado
 
 ## Guía horizontal
 
-**Guía es la vista inicial**, también al actualizar desde versiones anteriores. Puedes elegir **Guía** o **Canales** en **Ajustes → TV en directo**; esa elección se conserva. La cabecera del directo queda reservada al selector de fuente. En Guía, las categorías aparecen a la izquierda de los logos; se desplazan dentro de su propia zona, sin tapar la ayuda del mando. En Canales, los logos ocupan todo el ancho y arriba/abajo cambia a la lista anterior o siguiente, conservando la columna cuando es posible.
+**Guía es la vista inicial**, también al actualizar desde versiones anteriores. Puedes elegir **Guía** o **Canales** en **Ajustes → Televisión**; esa elección se conserva. La cabecera del directo queda reservada al selector de fuente. En Guía, las categorías aparecen a la izquierda de los logos; se desplazan dentro de su propia zona, sin tapar la ayuda del mando. En Canales, los logos ocupan todo el ancho y arriba/abajo cambia a la lista anterior o siguiente, conservando la columna cuando es posible.
 
 - **Arriba / abajo:** recorrer canales, también entre bloques y páginas.
 - **Izquierda / derecha:** elegir programas. Al llegar al borde, la ventana avanza o retrocede 90 minutos. Los controles inferiores permiten hacer lo mismo.

@@ -14,7 +14,10 @@ import java.util.*;
 
 /** TV-native update controls. Android always owns the final installation confirmation. */
 final class UpdatesScreen extends VelaScreen {
-    UpdatesScreen(Activity owner, Navigation navigation){super(owner,navigation);}
+    private final boolean detailOnly;
+    UpdatesScreen(Activity owner, Navigation navigation){this(owner,navigation,false);}
+    UpdatesScreen(Activity owner, Navigation navigation,boolean detailOnly){super(owner,navigation);this.detailOnly=detailOnly;}
+    @Override boolean standaloneChrome(){return !detailOnly;}
     private FrameLayout stage;
     private TextView title,status,action,check,automatic,download,channel,extra;
     private boolean active,installAfterDownload,waitingPermission;
@@ -23,6 +26,7 @@ final class UpdatesScreen extends VelaScreen {
     private static String t(String pt,String en,String es){return Ui.tr(pt,en,es);}
     @Override protected void onCreate(Bundle state){
         super.onCreate(state);Ui.init(this);Watchdog.install(this);
+        if(detailOnly){createDetail(state);return;}
         FrameLayout root=new FrameLayout(this){@Override protected void onSizeChanged(int w,int h,int oldw,int oldh){float scale=Math.min(w/1920f,h/1080f);stage.setScaleX(scale);stage.setScaleY(scale);stage.setTranslationX((w-1920*scale)/2);stage.setTranslationY((h-1080*scale)/2);}};root.setBackgroundColor(VelaTheme.BACKGROUND);
         stage=new FrameLayout(this);stage.setPivotX(0);stage.setPivotY(0);root.addView(stage,new FrameLayout.LayoutParams(1920,1080));
         View glow=new View(this);GradientDrawable gradient=new GradientDrawable();gradient.setGradientType(GradientDrawable.RADIAL_GRADIENT);gradient.setGradientRadius(1000);gradient.setGradientCenter(.2f,.4f);gradient.setColors(new int[]{VelaTheme.PANEL,VelaTheme.BACKGROUND});glow.setBackground(gradient);put(glow,0,0,1920,1080);
@@ -42,10 +46,23 @@ final class UpdatesScreen extends VelaScreen {
         waitingPermission=state!=null&&state.getBoolean("permission");installAfterDownload=state!=null&&state.getBoolean("installAfterDownload");render();setContentView(root);check.requestFocus();
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);getWindow().setBackgroundDrawable(null);
     }
+    private void createDetail(Bundle saved){
+        stage=new FrameLayout(this);
+        title=text("",26,VelaTheme.WHITE);put(title,0,0,1134,44);
+        status=text("",20,VelaTheme.SECONDARY);status.setMaxLines(3);status.setGravity(Gravity.TOP);put(status,0,50,1134,66);
+        action=button("",130,()->{ReleaseFeed.Release release=Updates.available(this);if(release==null)return;message="";if(Updates.ready(this,release))requestInstall();else{installAfterDownload=true;Updates.download(this);}});
+        check=button(t("Buscar agora","Check now","Buscar ahora"),212,()->{message="";Updates.check(this);});
+        automatic=button("",294,()->{Updates.prefs(this).edit().putBoolean("automatic",!Updates.automaticEnabled(this)).apply();render();Updates.automatic(this);});
+        download=button("",376,()->{Updates.prefs(this).edit().putBoolean("download",!Updates.automaticDownload(this)).apply();render();Updates.automatic(this);});
+        channel=button("",458,()->{Updates.prefs(this).edit().putBoolean("previews",!Updates.previews(this)).putLong("checked",0).putLong("attempt",0).apply();render();Updates.automatic(this);});
+        extra=button("",540,()->{if(Updates.state()!=Updates.IDLE){Updates.clearInstallationRequest(this);Updates.cancel();}else try{ReleaseFeed.Release release=Updates.available(this);startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(release==null?ReleaseFeed.REPO+"/releases":release.page())));}catch(ActivityNotFoundException absent){message=t("Nenhum navegador disponível.","No browser available.","No hay un navegador disponible.");render();}});
+        TextView[] controls={action,check,automatic,download,channel,extra};for(int i=0;i<controls.length;i++){if(i>0)controls[i].setNextFocusUpId(controls[i-1].getId());if(i+1<controls.length)controls[i].setNextFocusDownId(controls[i+1].getId());}
+        waitingPermission=saved!=null&&saved.getBoolean("permission");installAfterDownload=saved!=null&&saved.getBoolean("installAfterDownload");render();setContentView(stage);check.requestFocus();
+    }
     private TextView text(String value,int size,int color){TextView view=new TextView(this);view.setText(value);view.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);view.setTextColor(color);view.setTypeface(Ui.medium);view.setIncludeFontPadding(false);view.setGravity(Gravity.CENTER_VERTICAL);return view;}
     private void put(View view,int x,int y,int width,int height){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(width,height);p.leftMargin=x;p.topMargin=y;stage.addView(view,p);}
     private GradientDrawable round(int color){GradientDrawable drawable=new GradientDrawable();drawable.setColor(color);drawable.setCornerRadius(18);return drawable;}
-    private TextView button(String value,int y,Runnable run){TextView view=text(value,25,0xFFF7F7FA);view.setId(View.generateViewId());view.setFocusable(true);view.setFocusableInTouchMode(true);view.setDefaultFocusHighlightEnabled(false);view.setSingleLine();view.setEllipsize(android.text.TextUtils.TruncateAt.END);view.setPadding(26,0,26,0);view.setBackground(round(VelaTheme.CARD));put(view,936,y,840,76);view.setOnFocusChangeListener((v,focused)->{view.setBackground(round(focused?Appearance.accent(this):VelaTheme.CARD));view.setTextColor(focused?VelaTheme.INK:0xFFF7F7FA);});view.setOnClickListener(v->run.run());return view;}
+    private TextView button(String value,int y,Runnable run){TextView view=text(value,detailOnly?23:25,0xFFF7F7FA);view.setId(View.generateViewId());view.setFocusable(true);view.setFocusableInTouchMode(true);view.setDefaultFocusHighlightEnabled(false);view.setSingleLine();view.setEllipsize(android.text.TextUtils.TruncateAt.END);view.setPadding(26,0,26,0);view.setBackground(round(VelaTheme.CARD));put(view,detailOnly?0:936,y,detailOnly?1134:840,detailOnly?72:76);view.setOnFocusChangeListener((v,focused)->{view.setBackground(round(focused?Appearance.accent(this):VelaTheme.CARD));view.setTextColor(focused?VelaTheme.INK:0xFFF7F7FA);});view.setOnClickListener(v->run.run());return view;}
     private void render(){
         ReleaseFeed.Release release=Updates.available(this);int state=Updates.state();boolean busy=state!=Updates.IDLE,ready=Updates.ready(this,release);
         String subtitle=t("Busca automática uma vez por dia, ao abrir o Vela.","Automatic checks once a day when Vela opens.","Comprobación automática una vez al día al abrir Vela.");

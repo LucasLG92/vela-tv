@@ -36,8 +36,9 @@ def run_flow(adb, integrated=False):
     def open_updates():
         if integrated:
             call('shell','am','start','-n',pkg+'/.HomeActivity');wait_top('HomeActivity');click('Ajustes')
-        else:call('shell','am','start','-n',pkg+'/.SettingsActivity');wait_top('SettingsActivity')
-        click('Información y actualizaciones');click('Actualizaciones');wait_top('HomeActivity' if integrated else 'UpdatesActivity')
+        else:call('shell','am','start','-n',pkg+'/.UpdatesActivity');wait_top('UpdatesActivity')
+        if integrated:click('Actualizaciones')
+        wait_top('HomeActivity' if integrated else 'UpdatesActivity')
     def begin_permission():
         click('Instalar 1.');wait_top('com.android.settings/')
     def wait_installer():

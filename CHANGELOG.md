@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.23.0 Preview · 2026-10-25
+
+- Ajustes por categorías con iconos, panel de detalle amplio y filas alineadas en el tema grafito de Vela.
+- Televisión, aspecto y rendimiento, salvapantallas, cuentas, menú, actualizaciones, sistema e información en una navegación común.
+- Desplazamiento limitado al panel, foco estable al regresar de una cuenta y restauración de la página tras recrear Inicio.
+- Actualizaciones integradas en Ajustes, con continuidad al volver de los permisos de Android.
+- Galería de Vela renovada en 4K y nuevas capturas de los ajustes de Vela Lite 0.3.2.
+
 ## Vela Lite 0.3.2-preview
 
 - Compatibilidad de la verificación de firma con televisores Android 9 y 10 que no devuelven `SigningInfo` para APK descargadas. Se mantiene la comprobación de integridad, paquete, versión y coincidencia exacta de firma mediante el gestor de paquetes de Android.

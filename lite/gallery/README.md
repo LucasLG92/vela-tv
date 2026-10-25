@@ -1,6 +1,6 @@
 # Vela Lite, en imágenes
 
-Cinco pantallas para descubrir un inicio pensado para la televisión. Capturas reales en Full HD, sin datos de cuentas ni conexiones personales. Los canales y las aplicaciones disponibles dependen de cada televisor.
+Ocho pantallas para descubrir un inicio pensado para la televisión. Capturas nativas en Full HD y 4K, sin datos de cuentas ni conexiones personales. Los canales y las aplicaciones disponibles dependen de cada televisor.
 
 ## Tus dispositivos, en primera fila
 
@@ -31,5 +31,23 @@ Ajustes agrupados por categorías, con opciones alineadas en el tema de Vela.
 Búsqueda y descarga automáticas de nuevas versiones de Vela Lite.
 
 ![Siempre al día](05-actualizaciones.png)
+
+## Dale tu estilo
+
+Fondo grafito o negro, reloj, movimiento y pantalla inicial.
+
+![Aspecto de Vela Lite](06-aspecto.png)
+
+## Los controles de tu televisión
+
+El inicio y los ajustes del televisor, a un paso.
+
+![Sistema de Vela Lite](07-sistema.png)
+
+## Conoce tu Vela Lite
+
+Versión e información, en el mismo panel.
+
+![Información de Vela Lite](08-informacion.png)
 
 [Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.3.2-preview) · [Volver a la presentación](../README.md)

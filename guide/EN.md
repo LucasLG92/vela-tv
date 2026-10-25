@@ -4,7 +4,7 @@
 
 Your movies, series, apps and live TV, brought together in a home screen made for your remote. Connect Plex or Jellyfin, pick your favorites and make Vela feel like yours.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.22.0-preview)** · [47 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.23.0-preview)** · [52 screenshots in 4K](../gallery/README.md) · [Installation](INSTALL.es.md)
 
 ![Vela home screen](../gallery/01-inicio.webp)
 

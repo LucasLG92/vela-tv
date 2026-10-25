@@ -92,102 +92,102 @@
   {
     "file": "10-ajustes.webp",
     "title": "Tus ajustes",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.22.0",
-    "sha256": "c6f9a745ccaa29c42ffffdaa6595ed968c214c8f3d91dff1d7b308267d977dd4"
+    "version": "1.23.0",
+    "sha256": "a7284d34225368bfa89a8b064651140b6e35d3920b0f2ba41087dded46d6c226"
   },
   {
     "file": "11-apariencia.webp",
     "title": "Hazlo tuyo",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.22.0",
-    "sha256": "b5b45d250022cc49050a688161317e61af9b18e24281589c53aae881b2924d4b"
+    "version": "1.23.0",
+    "sha256": "306628551f34f4c32b2679e395c5259386a533d243a2b54c29a767283a858b40"
   },
   {
     "file": "12-colores.webp",
     "title": "Seis colores de acento",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "d74365d017223771214d7ce013abcafbfdf93ec9ecebb55d8082bc1ba54601f9"
+    "version": "1.23.0",
+    "sha256": "ae9b3668576594431bc1243110d352a97c75482c4ea848483e0bbb6ba5712a96"
   },
   {
     "file": "13-carteles.webp",
     "title": "Tres tamaños de cartel",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "5798dab1fa6cf02cd2494eb119ff60977b13004a8c2e1b1f4b8acf0ddc952c83"
+    "version": "1.23.0",
+    "sha256": "dbb6d3a1d4638c4bd33c6c9e5fabb79f00538561c4ccecd0b4ea628526e7774f"
   },
   {
     "file": "14-fondo.webp",
     "title": "El fondo, a tu gusto",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "275aa075e55bf0efddf9872dbb14045fe77f6fe773aa3ef7d3eaad9a1367313e"
+    "version": "1.23.0",
+    "sha256": "27c5057d8dac7db209b25e262cb571f280af394dc6db9816f73baff4e8553e48"
   },
   {
     "file": "15-rendimiento.webp",
     "title": "Imagen y rendimiento",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "f919ddeb281bb263e789816ebdbdc49c3bae4a430ef0ba82153d70a8d7b01cde"
+    "version": "1.23.0",
+    "sha256": "9112e5779d35e99da86e4d18bb6a8192eb426ebc149eaf6dc4114ddc2e7bfa00"
   },
   {
     "file": "16-accesos.webp",
     "title": "Tus accesos favoritos",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "40b7b4c4031c154f6feb36e180a5ddf4e57a9964650271c465aaf8e16776dfb6"
+    "version": "1.23.0",
+    "sha256": "50ccda4b08a1a38a9fe6976ba2413de1e88f5f9e250ae13b2ec46e6acc65a765"
   },
   {
     "file": "17-cuentas.webp",
     "title": "Tus cuentas y servicios",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.22.0",
-    "sha256": "80714f3d5d981b48818c6da7fb53d779475ed45fd69e691388d8db9de8098faa"
+    "version": "1.23.0",
+    "sha256": "67e7f1363fb5e68d709acfd4d1db5fc1acb4b19457c298b6cb1f4772b1d39d69"
   },
   {
     "file": "18-salvapantallas-ajustes.webp",
     "title": "Diseña tus pausas",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "89333af4cad52ba7db746236beb9d38d711771d9d8f1d7ed01f1716a1d169c48"
+    "version": "1.23.0",
+    "sha256": "4622f32b57fb32f2a3c27ab4be75e472ace48080ed15ff9e9c1a7817542089b8"
   },
   {
     "file": "19-ubicacion-demo.webp",
     "title": "El tiempo, a tu manera",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; original authorized artwork with demo progress",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "sha256": "ed9ee201c089d7511e679b5b8ec2f89aec67b32061e36465971452e2695009a5"
+    "version": "1.23.0",
+    "sha256": "47637a24f9b41a5990b2307dc2966f7c38e333699970b32d1c7ec16cbefde807"
   },
   {
     "file": "20-salvapantallas-plex-demo.webp",
@@ -212,12 +212,12 @@
   {
     "file": "22-cuentas-sin-vincular.webp",
     "title": "Conecta lo que te gusta",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.22.0",
-    "sha256": "80714f3d5d981b48818c6da7fb53d779475ed45fd69e691388d8db9de8098faa"
+    "version": "1.23.0",
+    "sha256": "67e7f1363fb5e68d709acfd4d1db5fc1acb4b19457c298b6cb1f4772b1d39d69"
   },
   {
     "file": "23-asistente.webp",
@@ -322,12 +322,12 @@
   {
     "file": "33-actualizaciones.webp",
     "title": "Siempre al día",
-    "source": "native clean-emulator 4K capture; no linked personal accounts or location; demo weather and public TV sources",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.22.0",
-    "sha256": "9d39be2cddeb5fdc99fcf5a556e2bcc2e1c6566ffc7d381b17536ea9ed99452b"
+    "version": "1.23.0",
+    "sha256": "5c62f6ae2350088acd37dc8cea4406ecd5570594cc9cc62864bf4cf950ea8933"
   },
   {
     "file": "34-jellyfin-inicio.webp",
@@ -455,9 +455,9 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.21.0",
-    "source": "native clean-emulator 4K capture; real public TDTChannels M3U, original channel logos and dobleM XMLTV; Reykjavik demo weather; no private IPTV or personal accounts",
-    "sha256": "49437e86e70d5af9e93f2de1caf09684d4b317310572893cf5a8da995502caf9"
+    "version": "1.23.0",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
+    "sha256": "a7284d34225368bfa89a8b064651140b6e35d3920b0f2ba41087dded46d6c226"
   },
   {
     "file": "47-canales-durante-directo.webp",
@@ -498,5 +498,25 @@
     "height": 2160,
     "version": "1.22.0",
     "sha256": "8a60b5f44df5dd04e27eb116b3b790ff0b31a8eedb540fc59d1e729581f0bfed"
+  },
+  {
+    "file": "51-sistema.webp",
+    "title": "El sistema, a mano",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.23.0",
+    "sha256": "f76994a9dfff78ac60d073d79f506a7737071f4a98346a3675b2c02a585439b8"
+  },
+  {
+    "file": "52-informacion.webp",
+    "title": "Conoce tu Vela",
+    "source": "native clean-emulator 4K capture; no linked personal accounts; explicit demo weather",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.23.0",
+    "sha256": "4446111f21023ce9c53ec84813e98a04548dffebde6924c7c0e8845e3458a4a3"
   }
 ]

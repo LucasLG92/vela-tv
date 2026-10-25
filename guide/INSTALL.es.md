@@ -19,7 +19,7 @@ No borres los datos de la app para actualizarla. Las actualizaciones deben utili
 
 ## Actualizar desde la televisión
 
-A partir de **1.12.0 Preview**, entra en **Ajustes → Información y actualizaciones → Actualizaciones**. Vela comprueba las publicaciones públicas de GitHub una vez al día al abrirse; también puedes pulsar **Buscar ahora**. El aviso aparece en Inicio si hay una versión nueva.
+A partir de **1.12.0 Preview**, entra en **Ajustes → Actualizaciones**. Vela comprueba las publicaciones públicas de GitHub una vez al día al abrirse; también puedes pulsar **Buscar ahora**. El aviso aparece en Inicio si hay una versión nueva.
 
 Desde **1.12.1 Preview**, **Comprobar automáticamente** y **Descargar automáticamente** vienen activados por defecto. Puedes desactivarlos en esta pantalla; si ya elegiste desactivarlos, esa preferencia se conserva al actualizar. La descarga queda en la caché privada y Vela comprueba su integridad, identidad y firma. Android puede pedir que autorices a Vela a instalar aplicaciones; después debes confirmar cada instalación con el mando. Las cuentas, aplicaciones y preferencias se conservan.
 
@@ -40,13 +40,13 @@ Las compilaciones públicas mantienen desactivada la opción de deshabilitar paq
 ## Tus cuentas
 
 - **Plex:** autoriza el código en `plex.tv/link`. Elige entre tus servidores si aparecen varios. Los carteles, bibliotecas y perfil proceden de esa cuenta.
-- **Jellyfin:** abre Ajustes → Cuentas y servicios → Jellyfin, introduce la dirección completa de tu servidor y autoriza Quick Connect desde otra sesión de Jellyfin. También puedes usar usuario y contraseña. Instala y configura Jellyfin para Android TV con ese mismo servidor y usuario para abrir los títulos. [Guía de Jellyfin](JELLYFIN.es.md).
+- **Jellyfin:** abre Ajustes → Cuentas → Jellyfin, introduce la dirección completa de tu servidor y autoriza Quick Connect desde otra sesión de Jellyfin. También puedes usar usuario y contraseña. Instala y configura Jellyfin para Android TV con ese mismo servidor y usuario para abrir los títulos. [Guía de Jellyfin](JELLYFIN.es.md).
 - **YouTube y Prime Video:** inicia sesión en sus propias aplicaciones. Vela abre esas sesiones y, para YouTube, las filas que la app comparta con Android TV.
-- **TV:** la lista inicial procede de TDTChannels y la guía externa inicial es EPG dobleM, con los horarios de la fuente como complemento. Puedes añadir una lista M3U HTTPS o conectar tu servicio Xtream desde Ajustes → TV en directo → Cuenta Xtream. Introduce los datos de la cuenta directamente en la televisión. [Configurar IPTV](IPTV.es.md).
+- **TV:** la lista inicial procede de TDTChannels y la guía externa inicial es EPG dobleM, con los horarios de la fuente como complemento. Puedes añadir una lista M3U HTTPS o conectar tu servicio Xtream desde Ajustes → Televisión → Listas y ajustes → Cuenta Xtream. Introduce los datos de la cuenta directamente en la televisión. [Configurar IPTV](IPTV.es.md).
 - **Tiempo:** utiliza la ubicación aproximada, si la autorizas, o busca tu ciudad. No hay una ciudad personal incorporada en el APK.
 
 ## Personalizar
 
-**Ajustes → Apariencia y rendimiento → Personalizar apariencia** ofrece color, tamaño de carteles y fondo. Se aplican al volver a Inicio. Restaurar apariencia conserva cuentas, apps y ubicación.
+**Ajustes → Aspecto → Personalizar apariencia** ofrece color, tamaño de carteles y fondo. Se aplican al volver a Inicio. Restaurar apariencia conserva cuentas, apps y ubicación.
 
 En la barra, mantener OK sobre una app abre **Mover** y **Quitar de la barra**. Quitar no desinstala la aplicación. Puedes añadir más accesos desde Ajustes.

@@ -50,11 +50,11 @@ final class HomeScreenHost extends FrameLayout implements VelaScreen.Navigation 
     private Intent safe(Intent input){
         Intent out=new Intent();if(input.getComponent()!=null)out.setComponent(input.getComponent());else out.setAction(input.getAction());
         for(String flag:new String[]{"returnToCaller","fromSetup","plex","screensaver","sources"})if(input.hasExtra(flag))out.putExtra(flag,input.getBooleanExtra(flag,false));
-        if(input.hasExtra("page"))out.putExtra("page",input.getIntExtra("page",0));return out;
+        if(input.hasExtra("page"))out.putExtra("page",input.getIntExtra("page",0));if(out.getComponent()!=null&&out.getComponent().getClassName().equals(UpdatesActivity.class.getName()))out.setClass(activity,SettingsActivity.class).putExtra("page",23);return out;
     }
     int navigationIndex(){return navigationIndex;}
-    boolean showingUpdates(){return screen instanceof UpdatesScreen;}
-    boolean updatesActive(){return active&&screen instanceof UpdatesScreen&&((UpdatesScreen)screen).canShowInstaller();}
+    boolean showingUpdates(){return screen instanceof UpdatesScreen||screen instanceof SettingsScreen&&((SettingsScreen)screen).showingUpdates();}
+    boolean updatesActive(){return active&&(screen instanceof UpdatesScreen&&((UpdatesScreen)screen).canShowInstaller()||screen instanceof SettingsScreen&&((SettingsScreen)screen).updatesActive());}
     boolean fullscreen(){return full;}
     private boolean inside(View view){for(View v=view;v!=null;){if(v==pane)return true;android.view.ViewParent parent=v.getParent();v=parent instanceof View?(View)parent:null;}return false;}
     public View navigationTarget(VelaScreen value){return actions.navigationTarget();}
@@ -116,7 +116,7 @@ final class HomeScreenHost extends FrameLayout implements VelaScreen.Navigation 
     void pause(){active=false;if(screen!=null)screen.pause();}
     void destroy(){if(closed)return;closed=true;pause();detach();history.clear();permissions.clear();if(getViewTreeObserver().isAlive())getViewTreeObserver().removeOnGlobalFocusChangeListener(focusListener);}
     private int focusIndex(){if(screen==null||screen.content==null)return 0;List<View> focusable=screen.content.getFocusables(View.FOCUS_FORWARD);int i=focusable.indexOf(activity.getCurrentFocus());return Math.max(0,i);}
-    private void focus(int index){if(screen==null||screen.content==null)return;if(screen instanceof AppsScreen){((AppsScreen)screen).focusGrid();return;}List<View> values=screen.content.getFocusables(View.FOCUS_FORWARD);if(!values.isEmpty())values.get(Math.min(Math.max(index,0),values.size()-1)).requestFocus();}
+    private void focus(int index){if(screen==null||screen.content==null)return;if(screen instanceof AppsScreen){((AppsScreen)screen).focusGrid();return;}if(screen instanceof SettingsScreen){((SettingsScreen)screen).focusContent();return;}List<View> values=screen.content.getFocusables(View.FOCUS_FORWARD);if(!values.isEmpty())values.get(Math.min(Math.max(index,0),values.size()-1)).requestFocus();}
     void focusContent(){if(lastFocus!=null&&lastFocus.isAttachedToWindow()&&lastFocus.isShown())lastFocus.requestFocus();else focus(0);}
     boolean onKey(KeyEvent event){
         if(screen==null)return false;if(screen.dispatchKeyEvent(event))return true;

@@ -29,7 +29,7 @@ Elige entre Nieve, Azul, Menta, Lavanda, Arena y Rosa. Ajusta el tamaño de los 
 
 ## Tu televisión en directo
 
-**M3U, Xtream y Antena**, dentro del mismo inicio de Vela. TV en directo aparece debajo de Inicio en la barra lateral y conserva el reloj y el tiempo. Cambia de fuente en la cabecera; gestiona tus listas y elige la vista desde **Ajustes → TV en directo**.
+**M3U, Xtream y Antena**, dentro del mismo inicio de Vela. TV en directo aparece debajo de Inicio en la barra lateral y conserva el reloj y el tiempo. Cambia de fuente en la cabecera; gestiona tus listas y elige la vista desde **Ajustes → Televisión**.
 
 - **Guía por defecto:** seis canales, categorías a la izquierda, tres horas por ventana y controles inferiores para volver a Ahora o cambiar de horario. El pie muestra el logo y el programa seleccionado, con tiempo restante y progreso si está en emisión.
 - **Canales:** logos grandes en una fila, sin columna de categorías. Arriba y abajo cambian de lista conservando la posición cuando es posible.

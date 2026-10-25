@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 /** Native TV settings. Focus animates briefly; an idle page schedules no frames or polling. */
 class SettingsScreen extends VelaScreen {
     SettingsScreen(Activity owner, Navigation navigation){super(owner,navigation);}
+    @Override boolean standaloneChrome(){return false;}
     private SettingsView view;
     private AmbientView preview;
     private View previewReturn;
@@ -27,23 +28,23 @@ class SettingsScreen extends VelaScreen {
         super.onCreate(state);Watchdog.install(this);Ui.init(this);returnToCaller=getIntent().getBooleanExtra("returnToCaller",false);
         if(!getIntent().getBooleanExtra("fromSetup",false)&&Personalization.launchIfNeeded(owner)){finish();return;}
         if(HomeMode.state(this).optBoolean("switchPending"))HomeMode.verify(this);
-        view=new SettingsView(this);setContentView(view);if(state!=null){returnToSetup=state.getBoolean("returnToSetup");entryPage=state.getInt("entryPage");view.render(state.getInt("settingsPage",0));view.returnRow=state.getInt("settingsReturnRow",0);}
+        view=new SettingsView(this);setContentView(view);if(state!=null){returnToSetup=state.getBoolean("returnToSetup");entryPage=state.getInt("entryPage");view.updateState=state.getBundle("updateState");view.render(state.getInt("settingsPage",22));view.returnRow=state.getInt("settingsReturnRow",0);view.savedRow=state.getInt("settingsFocusedRow",-1);}
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         getWindow().setBackgroundDrawable(null);
     }
     @Override protected void onResume() {
-        super.onResume();if(view==null||Updates.resumeInstallation(owner))return;view.resume();
+        super.onResume();if(view==null)return;if(getIntent().getIntExtra("page",-1)==23){getIntent().removeExtra("page");view.render(23);}if(!view.showingUpdates()&&Updates.resumeInstallation(owner))return;view.resume();
         if(getIntent().hasExtra("page")){
             int target=getIntent().getIntExtra("page",0);getIntent().removeExtra("page");
             returnToSetup=getIntent().getBooleanExtra("fromSetup",false);getIntent().removeExtra("fromSetup");
-            if(target==1||target==3||target==4||target==9||target==11||target==14||target==15||target==17||target==21||target==22){entryPage=target;view.render(target);}
+            if(target==1||target==3||target==4||target==9||target==11||target==14||target==15||target==17||target==21||target==22||target==23){entryPage=target;view.render(target);}
         }
         else if(view.page==14||view.page==15||view.page==21||view.page==22)view.render(view.page);
         if(getIntent().getBooleanExtra("plex",false)){getIntent().removeExtra("plex");startActivity(new Intent(this,PlexLinkActivity.class));}
         if(preview==null&&getIntent().getBooleanExtra("screensaver",false)){getIntent().removeExtra("screensaver");showPreview();}
     }
     @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);}
-    @Override protected void onSaveInstanceState(Bundle out){out.putBoolean("returnToSetup",returnToSetup);out.putInt("entryPage",entryPage);out.putInt("settingsPage",view==null?0:view.page);out.putInt("settingsReturnRow",view==null?0:view.returnRow);}
+    @Override protected void onSaveInstanceState(Bundle out){out.putBoolean("returnToSetup",returnToSetup);out.putInt("entryPage",entryPage);out.putInt("settingsPage",view==null?0:view.page);out.putInt("settingsReturnRow",view==null?0:view.returnRow);if(view!=null)out.putInt("settingsFocusedRow",view.rows.indexOf(getCurrentFocus()));if(view!=null&&view.updates!=null)out.putBundle("updateState",view.updates.save());}
     @Override protected void onPause(){closePreview();if(view!=null)view.pause();super.onPause();}
     @Override protected void onDestroy(){if(view!=null)view.destroy();super.onDestroy();}
     @Override public boolean dispatchKeyEvent(KeyEvent e) {
@@ -58,13 +59,23 @@ class SettingsScreen extends VelaScreen {
         return super.dispatchKeyEvent(e);
     }
     @Override public void onRequestPermissionsResult(int request,String[] p,int[] results){super.onRequestPermissionsResult(request,p,results);if(request==80)view.render(3);if(request==81)view.locationPermission(results.length>0&&results[0]==PackageManager.PERMISSION_GRANTED);}
+    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(view!=null&&view.updates!=null)view.updates.onActivityResult(request,result,data);}
+    @Override boolean navigationLeft(){return false;}
+    void focusContent(){if(view!=null){if(view.savedRow>=0&&view.savedRow<view.rows.size())view.rows.get(view.savedRow).requestFocus();else if(view.showingUpdates())view.focusOptions();else view.categories[view.categoryFor(view.page)].requestFocus();}}
+    boolean showingUpdates(){return view!=null&&view.showingUpdates();}
+    boolean updatesActive(){return showingUpdates()&&view.updates.canShowInstaller();}
     void showPreview(){previewReturn=getCurrentFocus();fullPreview(true);view.pause();preview=new AmbientView(owner,true);setContentView(preview);preview.start();}
     private void closePreview(){if(preview==null)return;preview.stop();preview=null;fullPreview(false);setContentView(view);view.resume();if(previewReturn!=null&&previewReturn.isShown())previewReturn.requestFocus();previewReturn=null;}
 
     static final class SettingsView extends FrameLayout {
         private static final int WHITE=0xFFF7F7FA,DIM=0xFFA5A9B8,INK=VelaTheme.INK;
         private final SettingsScreen activity;
-        private final FrameLayout stage,pane;
+        private final FrameLayout stage,pane,surface;
+        private ScrollView scroll;private int contentY;
+        private final View[] categories=new View[8];private final TextView[] categoryText=new TextView[8];private final CategoryIcon[] categoryIcons=new CategoryIcon[8];
+        private final int[] destinations={22,2,6,14,11,23,0,4};
+        private final String[] categoryTitles={Ui.tr("Televisão","Television","Televisión"),Ui.tr("Aspecto","Appearance","Aspecto"),Ui.tr("Protetor de tela","Screensaver","Salvapantallas"),Ui.tr("Contas","Accounts","Cuentas"),Ui.tr("Menu","Menu","Menú"),Ui.tr("Atualizações","Updates","Actualizaciones"),Ui.tr("Sistema","System","Sistema"),Ui.tr("Informações","Information","Información")};
+        private boolean building=true,categoryBrowsing;private UpdatesScreen updates;private Bundle updateState;
         private FrameLayout rowHost;
         private final TextView heading,detail,footer,status;
         private final Handler main=new Handler(Looper.getMainLooper());
@@ -74,7 +85,7 @@ class SettingsScreen extends VelaScreen {
         private JSONObject state=new JSONObject();
         private boolean active,closed,reading,observedBusy;
         private long pendingAt;
-        private int page,returnRow,searchGeneration;
+        private int page,returnRow,searchGeneration,savedRow=-1;
         private int shortcutSlot,pickerFocus;
         private EditText cityInput;
         private String cityQuery="";
@@ -82,58 +93,74 @@ class SettingsScreen extends VelaScreen {
         private java.util.concurrent.Future<?> searchJob;
         private final Runnable poll=()->readState();
         SettingsView(SettingsScreen a){
-            super(a);activity=a;setBackgroundColor(VelaTheme.BACKGROUND);setClipChildren(false);
-            stage=new FrameLayout(a);stage.setClipChildren(false);addView(stage,new LayoutParams(1920,1080));
-            View glow=new View(a);GradientDrawable gradient=new GradientDrawable();gradient.setGradientType(GradientDrawable.RADIAL_GRADIENT);gradient.setGradientCenter(.22f,.42f);gradient.setGradientRadius(950);gradient.setColors(new int[]{VelaTheme.PANEL,0xFF14151A,VelaTheme.BACKGROUND});glow.setBackground(gradient);put(stage,glow,0,0,1920,1080);
-            TextView brand=text("VELA",24,VelaTheme.SECONDARY,Ui.semibold);brand.setLetterSpacing(.22f);put(stage,brand,116,66,350,42);
-            TextView title=text("Ajustes",60,WHITE,Ui.displaySemibold);put(stage,title,112,132,660,86);
-            ImageView mark=new ImageView(a);mark.setImageResource(R.drawable.vela_mark);mark.setColorFilter(VelaTheme.WHITE);put(stage,mark,220,318,184,184);
-            heading=text("Tu televisión.",43,WHITE,Ui.displaySemibold);heading.setMaxLines(2);put(stage,heading,116,570,650,114);
-            detail=text("Todo a tu manera.",24,VelaTheme.SECONDARY,Ui.regular);detail.setGravity(Gravity.TOP);detail.setMaxLines(4);detail.setLineSpacing(7,1);put(stage,detail,116,704,620,146);
-            footer=text("Vela · "+version(),19,VelaTheme.MUTED,Ui.medium);put(stage,footer,116,970,610,40);
-            View divider=new View(a);divider.setBackgroundColor(0x15FFFFFF);put(stage,divider,855,136,1,806);
-            pane=new FrameLayout(a);pane.setClipChildren(false);put(stage,pane,936,130,840,850);
-            status=text("",19,VelaTheme.SECONDARY,Ui.regular);status.setMaxLines(2);put(stage,status,936,981,840,68);
-            render(0);
+            super(a);activity=a;setClipChildren(false);
+            if(!activity.navigation.embedded())setBackgroundColor(VelaTheme.BACKGROUND);
+            stage=new FrameLayout(a);stage.setClipChildren(false);addView(stage,new LayoutParams(1790,940));
+            ImageView mark=new ImageView(a);mark.setImageResource(R.drawable.vela_mark);put(stage,mark,86,26,48,48);
+            put(stage,text("Vela",31,WHITE,Ui.semibold),152,20,320,62);
+            put(stage,text(Ui.tr("Sua televisão, do seu jeito.","Your television, your way.","Tu televisión, a tu manera."),20,VelaTheme.SECONDARY,Ui.medium),86,92,378,42);
+            surface=new FrameLayout(a);surface.setBackground(round(0xB51C1D25,32));put(stage,surface,520,12,1218,904);
+            heading=text("",42,WHITE,Ui.displaySemibold);put(surface,heading,42,26,1134,72);
+            detail=text("",23,VelaTheme.SECONDARY,Ui.regular);detail.setMaxLines(2);detail.setEllipsize(android.text.TextUtils.TruncateAt.END);detail.setGravity(Gravity.TOP);put(surface,detail,42,106,1134,66);
+            pane=new FrameLayout(a);pane.setClipChildren(true);put(surface,pane,42,194,1134,622);
+            status=text("",18,VelaTheme.SECONDARY,Ui.regular);status.setMaxLines(2);put(surface,status,48,826,1118,64);
+            for(int i=0;i<categories.length;i++){
+                final int index=i;FrameLayout row=new FrameLayout(a);row.setId(View.generateViewId());row.setFocusable(true);row.setFocusableInTouchMode(true);row.setDefaultFocusHighlightEnabled(false);row.setContentDescription(categoryTitles[i]);
+                CategoryIcon icon=new CategoryIcon(a,i);categoryIcons[i]=icon;put(row,icon,22,18,28,28);TextView label=text(categoryTitles[i],23,WHITE,Ui.medium);categoryText[i]=label;put(row,label,72,0,288,64);put(stage,row,80,170+i*76,388,64);categories[i]=row;
+                row.setOnFocusChangeListener((v,focus)->{if(!building&&focus&&categoryFor(page)!=index){categoryBrowsing=true;try{render(destinations[index]);}finally{categoryBrowsing=false;}}skin();});
+                row.setOnClickListener(v->{render(destinations[index]);focusOptions();});
+                row.setOnKeyListener((v,key,event)->{if(key!=KeyEvent.KEYCODE_DPAD_UP&&key!=KeyEvent.KEYCODE_DPAD_DOWN&&key!=KeyEvent.KEYCODE_DPAD_LEFT&&key!=KeyEvent.KEYCODE_DPAD_RIGHT)return false;if(event.getAction()==KeyEvent.ACTION_DOWN){if(key==KeyEvent.KEYCODE_DPAD_LEFT)navigation();else if(key==KeyEvent.KEYCODE_DPAD_RIGHT)focusOptions();else categories[Math.max(0,Math.min(categories.length-1,index+(key==KeyEvent.KEYCODE_DPAD_DOWN?1:-1)))].requestFocus();}return true;});
+            }
+            footer=text(version(),18,VelaTheme.MUTED,Ui.medium);put(stage,footer,86,804,380,38);
+            TextView hint=text("← "+Ui.tr("Menu do Vela","Vela menu","Menú de Vela")+"\n→ "+Ui.tr("Opções","Options","Opciones"),17,VelaTheme.MUTED,Ui.regular);hint.setMaxLines(2);put(stage,hint,86,852,380,64);
+            building=false;render(22);categories[0].requestFocus();
+        }
+        private int categoryFor(int value){if(value==22)return 0;if(value==2||value>=17&&value<=20)return 1;if(value>=6&&value<=10)return 2;if(value==3||value>=14&&value<=16||value==21)return 3;if(value==11||value==12)return 4;if(value==23)return 5;if(value==4||value==5)return 7;return 6;}
+        private void skin(){int selected=categoryFor(page);for(int i=0;i<categories.length;i++){boolean focus=categories[i].hasFocus();categories[i].setBackground(round(focus?Appearance.accent(activity):selected==i?0x2AFFFFFF:Color.TRANSPARENT,20));categoryText[i].setTextColor(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);categoryIcons[i].color(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);}}
+        private void navigation(){View target=activity.navigation.navigationTarget(activity);if(target!=null)target.requestFocus();else activity.finish();}
+        private void focusOptions(){List<View> focusable=pane.getFocusables(FOCUS_FORWARD);if(!focusable.isEmpty())focusable.get(0).requestFocus();}
+        boolean showingUpdates(){return updates!=null&&page==23;}
+        private void closeUpdates(){if(updates!=null){updates.destroy();updates=null;}updateState=null;}
+        private void openUpdates(){
+            updates=new UpdatesScreen(activity.owner,new VelaScreen.Navigation(){
+                public boolean embedded(){return true;}public void content(VelaScreen s,View content){put(rowHost,content,0,0,1134,814);}
+                public void open(VelaScreen s,Intent intent){activity.startActivity(intent);}public void close(VelaScreen s){categories[5].requestFocus();}
+                public void fullscreen(VelaScreen s,boolean full){}public void permission(VelaScreen s,String[] names,int request){activity.requestPermissions(names,request);}
+                public void changed(VelaScreen s){activity.changed();}public View navigationTarget(VelaScreen s){return categories[5];}
+            },true);updates.create(new Intent(activity,UpdatesActivity.class),updateState);updateState=null;if(active)updates.resume();if(categoryBrowsing)categories[5].requestFocus();
         }
         private String version(){try{return activity.getPackageManager().getPackageInfo(activity.getPackageName(),0).versionName;}catch(Exception e){return "1.0.0";}}
         private TextView text(String s,int size,int color,Typeface font){TextView t=new TextView(activity);t.setText(s);t.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);t.setTextColor(color);t.setTypeface(font);t.setIncludeFontPadding(false);t.setGravity(Gravity.CENTER_VERTICAL);return t;}
         private void put(FrameLayout parent,View view,int x,int y,int w,int h){LayoutParams p=new LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;parent.addView(view,p);}
-        private GradientDrawable round(int color){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(17);return d;}
-        @Override protected void onSizeChanged(int w,int h,int ow,int oh){float scale=Math.min(w/1920f,h/1080f);stage.setPivotX(0);stage.setPivotY(0);stage.setScaleX(scale);stage.setScaleY(scale);stage.setTranslationX((w-1920*scale)/2);stage.setTranslationY((h-1080*scale)/2);}
-        private void section(String s,int y){TextView h=text(s,18,VelaTheme.MUTED,Ui.semibold);h.setLetterSpacing(.08f);put(pane,h,20,y,780,30);}
+        private GradientDrawable round(int color){return round(color,20);}
+        private GradientDrawable round(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(radius);return d;}
+        @Override protected void onSizeChanged(int w,int h,int ow,int oh){float scale=Math.min(w/1790f,h/940f);stage.setPivotX(0);stage.setPivotY(0);stage.setScaleX(scale);stage.setScaleY(scale);stage.setTranslationX((w-1790*scale)/2);stage.setTranslationY((h-940*scale)/2);}
+        private void section(String s,int y){if(y==0){heading.setText(page==22?categoryTitles[0]:s.substring(0,1)+s.substring(1).toLowerCase(Ui.locale()));return;}TextView h=text(s,18,VelaTheme.MUTED,Ui.semibold);h.setLetterSpacing(.08f);put(rowHost,h,8,contentY+18,1118,32);contentY+=64;}
         private void row(String label,String value,int y,String title,String description,Runnable action){row(label,value,"",y,title,description,action);}
         private void row(String label,String value,String secondary,int y,String title,String description,Runnable action){
-            final boolean scrolling=rowHost!=pane;
-            FrameLayout row=new FrameLayout(activity);row.setId(View.generateViewId());row.setFocusable(true);row.setFocusableInTouchMode(true);row.setClickable(true);row.setDefaultFocusHighlightEnabled(false);row.setContentDescription(label+(value.isEmpty()?"":", "+value));row.setClipChildren(false);
-            int height=secondary.isEmpty()?72:106;put(rowHost,row,0,y,840,height);
-            TextView name=text(label,27,WHITE,Ui.medium);put(row,name,26,secondary.isEmpty()?0:17,510,secondary.isEmpty()?72:36);
-            TextView right=text(value,23,DIM,Ui.regular);right.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.setSingleLine(true);right.setEllipsize(android.text.TextUtils.TruncateAt.END);put(row,right,548,0,264,height);
-            TextView sub=text(secondary,19,DIM,Ui.regular);if(!secondary.isEmpty())put(row,sub,26,58,720,32);
-            rows.add(row);labels.add(name);values.add(right);
-            row.setOnFocusChangeListener((v,focused)->{
-                row.setBackground(focused?round(Appearance.accent(activity)):null);name.setTextColor(focused?INK:WHITE);right.setTextColor(focused?0xFF60636C:DIM);sub.setTextColor(focused?0xFF656874:DIM);
-                row.animate().cancel();float scale=focused&&!scrolling&&!Visuals.reducedMotion(activity)?1.018f:1;
-                row.animate().scaleX(scale).scaleY(scale).translationZ(focused?14:0).setDuration(Visuals.duration(activity,140)).start();
-                if(focused){heading.setText(title);detail.setText(description);}
-            });
+            FrameLayout row=new FrameLayout(activity);row.setId(View.generateViewId());row.setFocusable(true);row.setFocusableInTouchMode(true);row.setClickable(true);row.setDefaultFocusHighlightEnabled(false);row.setContentDescription(label+(value.isEmpty()?"":", "+value));
+            int height=secondary.isEmpty()?78:106;put(rowHost,row,0,contentY,1134,height);contentY+=height+10;
+            TextView name=text(label,23,WHITE,Ui.medium);name.setSingleLine(true);name.setEllipsize(android.text.TextUtils.TruncateAt.END);put(row,name,24,secondary.isEmpty()?0:12,650,secondary.isEmpty()?78:38);
+            TextView right=text(value,22,DIM,Ui.regular);right.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.setSingleLine(true);right.setEllipsize(android.text.TextUtils.TruncateAt.END);put(row,right,710,0,398,height);
+            TextView sub=text(secondary,19,DIM,Ui.regular);sub.setSingleLine(true);sub.setEllipsize(android.text.TextUtils.TruncateAt.END);if(!secondary.isEmpty())put(row,sub,24,58,650,32);
+            rows.add(row);labels.add(name);values.add(right);row.setBackground(round(VelaTheme.CARD));
+            row.setNextFocusLeftId(categories[categoryFor(page)].getId());row.setOnFocusChangeListener((v,focused)->{row.setBackground(round(focused?Appearance.accent(activity):VelaTheme.CARD));name.setTextColor(focused?INK:WHITE);right.setTextColor(focused?0xFF60636C:DIM);sub.setTextColor(focused?0xFF656874:DIM);if(focused)status.setText(description);});
             row.setOnClickListener(v->{action.run();activity.changed();});
         }
         void render(int next){
+            boolean wasBuilding=building;building=true;
             if(page==10&&next!=10){searchGeneration++;if(searchJob!=null)searchJob.cancel(true);}
-            page=next;pane.removeAllViews();rowHost=pane;rows.clear();labels.clear();values.clear();status.setText("");pickerFocus=0;
+            Bundle previous=next==23&&updates!=null?updates.save():updateState;closeUpdates();updateState=previous;
+            page=next;pane.removeAllViews();rows.clear();labels.clear();values.clear();status.setText("");pickerFocus=0;contentY=0;
+            scroll=new ScrollView(activity);scroll.setFillViewport(false);scroll.setClipToPadding(true);scroll.setVerticalScrollBarEnabled(false);scroll.setFocusable(false);put(pane,scroll,0,0,1134,622);rowHost=new FrameLayout(activity);scroll.addView(rowHost,new ScrollView.LayoutParams(1134,LayoutParams.WRAP_CONTENT));String[] captions={"Elige cómo ver el directo y conecta tus canales.","Color, carteles, fondos y rendimiento.","Una pausa con tu estilo, tu hora y tu tiempo.","Tus bibliotecas y tus servicios, conectados.","Elige las aplicaciones de tu barra lateral.","Vela "+version(),"El inicio y los controles de tu televisión.","Versión, configuración y licencias."};detail.setText(captions[categoryFor(page)]);skin();
             if(page==0){
-                section("TU TELEVISIÓN",0);
-                row("Pantalla de inicio",mode(),42,"Tu televisión, a tu manera.","Elige Vela como inicio o vuelve en cualquier momento al inicio original de tu televisión.",()->open(1,0));
-                row("Salvapantallas",AmbientPrefs.styleName(activity),122,"Un paisaje para cada pausa.","Elige vídeos aéreos o los fondos de tu biblioteca de Plex. Añade la hora y el tiempo de tu ciudad, y pruébalo aquí.",()->open(6,1));
-                row("Ajustes de la TV","›",202,"Tu televisión, a mano.","Imagen, sonido, red, Bluetooth y todos los controles de la televisión.",()->launch(new Intent(Settings.ACTION_SETTINGS)));
-                section("TU CONTENIDO",320);
-                row(Ui.tr("Contas e serviços","Accounts and services","Cuentas y servicios"),"›",362,Ui.tr("Seu conteúdo, conectado.","Your content, connected.","Tu contenido, conectado."),Ui.tr("Gerencie Plex, o servidor e o acesso aos apps de vídeo desta TV.","Manage Plex, your server and access to this TV's video apps.","Gestiona Plex, tu servidor y el acceso a las apps de vídeo de esta televisión."),()->open(14,3));
-                row(Ui.tr("TV em direto","Live TV","TV en directo"),LiveTvData.guideView(activity)?Ui.tr("Guia","Guide","Guía"):Ui.tr("Canais","Channels","Canales"),442,Ui.tr("Sua televisão, do seu jeito.","Your TV, your way.","Tu televisión, a tu manera."),Ui.tr("Escolha entre guia e canais e gerencie suas fontes M3U, Xtream ou antena.","Choose Guide or Channels and manage your M3U, Xtream or antenna sources.","Elige entre Guía y Canales y gestiona tus fuentes M3U, Xtream o antena."),()->open(22,4));
-                section("VELA",560);
-                row(Ui.tr("Acessos do menu","Menu shortcuts","Accesos del menú"),"›",602,Ui.tr("Seu menu, seus apps.","Your menu, your apps.","Tu menú, tus apps."),Ui.tr("Adicione, altere ou oculte apps. Para ordenar diretamente na barra, mantenha OK sobre um ícone e mova-o com as setas.","Add, change or hide apps. To reorder directly in the sidebar, hold OK on an icon and move it with the arrows.","Añade, cambia u oculta apps. Para ordenarlas directamente en la barra, mantén OK sobre un icono y muévelo con las flechas."),()->open(11,5));
-                row(Ui.tr("Aparência e desempenho","Appearance and performance","Apariencia y rendimiento"),Visuals.light(activity)?"Ligera":"Alta calidad",682,"Bonito. Y ligero.","Conserva la calidad de las imágenes o elige un consumo menor. Vela libera sus imágenes cuando abres otra aplicación.",()->open(2,6));
-                row(Ui.tr("Informações e atualizações","Information and updates","Información y actualizaciones"),"›",762,"Hecha para tu televisión.",Ui.tr("Versão, atualizações e licenças do Vela.","Vela version, updates and licenses.","Versión, actualizaciones y licencias de Vela."),()->open(4,7));
+                section(Ui.tr("SISTEMA","SYSTEM","SISTEMA"),0);
+                row("Pantalla de inicio",mode(),0,"Tu televisión, a tu manera.","Elige Vela como inicio o vuelve al inicio original de tu televisión.",()->open(1,0));
+                row("Ajustes del televisor","›",0,"Tu televisión, a mano.","Imagen, sonido, red, Bluetooth y los controles del televisor.",()->launch(new Intent(Settings.ACTION_SETTINGS)));
+                row(Ui.tr("Assistente de configuração","Setup guide","Asistente de configuración"),"›",0,"Todo a tu gusto.","Repasa cuentas, aplicaciones y ubicación sin borrar tu configuración.",()->activity.startActivity(new Intent(activity,SetupActivity.class)));
+                note("El inicio y el salvapantallas originales se conservan para poder volver cuando quieras.",0);
+            }else if(page==23){
+                section(Ui.tr("ATUALIZAÇÕES","UPDATES","ACTUALIZACIONES"),0);detail.setText("Vela "+version());openUpdates();
             }else if(page==1){
                 section("PANTALLA DE INICIO",0);
                 row("Vela",isVela()?"✓":"Activar","Inicio, salvapantallas y recuperación.",54,"Tu inicio personal.","Activa Vela y su salvapantallas. La app guarda el retorno al inicio original de la televisión antes de completar la configuración.",()->switchHome(true));
@@ -146,8 +173,9 @@ class SettingsScreen extends VelaScreen {
                 section("MEMORIA",270);
                 Debug.MemoryInfo memory=new Debug.MemoryInfo();Debug.getMemoryInfo(memory);
                 row("Memoria del proceso",String.format(Ui.locale(),"%.1f MB",memory.getTotalPss()/1024f),312,"Una lectura real.","Memoria compartida proporcional de Inicio y Ajustes en este instante. Incluye Android y gráficos; varía con las imágenes y el dispositivo. Pulsa para actualizar.",()->{render(2);rows.get(2).requestFocus();});
-                note("Caché de imágenes: hasta "+Visuals.cacheKb(activity)/1024+" MB. Se vacía al salir de Inicio. No se reproducen vídeos ni se animan fondos en el inicio.",440);
+
                 row(Ui.tr("Personalizar aparência","Customize appearance","Personalizar apariencia"),"›",684,Ui.tr("Seu estilo.","Your style.","Tu estilo."),Ui.tr("Escolha cor, tamanho dos cartazes e intensidade do fundo. O desenho original fica disponível.","Choose color, poster size and background intensity. The original design stays available.","Elige color, tamaño de carteles e intensidad del fondo. El diseño original sigue disponible."),()->open(17,3));
+                note("Caché de imágenes: hasta "+Visuals.cacheKb(activity)/1024+" MB. Se vacía al salir de Inicio. No se reproducen vídeos ni se animan fondos en el inicio.",440);
             }else if(page==17){
                 section(Ui.tr("APARÊNCIA","APPEARANCE","APARIENCIA"),0);
                 row(Ui.tr("Cor de destaque","Accent color","Color de acento"),Appearance.colorName(Appearance.colorIndex(activity)),54,Ui.tr("Um toque de cor.","A touch of color.","Un toque de color."),Ui.tr("A cor aparece na seleção do menu, na ação principal, no progresso e nos Ajustes.","Color appears in menu selection, the main action, progress and Settings.","El color aparece en la selección del menú, la acción principal, el progreso y los Ajustes."),()->render(18));
@@ -171,7 +199,7 @@ class SettingsScreen extends VelaScreen {
                 row("Android",Build.VERSION.RELEASE,214,"El sistema de tu TV.","Los ajustes de imagen, sonido, red y cuentas se gestionan desde Ajustes de la TV.",()->{});
                 row("Licencias","›",334,"Créditos y licencias.","Avisos de los componentes de código abierto, tipografías y símbolos utilizados en Vela.",()->open(5,7));
                 row(Ui.tr("Assistente de configuração","Setup guide","Asistente de configuración"),"›",434,Ui.tr("Tudo a seu gosto.","Make it yours.","Todo a tu gusto."),Ui.tr("Revise contas, apps e localização sem apagar sua configuração.","Review accounts, apps and location without erasing your setup.","Repasa cuentas, apps y ubicación sin borrar tu configuración."),()->activity.startActivity(new Intent(activity,SetupActivity.class)));
-                row(Ui.tr("Atualizações","Updates","Actualizaciones"),"›",534,Ui.tr("Sempre em dia.","Always up to date.","Siempre al día."),Ui.tr("Novas versões do GitHub, com verificação automática e instalação confirmada por você.","New GitHub releases, with automatic checks and installation confirmed by you.","Nuevas versiones de GitHub, con comprobación automática e instalación confirmada por ti."),()->activity.startActivity(new Intent(activity,UpdatesActivity.class)));
+                row(Ui.tr("Atualizações","Updates","Actualizaciones"),"›",534,Ui.tr("Sempre em dia.","Always up to date.","Siempre al día."),Ui.tr("Novas versões do GitHub, com verificação automática e instalação confirmada por você.","New GitHub releases, with automatic checks and installation confirmed by you.","Nuevas versiones de GitHub, con comprobación automática e instalación confirmada por ti."),()->render(23));
             }else if(page==6){
                 section("SALVAPANTALLAS",0);
                 row("Estilo",AmbientPrefs.styleName(activity),54,"Una pausa a tu gusto.","Aéreos muestra vídeos de paisajes y ciudades. Plex o Jellyfin usan las imágenes originales de tu biblioteca con movimiento suave.",()->render(7));
@@ -202,7 +230,7 @@ class SettingsScreen extends VelaScreen {
                 note("Si Android tiene la ubicación desactivada o tu televisión no la facilita, elige una ciudad. Datos meteorológicos de Open-Meteo; búsqueda de lugares basada en GeoNames.",480);
             }else if(page==10){
                 section("BUSCAR CIUDAD",0);
-                cityInput=new EditText(activity);cityInput.setId(View.generateViewId());cityInput.setText(cityQuery);cityInput.setSelection(cityInput.length());cityInput.setHint("Ciudad o código postal");cityInput.setTextSize(TypedValue.COMPLEX_UNIT_PX,27);cityInput.setTextColor(WHITE);cityInput.setHintTextColor(DIM);cityInput.setSingleLine(true);cityInput.setPadding(26,0,26,0);cityInput.setBackground(round(VelaTheme.CARD));cityInput.setImeOptions(EditorInfo.IME_ACTION_SEARCH);cityInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);put(pane,cityInput,0,54,840,74);
+                cityInput=new EditText(activity);cityInput.setId(View.generateViewId());cityInput.setText(cityQuery);cityInput.setSelection(cityInput.length());cityInput.setHint("Ciudad o código postal");cityInput.setTextSize(TypedValue.COMPLEX_UNIT_PX,27);cityInput.setTextColor(WHITE);cityInput.setHintTextColor(DIM);cityInput.setSingleLine(true);cityInput.setPadding(26,0,26,0);cityInput.setBackground(round(VelaTheme.CARD));cityInput.setImeOptions(EditorInfo.IME_ACTION_SEARCH);cityInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);put(rowHost,cityInput,0,0,1134,74);contentY=92;
                 cityInput.setOnFocusChangeListener((v,focus)->{cityInput.setBackground(round(focus?VelaTheme.RAISED:VelaTheme.CARD));if(focus){heading.setText("El tiempo de tu ciudad.");detail.setText("Escribe con el mando y pulsa Buscar. Elige el lugar correcto entre los resultados.");}});
                 cityInput.setOnEditorActionListener((v,action,event)->{if(action==EditorInfo.IME_ACTION_SEARCH){searchCities();return true;}return false;});
                 row("Buscar","›",146,"Encuentra tu ciudad.","Busca una ciudad o código postal. Si hay varias con el mismo nombre, elige la provincia y el país correctos.",this::searchCities);
@@ -277,24 +305,22 @@ class SettingsScreen extends VelaScreen {
                 });
             }else{
                 section("LICENCIAS DE CÓDIGO ABIERTO",0);
-                ScrollView scroll=new ScrollView(activity);scroll.setFocusable(true);scroll.setVerticalScrollBarEnabled(false);put(pane,scroll,16,60,808,735);
-                TextView legal=text(license(),18,0xFFCBD0DD,Ui.regular);legal.setGravity(Gravity.TOP);legal.setLineSpacing(5,1);scroll.addView(legal);scroll.requestFocus();
+                ScrollView legalScroll=new ScrollView(activity);legalScroll.setFocusable(true);legalScroll.setVerticalScrollBarEnabled(false);put(rowHost,legalScroll,0,0,1134,610);
+                TextView legal=text(license(),18,0xFFCBD0DD,Ui.regular);legal.setGravity(Gravity.TOP);legal.setLineSpacing(5,1);legalScroll.addView(legal);legalScroll.requestFocus();
                 heading.setText("Gracias al código abierto.");detail.setText("Vela conserva los avisos exigidos por las licencias de sus componentes.");
             }
-            if(page==11||page==12)for(int i=0;i<rows.size();i++){if(i>0)rows.get(i).setNextFocusUpId(rows.get(i-1).getId());if(i+1<rows.size())rows.get(i).setNextFocusDownId(rows.get(i+1).getId());}
-            if(page==10&&cityResults.isEmpty())cityInput.requestFocus();else if(!rows.isEmpty())rows.get(page==12?pickerFocus:page==18?Appearance.colorIndex(activity):page==19?Appearance.sizeIndex(activity):page==20?Appearance.backdropIndex(activity):0).requestFocus();
+            for(int i=0;i<rows.size();i++){if(i>0)rows.get(i).setNextFocusUpId(rows.get(i-1).getId());if(i+1<rows.size())rows.get(i).setNextFocusDownId(rows.get(i+1).getId());}
+            if(!categoryBrowsing&&page==10&&cityResults.isEmpty())cityInput.requestFocus();else if(!categoryBrowsing&&!rows.isEmpty())rows.get(page==12?pickerFocus:page==18?Appearance.colorIndex(activity):page==19?Appearance.sizeIndex(activity):page==20?Appearance.backdropIndex(activity):0).requestFocus();
+            if(categoryBrowsing)categories[categoryFor(page)].requestFocus();building=wasBuilding;skin();
         }
-        private void shortcutScroll(int count){
-            ScrollView scroll=new ScrollView(activity);scroll.setClipToPadding(true);scroll.setClipBounds(new Rect(0,0,856,776));scroll.setVerticalScrollBarEnabled(false);scroll.setPadding(8,8,8,14);put(pane,scroll,-8,46,856,776);
-            rowHost=new FrameLayout(activity);rowHost.setClipChildren(false);scroll.addView(rowHost,new ScrollView.LayoutParams(840,count*84+20));
-        }
+        private void shortcutScroll(int count){/* All pages share one clipped, focus-scrolling viewport. */}
         private void providerRow(String name,String pkg,int y){
             row(name,SidebarApps.launchable(activity,pkg)?Ui.tr("Abrir","Open","Abrir"):Ui.tr("Não instalado","Not installed","No instalada"),y,name,Ui.tr("Entre ou troque de conta no próprio app. O acesso do menu abre a sessão dessa pessoa.","Sign in or change account in the app itself. The menu shortcut opens that person's session.","Inicia sesión o cambia de cuenta dentro de su app. El acceso del menú abre la sesión de esa persona."),()->{Intent intent=HomeApps.launchIntent(activity.getPackageManager(),pkg);if(intent!=null)launch(intent);else toast(Ui.tr("Instale o app na loja da TV.","Install the app from the TV store.","Instala la app desde la tienda de la televisión."));});
         }
         private void shortcutIcon(String pkg){
             if(pkg.isEmpty())return;
             FrameLayout row=rows.get(rows.size()-1);TextView label=labels.get(labels.size()-1);
-            LayoutParams position=(LayoutParams)label.getLayoutParams();position.leftMargin=86;position.width=446;label.setLayoutParams(position);label.setSingleLine(true);label.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            LayoutParams position=(LayoutParams)label.getLayoutParams();position.leftMargin=86;position.width=586;label.setLayoutParams(position);label.setSingleLine(true);label.setEllipsize(android.text.TextUtils.TruncateAt.END);
             ImageView icon=new ImageView(activity);icon.setImageDrawable(SidebarApps.icon(activity,pkg));icon.setScaleType(ImageView.ScaleType.FIT_CENTER);icon.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);put(row,icon,25,16,42,40);
         }
         private void chooseShortcut(String pkg){
@@ -318,7 +344,7 @@ class SettingsScreen extends VelaScreen {
                 if(places.isEmpty())status.setText("No hay resultados. Prueba el nombre de la ciudad o añade el país.");else rows.get(1).requestFocus();
             });}catch(Exception ignored){main.post(()->{if(!closed&&active&&page==10&&epoch==searchGeneration)status.setText("No se ha podido buscar. Comprueba Internet y vuelve a intentarlo.");});}});
         }
-        private void note(String s,int y){TextView t=text(s,21,DIM,Ui.regular);t.setGravity(Gravity.TOP);t.setLineSpacing(7,1);put(pane,t,26,y,780,210);}
+        private void note(String s,int y){TextView t=text(s,21,DIM,Ui.regular);t.setGravity(Gravity.TOP);t.setLineSpacing(7,1);t.setMaxLines(6);put(rowHost,t,6,contentY+18,1118,174);contentY+=210;}
         private String license(){StringBuilder s=new StringBuilder();for(String file:new String[]{"licenses/upstream-MIT.txt","licenses/device-icons.txt","licenses/simple-icons-CC0.txt","licenses/simple-icons-DISCLAIMER.txt","licenses/live-tv-sources.txt","licenses/tdtchannels-Apache-2.0.txt","ambient/sources.txt","fonts/OFL.txt","symbols/LICENSE-material-symbols.txt","brands/sources.txt","brands/JELLYFIN-ARTWORK-LICENSE.txt"})try(java.io.InputStream in=activity.getAssets().open(file);java.io.ByteArrayOutputStream out=new java.io.ByteArrayOutputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);s.append(new String(out.toByteArray(),"UTF-8")).append("\n\n");}catch(Exception ignored){}return s.toString();}
         private void toast(String s){Toast.makeText(activity,s,Toast.LENGTH_SHORT).show();}
         private void launch(Intent i){try{activity.startActivity(i);}catch(ActivityNotFoundException|SecurityException e){toast("No se ha podido abrir esta opción.");}}
@@ -336,9 +362,9 @@ class SettingsScreen extends VelaScreen {
             if(!busy()&&(personal!=isVela()||(!personal&&recovery))){HomeMode.request(activity,personal?HomeMode.FREE:HomeMode.ORIGINAL);pendingAt=SystemClock.uptimeMillis();observedBusy=false;}
             render(0);readState();
         }
-        void resume(){active=true;readState();}
-        void pause(){active=false;searchGeneration++;if(searchJob!=null)searchJob.cancel(true);main.removeCallbacks(poll);}
-        void destroy(){closed=true;pause();io.shutdownNow();main.removeCallbacksAndMessages(null);}
+        void resume(){active=true;readState();if(updates!=null)updates.resume();}
+        void pause(){active=false;if(updates!=null)updates.pause();searchGeneration++;if(searchJob!=null)searchJob.cancel(true);main.removeCallbacks(poll);}
+        void destroy(){closed=true;pause();closeUpdates();io.shutdownNow();main.removeCallbacksAndMessages(null);}
         private void readState(){
             if(!active||closed||reading)return;reading=true;
             io.execute(()->{JSONObject fresh=HomeMode.state(activity);main.post(()->{
@@ -352,12 +378,33 @@ class SettingsScreen extends VelaScreen {
             });});
         }
         boolean onKey(KeyEvent e){
+            View focusedView=activity.getCurrentFocus();int key=e.getKeyCode();
+            if(key==KeyEvent.KEYCODE_DPAD_LEFT&&hasFocus()&&!(focusedView instanceof EditText)){if(e.getAction()==KeyEvent.ACTION_DOWN){if(surface.hasFocus())categories[categoryFor(page)].requestFocus();else navigation();}return true;}
+            boolean root=false;for(int destination:destinations)root|=destination==page;
+            if(key==KeyEvent.KEYCODE_BACK&&root&&surface.hasFocus()&&!activity.returnToSetup&&!activity.returnToCaller){if(e.getAction()==KeyEvent.ACTION_UP)categories[categoryFor(page)].requestFocus();return true;}
+            if(key==KeyEvent.KEYCODE_BACK&&root&&categories[categoryFor(page)].hasFocus()){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
+
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==21){if(e.getAction()==KeyEvent.ACTION_UP)render(14);return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page>=17&&page<=20)){if(e.getAction()==KeyEvent.ACTION_UP){int old=page;render(old==17?2:17);rows.get(old==17?3:old-18).requestFocus();}return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(activity.returnToSetup||activity.returnToCaller)&&page==activity.entryPage){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page==15||page==16)){if(e.getAction()==KeyEvent.ACTION_UP)render(page==16?15:14);return true;}
-            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page!=0){if(e.getAction()==KeyEvent.ACTION_UP){if(page==5){render(4);rows.get(3).requestFocus();}else if(page==12){render(11);rows.get(shortcutSlot<0?SidebarApps.slots(activity).length:Math.min(shortcutSlot,rows.size()-1)).requestFocus();}else if(page==10){render(9);rows.get(1).requestFocus();}else if(page==7||page==8||page==9){int focus=page==9?4:page==8?6:0;render(6);rows.get(focus).requestFocus();}else{render(0);if(returnRow<rows.size())rows.get(returnRow).requestFocus();}}return true;}
+            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page!=0){if(e.getAction()==KeyEvent.ACTION_UP){if(page==5){render(4);rows.get(3).requestFocus();}else if(page==12){render(11);rows.get(shortcutSlot<0?SidebarApps.slots(activity).length:Math.min(shortcutSlot,rows.size()-1)).requestFocus();}else if(page==10){render(9);rows.get(1).requestFocus();}else if(page==7||page==8||page==9){int focus=page==9?4:page==8?6:0;render(6);rows.get(focus).requestFocus();}else{int parent=destinations[categoryFor(page)];render(parent);categories[categoryFor(parent)].requestFocus();}}return true;}
             return false;
+        }
+        private static final class CategoryIcon extends View {
+            final int kind;final Paint paint=new Paint(3);int color=WHITE;
+            CategoryIcon(Context c,int kind){super(c);this.kind=kind;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
+            void color(int value){color=value;invalidate();}
+            protected void onDraw(Canvas c){c.save();c.scale(getWidth()/32f,getHeight()/32f);paint.setColor(color);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(2.2f);paint.setStrokeCap(Paint.Cap.ROUND);
+                if(kind==0){c.drawRoundRect(4,7,28,24,3,3,paint);c.drawLine(16,24,16,28,paint);c.drawLine(11,28,21,28,paint);}
+                else if(kind==1){c.drawCircle(16,16,11,paint);c.save();c.clipRect(16,0,32,32);paint.setStyle(Paint.Style.FILL);c.drawCircle(16,16,9,paint);c.restore();}
+                else if(kind==2){c.drawRoundRect(4,5,28,27,4,4,paint);c.drawCircle(21,12,2,paint);Path p=new Path();p.moveTo(6,24);p.lineTo(13,15);p.lineTo(19,22);p.lineTo(23,18);p.lineTo(27,24);c.drawPath(p,paint);}
+                else if(kind==3){c.drawCircle(16,10,5,paint);c.drawArc(6,17,26,35,190,160,false,paint);}
+                else if(kind==4){paint.setStyle(Paint.Style.FILL);for(int y=7;y<=25;y+=9)for(int x=7;x<=25;x+=9)c.drawCircle(x,y,2,paint);}
+                else if(kind==5){c.drawArc(5,5,27,27,35,300,false,paint);c.drawLine(25,4,25,11,paint);c.drawLine(25,11,18,9,paint);}
+                else if(kind==6){for(int i=0;i<3;i++){int y=8+i*8,x=i==1?22:11;c.drawLine(5,y,27,y,paint);paint.setStyle(Paint.Style.FILL);c.drawCircle(x,y,3.5f,paint);paint.setStyle(Paint.Style.STROKE);}}
+                else{c.drawCircle(16,16,11,paint);c.drawLine(16,15,16,23,paint);paint.setStyle(Paint.Style.FILL);c.drawCircle(16,9.5f,1.5f,paint);}c.restore();
+            }
         }
     }
 }
