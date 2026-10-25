@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="tv.vela.launcher.lite" android:versionCode="7" android:versionName="0.3.1-preview">
+    <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <queries>
+        <intent><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LEANBACK_LAUNCHER" /></intent>
+        <intent><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent>
+        <intent><action android:name="android.intent.action.VIEW" /><data android:scheme="content" android:host="android.media.tv" /></intent>
+        <package android:name="com.xiaomi.mitv.tvplayer" /><package android:name="com.xiaomi.mitv.tvinput" /><package android:name="com.xiaomi.mitv.tvhome" />
+        <package android:name="com.mediatek.wwtv.tvcenter" /><package android:name="com.google.android.tv" /><package android:name="com.android.tv" />
+    </queries>
+    <!-- Antenna listings + public HTTPS programme metadata. No IPTV client or background service. -->
+    <application android:label="Vela Lite" android:icon="@drawable/icon" android:banner="@drawable/banner" android:allowBackup="false" android:usesCleartextTraffic="false" android:theme="@style/Vela.Lite">
+        <activity android:name="tv.vela.launcher.LiteHomeActivity" android:exported="true" android:launchMode="singleTask" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.HOME" /><category android:name="android.intent.category.DEFAULT" /></intent-filter>
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LEANBACK_LAUNCHER" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity>
+        <provider android:name="tv.vela.launcher.LiteUpdateProvider" android:authorities="tv.vela.launcher.lite.updates" android:exported="false" android:grantUriPermissions="true"/>
+    </application>
+</manifest>

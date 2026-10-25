@@ -1,5 +1,16 @@
 # Cambios
 
+## Vela Lite 0.3.1-preview
+
+Primera distribución pública de Vela Lite para la televisión que acompaña a una TV Box, consola u otro equipo HDMI. Incluye entradas con perfiles de dispositivo, antena con guía horizontal y programación dobleM, favoritos, cajón de apps y ajustes integrados.
+
+- Búsqueda y descarga automáticas de versiones Lite, con verificación de integridad, paquete y firma.
+- Continuación de la instalación al volver de los permisos de Android y limpieza de la APK instalada.
+- Guía por páginas, logos, horarios, progreso y tiempo restante; caché en disco y liberación de recursos al salir.
+- Preferencias de aspecto y pantalla inicial; navegación directa entre Aplicaciones y Ajustes.
+- Ficha, instalación y galería propias de Lite.
+
+
 ## 1.22.0 Preview · 2026-10-24
 
 - Paleta grafito común en Inicio, Ajustes y TV: superficies, campos, guía y progreso acordes con la barra lateral y un único acento elegido por el usuario.

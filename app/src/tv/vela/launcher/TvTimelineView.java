@@ -44,6 +44,7 @@ final class TvTimelineView extends FrameLayout {
         invalidate();if(hasFocus()||changed)notifySelection();
     }
     void cursor(long value){cursor=Math.max(start,Math.min(start+SECONDS-1,value));invalidate();notifySelection();}
+    long cursorTime(){return cursor;}
     void minute(long value){now=value;invalidate();if(hasFocus())notifySelection();}
     private List<LiveTvData.Programme> schedule(){return channels.isEmpty()?Collections.emptyList():programmes.getOrDefault(channels.get(row).id,Collections.emptyList());}
     LiveTvData.Programme programme(){for(LiveTvData.Programme p:schedule())if(p.start<=cursor&&p.end>cursor)return p;return null;}

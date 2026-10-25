@@ -42,6 +42,7 @@ final class DeviceProfiles {
         {"chromecast","Google Chromecast","Streaming","(?:google)?chromecast(?:ultra|googleTV|4k|hd)?"},
         {"googletv","Google TV Streamer","Streaming","(?:google)?tvstreamer(?:4k)?"},
         {"roku","Roku","Streaming","roku(?:ultra|express|premiere|streamingstick)?"},
+        {"mecool","MECOOL","Streaming","mecool[a-z0-9]*"},
         {"androidtv","Android TV","Streaming","androidtv|tvbox|xiaomibox|mibox|miboxs"},
         {"bluray","Blu-ray","Vídeo y audio","bluray|blurayplayer|bdplayer"},
         {"dvd","DVD","Vídeo y audio","dvd|dvdplayer"},

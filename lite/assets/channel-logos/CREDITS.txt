@@ -1,0 +1,14 @@
+Channel identification marks
+
+Original broadcaster marks, supplied by the tv-logo/tv-logos collection:
+https://github.com/tv-logo/tv-logos
+Revision: d32e347bb7c4c640dceec23957802ad9182f58a6
+
+These small original files are unmodified. All trademarks belong to their respective broadcasters. Inclusion identifies tuned services and does not imply endorsement. No ownership of the marks is claimed. See sources.json for each source and SHA-256.
+
+The television's own channel logo is preferred when available. Unknown channels show their channel number rather than a guessed logo.
+
+Public programme guide and optional picons: davidmuma / EPG_dobleM and picons_dobleM.
+https://github.com/davidmuma/EPG_dobleM
+https://github.com/davidmuma/picons_dobleM
+Only programme metadata and broadcaster identification are read. No IPTV stream or subscription is used.

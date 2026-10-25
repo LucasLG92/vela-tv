@@ -17,7 +17,7 @@ final class DeviceIcons {
             case "deck":return R.drawable.device_steamdeck;case "rogally":return R.drawable.device_asus;
             case "mac":return R.drawable.device_apple;case "appletv":return R.drawable.device_appletv;
             case "firetv":return R.drawable.device_amazonfiretv;case "shield":return R.drawable.device_nvidia;
-            case "roku":return R.drawable.device_roku;case "androidtv":return R.drawable.device_android;
+            case "roku":return R.drawable.device_roku;case "androidtv":case "mecool":return R.drawable.device_android;
             case "chromecast":case "googletv":return R.drawable.device_google;
             case "atari":return R.drawable.device_atari;
             default:return model.startsWith("xbox")?R.drawable.device_xbox:0;

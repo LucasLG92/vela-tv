@@ -6,6 +6,8 @@ Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abr
 
 **[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.22.0-preview)** · [Ver las 50 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
 
+**[Vela Lite · HDMI, antena y apps para tu televisión](lite/README.md)**
+
 ![Inicio de Vela con Seguir viendo panorámico](gallery/01-inicio.webp)
 
 ## Dale protagonismo a tu biblioteca

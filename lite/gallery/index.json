@@ -1,0 +1,47 @@
+[
+  {
+    "file": "01-entradas.png",
+    "title": "Tus dispositivos, en primera fila",
+    "caption": "Entradas HDMI con identificación, estado de conexión y acceso directo.",
+    "width": 1920,
+    "height": 1080,
+    "source": "native_android_tv",
+    "personal_data": false
+  },
+  {
+    "file": "02-guia.png",
+    "title": "La televisión, con contexto",
+    "caption": "Guía horizontal, programas actuales y siguientes, horarios y tiempo restante.",
+    "width": 1920,
+    "height": 1080,
+    "source": "native_android_tv",
+    "personal_data": false
+  },
+  {
+    "file": "03-aplicaciones.png",
+    "title": "Tus aplicaciones, a mano",
+    "caption": "Cajón de aplicaciones con iconos nativos y navegación con el mando.",
+    "width": 1920,
+    "height": 1080,
+    "source": "native_android_tv",
+    "personal_data": false
+  },
+  {
+    "file": "04-ajustes.png",
+    "title": "Todo en su sitio",
+    "caption": "Ajustes agrupados por categorías, con opciones alineadas en el tema de Vela.",
+    "width": 1920,
+    "height": 1080,
+    "source": "native_android_tv",
+    "personal_data": false
+  },
+  {
+    "file": "05-actualizaciones.png",
+    "title": "Siempre al día",
+    "caption": "Búsqueda y descarga automáticas de nuevas versiones de Vela Lite.",
+    "width": 1920,
+    "height": 1080,
+    "source": "native_android_tv",
+    "personal_data": false
+  }
+]

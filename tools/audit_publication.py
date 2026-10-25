@@ -48,6 +48,26 @@ if manifest.exists():
     expected={item['file'] for item in pictures}
     actual={p.name for p in (root/'gallery').glob('*.webp')}
     if expected!=actual or any(item.get('personal_data') is not False for item in pictures):issues.append(('gallery/index.json','unreviewed or missing gallery image'))
+lite_manifest=root/'lite/gallery/index.json'
+if lite_manifest.exists():
+    import struct,zlib
+    pictures=json.loads(lite_manifest.read_text(encoding='utf-8'))
+    expected={item['file'] for item in pictures};actual={p.name for p in lite_manifest.parent.glob('*.png')}
+    if expected!=actual or any(item.get('personal_data') is not False for item in pictures):issues.append(('lite/gallery/index.json','unreviewed or missing Lite screenshot'))
+    for item in pictures:
+        name='lite/gallery/'+item['file'];raw=(root/name).read_bytes()
+        if not raw.startswith(b'\x89PNG\r\n\x1a\n'):issues.append((name,'invalid PNG'));continue
+        offset=8;dimensions=None;ended=False
+        while offset+12<=len(raw):
+            length=struct.unpack('>I',raw[offset:offset+4])[0];tag=raw[offset+4:offset+8];end=offset+12+length
+            if end>len(raw):issues.append((name,'truncated PNG'));break
+            content=raw[offset+8:offset+8+length]
+            if zlib.crc32(tag+content)&0xffffffff!=struct.unpack('>I',raw[end-4:end])[0]:issues.append((name,'PNG checksum mismatch'))
+            if tag in (b'eXIf',b'tEXt',b'zTXt',b'iTXt'):issues.append((name,'screenshot includes text or personal metadata'))
+            if tag==b'IHDR':dimensions=struct.unpack('>II',content[:8])
+            if tag==b'IEND':ended=end==len(raw)
+            offset=end
+        if not ended or dimensions!=(item['width'],item['height']):issues.append((name,'incorrect screenshot dimensions or termination'))
 if issues:
     for name,reason in issues:print(f'FAIL {name}: {reason}')
     sys.exit(1)

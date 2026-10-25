@@ -1,0 +1,151 @@
+{
+  "collection": "tv-logo/tv-logos",
+  "revision": "d32e347bb7c4c640dceec23957802ad9182f58a6",
+  "note": "Original broadcaster marks, unmodified. All trademarks remain with their owners; no endorsement implied. This manifest does not grant a software license to broadcaster marks. System tuner logos take precedence.",
+  "files": [
+    {
+      "file": "tve-1-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/tve-1-es.png",
+      "sha256": "1dda823b033145fdacedc6bc07c603d227102ab159a78aaa11626364cad6d4c1",
+      "bytes": 7823
+    },
+    {
+      "file": "tve-2-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/tve-2-es.png",
+      "sha256": "24469ea597246ec3d8a14f4f2744148042e2a939bd0b4515694b897c0924cf21",
+      "bytes": 13358
+    },
+    {
+      "file": "antena-3-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/antena-3-es.png",
+      "sha256": "9963d39b03718648d6d2b5c1be6313ab0e3c10bf3fc74b70dd4a95c8bf8a7e72",
+      "bytes": 6267
+    },
+    {
+      "file": "cuatro-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/cuatro-es.png",
+      "sha256": "bd638ac3e877d8a54b34b2bcb65788150fabb20ed3985f03d7c951ba282d8f3d",
+      "bytes": 2723
+    },
+    {
+      "file": "telecinco-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/telecinco-es.png",
+      "sha256": "979a9ee9ae1f1343faf24e9843f9056b9a7d792908b6e07f3e63c70d989ced55",
+      "bytes": 14983
+    },
+    {
+      "file": "lasexta-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/lasexta-es.png",
+      "sha256": "dba3f3b7ac1f7ee522239f0680fb5672081c03dbcac8e08923088c6c9b2e64b8",
+      "bytes": 15241
+    },
+    {
+      "file": "dmax-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/dmax-es.png",
+      "sha256": "1c67d753e1baf7a067bbdf84b9d20b18f9ae9a0524ea83ccc41a61fc82806cb1",
+      "bytes": 2148
+    },
+    {
+      "file": "mega-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/mega-es.png",
+      "sha256": "052b7eeb691219208a8a52b3ef9e7d106d5fda179a20cb7cafede1ae77dfd393",
+      "bytes": 2436
+    },
+    {
+      "file": "ten-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/ten-es.png",
+      "sha256": "697e8db34ccf83f0c0c70fb1fa23cc06c9f864788c9ca933b332949480d80b4e",
+      "bytes": 3200
+    },
+    {
+      "file": "real-madrid-tv-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/real-madrid-tv-es.png",
+      "sha256": "514143c68d1366bfbf823a5dae1e8bb49676cecdad8c91ff221c77edb3549d8a",
+      "bytes": 10541
+    },
+    {
+      "file": "be-mad-tv-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/be-mad-tv-es.png",
+      "sha256": "87af245be18c6bf9b2d005ae6e76dea379355be9edd081be5efe82b0e925f40f",
+      "bytes": 4671
+    },
+    {
+      "file": "atreseries-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/atreseries-es.png",
+      "sha256": "c023938f48555f6aee811150107fbf28795659d11a1a2feb8c799b3ec926937f",
+      "bytes": 5141
+    },
+    {
+      "file": "divinity-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/divinity-es.png",
+      "sha256": "fa225f955e231ee042c0c58e527088a42c606f8dba06042ee5c8871d86d963ea",
+      "bytes": 4831
+    },
+    {
+      "file": "fdf-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/fdf-es.png",
+      "sha256": "b3716ce35eb7bb27bb9e84109f313533afc2cfeb1b2590d1838398133cb70dac",
+      "bytes": 3789
+    },
+    {
+      "file": "boing-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/boing-es.png",
+      "sha256": "e594d15d6b02e1604a0f8e1bc53d366a546112a86202763b296123286fd7704a",
+      "bytes": 6245
+    },
+    {
+      "file": "energy-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/energy-es.png",
+      "sha256": "b9a9f3ad16071c2802c0f30856b3d50f1c6dc2fb3f404038e3b32a4c6256844f",
+      "bytes": 4009
+    },
+    {
+      "file": "trece-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/trece-es.png",
+      "sha256": "6c1ad22d1b7722f7d4ff854b44128e2ba6c7f9bf40320c69b368bcdf710731c4",
+      "bytes": 1659
+    },
+    {
+      "file": "castilla-de-mancha-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/castilla-de-mancha-es.png",
+      "sha256": "72ce32ea8eac46c5b16bc5bd504139eb966991a923d687f26748c91fdeeb0459",
+      "bytes": 2518
+    },
+    {
+      "file": "veo7-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/veo7-es.png",
+      "sha256": "368da5731259763a265a87476ed0b93134315437574c9c3ef312ad99a53d8597",
+      "bytes": 6779
+    },
+    {
+      "file": "squirrel-dos-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/squirrel-dos-es.png",
+      "sha256": "bb85a61fe3bdecbeb0be0bc06249b8008183a676d320829f5594089387889984",
+      "bytes": 6512
+    },
+    {
+      "file": "24h-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/24h-es.png",
+      "sha256": "e6d2f03b336204d96664003f41df321af508b368effbf1b14321ee87e6be6a4e",
+      "bytes": 6788
+    },
+    {
+      "file": "nova-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/nova-es.png",
+      "sha256": "563976cd899027a2dadaaf3d25c60cff4215f596f3c30e2287355f1cf31583dc",
+      "bytes": 2806
+    },
+    {
+      "file": "neox-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/neox-es.png",
+      "sha256": "910b513faac83763cda3a69bdd34dd935737646268ae6a2aa20c8a6c5da1a517",
+      "bytes": 2822
+    },
+    {
+      "file": "clan-es.png",
+      "source": "https://raw.githubusercontent.com/tv-logo/tv-logos/d32e347bb7c4c640dceec23957802ad9182f58a6/countries/spain/clan-es.png",
+      "sha256": "7719bbabeccb59a0532a384fb0acb0c42007d1a0f4f40243d92851ffa5c35747",
+      "bytes": 6997
+    }
+  ]
+}
