@@ -4,7 +4,7 @@
 
 Tus entradas HDMI, la televisión por antena y tus aplicaciones, en un inicio visual y fácil de recorrer con el mando. **Vela Lite está pensada para la televisión que acompaña a tu TV Box, consola u ordenador.**
 
-**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.4.0-preview/Vela-Lite-0.4.0-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
+**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.5.0-preview/Vela-Lite-0.5.0-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
 
 **Android TV / Google TV · Android 8.0 o posterior · APK de unos 1,3 MB · Vista previa**
 
@@ -27,6 +27,12 @@ La guía pública de **dobleM** completa los horarios de los canales que tengas 
 Al ver un canal, pulsa **derecha**, **arriba** o **abajo** para explorar la lista con los programas y el tiempo restante. Alterna entre **Lista** y **Favoritos** y confirma el canal con OK. Mantener OK añade o quita el favorito; **CH+/CH−** cambian directamente. Atrás cierra primero el panel y después vuelve a la guía, recuperando el canal que estabas viendo. OK durante la emisión muestra su información. La reproducción utiliza el sintonizador de la televisión.
 
 Con **OK**, la información de la emisión muestra también **A continuación** a la derecha: el próximo programa y su horario. Los datos proceden de la guía de antena y de dobleM; si no están disponibles, la tarjeta se oculta.
+
+## Tus canales, a tu manera
+
+En **Organizar**, elige un favorito con OK, muévelo con arriba o abajo y confirma con OK. Atrás cancela. Oculta el canal seleccionado en la guía, recupera canales ocultos y elige las categorías que quieres mostrar. Los cambios se guardan en Vela Lite, sin modificar la sintonización de la televisión.
+
+**Recientes** conserva hasta doce canales abiertos correctamente. El panel del directo reúne Lista, Favoritos y Recientes, con un botón **Canal anterior**. La identidad DVB permite conservar la organización tras resintonizar; cuando no está disponible se usa un nombre único, evitando confundir canales del mismo nombre.
 
 ## Tus aplicaciones, a mano
 

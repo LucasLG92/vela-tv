@@ -87,7 +87,7 @@ Si falta un logo válido del proveedor, Vela intenta el icono original declarado
 - **Izquierda / derecha:** elegir programas. Al llegar al borde, la ventana avanza o retrocede 90 minutos. Los controles inferiores permiten hacer lo mismo.
 - **Ahora:** volver al horario actual. Una línea marca la hora en la programación.
 - **OK en el programa actual:** ver el canal. En uno futuro, consultar su horario y, si quieres, abrir el directo del canal.
-- **Mantener OK:** favoritos y calidad. **Atrás** desde la reproducción vuelve a la guía y libera el reproductor.
+- **Mantener OK:** añadir o quitar el favorito. **Atrás** desde la reproducción vuelve a la guía y libera el reproductor.
 
 La programación completa procede del XMLTV externo configurado o de los datos de antena que comparta Android. Cuando una fuente solo facilita el programa actual y el siguiente, se muestran esos datos. Los huecos se indican como **Sin programación**; no se inventan horarios ni se añaden reproducción de programas pasados, grabaciones o recordatorios.
 
@@ -101,6 +101,20 @@ La guía muestra seis filas ampliadas y tres horas por ventana, hasta las próxi
 - **Derecha:** abrir el panel lateral de canales, también con la información visible. El vídeo continúa mientras exploras.
 - **Arriba / abajo en el panel:** recorrer canales. Sus filas muestran logo, programa, progreso y tiempo restante cuando hay guía. La lista utiliza páginas de doce canales y recicla sus filas.
 - **OK en el panel:** cambiar al canal seleccionado y cerrar el panel. **Izquierda o Atrás:** cerrarlo y seguir viendo.
-- **CH+ / CH−**, o **arriba / abajo** con la información oculta: cambiar de canal. **Atrás** sin el panel abierto: volver a la guía o a Canales.
+- **CH+ / CH−:** cambiar de canal directamente. Arriba y abajo abren la lista para explorar antes de confirmar con OK. **Atrás** sin el panel abierto vuelve a la guía o a Canales.
+
+## Organizar, recientes y canal anterior
+
+Abre **Organizar** en la cabecera del directo, o pulsa Menú si tu mando lo incluye. El panel utiliza el mismo tema y funciona sin abrir otra actividad.
+
+- **Favoritos:** OK recoge la fila; arriba y abajo cambian su posición. OK guarda y Atrás descarta ese movimiento. El orden se aplica a todas las páginas de favoritos y al panel durante la emisión.
+- **Canales ocultos:** el botón oculta el canal seleccionado en la guía. OK sobre una fila de ocultos la recupera. El canal permanece en tu fuente y en tus favoritos guardados; desaparece de las listas visibles y de Recientes hasta que lo recuperes.
+- **Categorías:** OK muestra u oculta su acceso. Todos los canales sigue disponible y conserva los canales de esas categorías.
+- **Recientes:** hasta doce canales abiertos correctamente, ordenados por el último uso y sin duplicados de calidad. Puedes vaciar el historial desde el panel.
+- **Canal anterior:** disponible en el panel del reproductor y en los mandos que envían LAST_CHANNEL. Vuelve al canal anterior del historial visible; cambiar de nuevo permite alternar entre los dos últimos cuando ambos han abierto correctamente.
+
+La organización y el historial se separan por fuente y cuenta. Los favoritos existentes se conservan; sin un orden manual mantienen su orden anterior. Las preferencias guardan como máximo 128 posiciones de favoritos, 256 canales ocultos y 512 categorías ocultas. Los recientes de M3U y Xtream se guardan cifrados con la clave del dispositivo; no se copian a GitHub ni a otra cuenta.
+
+Los filtros de canales ocultos se aplican en la consulta del catálogo antes de contar y paginar. La guía y el reproductor conservan sus límites de seis y doce registros visibles. Organizar utiliza filas de texto recicladas, sin descargar imágenes ni abrir un segundo reproductor; su trabajador se cierra al salir. No añade servicios en segundo plano.
 
 El aviso de directo y la resolución real del vídeo se ocultan a los cuatro segundos; la información del programa, a los seis. El panel de canales usa el mismo reproductor: explorar o pasar de página no inicia otro vídeo. Los tiempos se actualizan por minuto y se muestran en horas y minutos a partir de una hora. No hay botones adicionales de favoritos o cambio manual de señal sobre el vídeo.

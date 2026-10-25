@@ -1,5 +1,13 @@
 # Vela Lite · Desarrollo y compatibilidad
 
+## Organización de canales
+
+Lite comparte con Vela el panel `TvChannelOrganizer` y las preferencias acotadas `TvPersonalization`, sin incluir clientes IPTV. La organización afecta únicamente a Vela Lite: nunca escribe favoritos, orden o visibilidad en el proveedor de televisión del fabricante.
+
+Se guardan hasta 128 posiciones manuales de favoritos, 256 canales ocultos, 512 categorías ocultas y 12 identificadores de canales recientes. La identidad DVB sobrevive a los cambios de URI tras resintonizar; el nombre solo se usa cuando identifica un canal de forma única. Los recientes se registran al recibir disponibilidad de vídeo o reproducción de radio, nunca al navegar por la lista o intentar una sintonía fallida.
+
+La resolución de identidades usa índices temporales de nombres, sin búsquedas cuadráticas en todo el catálogo. La guía mantiene seis filas, Canales doce tarjetas y el panel del reproductor seis filas con un único `TvView`. El organizador recicla filas de texto y libera su trabajador al cerrarse. No incorpora servicios ni permisos nuevos.
+
 Un inicio para la **propia televisión**, cuando un dispositivo HDMI se encarga del contenido. Mantiene el aspecto grafito, la barra flotante, Inter y los iconos de Vela, con tres destinos: **Entradas HDMI, Televisión y Aplicaciones**.
 
 ## Una televisión, un inicio

@@ -165,7 +165,7 @@ public class LiteHomeActivity extends Activity {
     boolean canShowInstaller(){return visible&&player==null;}
     private void refreshUpdates(){if(visible&&!updates.busy()&&updates.requested()&&getPackageManager().canRequestPackageInstalls())updates.resumeInstall(this);if(visible&&settingsView!=null)settingsView.refreshUpdates();}
     private void openSettings(String action){Intent intent=new Intent(action);if(intent.resolveActivity(getPackageManager())==null)intent=new Intent(Settings.ACTION_SETTINGS);launch(intent);}
-    @Override public boolean dispatchKeyEvent(KeyEvent event){if(consumeOkUp&&(event.getKeyCode()==KeyEvent.KEYCODE_DPAD_CENTER||event.getKeyCode()==KeyEvent.KEYCODE_ENTER)){if(event.getAction()==KeyEvent.ACTION_UP)consumeOkUp=false;return true;}if(player!=null&&player.remote(event))return true;return super.dispatchKeyEvent(event);}
+    @Override public boolean dispatchKeyEvent(KeyEvent event){if(consumeOkUp&&(event.getKeyCode()==KeyEvent.KEYCODE_DPAD_CENTER||event.getKeyCode()==KeyEvent.KEYCODE_ENTER)){if(event.getAction()==KeyEvent.ACTION_UP)consumeOkUp=false;return true;}if(player!=null&&player.remote(event))return true;if(guide!=null&&guide.remote(event))return true;return super.dispatchKeyEvent(event);}
     @Override public void onBackPressed(){if(player!=null){show(TV,false);return;}if(guide!=null&&guide.back())return;if(settingsView!=null&&settingsView.back())return;if(section==PROFILE)show(INPUTS,false);else if(section==LICENSES||section==TV_SETTINGS||section==UPDATES||section==APPEARANCE)show(SETTINGS,false);else if(!navigation[Math.min(section,3)].hasFocus())navigation[Math.min(section,3)].requestFocus();else if(section!=INPUTS)show(INPUTS,true);}
 
     private final class Stage extends FrameLayout {

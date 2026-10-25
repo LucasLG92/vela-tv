@@ -1,5 +1,18 @@
 # Cambios
 
+## 1.25.0 Preview y Vela Lite 0.5.0 Preview · 2026-10-25
+
+- Panel Organizar integrado y compartido entre ambas ediciones: orden manual de favoritos con OK y flechas; guardar o cancelar con el mando.
+- Ocultar y recuperar canales, y elegir las categorías visibles. Todos sigue disponible; los cambios no modifican la fuente ni la sintonización del fabricante.
+- Recientes por fuente, hasta doce canales abiertos correctamente, con acceso desde guía, organización y panel del reproductor.
+- Canal anterior desde el panel o la tecla correspondiente del mando; se omiten los canales ocultos.
+- Historial M3U y Xtream cifrado; consulta de variantes disponibles para conservar la recuperación de señal desde Recientes.
+- Filtros antes de contar y paginar el catálogo, sin huecos al ocultar canales. El orden de favoritos se conserva entre páginas.
+- Lite conserva identidades DVB o nombres únicos tras resintonizar y utiliza índices temporales para resolverlas. Un único sintonizador y los mismos límites de EPG.
+- Filas de texto recicladas, listas acotadas y cierre de tareas al salir. Sin servicios ni permisos nuevos.
+- Pruebas nativas del organizador en ambas APK, orden y ocultación en el índice M3U, historial cifrado, canal anterior, resintonización simulada y geometría 720p/4K.
+
+
 ## 1.24.0 Preview · 2026-10-25
 
 - Mantener OK añade o quita favoritos en guía, tarjetas, selector y emisión actual. La pulsación larga no activa también la corta.

@@ -6,6 +6,7 @@ import java.util.*;
 /** A twelve-record channel picker. Uses the same indexed sources without opening another player. */
 final class TvPlayerCatalog {
     static TvCatalogCache.Page page(Context context,String mode,String group,String groupName,String query,int page)throws Exception{
+        if(group.equals(TvChannelLibrary.RECENT))return TvChannelLibrary.recentPage(context,LiveTvData.source(context));
         if(mode.equals("xtream")){
             XtreamClient client=new XtreamClient(context);
             XtreamClient.Page result=group.equals("@favorites")?client.favoritePage(page,query):client.page(group.startsWith("@xc:")?group.substring(4):"*",groupName,page,query,false);
