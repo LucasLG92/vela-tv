@@ -1,260 +1,129 @@
-# Cambios
+# Changelog
 
-## 1.25.2 Preview y Vela Lite 0.5.1 Preview · 2026-10-25
+## Vela 1.28.0 Preview and Vela Lite 0.8.0 Preview · 2026-10-26
 
-- Organizar utiliza el mismo panel grafito de Ajustes: categorías con iconos a la izquierda, filas redondeadas a la derecha, Inter y el color de acento configurado.
-- Mantiene el fondo original de TV y oculta la guía bajo el panel para evitar texto superpuesto. No abre otra actividad ni añade desenfoques, imágenes o animaciones.
-- Navegación por categorías con arriba y abajo; derecha entra en las opciones, izquierda vuelve y Atrás cancela un movimiento o regresa al menú antes de cerrar.
-- Foco estable al vaciar una lista, filas recicladas y cierre del organizador al salir de TV. Las actualizaciones de programación de Lite no interrumpen una edición.
-- Verificación nativa del tema, foco, orden, acciones, fondo integrado y liberación de recursos en ambas ediciones.
+- Complete English, Spanish and Portuguese menus in both editions, including shared tools, guide actions, playback controls and local phone setup. Choose an installation language or follow Android; unsupported system languages fall back to English. Provider content keeps its original text.
+- A bounded catalogue for the selected language only, an atomic cross-process language record and immediate Activity recreation when the choice changes. No translation service or permanent worker.
+- English project pages, installation, feature, privacy and development guides. Refreshed native 4K English galleries with demonstration data and per-image provenance.
+- Includes the shared tools and playback work prepared in 1.26/1.27 and Lite 0.6/0.7 below. Those local preparations were not separate public releases.
+- Localisation parity and placeholder checks, real language selection and recreation tests for both APKs, and existing library, update, guide and package checks.
 
+## Vela 1.27.0 / Lite 0.7.0 · local development · 2026-10-26
 
-## 1.25.1 Preview · 2026-10-25
+- Home row order, visibility and size in Full; HDMI/TV/apps sections in Lite. App folders and drawer ordering with original icons.
+- Temporary ten-minute local HTTPS phone setup for apps, folders, favourites and reading size; Full also supports sidebar and M3U/Xtream connection setup.
+- Explicitly paired preference sync on opening Vela, certificate pinning and local-conflict review. Accounts, provider URLs and history are excluded.
+- Manual EPG identity/time corrections with search and preview. Discovery covers Now, Tonight and the next 48 hours using actual source categories and paged queries.
+- Themed audio, supported subtitle, aspect and signal controls. Native antenna pause is offered only when the manufacturer declares support.
+- Optional Full HLS pause/rewind: one Media3 decoder and private disk ring bounded to 15 minutes/256 MiB, cleared on exit. Unsupported or protected streams retain direct playback.
+- Past programmes only for M3U/Xtream sources advertising a compatible archive; up to 24 previous guide hours. Lite has neither IPTV nor Media3.
+- Cancellable sessions, sockets and jobs; native HTTPS, origin checks, sync/conflicts, SQL, real pause/seek and synthetic archive playback tests.
 
-- Selector de fuente y Organizar alineados dentro de la columna izquierda, sin solapar la fecha ni reducir el espacio de la guía.
-- Comprobación nativa de los límites de la cabecera.
+## Vela 1.26.0 / Lite 0.6.0 · local development · 2026-10-25
 
+- Shared Your Vela tools: unified search, backups, reading controls, programme follows, profiles and remote diagnostics in the existing theme and Activity.
+- Reviewed local JSON import/export, validation, recovery and undo. Accounts, tokens, passwords, provider URLs and history are excluded.
+- Portable local Xtream organisation and stable antenna identity recovery after a rescan; ambiguous matches are not guessed.
+- Paged search across apps, HDMI, channels and guide; Full adds Plex/Jellyfin. Text size, guide density, margins and contrast controls.
+- Up to six local profiles with separate layouts and organisation. Device accounts remain shared.
+- Programme follows and optional approximate reminders, local remote diagnostics and configurable shortcuts. No permanent service.
 
-## 1.25.0 Preview y Vela Lite 0.5.0 Preview · 2026-10-25
+## Vela 1.25.2 / Lite 0.5.1 · 2026-10-25
 
-- Panel Organizar integrado y compartido entre ambas ediciones: orden manual de favoritos con OK y flechas; guardar o cancelar con el mando.
-- Ocultar y recuperar canales, y elegir las categorías visibles. Todos sigue disponible; los cambios no modifican la fuente ni la sintonización del fabricante.
-- Recientes por fuente, hasta doce canales abiertos correctamente, con acceso desde guía, organización y panel del reproductor.
-- Canal anterior desde el panel o la tecla correspondiente del mando; se omiten los canales ocultos.
-- Historial M3U y Xtream cifrado; consulta de variantes disponibles para conservar la recuperación de señal desde Recientes.
-- Filtros antes de contar y paginar el catálogo, sin huecos al ocultar canales. El orden de favoritos se conserva entre páginas.
-- Lite conserva identidades DVB o nombres únicos tras resintonizar y utiliza índices temporales para resolverlas. Un único sintonizador y los mismos límites de EPG.
-- Filas de texto recicladas, listas acotadas y cierre de tareas al salir. Sin servicios ni permisos nuevos.
-- Pruebas nativas del organizador en ambas APK, orden y ocultación en el índice M3U, historial cifrado, canal anterior, resintonización simulada y geometría 720p/4K.
+- Channel organisation adopts Vela's graphite settings theme, category icons, rounded rows and configured accent.
+- Guide underlay is hidden while editing; stable focus, recycled rows, clean cancellation and resource release in both editions.
 
+## Vela 1.25.1 · 2026-10-25
 
-## 1.24.0 Preview · 2026-10-25
+- Source and Organise controls stay inside the category header without overlapping the guide date.
 
-- Mantener OK añade o quita favoritos en guía, tarjetas, selector y emisión actual. La pulsación larga no activa también la corta.
-- Panel rápido con Lista y Favoritos, estrellas visibles y foco estable al refrescar la programación, cambiar de página o quitar el último favorito.
-- Las flechas abren la lista para explorar sin cambiar la emisión; OK confirma y Atrás vuelve al vídeo. CH+/CH− permiten cambiar directamente y recorren los límites de página.
-- Favoritos por fuente y un único reproductor, con páginas de doce registros.
+## Vela 1.25.0 / Lite 0.5.0 · 2026-10-25
 
-## Vela Lite 0.4.0-preview · 2026-10-25
+- Reorder favourites with OK and arrows; hide and restore channels/categories without changing the source or tuner database.
+- Recent successful channels, bounded to twelve per source, plus Previous channel. Hidden entries are skipped.
+- Encrypted M3U/Xtream history; filtering before counting/pagination; stable antenna identity handling after rescanning.
 
-- El mismo manejo del mando, las estrellas y el filtro de favoritos en la reproducción de antena.
-- Recuperación del canal y la categoría al volver a la guía; si el canal queda fuera del filtro, se muestra en Todos.
-- Actualización de horarios y logos sobre las mismas seis filas, conservando el foco y las pulsaciones largas.
-- Corrección del recorte del panel en 4K y comprobación del ajuste de los controles al pasar por 720p.
-- Pruebas nativas con metadatos sintéticos en emulador. La señal de antena y los mandos HDMI-CEC dependen del dispositivo.
+## Vela 1.24.0 / Lite 0.4.0 · 2026-10-25
 
-## Vela Lite 0.3.4-preview
+- Hold OK for favourites throughout guide and playback without also triggering the short action.
+- List/Favourites drawer, stable focus on refresh/removal, browsing without retuning, direct CH+/CH− and return to the selected channel.
+- Bounded pages, one player and native 720p/4K drawer geometry checks.
 
-- Fuente auxiliar de actualizaciones del repositorio para encontrar versiones Lite cuando la API de GitHub alcanza su límite de consultas.
-- Mantiene la comprobación de SHA-256, tamaño, paquete y firma; no necesita una cuenta ni un token de GitHub.
+## Vela 1.23.1 / Lite 0.3.3 · 2026-10-25
 
-## 1.23.1 Preview · 2026-10-25
+- Next programme card beside current playback information, timed from the guide and hidden when unavailable.
+- Bounded current/next retention, long-programme lookup and responsive controls.
 
-- Tarjeta «A continuación» a la derecha de la información del reproductor, con el próximo programa y su horario.
-- Títulos en dos líneas, retirada de los datos al cambiar de canal y espacio completo para la emisión actual si falta la siguiente.
-- Actualización de la programación al cambiar de emisión y ajuste de los controles al cambiar la resolución de la ventana.
+## Lite 0.3.4 · 2026-10-25
 
-## Vela Lite 0.3.3-preview
+- Public repository fallback feed when GitHub's unauthenticated release API is rate-limited. Size, SHA-256, package and signature checks remain required.
 
-- La misma tarjeta de próximo programa en la reproducción por antena.
-- Selección del siguiente programa por horario y retención de solo la emisión actual y la siguiente por canal.
-- Consulta limitada de horarios del día para incluir programas que empiezan después de una emisión larga, reutilizando la guía y el refresco existentes.
+## Vela 1.23.0 / Lite 0.3.2 · 2026-10-25
 
-## 1.23.0 Preview · 2026-10-25
+- Categorised graphite settings, integrated update panel, stable focus and state restoration.
+- Lite compatibility for Android 9/10 package managers that omit SigningInfo for downloaded APKs; exact signature, integrity and package validation retained.
 
-- Ajustes por categorías con iconos, panel de detalle amplio y filas alineadas en el tema grafito de Vela.
-- Televisión, aspecto y rendimiento, salvapantallas, cuentas, menú, actualizaciones, sistema e información en una navegación común.
-- Desplazamiento limitado al panel, foco estable al regresar de una cuenta y restauración de la página tras recrear Inicio.
-- Actualizaciones integradas en Ajustes, con continuidad al volver de los permisos de Android.
-- Galería de Vela renovada en 4K y nuevas capturas de los ajustes de Vela Lite 0.3.2.
+## Lite 0.3.1 · 2026-10-25
 
-## Vela Lite 0.3.2-preview
+- First public Lite release: HDMI device profiles, native antenna guide with optional dobleM schedules, favourites, apps and integrated settings.
+- Automatic Lite update checks/downloads, permission-return continuation and installed APK cleanup.
 
-- Compatibilidad de la verificación de firma con televisores Android 9 y 10 que no devuelven `SigningInfo` para APK descargadas. Se mantiene la comprobación de integridad, paquete, versión y coincidencia exacta de firma mediante el gestor de paquetes de Android.
-- Instalación inicial o actualización manual desde la APK para las versiones Lite anteriores afectadas; las siguientes actualizaciones utilizan el flujo automático.
+## Vela 1.22.0 · 2026-10-24
 
-## Vela Lite 0.3.1-preview
+- Shared graphite palette and accent across Home, settings, TV and inputs. HDMI device icons use brand colours as local vectors.
+- Event-driven physical/CEC port grouping, connected-device detection and optional manual device profiles.
+- OK launches pinned apps; Right keeps shared YouTube rows in Vela. Settings, accounts, apps, inputs and sources mount in Home with bounded navigation history.
+- Private forms block screenshots; system permissions, installer, OEM settings and recovery remain Android-owned surfaces.
 
-Primera distribución pública de Vela Lite para la televisión que acompaña a una TV Box, consola u otro equipo HDMI. Incluye entradas con perfiles de dispositivo, antena con guía horizontal y programación dobleM, favoritos, cajón de apps y ajustes integrados.
+## Vela 1.21.0 · 2026-10-22
 
-- Búsqueda y descarga automáticas de versiones Lite, con verificación de integridad, paquete y firma.
-- Continuación de la instalación al volver de los permisos de Android y limpieza de la APK instalada.
-- Guía por páginas, logos, horarios, progreso y tiempo restante; caché en disco y liberación de recursos al salir.
-- Preferencias de aspecto y pantalla inicial; navegación directa entre Aplicaciones y Ajustes.
-- Ficha, instalación y galería propias de Lite.
+- Live TV inside Home with shared sidebar, clock and weather; TV immediately follows Home.
+- Guide is the migration default; Guide/Channels choice moves to Settings. Six enlarged rows, left categories, bottom time controls, logo, progress and remaining time.
+- Full-width channel cards with vertical category switching. Playback information auto-hides; Right opens paged channels without replacing the decoder.
 
+## Vela 1.20.2 / 1.20.1 / 1.20.0 · 2026-10-22
 
-## 1.22.0 Preview · 2026-10-24
+- Themed Plex linking/server selection. Downloaded update APK cleanup after installation.
+- Reliable Android installer hand-off and continuation after unknown-source permission, including process recreation, expiry and retry checks.
 
-- Paleta grafito común en Inicio, Ajustes y TV: superficies, campos, guía y progreso acordes con la barra lateral y un único acento elegido por el usuario.
-- Entradas HDMI rediseñadas con un dispositivo destacado, accesos compactos e iconos con los colores de las marcas como vectores nativos. Sin fotografías, descargas ni trabajador de imágenes en la sección.
-- Agrupación de puertos y dispositivos HDMI-CEC, cambios de conexión por eventos y perfiles para consolas Nintendo, PlayStation, Xbox y Sega, equipos de juego, ordenadores, streaming, vídeo y audio. Mantener OK permite asignar un modelo sin cambiar el nombre del puerto en la TV.
-- Un dispositivo solo muestra su nombre e icono con conexión activa compartida por Android. En espera, sin señal o sin identificar se muestra HDMI y su número; un nombre antiguo o una asignación manual no simulan una conexión.
-- OK sobre cualquier aplicación anclada abre su aplicación. La flecha derecha sobre YouTube conserva sus vídeos dentro de Vela; mantener OK sigue permitiendo ordenar y ocultar accesos.
-- Ajustes, cuentas, actualizaciones, fuentes de TV, aplicaciones y entradas se muestran dentro del inicio, con la misma barra lateral, cabecera y tema. La vista previa del salvapantallas usa ese mismo espacio y devuelve el foco al cerrarse.
-- Una sola pantalla interna montada y un historial limitado de rutas sin vistas ni credenciales. Los trabajadores, iconos y carteles ocultos se liberan al salir de su sección; se restaura la página de ajustes si Android recrea el inicio.
-- Se conserva la continuación de una instalación pendiente después del permiso de Android y del cierre del proceso. Los formularios de cuenta y listas se protegen contra capturas y no guardan campos privados en el estado de navegación.
-- El instalador, los permisos, la reproducción de entradas y los ajustes del fabricante siguen siendo pantallas del sistema. Se conserva el acceso independiente de recuperación.
+## Vela 1.19.1 · 2026-10-22
 
-## 1.21.0 Preview · 2026-10-22
+- Live sources narrowed to M3U, Xtream and antenna; obsolete third-party web and TiviMate integration removed.
+- Indexed grouping of same-channel qualities, bounded disk guide, original channel logos and public dobleM XMLTV default.
 
-- TV en directo integrada en Inicio: comparte barra lateral, reloj y tiempo, con su acceso justo debajo de Inicio. Al salir de TV se liberan el trabajo pendiente y los logos; durante el directo se libera el arte de navegación.
-- Guía como vista inicial para todas las instalaciones. La elección Guía/Canales se guarda solo desde Ajustes → TV en directo; se retiran el selector de vista y los puntos de opciones de la cabecera.
-- Guía ampliada con seis filas, categorías a la izquierda, controles de horario y Ahora debajo, y pie con logo, programa, horario, tiempo restante y progreso. Las categorías largas conservan la ayuda visible.
-- Canales ocupa todo el ancho sin columna de categorías; arriba/abajo cambia de lista conservando la posición horizontal cuando es posible.
-- Reproductor con logo original, programa actual/siguiente, horarios y progreso. El aviso de directo y la resolución real se ocultan tras cuatro segundos; la información, tras seis. OK vuelve a mostrarla.
-- Derecha abre los canales sobre el vídeo, con su programa y tiempo restante en horas y minutos. Explorar o paginar conserva el mismo decodificador; OK cambia de canal y Atrás/Izquierda cierra el panel. Se retiran los botones Canales, Favorito y Otra señal del reproductor. Tras agotar las señales alternativas, OK reintenta sin un bucle automático.
-- Páginas de doce registros, filas recicladas, seis logos de guía y caché de 768 KiB. Sin tarjetas de canales ocultas en Guía, miniaturas de vídeo ni un servicio adicional. La actualización de los tiempos conserva el foco del mando.
-- Pruebas nativas con M3U y XMLTV públicos, cambio de canal real, ajustes persistentes, 180 categorías, navegación, límites de vistas y liberación. Regresión del cambio automático entre señales de prueba, con un único reproductor.
-- Nuevas capturas nativas en 4K desde un emulador independiente y documentación renovada. Sin cuentas IPTV, sesiones Plex/Jellyfin ni ubicación personal en las imágenes o en el instalador.
+## Vela 1.16.0 · 2026-10-21
 
-## 1.20.2 Preview · 2026-10-22
+- Native Xtream connection, encrypted credentials/favourites, provider categories and paged guide/playback. Synthetic API and video regression tests.
+- Horizontal guide development and bounded remote navigation.
 
-- Conexión de Plex rediseñada con el tema de Vela: logo original, código destacado y tarjetas de servidor con foco del color elegido.
-- Servidor seleccionado identificado y listas largas dentro de una zona con desplazamiento; las acciones y la ayuda del mando permanecen visibles.
-- Una conexión fallida conserva la sesión y devuelve el foco al servidor para reintentar con OK. Si falla la consulta de servidores tras autorizar el código, se muestra Reintentar sin descartar la autorización.
-- Recursos vectoriales y vistas nativas, sin imágenes de red, vídeo, desenfoques ni servicios nuevos. El trabajador de conexión se libera al salir.
-- Pruebas nativas con código y servidores ficticios: caducidad, errores, nueve servidores con el mando, selección y liberación de recursos. Dos capturas nuevas en 4K sin datos personales.
+## Vela 1.15.1 / 1.15.0 · 2026-10-21
 
-## 1.20.1 Preview · 2026-10-22
+- Resume installation after Android permission with an expiring request tied to the exact verified APK.
+- Server-backed Plex/Jellyfin filters and ordering, independent Movies/Series selection, newest additions first and paged filter values.
 
-- El APK descargado por Vela se elimina al confirmar Android que su versión ya está instalada. La limpieza utiliza el aviso de actualización de la app y se recupera al abrir Vela si ese aviso no llegó.
-- Funciona sin red y con las comprobaciones y descargas automáticas desactivadas. Se conservan los APK de versiones pendientes, también al cancelar o fallar una instalación.
-- Se retiran los temporales abandonados del actualizador. Un bloqueo de archivo protege las descargas activas entre el proceso de Inicio y el receptor del sistema; no se añade un servicio ni una comprobación periódica.
-- Solo se gestionan los dos archivos privados del actualizador. Las cuentas, la personalización y los archivos ajenos permanecen intactos.
-- Prueba nativa con sustitución real del paquete Android, recuperación al abrir sin conexión, descargas bloqueadas, conservación de la instalación pendiente y regresión del permiso con cierre/recreación del proceso.
+## Vela 1.14.0 / 1.13.0 · 2026-10-21
 
-## 1.20.0 Preview · 2026-10-22
+- Hold OK to mark a Plex/Jellyfin film or episode watched; server-backed next episodes and refreshed Continue watching.
+- Jellyfin connection, original artwork, resume progress, latest additions, paged libraries and official Android TV app hand-off.
 
-- Cambio automático de señal en M3U y Xtream: si una emisión falla, se prueban sus otros formatos y variantes del mismo canal, priorizando la misma calidad y después las inferiores.
-- Margen de 20 segundos para iniciar una señal y detectar bloqueos prolongados de reproducción; comprobación de progreso cada cinco segundos y respeto de la pausa con el mando.
-- Se conserva la calidad preferida para la próxima vez. Cambiar de canal, salir o volver a la lista cancela los intentos pendientes. Si fallan todas las señales disponibles, se permite reintentar con Otra señal.
-- Un único reproductor; hasta ocho variantes y cuatro enlaces por variante, sin repetir URL ni realizar descargas de prueba. Sin búsquedas entre otras cuentas, países, regiones o emisiones +1. La antena mantiene su comportamiento propio.
-- Pruebas nativas con señales locales de prueba: errores HTTP, vídeo HLS y MPEG-TS decodificado, salto de FHD a HD/SD, pausa, cambio de canal, liberación y agotamiento de alternativas. Regresión M3U y Xtream con 10.001 canales.
+## Vela 1.12.1 / 1.12.0 · 2026-10-21
 
-## 1.19.1 Preview · 2026-10-22
+- Automatic update checks/downloads default on while respecting existing opt-outs. Daily foreground checks, bounded download and SHA-256/package/version/signature validation.
+- Android installation confirmation remains required. Home scrolling keeps selected content and headings visible.
 
-- Guía horizontal junto a la cuadrícula: logos, horarios, línea de hora actual, tiempo restante y botón Ahora. Navegación con el mando entre programas, canales, bloques y páginas; se recuerda la vista elegida.
-- Las categorías se recortan dentro de una zona fija para que su desplazamiento no tape la ayuda del mando, también en listas largas.
-- Tres fuentes nativas: M3U, Xtream y canales de antena que comparta Android. Se retiran las rutas web y la integración con TiviMate de TV en directo.
-- Logos grandes y una entrada por canal y categoría. Mantener OK permite gestionar favoritos y elegir entre hasta ocho variantes de calidad. Los países, regiones y emisiones +1 se mantienen separados.
-- Catálogos M3U/Xtream procesados por flujo e indexados en disco. EPG dobleM como XMLTV externo inicial; índice de 48 horas y programación de la fuente como complemento. La guía horizontal recupera seis canales, tres horas y hasta 32 programas por canal.
-- Se mantienen los límites de logos, se dibujan los programas sin crear una vista por celda y se libera el reproductor al salir. No se añade un servicio permanente ni vídeo de fondo.
-- Pruebas nativas en emulador con 180 categorías y comprobación visual en TCL, navegación de la guía, calidad, reproducción FHD y conservación de cuentas. Las nuevas capturas públicas proceden de un emulador independiente sin cuentas personales.
+## Vela 1.11.0 · 2026-10-21
 
+- Uniform widescreen Continue watching, separate recently added posters, row-edge fades and seamless full-height artwork background.
 
-## 1.16.0 Preview · 2026-10-21
+## Vela 1.10.4 / 1.10.3 · 2026-10-21
 
-- IPTV por Xtream dentro de TV: conexión privada en la televisión, categorías del proveedor, páginas de doce canales, logotipos, favoritos y guía actual/siguiente con tiempo restante.
-- Cuenta y favoritos cifrados con AES-GCM y Android Keystore. Formulario protegido contra capturas, sin campos guardados ni cuentas incorporadas al APK público. HTTP requiere una elección explícita.
-- Reproducción nativa HLS/MPEG-TS, cambio de canal entre páginas, liberación del decodificador al salir y acceso separado a TiviMate cuando está instalado.
-- Procesamiento de categorías por flujo con límites de datos y tiempo. Se conserva el presupuesto de logotipos y se consulta solo la guía visible, sin servicio permanente.
-- Pruebas con una API local propia y vídeo sintético: 10.001 canales conservando doce registros por página, cifrado, autenticación, guía, favoritos, reproducción real, cambio de canal, pausa y eliminación de cuenta. Las credenciales de una cuenta personal no se han utilizado en las pruebas.
+- Live programme progress and remaining duration on channel cards, refreshed by the existing minute timer. Durations above an hour use hours and minutes.
 
-## 1.15.1 Preview · 2026-10-21
+## Vela 1.10.2 / 1.10.1 · 2026-10-21
 
-- La instalación continúa al regresar del permiso de fuentes desconocidas, también si Android recrea Vela. La petición explícita se guarda durante una hora y se vincula al APK exacto.
-- El APK vuelve a comprobarse antes de abrir el instalador del sistema. Denegar el permiso o cancelar permite reintentar sin bucles ni nuevas descargas. Las descargas automáticas nunca inician una instalación.
-- La petición caduca si cambia la versión, desaparece el archivo o falla la verificación. Sin servicios ni consultas permanentes.
-- Pruebas en emulador con la pantalla real de permisos, cierre del proceso por Android, recuperación y confirmación del sistema; pruebas de cancelación, reintento, caducidad, firma y alteración del APK.
+- Original adaptive app icons, large rounded square layout, sidebar favourites first and recycled cells with bounded local icon caches.
 
-## 1.15.0 Preview · 2026-10-21
+## Native 4K gallery / Vela 1.10.0 · 2026-10-21
 
-- Películas y Series empiezan por las últimas incorporaciones del servidor, con consultas independientes para cada tipo.
-- Filtros y órdenes nativos publicados por las bibliotecas de Plex, y equivalentes de Jellyfin con valores reales del servidor: género, año, estado de visto y otros metadatos disponibles.
-- Búsqueda por título, selección múltiple, combinaciones entre campos y orden ascendente o descendente. Los filtros se aplican a todo el catálogo y reinician la paginación; las bibliotecas conservan su selección durante la navegación.
-- Listas de opciones con filas recicladas, búsqueda, páginas de 24 valores y límites de respuesta. La hoja y su trabajo pendiente se liberan al salir, sin añadir trabajadores ni ampliar la caché de imágenes.
-- Comprobaciones nativas del mando, cancelación de borradores, restablecimiento, filtros globales, orden y separación de películas/series. Transporte Plex simulado y servidor Jellyfin 12.2 real; pruebas de metadatos y regresión de Seguir viendo.
-
-## 1.14.0 Preview · 2026-10-21
-
-- Menú de Seguir viendo al mantener OK, con Marcar como visto para la película o episodio seleccionado de Plex o Jellyfin. La acción se guarda en el usuario conectado al servidor.
-- Próximos episodios de Plex Continue Watching / On Deck y Jellyfin Next Up, con la etiqueta Siguiente episodio. Prioridad para lo empezado y límites de fila existentes.
-- Respuestas actualizadas de Plex sustituyen las filas anteriores para evitar resucitar contenido visto. La caché de Jellyfin conserva la distinción entre progreso y próximo episodio.
-- Tipos NEXT y NEW de Watch Next para capítulos compartidos por otras apps; su historial se gestiona desde su aplicación.
-- Protección ante pulsación larga, repeticiones de OK, doble envío, cambio de cuenta y errores de red. Pruebas nativas en emulador: Plex con transporte HTTPS simulado y Jellyfin con servidor 12.2 real. No se ha modificado una biblioteca personal durante las pruebas.
-
-## 1.13.0 Preview · 2026-10-21
-
-- Integración nativa con Jellyfin: servidor propio, Quick Connect o acceso con usuario y contraseña, nombre del servidor e imagen de perfil cuando está disponible.
-- Carteles y fondos originales, Seguir viendo con duración y posición del servidor, Últimas subidas y catálogo de películas y series en páginas de 24 títulos.
-- Selector de biblioteca de Inicio entre Plex y Jellyfin, sin desvincular la otra cuenta. Los fondos de biblioteca del salvapantallas siguen la biblioteca elegida.
-- Apertura de la ficha del título en Jellyfin para Android TV; la app debe estar configurada con el mismo servidor y usuario.
-- HTTPS para servidores remotos y HTTP solo para servidores elegidos en red local. Sin contraseñas persistentes ni credenciales en enlaces de reproducción.
-- Se reutilizan los límites de imágenes y trabajadores existentes. Pruebas con servidor Jellyfin 12.2 real y app oficial Android TV 0.19.10 en emulador.
-
-
-## 1.12.1 Preview · 2026-10-21
-
-- Búsqueda y descarga de nuevas versiones activadas por defecto. Se mantienen la consulta diaria al abrir Vela, los límites de descarga y la verificación de firma e integridad.
-- Las personas que hayan desactivado alguna opción conservan su elección. Ambas opciones siguen disponibles en Ajustes.
-- Android sigue pidiendo confirmar la instalación. No se añade un servicio permanente ni se cambian cuentas, aplicaciones o ubicación.
-
-
-## 1.12.0 Preview · 2026-10-21
-
-- Al bajar o subir entre filas, el encabezado y la tarjeta seleccionada permanecen visibles. Los títulos de dos líneas y los textos del bloque principal disponen de espacio y límites explícitos.
-- Actualizaciones desde GitHub en Ajustes → Información y actualizaciones → Actualizaciones. Comprobación automática diaria al abrir Vela, aviso discreto en Inicio y descarga automática opcional.
-- Selección de versiones estables o preliminares. Descargas acotadas, comprobación SHA-256, paquete, versión y firma antes de entregar el APK al instalador de Android.
-- Instalación confirmada por el usuario; las versiones anteriores requieren instalar esta actualización manualmente una vez. No se añade un servicio permanente.
-- Pruebas nativas de navegación con mando, títulos largos, transferencias, cancelación, integridad, firma y permisos. Actualización real mediante el instalador de Android comprobada en emulador, conservando preferencias.
-
-
-## 1.11.0 Preview · 2026-10-21
-
-- Seguir viendo con tarjetas panorámicas uniformes, servicio, episodio, progreso y tiempo restante de Plex y de las apps que lo publiquen en Android TV.
-- Últimas subidas de Plex con carteles verticales, orden por incorporación y hasta doce títulos debajo de Seguir viendo.
-- Difuminados nativos en los extremos al quedar contenido fuera de cada fila.
-- Fondo a toda altura, sin el corte anterior al final del degradado; las filas se recortan dentro de su ventana al desplazarse.
-- Caché de imágenes conservada y carga de arte limitada a lo visible. Capturas nativas 4K y pruebas de navegación, formato, progreso, extremos y privacidad de la configuración.
-
-## 1.10.4 Preview · 2026-10-21
-
-- El tiempo restante de los programas se muestra en horas y minutos cuando supera una hora: «2 h 15 min» en lugar de «135 min».
-- Las horas exactas se muestran sin «0 min»; los tiempos de hasta una hora conservan los minutos.
-- Se mantienen la actualización por minuto y los límites de la pantalla de canales.
-
-## 1.10.3 Preview · 2026-10-21
-
-- Minutos restantes y barra de progreso del programa en emisión en cada tarjeta de canal.
-- Cuenta atrás según la guía, actualizada con el temporizador de minuto existente y sin consultas adicionales.
-- Cambio al siguiente programa y retirada del contador cuando falta un horario válido.
-- Actualizaciones sin reconstruir las tarjetas ni desplazar el foco del mando; se mantienen doce canales por página.
-- Pruebas de límites de horario, datos ausentes, último minuto, cambio de programa y cierre de la pantalla.
-
-## 1.10.2 Preview · 2026-10-21
-
-- Nueva biblioteca de apps con iconos cuadrados grandes, nombres debajo y seis columnas.
-- Una sola cuadrícula: todas las favoritas primero, respetando el orden de la barra y sin duplicados.
-- Iconos adaptativos con sus propias capas y colores; selección discreta y fondo opaco en degradado.
-- Carga local en segundo plano, celdas recicladas y recursos liberados al cerrar o pausar.
-- Caché de iconos de 1 MiB; el modo ligero reduce resolución y caché a 512 KiB.
-- Navegación con mando y orden de más de cuatro favoritas comprobados en emulador.
-
-## 1.10.1 Preview · 2026-10-21
-
-- Tus apps muestra los iconos originales en una cuadrícula con tarjetas recicladas y navegación por mando.
-- Iconos locales bajo demanda, caché de 512 KiB y liberación al cerrar, pausar o cambiar de pantalla.
-- Navegación entre favoritas y aplicaciones, con límites claros en las filas y columnas.
-- Presentación del proyecto renovada y textos de cuentas y salvapantallas más directos.
-
-## Galería 4K · 2026-10-21
-
-- 29 capturas nativas de alta resolución, con carteles y fondos reales de Plex autorizados por el usuario.
-- Perfil y servidor anonimizados; progreso, páginas y ciudad de ejemplo.
-- Nuevas vistas de Películas y Series. El APK y sus límites de memoria se mantienen.
-
-## 1.10.0 Preview — 2026-10-21
-
-- Seis colores de acento para selección del menú, acción principal, progreso y Ajustes.
-- Carteles compactos, equilibrados o grandes, conservando la proporción y mostrando la imagen completa.
-- Fondo más oscuro, equilibrado o más visible, sin añadir imágenes ni animaciones continuas.
-- Restaurar apariencia conserva las cuentas, aplicaciones, clima y preferencias de rendimiento.
-- Publicación con configuración neutra, galería de demostración y créditos de las imágenes.
-- Plataforma de compilación 34 coherente en Windows y Linux.
-
-Incluye la integración web de TV preparada en 1.9.1. La página oficial de Cuatro y el vídeo HTML5 de prueba se han comprobado en el emulador; los directos de las plataformas necesitan verificación física.
-
-## Funciones anteriores
-
-Biblioteca de Plex por páginas, Seguir viendo separado, imágenes con cachés y trabajo acotados, avatar y nombre del servidor, accesos configurables y ordenables con el mando, hora y clima, dos estilos de salvapantallas, configuración por instalación y televisión en directo con favoritos y guía.
+- Authorised original movie artwork with anonymised demonstration state, Movies and Series previews, six accent colours, three poster sizes and background intensity controls.
+- Earlier features include paged Plex libraries, separate Continue watching, bounded artwork caches, configurable sidebar, clock/weather, two screensaver styles and live TV favourites/guide. Historical web integrations were subsequently removed.

@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 /** Visual preferences and workers that retire after ten idle seconds. */
 final class Visuals {
     private Visuals() {}
-    static SharedPreferences prefs(Context c) { return c.getSharedPreferences("visuals",Context.MODE_PRIVATE); }
+    static SharedPreferences prefs(Context c) { return VelaWorkspace.prefs(c,"visuals"); }
     static boolean light(Context c) {
         ActivityManager m=(ActivityManager)c.getSystemService(Context.ACTIVITY_SERVICE);
         return prefs(c).getBoolean("light",m!=null&&m.isLowRamDevice());

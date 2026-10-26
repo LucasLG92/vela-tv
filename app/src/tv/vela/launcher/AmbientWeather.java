@@ -95,7 +95,7 @@ final class AmbientWeather {
                     if(closed||resolved)return;
                     if(fix==null){fallback();return;}
                     resolved=true;main.removeCallbacksAndMessages(null);location.cancel();
-                    Place p=new Place("Ubicación de la TV","",fix.getLatitude(),fix.getLongitude(),"");
+                    Place p=new Place(L10n.text("TV location"),"",fix.getLatitude(),fix.getLongitude(),"");
                     prefs(context).edit().putString("autoLat",Double.toString(p.lat)).putString("autoLon",Double.toString(p.lon)).putLong("autoAt",System.currentTimeMillis()).apply();use(p);
                 });return;
             }
@@ -104,7 +104,7 @@ final class AmbientWeather {
     }
     private void fallback(){
         if(closed||resolved)return;resolved=true;if(location!=null)location.cancel();main.removeCallbacksAndMessages(null);
-        Place p=manual(context);if(p==null)try{SharedPreferences stored=prefs(context);long age=System.currentTimeMillis()-stored.getLong("autoAt",0);if(age>=0&&age<7*86400_000L)p=new Place("Ubicación de la TV","",Double.parseDouble(stored.getString("autoLat","")),Double.parseDouble(stored.getString("autoLon","")),"");}catch(Exception ignored){}
+        Place p=manual(context);if(p==null)try{SharedPreferences stored=prefs(context);long age=System.currentTimeMillis()-stored.getLong("autoAt",0);if(age>=0&&age<7*86400_000L)p=new Place(L10n.text("TV location"),"",Double.parseDouble(stored.getString("autoLat","")),Double.parseDouble(stored.getString("autoLon","")),"");}catch(Exception ignored){}
         use(p);
     }
     private void use(Place place){
@@ -112,7 +112,7 @@ final class AmbientWeather {
         if(place==null){listener.update(null,Ui.tr("Escolha sua localização nos Ajustes","Choose your location in Settings","Elige tu ubicación en Ajustes"));return;}
         SharedPreferences p=prefs(context);
         if(place.key().equals(p.getString("cacheKey","")))try{last=parse(p.getString("cache",""),place.name,p.getLong("cacheAt",0));}catch(Exception ignored){}
-        long now=System.currentTimeMillis();if(last!=null&&last.usable(now))listener.update(last,"");else listener.update(null,"Consultando el tiempo de "+place.name+"…");
+        long now=System.currentTimeMillis();if(last!=null&&last.usable(now))listener.update(last,"");else listener.update(null,L10n.text("Loading weather for ")+place.name+"…");
         if(last!=null&&last.fresh(now)){main.postDelayed(refresh,Math.max(1000,FRESH-(now-last.at)));return;}
         refresh();
     }
@@ -121,7 +121,7 @@ final class AmbientWeather {
         io.execute(()->{try{
             String body=get("https://api.open-meteo.com/v1/forecast?latitude="+place.lat+"&longitude="+place.lon+"&current=temperature_2m,weather_code,is_day&timezone=auto");Snapshot snapshot=parse(body,place.name,System.currentTimeMillis());
             main.post(()->{if(closed)return;last=snapshot;prefs(context).edit().putString("cache",body).putString("cacheKey",place.key()).putLong("cacheAt",snapshot.at).apply();listener.update(snapshot,"");main.postDelayed(refresh,FRESH);});
-        }catch(Exception ignored){main.post(()->{if(closed)return;listener.update(last!=null&&last.usable(System.currentTimeMillis())?last:null,"Tiempo no disponible");main.postDelayed(refresh,15*60_000L);});}});
+        }catch(Exception ignored){main.post(()->{if(closed)return;listener.update(last!=null&&last.usable(System.currentTimeMillis())?last:null,L10n.text("Weather unavailable"));main.postDelayed(refresh,15*60_000L);});}});
     }
     void close(){closed=true;if(location!=null)location.cancel();main.removeCallbacksAndMessages(null);io.shutdownNow();last=null;selected=null;}
 }

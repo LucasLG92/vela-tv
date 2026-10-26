@@ -58,7 +58,7 @@ final class InstalledAppsGrid extends GridView {
                 List<SidebarApps.Choice> all=SidebarApps.choices(context);Map<String,SidebarApps.Choice> remaining=new LinkedHashMap<>();
                 for(SidebarApps.Choice choice:all)remaining.put(choice.pkg,choice);
                 for(String pkg:order){SidebarApps.Choice choice=remaining.remove(pkg);if(choice!=null)found.add(choice);}
-                found.addAll(remaining.values());
+                found.addAll(remaining.values());List<String> custom=VelaLayout.apps(context);if(!custom.isEmpty())found.sort(Comparator.comparingInt(choice->{int at=custom.indexOf(choice.pkg);return at<0?10000:at;}));
             }catch(RuntimeException ignored){}
             main.post(()->{
                 if(released)return;choices.addAll(found);adapter.notifyDataSetChanged();

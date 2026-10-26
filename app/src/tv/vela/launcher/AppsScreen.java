@@ -16,9 +16,9 @@ final class AppsScreen extends VelaScreen {
     protected void onCreate(Bundle state){if(state!=null)selection=state.getInt("selection",0);}
     protected void onResume(){
         root=new FrameLayout(this);TextView status=label(Ui.tr("Carregando aplicativos…","Loading apps…","Cargando aplicaciones…"),22),count=label("",20),hint=label(Ui.tr("Seus favoritos primeiro","Your favorites first","Tus favoritas primero"),24);
-        place(hint,74,22,1240,48);place(count,1420,22,270,48);place(status,74,100,1600,70);
+        hint.setText(L10n.text("▦  Folders and layout"));hint.setFocusable(true);hint.setId(View.generateViewId());hint.setOnKeyListener((v,k,e)->{if(e.getAction()==KeyEvent.ACTION_DOWN&&k==KeyEvent.KEYCODE_DPAD_LEFT){navigation.navigationTarget(this).requestFocus();return true;}if(e.getAction()==KeyEvent.ACTION_DOWN&&k==KeyEvent.KEYCODE_DPAD_DOWN){if(grid!=null)grid.requestFocus();return true;}return false;});hint.setOnClickListener(v->{if(owner instanceof VelaHub.Owner)((VelaHub.Owner)owner).tools(6);});place(hint,74,22,1240,48);place(count,1420,22,270,48);place(status,74,100,1600,70);
         View menu=navigation.navigationTarget(this);
-        grid=new InstalledAppsGrid(this,Arrays.asList(SidebarApps.slots(this)),menu,status,count,item->{Intent intent=HomeApps.launchIntent(getPackageManager(),item.pkg);if(intent!=null)startActivity(intent);},false);place(grid,26,90,1738,824);grid.initialSelection(selection);setContentView(root);
+        grid=new InstalledAppsGrid(this,Arrays.asList(SidebarApps.slots(this)),hint,status,count,item->{Intent intent=HomeApps.launchIntent(getPackageManager(),item.pkg);if(intent!=null)startActivity(intent);},false);place(grid,26,90,1738,824);grid.initialSelection(selection);setContentView(root);
     }
     private TextView label(String text,int size){TextView v=new TextView(this);v.setText(text);v.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,size);v.setTextColor(VelaTheme.SECONDARY);v.setTypeface(Ui.medium);return v;}
     private void place(View v,int x,int y,int w,int h){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;root.addView(v,p);}

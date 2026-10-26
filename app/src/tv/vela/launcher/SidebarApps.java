@@ -13,7 +13,7 @@ final class SidebarApps {
     static final String YOUTUBE="com.google.android.youtube.tv";
     private static final String[] DEFAULTS={"com.plexapp.android",YOUTUBE,"com.amazon.amazonvideo.livingroom","com.tv.tdtspain"};
     private SidebarApps() {}
-    static SharedPreferences prefs(Context c){return c.getSharedPreferences("sidebar_apps",Context.MODE_PRIVATE);}
+    static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"sidebar_apps");}
     static String[] slots(Context c){
         try {
             String saved=prefs(c).getString("slots",null);

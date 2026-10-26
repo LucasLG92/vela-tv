@@ -33,7 +33,7 @@ final class TvInputs {
         public void stop(){changed=null;if(registered){registered=false;try{manager.unregisterCallback(callback);}catch(RuntimeException ignored){}}}
     }
     static String clean(String value){if(value==null)return "";String text=value.replaceAll("[\\p{Cntrl}]"," ").trim().replaceAll("\\s+"," ");return text.substring(0,Math.min(120,text.length()));}
-    static SharedPreferences prefs(Context c){return c.getSharedPreferences("input_cards",0);}
+    static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"input_cards");}
     static String preset(Context c,String id){String value=prefs(c).getString("device_"+LiveTvData.hash(id),"auto");return Arrays.asList(PRESETS).contains(value)?value:"auto";}
     static void assign(Context c,String id,String model){if(!Arrays.asList(PRESETS).contains(model))return;SharedPreferences.Editor e=prefs(c).edit();String key="device_"+LiveTvData.hash(id);if(model.equals("auto"))e.remove(key);else e.putString(key,model);e.apply();}
     static String detect(String label){return DeviceProfiles.detect(label);}

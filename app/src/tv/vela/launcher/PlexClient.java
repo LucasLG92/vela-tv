@@ -104,12 +104,12 @@ class PlexClient {
                 if (!prefs.edit().putString("serverUri", trimSlash(url)).putString("serverToken", server.token)
                         .putString("serverId", server.id).putString("serverName", server.name)
                         .remove("libraryCache").remove("libraryAt").commit()) {
-                    throw new IOException("No se ha podido guardar la conexión.");
+                    throw new IOException(Ui.problem("Could not save the connection.","No se ha podido guardar la conexión."));
                 }
                 return;
             } catch (IOException ignored) {}
         }
-        throw new IOException("No se ha podido conectar de forma segura. Comprueba que el servidor esté encendido.");
+        throw new IOException(Ui.problem("Could not connect securely. Check that the server is on.","No se ha podido conectar de forma segura. Comprueba que el servidor esté encendido."));
     }
     static final class Film {
         String key, title, summary, thumb, art, meta, type;
@@ -161,9 +161,9 @@ class PlexClient {
     }
     static LibraryPage parsePage(JSONObject root,int offset) throws Exception {
         JSONObject container=root.optJSONObject("MediaContainer");
-        if(container==null||container.optInt("offset",offset)!=offset)throw new IOException("Página no disponible.");
+        if(container==null||container.optInt("offset",offset)!=offset)throw new IOException(Ui.problem("Page unavailable.","Página no disponible."));
         JSONArray metadata=container.optJSONArray("Metadata");int received=metadata==null?0:metadata.length();
-        if(received>PAGE_SIZE)throw new IOException("El servidor no ha respetado el límite de página.");
+        if(received>PAGE_SIZE)throw new IOException(Ui.problem("The server exceeded the page limit.","El servidor no ha respetado el límite de página."));
         int total=container.has("totalSize")?Math.max(0,container.optInt("totalSize")):-1;
         List<Film> result=new ArrayList<>();Set<String> seen=new HashSet<>();
         for(int i=0;i<received;i++){
@@ -200,7 +200,7 @@ class PlexClient {
     static void mergeRecent(JSONObject root,JSONObject response) throws Exception {
         JSONObject container=response.optJSONObject("MediaContainer"),home=root.optJSONObject("MediaContainer");if(container==null||home==null)return;
         JSONArray metadata=container.optJSONArray("Metadata");if(metadata==null)return;
-        if(metadata.length()>PAGE_SIZE)throw new IOException("El servidor no ha respetado el límite de novedades.");
+        if(metadata.length()>PAGE_SIZE)throw new IOException(Ui.problem("The server exceeded the recent additions limit.","El servidor no ha respetado el límite de novedades."));
         JSONArray existing=home.optJSONArray("Hub"),merged=new JSONArray().put(new JSONObject().put("hubIdentifier","vela.recent").put("Metadata",metadata));
         // The dedicated feed replaces recent hubs, avoiding stale fallback titles after removals.
         for(int i=0;existing!=null&&i<existing.length();i++){JSONObject hub=existing.optJSONObject(i);if(hub!=null&&!recentHub(hub.optString("hubIdentifier").toLowerCase(Locale.ROOT)))merged.put(hub);}
@@ -272,7 +272,7 @@ class PlexClient {
         long added=item.optLong("addedAt");if(added>0&&added<=Long.MAX_VALUE/1000)film.addedAtMs=added*1000;
         if(type.equals("episode"))film.episodeLabel="T"+item.optInt("parentIndex")+" · E"+item.optInt("index");
         if(duration>0&&offset>0)film.progress=Math.min(1f,(float)offset/duration);
-        film.section=resume?"Seguir viendo":"En tu biblioteca";
+        film.section=resume?Ui.problem("Continue watching","Seguir viendo"):L10n.text("In your library");
         return film;
     }
     static String watchedPath(String key)throws IOException {if(key==null||!key.matches("[0-9]{1,20}"))throw new IOException("Invalid Plex item");return "/:/scrobble?identifier=com.plexapp.plugins.library&key="+key;}
@@ -300,7 +300,7 @@ class PlexClient {
     private byte[] bytes(String url,String token,String body,int timeout,int limit)throws IOException{return bytes(url,token,body,timeout,limit,body==null?"GET":"POST");}
     private byte[] bytes(String url, String token, String body, int timeout, int limit,String method) throws IOException {
         URL address = new URL(url);
-        if (!address.getProtocol().equals("https")) throw new IOException("La conexión debe usar HTTPS.");
+        if (!address.getProtocol().equals("https")) throw new IOException(Ui.problem("The connection must use HTTPS.","La conexión debe usar HTTPS."));
         HttpURLConnection connection = (HttpURLConnection) address.openConnection();
         connection.setInstanceFollowRedirects(false);
         connection.setConnectTimeout(timeout); connection.setReadTimeout(timeout);
@@ -309,7 +309,7 @@ class PlexClient {
         connection.setRequestProperty("X-Plex-Product", PRODUCT);
         connection.setRequestProperty("X-Plex-Version", "1.0.0");
         connection.setRequestProperty("X-Plex-Platform", "Android");
-        connection.setRequestProperty("Accept-Language",Locale.getDefault().toLanguageTag());connection.setRequestProperty("X-Plex-Language",Locale.getDefault().toLanguageTag());
+        connection.setRequestProperty("Accept-Language",Ui.apiLanguage());connection.setRequestProperty("X-Plex-Language",Ui.apiLanguage());
         if (!token.isEmpty()) connection.setRequestProperty("X-Plex-Token", token);
         try {
             connection.setRequestMethod(method);
@@ -319,8 +319,8 @@ class PlexClient {
                 try (OutputStream out = connection.getOutputStream()) { out.write(body.getBytes(StandardCharsets.UTF_8)); }
             }
             int status = connection.getResponseCode();
-            if (status == 401) throw new IOException("La sesión de Plex ha caducado. Vuelve a vincularla.");
-            if (status != 200 && status != 201 && status != 204) throw new IOException("Plex no está disponible (" + status + ").");
+            if (status == 401) throw new IOException(Ui.problem("Your Plex session has expired. Connect again.","La sesión de Plex ha caducado. Vuelve a vincularla."));
+            if (status != 200 && status != 201 && status != 204) throw new IOException(Ui.problem("Plex is unavailable (","Plex no está disponible (") + status + ").");
             if(status==204)return new byte[0];
             try (InputStream in = connection.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[8192]; int read;

@@ -30,10 +30,14 @@ Copy-Item -LiteralPath 'assets/channel-logos/CREDITS.txt' -Destination 'out/asse
 foreach($name in @('hdmi','live_tv','apps','settings')){Copy-Item -LiteralPath (Join-Path $repo "app/assets/symbols/$name.png") -Destination 'out/assets/symbols'}
 Copy-Item -LiteralPath (Join-Path $repo 'app/assets/symbols/LICENSE-material-symbols.txt') -Destination 'out/assets/licenses'
 Run (Join-Path $bt 'aapt2.exe') @('compile','--dir','out/res','-o','out/res.zip')
+Copy-Item -LiteralPath (Join-Path $repo 'app/assets/i18n') -Destination 'out/assets' -Recurse
+Copy-Item -LiteralPath (Join-Path $repo 'app/assets/connect.html') -Destination 'out/assets'
+Copy-Item -LiteralPath (Join-Path $repo 'app/assets/licenses/qr-generator-MIT.txt') -Destination 'out/assets/licenses'
 Run (Join-Path $bt 'aapt2.exe') @('link','-o','out/base.apk','-I',$android,'--manifest','AndroidManifest.xml','--java','out/gen','--custom-package','tv.vela.launcher','out/res.zip','--min-sdk-version','26','--target-sdk-version','33','-A','out/assets')
 $sources=@(Get-ChildItem -LiteralPath 'src','out/gen' -Filter '*.java' -Recurse | ForEach-Object {$_.FullName})
-foreach($name in @('TvInputs','DeviceProfiles','DeviceIcons','VelaTheme','TvTimelineView','UpNextView','TvRemotePress','TvPersonalization','TvChannelOrganizer')){$sources+=Join-Path $repo "app/src/tv/vela/launcher/$name.java"}
+foreach($name in @('L10n','TvInputs','DeviceProfiles','DeviceIcons','VelaTheme','TvTimelineView','UpNextView','TvRemotePress','TvPersonalization','TvChannelOrganizer','VelaWorkspace','VelaReading','VelaShows','VelaReminderReceiver','VelaRemote','VelaPlaybackPanel','VelaDiscovery','VelaLayout','VelaGuideFix','VelaConnect','VelaSync','VelaQr','VelaHub','VelaToolsData','VelaGuideSearch','VelaProgrammeRefresh','VelaAntennaBackup')){$sources+=Join-Path $repo "app/src/tv/vela/launcher/$name.java"}
 $utf8=New-Object System.Text.UTF8Encoding($false)
+$sources+=@(Get-ChildItem -LiteralPath (Join-Path $repo 'app/src/io/nayuki/qrcodegen') -Filter '*.java' | ForEach-Object {$_.FullName})
 [IO.File]::WriteAllLines((Join-Path $out 'sources.txt'),@($sources | ForEach-Object {'"'+$_.Replace('\','/')+'"'}),$utf8)
 Run (Join-Path $env:JAVA_HOME 'bin/javac.exe') @('-encoding','UTF-8','-source','8','-target','8','-bootclasspath',($android+';'+(Join-Path $bt 'core-lambda-stubs.jar')),'-classpath',$android,'-d','out/classes','@out/sources.txt')
 Run (Join-Path $env:JAVA_HOME 'bin/jar.exe') @('cf','out/classes.jar','-C','out/classes','.')

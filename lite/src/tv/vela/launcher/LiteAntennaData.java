@@ -39,9 +39,9 @@ class LiteAntennaData {
         Map<String,List<LiveTvData.Programme>> result=new HashMap<>();
         for(LiveTvData.Channel channel:channels){
             if(cancel.isCanceled()||Thread.currentThread().isInterrupted())throw new InterruptedIOException();
-            Uri uri=TvContract.buildProgramsUriForChannel(TvContract.buildChannelUri(channel.providerId),from*1000,to*1000);List<LiveTvData.Programme> rows=new ArrayList<>();
+            long offset=VelaGuideFix.offset(context,channel.name);Uri uri=TvContract.buildProgramsUriForChannel(TvContract.buildChannelUri(channel.providerId),(from-offset)*1000,(to-offset)*1000);List<LiveTvData.Programme> rows=new ArrayList<>();
             try(Cursor cursor=context.getContentResolver().query(uri,new String[]{"start_time_utc_millis","end_time_utc_millis","title","short_description"},null,null,"start_time_utc_millis ASC",cancel)){
-                for(int scanned=0;cursor!=null&&cursor.moveToNext()&&scanned++<128&&rows.size()<MAX_PROGRAMMES;){long start=cursor.getLong(0)/1000,end=cursor.getLong(1)/1000;String title=cursor.getString(2);if(start<to&&end>from&&end>start&&title!=null&&!title.trim().isEmpty())rows.add(new LiveTvData.Programme(start,end,trim(title,512),trim(cursor.getString(3),1600)));}
+                for(int scanned=0;cursor!=null&&cursor.moveToNext()&&scanned++<128&&rows.size()<MAX_PROGRAMMES;){long start=cursor.getLong(0)/1000+offset,end=cursor.getLong(1)/1000+offset;String title=cursor.getString(2);if(start<to&&end>from&&end>start&&title!=null&&!title.trim().isEmpty())rows.add(new LiveTvData.Programme(start,end,trim(title,512),trim(cursor.getString(3),1600)));}
             }
             result.put(channel.id,rows);
         }

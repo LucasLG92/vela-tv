@@ -1,155 +1,112 @@
 # Vela
 
-## Tu televisión. A tu manera.
+### Your library. Your channels. Your television.
 
-Tu cine, tus series, tus aplicaciones y el directo, en un inicio que apetece abrir. Vela reúne lo que te gusta ver en una interfaz visual, personalizable y pensada para el mando.
+A personal home screen for **Android TV and Google TV**. Bring your Plex or Jellyfin library, live channels, apps and HDMI devices together in a calm interface made for your remote.
 
-**[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.25.2-preview)** · [Ver las 52 capturas en 4K](gallery/README.md) · [Instalación](guide/INSTALL.es.md) · [English](guide/EN.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.28.0-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
 
-**[Vela Lite · HDMI, antena y apps para tu televisión](lite/README.md)**
+**Android 11+ · English / Español / Português · Preview · MIT**
 
-![Inicio de Vela con Seguir viendo panorámico](gallery/01-inicio.webp)
+![Vela home with continue watching, original artwork and recently added titles](gallery/01-home.webp)
 
-## Dale protagonismo a tu biblioteca
+## Pick up your story
 
-Conecta Plex o Jellyfin y deja que tus películas y series llenen la pantalla con sus carteles y fondos originales. Retoma películas y capítulos desde **Seguir viendo**, con el tiempo restante a la vista. Justo debajo, **Últimas subidas** reúne las novedades de tu servidor con sus carteles originales. Elige la biblioteca que quieres mostrar y conserva tus conexiones. Explora el resto de la biblioteca por páginas.
+Connect **Plex or Jellyfin** and let your own posters and artwork fill the screen. Continue watching shows what you have started, how much time remains and the next available episode. Hold OK to mark one film or episode as watched on your connected server.
 
-| Tus películas | Tus series |
+Recently added brings your newest films and series home. Open Movies or Series to browse the full library in small pages, with server-backed filters and newest additions first.
+
+| Movies | Series |
 | --- | --- |
-| ![Películas en Vela](gallery/28-peliculas.webp) | ![Series en Vela](gallery/29-series.webp) |
+| ![Movies library](gallery/28-movies.webp) | ![Series library](gallery/29-series.webp) |
 
-## Conecta tu cine
+[Connect Jellyfin](guide/JELLYFIN.md) · [Library filters](guide/LIBRARY-FILTERS.md) · [Continue watching](guide/CONTINUE-WATCHING.md)
 
-Vincula tu cuenta de Plex con un código y elige tu servidor con el mando. Una conexión sencilla, con el mismo diseño de tu inicio y tu biblioteca a un OK de distancia.
+## Make room for live television
 
-![Conexión de Plex y selección de servidor](gallery/42-servidores-plex.webp)
+Your **M3U playlists, Xtream service and television antenna**, in the same Vela interface. Explore a horizontal programme guide or large channel cards. See what is on, how long it has left and what comes next.
 
-## Encuentra justo lo que te apetece
+Hold OK for favourites. Put them in your order, hide channels and categories you do not use, revisit recent channels or return to the previous channel. During playback, press Right to browse without leaving the picture.
 
-Películas y Series se abren con **las últimas incorporaciones primero**. Filtra por género, año, estado de visto y las opciones de tu servidor, combina tus preferencias o cambia el orden. Cada sección conserva sus filtros mientras navegas, también al pasar de página.
+![Horizontal television guide with categories, original channel logos and programme progress](gallery/40-tv-guide.webp)
 
-| Filtra tu biblioteca | Elige el orden |
-| --- | --- |
-| ![Filtros nativos de la biblioteca](gallery/38-filtros-biblioteca.webp) | ![Ordenación del catálogo](gallery/39-ordenar-biblioteca.webp) |
+The Full edition can try another matching signal when a stream fails. You can correct an EPG match or time offset yourself. What to watch explores Now, Tonight and the next 48 hours, with categories supplied by the guide.
 
-[Cómo usar los filtros](guide/FILTROS.es.md)
+For supported clear HLS streams, enable optional **local pause and rewind**. The selected channel uses one decoder and a bounded private disk buffer, cleared on exit. Past programmes are available only when your source explicitly advertises a compatible archive. Antenna pause depends on your television's tuner.
 
-## Retoma una historia. Descubre la siguiente.
+[Live TV setup and controls](guide/IPTV.md) · [Compatibility and limits](guide/COMPATIBILITY.md)
 
-Mantén OK sobre un título de **Seguir viendo** para marcarlo como visto en Plex o Jellyfin. El siguiente capítulo pendiente de tus series vuelve a tu inicio cuando está disponible en el servidor. [Así funciona](guide/SEGUIR-VIENDO.es.md).
+## Recognise every app
 
-Una fila para lo que dejaste a medias y otra para lo que acaba de llegar. Recorre tus títulos con el mando y deja que cada historia llene la pantalla.
+Large, rounded icons make your apps easy to find. Pin more shortcuts to the sidebar, hold OK to rearrange or remove them, and group installed apps into folders. Removing a shortcut keeps the app installed.
 
-| Seguir viendo | Últimas subidas |
-| --- | --- |
-| ![Continúa películas, series y vídeos](gallery/04-seguir-viendo.webp) | ![Novedades de tu biblioteca](gallery/30-ultimas-subidas.webp) |
+Press OK on a pinned app to launch it. Press Right on YouTube to explore the rows it shares with Android TV. Other services can appear in Continue watching when they publish compatible Watch Next information; Vela never imports their private sessions.
 
-Las otras aplicaciones pueden aportar su progreso cuando lo comparten con Android TV. Consulta la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
+![App drawer with original application icons](gallery/09-apps.webp)
 
-## Tu biblioteca también puede ser Jellyfin
+## A home that feels like yours
 
-Conecta tu servidor con un código, elige tu biblioteca y vuelve a tus películas y series. Carteles originales, novedades y Seguir viendo con el tiempo restante del servidor. Plex y Jellyfin tienen su propio acceso; tú eliges cuál aparece en Inicio.
+Choose your accent, poster size and background intensity. Arrange, resize or hide home rows. Create local profiles with separate layouts and favourites, adjust reading size and guide density, or set screen margins for your television.
 
-![Biblioteca de Jellyfin en Vela](gallery/34-jellyfin-inicio.webp)
+Configure apps, folders and favourites **from your phone** through a temporary local HTTPS session. Explicitly pair another Vela to receive compatible preferences when it opens. Accounts and provider credentials stay on each television, and conflicting local edits are kept for review.
 
-[Conectar Jellyfin](guide/JELLYFIN.es.md)
+![Home layout, folders and personalisation tools](gallery/55-home-layout.webp)
 
-## Tus apps, reconocibles al instante
+Every menu is available in **English, Spanish and Portuguese**. Choose a language in Appearance or follow your TV's system language. Channel names, account names and library titles keep their original text.
 
-Plex, YouTube, Prime Video y las aplicaciones que tú elijas. Iconos grandes, formas suaves y un espacio para cada app. Tus favoritas aparecen primero, en el orden de tu barra, y todo se recorre con el mando.
+[Personalisation, phone setup, profiles and sync](guide/YOUR-VELA.md) · [Integrated settings](guide/INTEGRATED-SETTINGS.md)
 
-Pon tus accesos en el orden que prefieras. Mantén OK para moverlos o quitarlos de la barra, sin desinstalar nada.
+## Your connected devices, in view
 
-![Aplicaciones con sus iconos originales](gallery/09-todas-las-apps.webp)
+HDMI inputs share your home screen's sidebar and visual style. Original brand icons help identify consoles, TV boxes, PCs and Macs when Android reports an active connection. Unknown or disconnected inputs keep their HDMI port name. Hold OK to choose a device profile yourself.
 
-## Tus dispositivos, también en Vela
+![HDMI inputs with original brand symbols and connection state](gallery/48-hdmi-inputs.webp)
 
-Entradas comparte el diseño de Inicio: un dispositivo destacado, iconos con los colores de sus marcas y una fila de conexiones para recorrer con el mando. Nintendo, PlayStation, Xbox, Sega, ordenadores, streaming y equipos de vídeo o audio tienen su lugar.
+[How HDMI detection works](guide/HDMI.md)
 
-Solo aparece el dispositivo cuando la televisión comunica una conexión activa. Los puertos sin señal muestran **HDMI 1, HDMI 2…**. Mantén OK para elegir el modelo cuando el televisor o un adaptador no lo identifica. [Cómo funciona la detección](guide/HDMI.es.md).
+## Let the screen take a breath
 
-![Entradas HDMI con iconos](gallery/48-entradas-hdmi.webp)
+Choose aerial landscapes and cities, or artwork from your connected library. Add a quiet clock and weather for your approximate location or chosen city. Library images move gently; Reduce motion keeps them still.
 
-## Cada ajuste, en su sitio
+![Library screensaver with clock and demonstration weather](gallery/20-library-screensaver.webp)
 
-Televisión, aspecto, salvapantallas, cuentas, menú, actualizaciones, sistema e información. Ocho categorías siempre a mano, un panel amplio para cada opción y el mismo tema grafito de tu inicio. Entra con derecha, cambia lo que quieras con OK y vuelve con izquierda.
+## Two editions, one visual language
 
-Las opciones largas se recorren dentro de su panel. Elige tu color de acento, conecta tus servicios o prepara la próxima actualización sin perder tu lugar. Los permisos y el instalador se confirman en Android.
+| | Vela | Vela Lite |
+| --- | --- | --- |
+| Designed for | Your main TV or Android TV box | A television used with an HDMI box, console or computer |
+| Android | 11+ | 8.0+ |
+| Plex / Jellyfin library | Yes | — |
+| Live sources | M3U, Xtream, antenna | Antenna |
+| Guide, favourites, hidden channels, recent and previous channel | Yes | Yes |
+| Apps, folders and HDMI devices | Yes | Yes |
+| Phone setup, local profiles, backups and preference sync | Yes | Yes, compatible settings |
+| Screensaver | Aerials or library artwork | Television's own screensaver |
+| Optional HLS pause and provider archives | Supported sources | — |
+| Tuner pause | When the manufacturer exposes it | When the manufacturer exposes it |
 
-![Ajustes dentro del inicio de Vela](gallery/10-ajustes.webp)
+**[Explore Vela Lite →](lite/README.md)**
 
-## Hazlo tuyo
+## Built to stay light
 
-Seis colores de acento, tres tamaños de cartel y distintas intensidades de fondo. Un aspecto más discreto, más colorido o con el cine a lo grande: tú eliges.
+Home artwork and app icons use bounded caches. Libraries and guides are paged, stale work is cancelled, and players are released when you leave. No background video plays on Home. Only the selected language catalogue is loaded; English uses the source text directly.
 
-| Menta · compacto | Lavanda · carteles grandes |
-| --- | --- |
-| ![Vela en menta](gallery/02-aspecto-menta-compacto.webp) | ![Vela en lavanda](gallery/03-aspecto-lavanda-grande.webp) |
+Optional HLS rewind stores its history on disk, up to 15 minutes, 256 MiB and 240 segments. Its decoder queue has a 4 MiB target; these limits are not a claim about total application RAM. Lite contains no Plex, Jellyfin, IPTV or Media3 engine.
 
-## También hay sitio para el directo
+## Updates from your remote
 
-El directo tiene su sitio en Vela, justo debajo de Inicio. Tu barra, tu reloj y tus canales en la misma pantalla. La **guía horizontal** te recibe con logos originales, horarios y el tiempo que queda de cada programa. Recorre lo que viene después o vuelve a **Ahora** desde los controles inferiores.
+Vela can check GitHub and download updates automatically. APKs are verified for integrity, package identity and signing certificate. Android asks you to confirm installation; installed update files are cleaned from Vela's private cache afterwards. Your explicit update preferences are kept.
 
-![El directo, integrado en Vela](gallery/40-guia-horizontal.webp)
+## Your data stays yours
 
-**M3U, Xtream o antena.** Tus categorías a la izquierda, tus favoritos a mano y una entrada por canal. El programa seleccionado muestra su logo, horario y progreso al pie de la guía. ¿Prefieres logos grandes? Elige **Canales** en Ajustes y cambia de lista con arriba y abajo.
+Each installation starts with neutral settings. No personal account, IPTV credential or location is bundled. Phone setup stays on your network; backups and sync exclude accounts, tokens, provider URLs, location and viewing history. Public screenshots use demonstration data.
 
-![Tus canales, con sus logos originales](gallery/25-television.webp)
+[Privacy](guide/PRIVACY.md) · [Security](SECURITY.md) · [Credits and licences](NOTICE.md)
 
-### Tu lista, en tu orden
+Vela is a preview. HDMI, native tuning, Home-button behaviour and some playback features depend on what the device and source expose. External services manage their own accounts and playback. See the [compatibility guide](guide/COMPATIBILITY.md) before choosing Vela as your permanent home.
 
-Organizar comparte el diseño de tus ajustes: categorías con iconos a la izquierda, un panel grafito y el color que has elegido para Vela.
+## Build and contribute
 
-Abre **Organizar** y coloca tus favoritos con el mando: OK para coger un canal, arriba o abajo para moverlo y OK para guardar. Atrás cancela el cambio. Oculta los canales que no utilizas y recupera cualquiera desde **Canales ocultos**. También puedes despejar la lista de categorías; sus canales siguen disponibles en Todos.
+[Build and tests](guide/BUILD.md) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md) · [All features](guide/FEATURES.md)
 
-**Recientes** reúne los últimos doce canales que has abierto correctamente. Durante la emisión, el panel ofrece Lista, Favoritos y Recientes, además de **Canal anterior** para volver a lo que estabas viendo. Si tu mando tiene ese botón, también funciona directamente. Cada fuente conserva su propia organización.
-
-![Organizador de canales integrado en el tema de Vela](https://github.com/LucasLG92/vela-tv/releases/download/v1.25.2-preview/Vela-Organizar-tema-demo.png)
-
-*Captura nativa con datos de demostración.*
-
-### Cambia de canal sin salir del directo
-
-Con la información del canal abierta, **A continuación** muestra a la derecha el próximo programa y su horario. La tarjeta utiliza los datos de la guía y se oculta cuando no hay programación disponible.
-
-Mantén **OK** en la guía, en la lista o durante la emisión para guardar o quitar un favorito. La estrella confirma el cambio y conserva tu posición.
-
-Pulsa **derecha**, **arriba** o **abajo** mientras ves un canal. Aparecen sus logos, lo que están emitiendo y cuánto queda, sobre el vídeo que sigue reproduciéndose. Alterna entre **Lista** y **Favoritos**, explora con las flechas y confirma el canal con **OK**. Atrás cierra el panel; **CH+/CH−** cambian directamente de canal. Al empezar, Vela muestra la calidad y la información del programa; después se ocultan para dejarte ver. Pulsa OK para recuperar la información.
-
-![Canales y tiempo restante sobre el directo](gallery/47-canales-durante-directo.webp)
-
-Si una señal IPTV falla, Vela prueba otra del mismo canal, también en menor calidad cuando está disponible. Tu calidad preferida queda guardada. Todo con un único reproductor, sin miniaturas de vídeo ni reproducción mientras exploras la guía.
-
-[Configurar TV en directo](guide/IPTV.es.md) · [Elegir Guía o Canales](gallery/46-ajustes-tv.webp) · [Ver lo que viene después](gallery/41-proximos-programas.webp)
-
-## Incluso las pausas tienen su momento
-
-Paisajes en movimiento o fondos de tu biblioteca, con reloj y tiempo. Elige qué quieres ver cuando descansas del mando.
-
-| Tu biblioteca | Paisajes en movimiento |
-| --- | --- |
-| ![Salvapantallas con fondo de Plex](gallery/20-salvapantallas-plex-demo.webp) | ![Salvapantallas de vídeo](gallery/21-salvapantallas-aereos.webp) |
-
-## Un diseño cuidado. Una base ligera.
-
-Vela carga las imágenes cuando hacen falta y libera recursos al salir, para cuidar la fluidez de tu televisión.
-
-## Siempre al día
-
-Las nuevas versiones llegan desde GitHub a tu televisión. Vela busca actualizaciones al abrirse y te avisa en Inicio. La búsqueda y la descarga automática vienen activadas para que tengas la siguiente versión preparada. Confirma la instalación con el mando y conserva tu configuración; puedes desactivar ambas opciones desde Ajustes. Al terminar, Vela elimina el APK utilizado para liberar espacio.
-
-![Actualizaciones desde la televisión](gallery/33-actualizaciones.webp)
-
-## Empieza por hacerlo tuyo
-
-Instala Vela, conecta tu biblioteca y elige tus aplicaciones. Todo desde la televisión, con un asistente que puedes completar a tu ritmo.
-
-**[Descargar Vela 1.25.2 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/v1.25.2-preview)**
-
-Para **Android TV y Google TV con Android 11 o posterior**. Esta versión es una preview. Consulta la [guía de instalación](guide/INSTALL.es.md) y la [compatibilidad de los servicios](guide/COMPATIBILITY.es.md).
-
----
-
-[Galería](gallery/README.md) · [Funciones](guide/FEATURES.es.md) · [Cambios](CHANGELOG.md) · [Privacidad](guide/PRIVACY.es.md) · [Créditos y licencias](NOTICE.md) · [Contribuir](CONTRIBUTING.md) · [Desarrollo](guide/BUILD.md)
-
-Código bajo [licencia MIT](LICENSE). Las marcas y los contenidos mostrados pertenecen a sus respectivos titulares.
+Vela derives from [Free My TV](https://github.com/simbasjungles/free-my-tv), under the MIT licence. The original copyright and licence are preserved. Product names and artwork belong to their respective owners; Vela is not affiliated with Apple, Plex, Jellyfin, Google or Amazon.

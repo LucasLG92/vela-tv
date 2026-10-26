@@ -25,9 +25,9 @@ final class XtreamClient {
     private static final class GuideEntry {final LiveTvData.Guide guide;final long at;GuideEntry(LiveTvData.Guide g){guide=g;at=System.currentTimeMillis();}}
     XtreamClient(Context c){context=c.getApplicationContext();prefs=context.getSharedPreferences("xtream",Context.MODE_PRIVATE);cache=new TvCatalogCache(context);}
     static final class Account {
-        final String base,user,password,id;final boolean hls,ts;
+        final String base,user,password,id;String zone="UTC";final boolean hls,ts;
         Account(String b,String u,String p,String i,boolean h,boolean t){base=b;user=u;password=p;id=i;hls=h;ts=t;}
-        JSONObject json()throws Exception{return new JSONObject().put("base",base).put("user",user).put("password",password).put("id",id).put("hls",hls).put("ts",ts);}
+        JSONObject json()throws Exception{return new JSONObject().put("base",base).put("user",user).put("password",password).put("id",id).put("hls",hls).put("ts",ts).put("zone",zone);}
     }
     static final class Category {
         final String id,name;Category(String i,String n){id=i;name=n;}
@@ -38,11 +38,12 @@ final class XtreamClient {
         boolean more(){return (page+1)*LiveTvData.PAGE_SIZE<total;}
     }
     boolean connected(){return !prefs.getString("account","").isEmpty()&&!prefs.getString("id","").isEmpty();}
-    String source(){return "xtream:"+prefs.getString("id","");}
+    String source(){if(connected()&&!prefs.contains("portable-source"))try{account();}catch(Exception unavailable){}return "xtream:"+prefs.getString("id","");}
+    private String favoriteKey(){String source=source(),key="favorites-"+LiveTvData.hash(VelaWorkspace.channelSource(context,source)),legacy="favorites-"+LiveTvData.hash(source);SharedPreferences local=VelaWorkspace.prefs(context,"live-tv");if(!key.equals(legacy)&&local.contains(legacy)){SharedPreferences.Editor edit=local.edit();if(!local.contains(key))edit.putStringSet(key,new LinkedHashSet<>(local.getStringSet(legacy,Collections.emptySet())));edit.remove(legacy).commit();}return key;}
     boolean active(){SharedPreferences p=LiveTvData.prefs(context);return connected()&&p.getString("mode",p.getBoolean("xtream",false)?"xtream":"m3u").equals("xtream");}
     Account account()throws Exception{
         JSONObject j=new JSONObject(decrypt(prefs.getString("account","")));Account a=new Account(j.getString("base"),j.getString("user"),j.getString("password"),j.getString("id"),j.optBoolean("hls",true),j.optBoolean("ts",true));
-        if(!a.id.equals(prefs.getString("id","")))throw new IOException("Account unavailable");return a;
+        a.zone=j.optString("zone","UTC");if(!a.id.equals(prefs.getString("id","")))throw new IOException("Account unavailable");if(!prefs.contains("portable-source"))prefs.edit().putString("portable-source",LiveTvData.hash(a.base+"|"+a.user)).commit();return a;
     }
     static String server(String input,boolean allowHttp)throws Exception{
         String value=input.trim();if(value.length()>2048||value.indexOf('\\')>=0||value.matches("(?s).*[\\x00-\\x20\\x7f].*"))throw new IOException("Invalid server");
@@ -60,14 +61,15 @@ final class XtreamClient {
         if(info==null||info.optInt("auth")!=1||!"Active".equalsIgnoreCase(info.optString("status")))throw new IOException("Account not active");
         JSONArray formats=info.optJSONArray("allowed_output_formats");boolean h=formats==null||formats.length()==0,t=h;
         for(int i=0;formats!=null&&i<formats.length();i++){String f=formats.optString(i);h|=f.equalsIgnoreCase("m3u8");t|=f.equalsIgnoreCase("ts");}
-        if(!h&&!t)throw new IOException("Unsupported output");return new Account(draft.base,user,password,draft.id,h,t);
+        if(!h&&!t)throw new IOException("Unsupported output");Account result=new Account(draft.base,user,password,draft.id,h,t);JSONObject serverInfo=j.optJSONObject("server_info");String zone=serverInfo==null?"UTC":serverInfo.optString("timezone","UTC");if(Arrays.asList(TimeZone.getAvailableIDs()).contains(zone))result.zone=zone;return result;
     }
-    synchronized void save(Account a)throws Exception{
-        String encrypted=encrypt(a.json().toString());if(!prefs.edit().clear().putString("account",encrypted).putString("id",a.id).commit())throw new IOException("Cannot save account");
+    synchronized void save(Account a)throws Exception{synchronized(VelaWorkspace.class){
+        String encrypted=encrypt(a.json().toString());if(!prefs.edit().clear().putString("account",encrypted).putString("id",a.id).putString("portable-source",LiveTvData.hash(a.base+"|"+a.user)).commit())throw new IOException("Cannot save account");
         activate();
+        }
     }
     void activate(){LiveTvData.select(context,"xtream");}
-    synchronized void disconnect(){String id=prefs.getString("id","");prefs.edit().clear().commit();guideCache.evictAll();cache.removePrefix("xc:"+id+":");LiveTvData.select(context,"m3u");}
+    synchronized void disconnect(){synchronized(VelaWorkspace.class){String id=prefs.getString("id","");prefs.edit().clear().commit();guideCache.evictAll();cache.removePrefix("xc:"+id+":");LiveTvData.select(context,"m3u");}}
     private javax.crypto.SecretKey key()throws Exception{
         synchronized(XtreamClient.class){KeyStore store=KeyStore.getInstance("AndroidKeyStore");store.load(null);if(store.containsAlias(KEY))return (javax.crypto.SecretKey)store.getKey(KEY,null);
             KeyGenerator generator=KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,"AndroidKeyStore");generator.init(new KeyGenParameterSpec.Builder(KEY,KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());return generator.generateKey();}
@@ -76,7 +78,7 @@ final class XtreamClient {
     private String decrypt(String value)throws Exception{if(value.length()>256*1024)throw new IOException("Private data limit");String[] parts=value.split("\\.");if(parts.length!=2)throw new IOException("Private data unavailable");Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");cipher.init(Cipher.DECRYPT_MODE,key(),new GCMParameterSpec(128,Base64.decode(parts[0],Base64.NO_WRAP)));return new String(cipher.doFinal(Base64.decode(parts[1],Base64.NO_WRAP)),StandardCharsets.UTF_8);}
     static boolean id(String value){return value!=null&&value.matches("[0-9]{1,18}");}
     private static String limited(String s,int n){return s.length()>n?s.substring(0,n):s;}
-    private static String string(JsonReader r)throws IOException{if(r.peek()==JsonToken.NULL){r.nextNull();return "";}if(r.peek()==JsonToken.STRING||r.peek()==JsonToken.NUMBER)return r.nextString();r.skipValue();return "";}
+    private static String string(JsonReader r)throws IOException{if(r.peek()==JsonToken.BOOLEAN)return r.nextBoolean()?"1":"0";if(r.peek()==JsonToken.NULL){r.nextNull();return "";}if(r.peek()==JsonToken.STRING||r.peek()==JsonToken.NUMBER)return r.nextString();r.skipValue();return "";}
     List<Category> categories()throws Exception{return categories(false);}
     List<Category> categories(boolean force)throws Exception{
         long age=System.currentTimeMillis()-prefs.getLong("categories-at",0);String saved=prefs.getString("categories-cache","");
@@ -100,9 +102,9 @@ final class XtreamClient {
                 try(Response response=new Response(endpoint(a,"get_live_streams",category.equals("*")?"":"&category_id="+enc(category)),16*1024*1024);TvCatalogCache.Writer writer=cache.writer(source,response.connection.getContentLengthLong())){
                     JsonReader r=response.reader;r.beginArray();int count=0;
                     while(r.hasNext()){
-                        if(++count>MAX_STREAMS)throw new IOException("Channel limit");String id="",title="",logo="",group=category,type="live";
-                        r.beginObject();while(r.hasNext()){String k=r.nextName();if(k.equals("stream_id"))id=string(r);else if(k.equals("name"))title=limited(string(r),160);else if(k.equals("stream_icon"))logo=limited(string(r),4096);else if(k.equals("category_id"))group=string(r);else if(k.equals("stream_type"))type=string(r);else r.skipValue();}r.endObject();
-                        if(id(id)&&!title.trim().isEmpty()&&type.equals("live"))writer.add(channel(a,id,title,category.equals("*")?names.getOrDefault(group,name):name,safeLogo(a,logo)),false);
+                        if(++count>MAX_STREAMS)throw new IOException("Channel limit");String id="",title="",logo="",group=category,type="live",archive="",archiveDays="";
+                        r.beginObject();while(r.hasNext()){String k=r.nextName();if(k.equals("stream_id"))id=string(r);else if(k.equals("name"))title=limited(string(r),160);else if(k.equals("stream_icon"))logo=limited(string(r),4096);else if(k.equals("category_id"))group=string(r);else if(k.equals("stream_type"))type=string(r);else if(k.equals("tv_archive"))archive=string(r);else if(k.equals("tv_archive_duration"))archiveDays=string(r);else r.skipValue();}r.endObject();
+                        if(id(id)&&!title.trim().isEmpty()&&type.equals("live")){LiveTvData.Channel ch=channel(a,id,title,category.equals("*")?names.getOrDefault(group,name):name,safeLogo(a,logo));try{if(archive.equals("1"))ch.archiveDays=Math.max(0,Math.min(7,Integer.parseInt(archiveDays)));}catch(NumberFormatException absent){}writer.add(ch,false);}
                     }r.endArray();writer.commit("{}");
                 }
             }catch(Exception failure){if(Thread.currentThread().isInterrupted()||!cache.fresh(source,7*86400_000L))throw failure;}
@@ -130,15 +132,22 @@ final class XtreamClient {
     }
     static String title(String value){if(value.length()>4096)return "";try{if(value.length()%4==0&&value.matches("[A-Za-z0-9+/]+={0,2}")){String decoded=new String(Base64.decode(value,Base64.DEFAULT),StandardCharsets.UTF_8);if(decoded.indexOf('\uFFFD')<0&&!decoded.matches("(?s).*[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f].*"))return limited(decoded,512);}}catch(Exception ignored){}return limited(value,512);}
     private JSONObject json(Account a,String action,String suffix,int limit)throws Exception{try(Response response=new Response(endpoint(a,action,suffix),limit);ByteArrayOutputStream out=new ByteArrayOutputStream()){LiveTvData.copy(response.in,out,limit);return new JSONObject(new String(out.toByteArray(),StandardCharsets.UTF_8));}}
-    private List<LiveTvData.Channel> favorites()throws Exception{
-        if(!prefs.contains("favorites"))return new ArrayList<>();Account a=account();JSONArray values=new JSONArray(decrypt(prefs.getString("favorites","")));if(values.length()>MAX_FAVORITES)throw new IOException("Favorite limit");List<LiveTvData.Channel> out=new ArrayList<>();for(int i=0;i<values.length();i++){JSONObject j=values.getJSONObject(i);String id=j.optString("id");if(id(id))out.add(channel(a,id,limited(j.optString("name"),160),limited(j.optString("group"),120),safeLogo(a,j.optString("logo"))));}return out;
+    private List<LiveTvData.Channel> favorites()throws Exception{synchronized(VelaWorkspace.class){
+        Account a=account();String key=favoriteKey(),detailKey="items-"+LiveTvData.hash(source());SharedPreferences local=VelaWorkspace.prefs(context,"live-tv"),details=VelaWorkspace.prefs(context,"xtream-favorites");String stored=details.getString(detailKey,"");if(stored.isEmpty()&&VelaWorkspace.active(context).equals(VelaWorkspace.DEFAULT))stored=prefs.getString("favorites","");
+        Set<String> ids=local.contains(key)?new LinkedHashSet<>(local.getStringSet(key,Collections.emptySet())):null;List<LiveTvData.Channel> out=new ArrayList<>();Set<String> found=new HashSet<>();
+        if(!stored.isEmpty()){JSONArray values=new JSONArray(decrypt(stored));if(values.length()>MAX_FAVORITES)throw new IOException("Favorite limit");for(int i=0;i<values.length();i++){JSONObject j=values.getJSONObject(i);String id=j.optString("id");if(id(id)&&(ids==null||ids.contains("xc-"+id))&&found.add("xc-"+id))out.add(channel(a,id,limited(j.optString("name"),160),limited(j.optString("group"),120),safeLogo(a,j.optString("logo"))));}}
+        if(ids==null){ids=new LinkedHashSet<>();for(LiveTvData.Channel ch:out)ids.add(ch.id);local.edit().putStringSet(key,ids).commit();}
+        Set<String> missing=new LinkedHashSet<>(ids);missing.removeAll(found);for(LiveTvData.Channel ch:cache.favoritePrefix("xc:"+a.id+":",missing))if(found.add(ch.id))out.add(ch);
+        return out;
+        }
     }
     List<LiveTvData.Channel> favoriteItems()throws Exception{return favorites();}
     Set<String> favoriteIds(){Set<String> out=new LinkedHashSet<>();try{for(LiveTvData.Channel ch:favorites())out.add(ch.id);}catch(Exception unavailable){}return out;}
     Page favoritePage(int requested)throws Exception{return favoritePage(requested,"");}
     Page favoritePage(int requested,String query)throws Exception{Map<String,LiveTvData.Channel> unique=new LinkedHashMap<>();for(LiveTvData.Channel ch:favorites())if(query.isEmpty()||TvCatalogCache.normalize(ch.name).contains(TvCatalogCache.normalize(query)))unique.putIfAbsent(TvChannelNames.family(ch),ch);List<LiveTvData.Channel> all=new ArrayList<>(unique.values());TvPersonalization state=new TvPersonalization(context,source());Set<String> hidden=state.hiddenKeys();all.removeIf(ch->hidden.contains(TvChannelLibrary.key(ch)));Map<String,Integer> rank=new HashMap<>();List<String> order=state.order();for(int i=0;i<order.size();i++)rank.put(order.get(i),i);all.sort(Comparator.comparingInt(ch->rank.getOrDefault(TvChannelLibrary.key(ch),128)));int page=Math.max(0,Math.min(requested,Math.max(0,(all.size()-1)/LiveTvData.PAGE_SIZE))),start=page*LiveTvData.PAGE_SIZE;List<LiveTvData.Channel> out=new ArrayList<>();for(int i=start;i<Math.min(start+LiveTvData.PAGE_SIZE,all.size());i++)out.add(cache.favoriteVariant("xc:"+account().id+":",all.get(i)));return new Page(out,page,all.size());}
-    void toggleFavorite(LiveTvData.Channel ch)throws Exception{
-        Account a=account();if(!a.id.equals(ch.xtreamAccount))throw new IOException("Account changed");List<LiveTvData.Channel> all=favorites();boolean removed=all.removeIf(x->TvChannelNames.family(x).equals(TvChannelNames.family(ch)));if(!removed){if(all.size()>=MAX_FAVORITES)throw new IOException("Favorite limit");all.add(ch);}JSONArray values=new JSONArray();for(LiveTvData.Channel item:all)values.put(new JSONObject().put("id",item.xtreamId).put("name",item.name).put("group",item.group).put("logo",item.logo));if(!prefs.edit().putString("favorites",encrypt(values.toString())).commit())throw new IOException("Cannot save favorites");
+    void toggleFavorite(LiveTvData.Channel ch)throws Exception{synchronized(VelaWorkspace.class){
+        Account a=account();if(!a.id.equals(ch.xtreamAccount))throw new IOException("Account changed");List<LiveTvData.Channel> all=favorites();boolean removed=all.removeIf(x->TvChannelNames.family(x).equals(TvChannelNames.family(ch)));if(!removed){if(all.size()>=MAX_FAVORITES)throw new IOException("Favorite limit");all.add(ch);}JSONArray values=new JSONArray();for(LiveTvData.Channel item:all)values.put(new JSONObject().put("id",item.xtreamId).put("name",item.name).put("group",item.group).put("logo",item.logo));Set<String> ids=new LinkedHashSet<>();for(LiveTvData.Channel item:all)ids.add(item.id);if(!VelaWorkspace.prefs(context,"live-tv").edit().putStringSet(favoriteKey(),ids).commit())throw new IOException("Cannot save favorites");if(!VelaWorkspace.prefs(context,"xtream-favorites").edit().putString("items-"+LiveTvData.hash(source()),encrypt(values.toString())).commit())throw new IOException("Cannot save favourites");if(VelaWorkspace.active(context).equals(VelaWorkspace.DEFAULT))prefs.edit().putString("favorites",encrypt(values.toString())).commit();
+        }
     }
     static final class Response implements AutoCloseable {
         final HttpURLConnection connection;final InputStream in;final JsonReader reader;

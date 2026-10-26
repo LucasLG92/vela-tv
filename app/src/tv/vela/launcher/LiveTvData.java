@@ -27,6 +27,7 @@ final class LiveTvData {
     static final class Channel {
         final String id,name,group,logo,xtreamId,xtreamAccount,inputId,number,epgId;
         final List<String> streams;
+        int archiveDays;String replayTemplate="",replayMode="";
         List<Channel> variants=Collections.emptyList();
         Channel(String id,String name,String group,String logo,List<String> streams){this(id,name,group,logo,streams,"","","","",id);}
         Channel(String id,String name,String group,String logo,List<String> streams,String xc,String account){this(id,name,group,logo,streams,xc,account,"","",id);}
@@ -72,8 +73,8 @@ final class LiveTvData {
             }reader.endObject();if(wanted.contains(id)&&(guide.now!=null||guide.next!=null))result.put(id,guide);
         }reader.endArray();return result;
     }
-    static Set<String> favorites(Context c,String source){return new LinkedHashSet<>(prefs(c).getStringSet("favorites-"+hash(source),Collections.emptySet()));}
-    static void toggle(Context c,String source,String id){Set<String> chosen=favorites(c,source);if(!chosen.remove(id)){if(chosen.size()>=128)return;chosen.add(id);}prefs(c).edit().putStringSet("favorites-"+hash(source),chosen).apply();}
+    static Set<String> favorites(Context c,String source){return new LinkedHashSet<>(VelaWorkspace.prefs(c,"live-tv").getStringSet("favorites-"+hash(source),Collections.emptySet()));}
+    static void toggle(Context c,String source,String id){SharedPreferences local=VelaWorkspace.prefs(c,"live-tv");Set<String> chosen=new LinkedHashSet<>(local.getStringSet("favorites-"+hash(source),Collections.emptySet()));if(!chosen.remove(id)){if(chosen.size()>=128)return;chosen.add(id);}local.edit().putStringSet("favorites-"+hash(source),chosen).apply();}
     static File cached(Context c,String name){File folder=new File(c.getCacheDir(),"live-tv");folder.mkdirs();return new File(folder,name);}
     static boolean fresh(File file,long limit){long age=System.currentTimeMillis()-file.lastModified();return file.isFile()&&age>=0&&age<limit;}
     static byte[] read(File file,int limit)throws IOException{try(InputStream in=new FileInputStream(file);ByteArrayOutputStream out=new ByteArrayOutputStream()){copy(in,out,limit);return out.toByteArray();}}

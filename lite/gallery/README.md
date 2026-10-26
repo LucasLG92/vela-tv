@@ -1,53 +1,93 @@
-# Vela Lite, en imágenes
+# Vela Lite in pictures
 
-Ocho pantallas para descubrir un inicio pensado para la televisión. Capturas nativas en Full HD y 4K, sin datos de cuentas ni conexiones personales. Los canales y las aplicaciones disponibles dependen de cada televisor.
+Explore 22 native **4K screenshots** from 0.8.0-preview. Every control is shown in English. Film artwork and original channel/programme names retain their source language.
 
-## Tus dispositivos, en primera fila
+These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](../../gallery/CREDITS.md) · [Image manifest](index.json)
 
-Entradas HDMI con identificación, estado de conexión y acceso directo.
+## Your HDMI devices, front and centre
 
-![Tus dispositivos, en primera fila](01-entradas.png)
+![Your HDMI devices, front and centre](01-inputs.png)
 
-## La televisión, con contexto
+## A complete view of antenna TV
 
-Guía horizontal, programas actuales y siguientes, horarios y tiempo restante.
+![A complete view of antenna TV](02-guide.png)
 
-![La televisión, con contexto](02-guia.png)
+## Every Lite setting, together
 
-## Tus aplicaciones, a mano
+![Every Lite setting, together](03-settings.png)
 
-Cajón de aplicaciones con iconos nativos y navegación con el mando.
+## Your channels, your order
 
-![Tus aplicaciones, a mano](03-aplicaciones.png)
+![Your channels, your order](04-organise.png)
 
-## Todo en su sitio
+## Your installed apps, within reach
 
-Ajustes agrupados por categorías, con opciones alineadas en el tema de Vela.
+![Your installed apps, within reach](05-apps.png)
 
-![Todo en su sitio](04-ajustes.png)
+## Lite stays up to date
 
-## Siempre al día
+![Lite stays up to date](06-updates.png)
 
-Búsqueda y descarga automáticas de nuevas versiones de Vela Lite.
+## Vela Lite in your style
 
-![Siempre al día](05-actualizaciones.png)
+![Vela Lite in your style](07-appearance.png)
 
-## Dale tu estilo
+## Keep system controls close
 
-Fondo grafito o negro, reloj, movimiento y pantalla inicial.
+![Keep system controls close](08-system.png)
 
-![Aspecto de Vela Lite](06-aspecto.png)
+## Small by design
 
-## Los controles de tu televisión
+![Small by design](09-about.png)
 
-El inicio y los ajustes del televisor, a un paso.
+## Explore antenna channels
 
-![Sistema de Vela Lite](07-sistema.png)
+![Explore antenna channels](10-channel-cards.png)
 
-## Conoce tu Vela Lite
+## See what is on while you browse
 
-Versión e información, en el mismo panel.
+![See what is on while you browse](11-channel-drawer.png)
 
-![Información de Vela Lite](08-informacion.png)
+## Choose your language
 
-[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.5.1-preview) · [Volver a la presentación](../README.md)
+![Choose your language](12-language.png)
+
+## Choose your Lite home
+
+![Choose your Lite home](13-home-layout.png)
+
+## A place for your apps
+
+![A place for your apps](14-folders.png)
+
+## A little help from your phone
+
+![A little help from your phone](15-phone-and-sync.png)
+
+## Match your programme guide
+
+![Match your programme guide](16-guide-corrections.png)
+
+## Discover your next programme
+
+![Discover your next programme](17-discovery.png)
+
+## Read comfortably from the sofa
+
+![Read comfortably from the sofa](18-reading.png)
+
+## Save your personal layout
+
+![Save your personal layout](19-backups.png)
+
+## One television, different spaces
+
+![One television, different spaces](20-profiles.png)
+
+## A remote that feels familiar
+
+![A remote that feels familiar](21-remote.png)
+
+## Keep up with your programmes
+
+![Keep up with your programmes](22-programmes.png)

@@ -1,5 +1,5 @@
 # Native Windows build, using only a JDK and the Android SDK.
-param([string]$SdkPath = '', [string]$JdkPath = '', [switch]$UseLocalConfig)
+param([string]$SdkPath = '', [string]$JdkPath = '', [switch]$UseLocalConfig, [string]$PythonPath = 'python')
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
@@ -21,8 +21,8 @@ $buildTools = Get-ChildItem -LiteralPath (Join-Path $SdkPath 'build-tools') -Dir
     Where-Object { $_.Name -match '^\d+\.\d+\.\d+$' } | Sort-Object { [version]$_.Name } | Select-Object -Last 1
 if (!$buildTools) { throw 'Install Android SDK build-tools 34 or newer.' }
 $bt = $buildTools.FullName
-$androidJar = Join-Path $SdkPath 'platforms\android-34\android.jar'
-if (!(Test-Path -LiteralPath $androidJar)) { throw 'Install SDK platform android-34.' }
+$androidJar = Join-Path $SdkPath 'platforms\android-36\android.jar'
+if (!(Test-Path -LiteralPath $androidJar)) { throw 'Install SDK platform android-36.' }
 
 function Run-Native([string]$Command, [string[]]$Arguments) {
     & $Command @Arguments
@@ -75,19 +75,22 @@ foreach ($field in @(@('DISABLE_ASSISTANT','disable_assistant'), @('DISABLE_APPS
 $generated += '}'
 [IO.File]::WriteAllLines((Join-Path $outPath 'gen\tv\vela\launcher\Config.java'), $generated, $utf8)
 
+Run-Native $PythonPath @('tools/prepare_media3.py')
+Run-Native (Join-Path $bt 'aapt2.exe') @('compile','--dir','out/media3/res','-o','out/media3/res.zip')
 Run-Native (Join-Path $bt 'aapt2.exe') @('compile','--dir','app/res','-o','out/res.zip')
 Run-Native (Join-Path $bt 'aapt2.exe') @('link','-o','out/base.apk','-I',$androidJar,'--manifest','app/AndroidManifest.xml',
-    '--java','out/gen','out/res.zip','--min-sdk-version','30','--target-sdk-version','33','-A','app/assets','-0','ttf')
+    '--java','out/gen','out/media3/res.zip','out/res.zip','--auto-add-overlay','--min-sdk-version','30','--target-sdk-version','33','-A','app/assets','-0','ttf')
 $sources = @(Get-ChildItem -LiteralPath 'app\src','out\gen' -Filter '*.java' -Recurse | ForEach-Object { '"' + $_.FullName.Replace('\','/') + '"' })
 [IO.File]::WriteAllLines((Join-Path $outPath 'sources.txt'), $sources, $utf8)
 Run-Native (Join-Path $env:JAVA_HOME 'bin\javac.exe') @('-encoding','UTF-8','-nowarn','-Xlint:-options','-source','8','-target','8',
-    '-bootclasspath',($androidJar + ';' + (Join-Path $bt 'core-lambda-stubs.jar')),'-classpath',$androidJar,'-d','out/classes','@out/sources.txt')
+    '-bootclasspath',($androidJar + ';' + (Join-Path $bt 'core-lambda-stubs.jar')),'-classpath',($androidJar + ';' + ((Get-ChildItem -LiteralPath 'out/media3/libs' -Filter '*.jar' | ForEach-Object { $_.FullName }) -join ';')),'-d','out/classes','@out/sources.txt')
 Run-Native (Join-Path $env:JAVA_HOME 'bin\jar.exe') @('cf','out/classes.jar','-C','out/classes','.')
-Run-Native (Join-Path $bt 'd8.bat') @('--release','--min-api','30','--lib',$androidJar,'--output','out','out/classes.jar')
+$r8args = @('-cp',(Join-Path $bt 'lib/d8.jar'),'com.android.tools.r8.R8','--release','--min-api','30','--lib',$androidJar,'--lib',(Join-Path $bt 'core-lambda-stubs.jar'),'--pg-conf','out/media3/rules.pro','--output','out','out/classes.jar') + @(Get-ChildItem -LiteralPath 'out/media3/libs' -Filter '*.jar' | ForEach-Object { $_.FullName })
+Run-Native (Join-Path $env:JAVA_HOME 'bin/java.exe') $r8args
 # Windows aapt2 can emit backslashes in asset names; Android requires ZIP paths with '/'.
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $outPath 'base.apk'), (Join-Path $outPath 'package'))
-Copy-Item -LiteralPath (Join-Path $outPath 'classes.dex') -Destination (Join-Path $outPath 'package\classes.dex')
+Get-ChildItem -LiteralPath $outPath -Filter 'classes*.dex' | Copy-Item -Destination (Join-Path $outPath 'package')
 # Store every entry: resources.arsc and fonts must remain uncompressed.
 Run-Native (Join-Path $env:JAVA_HOME 'bin\jar.exe') @('c0Mf','out/normalized.apk','-C','out/package','.')
 Run-Native (Join-Path $bt 'zipalign.exe') @('-f','-p','4','out/normalized.apk','out/aligned.apk')

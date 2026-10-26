@@ -23,7 +23,7 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
     private final ImageView weatherIcon;
     private AmbientWeather weather;
     private AmbientWeather.Snapshot weatherSnapshot;
-    private String weatherMessage="Consultando el tiempo…",weatherSymbol="";
+    private String weatherMessage=L10n.text("Loading weather…"),weatherSymbol="";
     private final View veil;
     private final Handler main=new Handler(Looper.getMainLooper());
     private ExecutorService io;
@@ -67,7 +67,7 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
     }
     private TextView text(int size,int color,android.graphics.Typeface font){TextView t=new TextView(getContext());t.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);t.setTextColor(color);t.setTypeface(font);t.setIncludeFontPadding(false);t.setShadowLayer(9,0,2,0xAA000000);return t;}
     void start(){
-        if(active)return;active=true;weatherMessage="Consultando el tiempo…";failures=0;index=-1;generation++;io=Visuals.worker(1);status.setVisibility(VISIBLE);status.setText(plexMode?"Preparando tu biblioteca…":"Preparando paisajes…");
+        if(active)return;active=true;weatherMessage=L10n.text("Loading weather…");failures=0;index=-1;generation++;io=Visuals.worker(1);status.setVisibility(VISIBLE);status.setText(plexMode?L10n.text("Preparing your library…"):L10n.text("Preparing landscapes…"));
         if(infoPinned()){chrome.setAlpha(1);minute.run();}
         if(AmbientPrefs.weather(getContext())){weather=new AmbientWeather(getContext(),(snapshot,message)->{if(!active)return;weatherSnapshot=snapshot;weatherMessage=message;updateInfo();});weather.start();}
         if(plexMode){
@@ -79,8 +79,8 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
         }else{
             video.setVisibility(VISIBLE);
             io.execute(()->{try{List<AerialCatalog.Scene> catalogue=AerialCatalog.read(getContext(),AmbientPrefs.theme(getContext()));if(!preview)Collections.shuffle(catalogue);
-                main.post(()->{if(!active)return;scenes=catalogue;if(scenes.isEmpty())message("No hay vídeos en este tema.");else if(video.getHolder().getSurface().isValid())next();});
-            }catch(Exception e){main.post(()->{if(active)message("No se ha podido abrir el catálogo de paisajes.");});}});
+                main.post(()->{if(!active)return;scenes=catalogue;if(scenes.isEmpty())message(L10n.text("No videos in this theme."));else if(video.getHolder().getSurface().isValid())next();});
+            }catch(Exception e){main.post(()->{if(active)message(L10n.text("Could not open the aerial catalogue."));});}});
         }
     }
     private void next(){if(!active)return;if(plexMode)nextPhoto();else nextVideo();}
@@ -103,8 +103,8 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
     }
     private void videoFailed(){
         releasePlayer();failures++;
-        if(failures>=scenes.size()){message("No se han podido cargar los vídeos. Comprueba Internet o elige tu biblioteca de Plex.");return;}
-        status.setVisibility(VISIBLE);status.setText("Probando otro paisaje…");main.removeCallbacks(advance);main.postDelayed(advance,1500);
+        if(failures>=scenes.size()){message(L10n.text("Could not load videos. Check your connection or choose your library."));return;}
+        status.setVisibility(VISIBLE);status.setText(L10n.text("Trying another landscape…"));main.removeCallbacks(advance);main.postDelayed(advance,1500);
     }
     private void releasePlayer(){
         if(timeout!=null){main.removeCallbacks(timeout);timeout=null;}
@@ -142,11 +142,11 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
         if(!enabled){weatherIcon.setVisibility(GONE);return;}
         long now=System.currentTimeMillis();
         if(weatherSnapshot!=null&&weatherSnapshot.usable(now)){
-            weatherText.setText(weatherSnapshot.degrees()+" · "+AmbientWeather.condition(weatherSnapshot.code));weatherCity.setText(weatherSnapshot.city+(weatherSnapshot.fresh(now)?"":" · Últimos datos"));
+            weatherText.setText(weatherSnapshot.degrees()+" · "+AmbientWeather.condition(weatherSnapshot.code));weatherCity.setText(weatherSnapshot.city+(weatherSnapshot.fresh(now)?"":L10n.text(" · Latest saved data")));
             String icon=AmbientWeather.icon(weatherSnapshot.code,weatherSnapshot.day);
             if(!icon.equals(weatherSymbol))try(java.io.InputStream in=getContext().getAssets().open("symbols/"+icon+".png")){weatherIcon.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));weatherSymbol=icon;}catch(java.io.IOException ignored){}
             weatherIcon.setVisibility(VISIBLE);
-        }else{weatherIcon.setVisibility(GONE);weatherText.setText(weatherMessage.isEmpty()?"Tiempo no disponible":weatherMessage);AmbientWeather.Place place=AmbientWeather.manual(getContext());weatherCity.setText(place==null?"":place.name);}
+        }else{weatherIcon.setVisibility(GONE);weatherText.setText(weatherMessage.isEmpty()?L10n.text("Weather unavailable"):weatherMessage);AmbientWeather.Place place=AmbientWeather.manual(getContext());weatherCity.setText(place==null?"":place.name);}
     }
     private void message(String text){status.setText(text);status.setVisibility(VISIBLE);veil.setAlpha(currentPhoto==null?1:0);}
     private void resizeVideo(){if(videoWidth<=0||videoHeight<=0||getWidth()==0)return;float scale=Math.max(getWidth()/(float)videoWidth,getHeight()/(float)videoHeight);video.setLayoutParams(new LayoutParams(Math.round(videoWidth*scale),Math.round(videoHeight*scale),Gravity.CENTER));}

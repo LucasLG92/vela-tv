@@ -9,16 +9,16 @@ import java.util.Locale;
 /** The small contracts used by the shared HDMI resolver and vectors. No full Vela runtime. */
 final class Ui {
     static Typeface regular,medium,displaySemibold;
-    static synchronized void init(Context context){if(medium!=null)return;try{regular=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 14, 'wght' 400").build();medium=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 14, 'wght' 500").build();displaySemibold=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 32, 'wght' 600").build();}catch(RuntimeException unavailable){regular=Typeface.create("sans-serif",0);medium=Typeface.create("sans-serif-medium",0);displaySemibold=Typeface.create("sans-serif",Typeface.BOLD);}}
-    static Locale locale(){return Locale.getDefault();}
-    static String tr(String pt,String en,String es){String language=Locale.getDefault().getLanguage();return language.equals("es")?es:language.equals("pt")?pt:en;}
+    static synchronized void init(Context context){L10n.init(context,"auto");if(medium!=null)return;try{regular=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 14, 'wght' 400").build();medium=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 14, 'wght' 500").build();displaySemibold=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 32, 'wght' 600").build();}catch(RuntimeException unavailable){regular=Typeface.create("sans-serif",0);medium=Typeface.create("sans-serif-medium",0);displaySemibold=Typeface.create("sans-serif",Typeface.BOLD);}}
+    static Locale locale(){return L10n.locale();}
+    static String tr(String pt,String en,String es){return L10n.tr(pt,en,es);}
 }
 final class Appearance {static int accent(Context c){return VelaTheme.WHITE;}static int tint(Context c,int alpha){return (alpha<<24)|0xFFFFFF;}}
 final class LiveTvActivity {
     static String displayName(String name){return name;}
     static String remainingText(long minutes){String duration=minutes>=60?(minutes/60)+" h"+(minutes%60==0?"":" "+(minutes%60)+" min"):minutes+" min";return Ui.tr("Faltam ","Remaining ","Quedan ")+duration;}
 }
-final class TvChannelNames {static String quality(String name){return "";}}
+final class TvChannelNames {static String quality(String name){return "";}static String match(String name){return LiteXmlTvGuide.match(name);}}
 final class LiveTvData {
     static final class Channel {
         final long providerId;final String id,inputId,number,name,logo,identity,alias;final boolean radio,hd,locked;

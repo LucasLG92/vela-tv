@@ -19,7 +19,7 @@ final class TvChannelNames {
     static boolean favorite(LiveTvData.Channel ch,Set<String> ids){for(LiveTvData.Channel item:variants(ch))if(ids.contains(item.id))return true;return false;}
     static LiveTvData.Channel choose(Context c,String source,List<LiveTvData.Channel> values){
         if(values.isEmpty())return null;String saved=LiveTvData.prefs(c).getString("quality-"+LiveTvData.hash(source+family(values.get(0))),"");LiveTvData.Channel chosen=values.get(0);for(LiveTvData.Channel v:values)if(v.id.equals(saved)){chosen=v;break;}
-        LiveTvData.Channel out=new LiveTvData.Channel(chosen.id,chosen.name,chosen.group,chosen.logo,chosen.streams,chosen.xtreamId,chosen.xtreamAccount,chosen.inputId,chosen.number,chosen.epgId);out.variants=Collections.unmodifiableList(new ArrayList<>(values));return out;
+        LiveTvData.Channel out=new LiveTvData.Channel(chosen.id,chosen.name,chosen.group,chosen.logo,chosen.streams,chosen.xtreamId,chosen.xtreamAccount,chosen.inputId,chosen.number,chosen.epgId);out.archiveDays=chosen.archiveDays;out.replayTemplate=chosen.replayTemplate;out.replayMode=chosen.replayMode;out.variants=Collections.unmodifiableList(new ArrayList<>(values));return out;
     }
     static void prefer(Context c,String source,LiveTvData.Channel chosen){SharedPreferences p=LiveTvData.prefs(c);SharedPreferences.Editor e=p.edit();String key="quality-"+LiveTvData.hash(source+family(chosen));int count=0;for(String old:p.getAll().keySet())if(old.startsWith("quality-")&&++count>=128)e.remove(old);e.putString(key,chosen.id).apply();}
 }

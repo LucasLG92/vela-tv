@@ -1,6 +1,6 @@
 # Build and test
 
-Requirements: JDK 17+, Android SDK platform **34**, build-tools 34+ and platform-tools. The app uses Java 8, minSdk 30 and targetSdk 33. There is no Gradle project or external runtime library.
+Requirements: JDK 17+, Android SDK platform **36**, build-tools 36.1+, Python 3.10+ and platform-tools. The app uses Java 8, minSdk 30 and targetSdk 33. There is no Gradle daemon. The Full build fetches checksum-pinned AndroidX Media3 1.11.1 dependencies from official Google Maven/Maven Central, caches them under ignored `.build-deps/` and strips unused code with R8. Only the optional HLS pause path instantiates this decoder. Lite continues to compile against platform 34 without Media3.
 
 ```sh
 export JAVA_HOME=/path/to/jdk-17
@@ -109,3 +109,41 @@ The native horizontal-guide regression runs with `--test tv-timeline`. It checks
 Run `python tests/test_artwork_device.py --serial <clean-emulator-serial> --adb-port <port> --test home-tv` with the neutral production APK installed. It rejects linked Plex, Jellyfin and Xtream accounts, uses only the public M3U/XMLTV sources, saves/restores preferences and produces nine native 4K captures. It verifies the shared Home host, TV below Home, Settings-only persisted Guide/Channels choice with Guide as the migration default, six enlarged guide rows, bottom controls and programme footer, 180 clipped/recycled categories, indexed page navigation and source selection. Actual public broadcast decoding checks timed information, Right channel drawer, remaining times, minute refresh preserving focus, same-decoder browsing, channel changes and release. Network sources and public broadcasts must be available; no personal IPTV subscription is needed.
 
 The `tv-fallback` fixture test also checks that OK explicitly retries after all same-channel alternatives are exhausted. It never starts an unbounded automatic retry cycle. Test assets and instrumentation APKs stay outside production builds.
+
+## Shared tools and native tests
+
+Build and install both matching APKs on an owned emulator:
+
+```sh
+python tests/run_workspace.py --serial <owned-emulator> --adb-port 5038
+python tests/run_workspace.py --serial <owned-emulator> --adb-port 5038 --lite
+python tests/run_workspace.py --serial <owned-emulator> --adb-port 5038 --data
+```
+
+The last case targets Full using isolated storage, real SQLite and synthetic offline accounts. The first two verify shared tools and capture native demonstration screens. Never run these fixtures against a personal television.
+
+## Shared tools and playback
+
+Full 1.28.0 / Lite 0.8.0 previews include native layout/folders, temporary local HTTPS mobile setup, opt-in paired preference sync, guide corrections/discovery and playback controls. See [the feature guide](YOUR-VELA.md).
+
+Owned-emulator regressions (install the matching built APK first):
+
+```sh
+python tests/run_expansion.py --serial <emulator> --adb-port <port>
+python tests/run_expansion.py --serial <emulator> --adb-port <port> --lite
+python tests/run_expansion.py --serial <emulator> --adb-port <port> --player --fixture http://127.0.0.1:<owned-fixture-port>
+```
+
+The playback fixture must be owned synthetic clear HLS and a synthetic Xtream archive, accessible through ADB reverse. The tests refuse physical TVs and linked personal providers. No accounts, streams or device credentials are required for the shared tools tests.
+
+## UI languages
+
+English, Spanish and Portuguese share catalogue keys. Only the selected translation catalogue is loaded; English is the source fallback. Language belongs to the installation, not a profile or sync partner. Keep provider titles unchanged.
+
+```sh
+python tools/check_localization.py
+python tests/run_localization.py --serial <owned-emulator> --adb-port 5038
+python tests/run_localization.py --serial <owned-emulator> --adb-port 5038 --lite
+```
+
+The native checks select each language, recreate the actual Activity, verify system-language fallback and capture the themed menus at native 4K.

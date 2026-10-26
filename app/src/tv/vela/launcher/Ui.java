@@ -24,14 +24,15 @@ final class Ui {
 
     static final Locale PT = new Locale("pt", "BR");
     static final Locale ES = new Locale("es", "ES");
-    static final String language = language();
-    static final boolean en = language.equals("en"), es = language.equals("es");
+    static String language = language();
+    static boolean en = language.equals("en"), es = language.equals("es");
     static Typeface thin, light, displayMedium, displaySemibold, regular, medium, semibold;
     private static boolean loaded;
     private static final Rect BOUNDS = new Rect();
     private static final RectF OVAL = new RectF();
 
     static synchronized void init(Context c) {
+        L10n.init(c,Config.LANGUAGE);language=L10n.language();en=language.equals("en");es=language.equals("es");
         if (loaded) return;
         loaded = true;
         AssetManager a = c.getAssets();
@@ -68,9 +69,9 @@ final class Ui {
         return "en";
     }
 
-    static Locale locale() { return es ? ES : en ? Locale.US : PT; }
+    static Locale locale() { return L10n.locale(); }
 
-    static String apiLanguage() { return es ? "es-ES" : en ? "en-US" : "pt-BR"; }
+    static String apiLanguage() { return locale().toLanguageTag(); }
 
     private static boolean has(AssetManager a, String path) {
         try (InputStream in = a.open(path)) {
@@ -127,10 +128,10 @@ final class Ui {
     }
 
     static String tr(String pt, String english, String spanish) {
-        return es ? spanish : en ? english : pt;
+        return L10n.tr(pt,english,spanish);
     }
 
-    static String problem(String english, String spanish) { return es ? spanish : english; }
+    static String problem(String english, String spanish) { return L10n.tr(english,english,spanish); }
 
     /** "21:47" (in English, "9:47", like the iPhone in the US). */
     static String clock(long now) {

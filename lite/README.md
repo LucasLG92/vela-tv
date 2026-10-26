@@ -1,92 +1,53 @@
 # Vela Lite
 
-## Tu tele. Lo esencial, bien puesto.
+### Your television. The essentials, beautifully placed.
 
-Tus entradas HDMI, la televisión por antena y tus aplicaciones, en un inicio visual y fácil de recorrer con el mando. **Vela Lite está pensada para la televisión que acompaña a tu TV Box, consola u ordenador.**
+Your **HDMI devices, antenna television and apps**, in a clean home screen made for your remote. Vela Lite is for the television that sits alongside a TV box, console or computer.
 
-**[Descargar Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.5.1-preview/Vela-Lite-0.5.1-preview.apk)** · [Ver las capturas](gallery/README.md) · [Instalación](INSTALL.es.md) · [Vela completo](../README.md)
+**[Download Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.8.0-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
-**Android TV / Google TV · Android 8.0 o posterior · APK de unos 1,3 MB · Vista previa**
+**Android TV / Google TV · Android 8.0+ · English / Español / Português · Preview**
 
-![Entradas HDMI de Vela Lite](gallery/01-entradas.png)
+![Vela Lite HDMI home](gallery/01-inputs.png)
 
-## Tu dispositivo, en primera fila
+## Put your devices first
 
-Enciende la tele y entra en tu HDMI. Vela Lite pone delante tu TV Box, consola u ordenador, con su estado de conexión y un acceso directo para abrirlo. Recorre el resto de entradas con el mando y elige un perfil de dispositivo manteniendo OK.
+Open an HDMI input directly from Vela Lite. Connected consoles, TV boxes, PCs and Macs use brand icons and device profiles; unknown or inactive ports keep their HDMI number. Android supplies the connection state. Hold OK to choose a manual profile without inventing a signal.
 
-La identificación utiliza la información que comparte el televisor. Las entradas desconectadas conservan su número HDMI, para que siempre sepas dónde estás.
+## Television with context
 
-## La televisión, con contexto
+A horizontal guide brings channel logos, programmes, remaining time and upcoming broadcasts together. Switch to channel cards if you prefer. Use favourites, TV/radio and HD filters, then open the channel through your television's own tuner.
 
-Mira qué están emitiendo, cuánto queda y qué viene después. Una guía horizontal de tres horas reúne canales, logos y programas en el mismo diseño de Vela. Consulta una emisión futura, entra en el directo o reúne tus favoritos manteniendo OK.
+The public dobleM EPG can complete the schedules of channels already tuned on your TV. Antenna information remains available offline. Vela Lite never adds IPTV channels or changes your television's tuning database.
 
-La guía pública de **dobleM** completa los horarios de los canales que tengas sintonizados. Si prefieres las tarjetas, puedes cambiar la vista desde Ajustes. También tienes filtros de televisión, radio y HD.
+![Antenna guide with channel logos and programme progress](gallery/02-guide.png)
 
-![Guía de televisión y tiempo restante](gallery/02-guia.png)
+During a channel, press Right, Up or Down to explore without leaving playback. OK chooses a channel; hold OK adds or removes a favourite. CH+/CH− changes channels directly. Back closes the drawer before returning to the guide.
 
-Al ver un canal, pulsa **derecha**, **arriba** o **abajo** para explorar la lista con los programas y el tiempo restante. Alterna entre **Lista** y **Favoritos** y confirma el canal con OK. Mantener OK añade o quita el favorito; **CH+/CH−** cambian directamente. Atrás cierra primero el panel y después vuelve a la guía, recuperando el canal que estabas viendo. OK durante la emisión muestra su información. La reproducción utiliza el sintonizador de la televisión.
+The on-screen information includes **Up next**. MENU opens audio, supported subtitles, picture format and signal information. Pause is offered only if the television's tuner exposes it to Android.
 
-Con **OK**, la información de la emisión muestra también **A continuación** a la derecha: el próximo programa y su horario. Los datos proceden de la guía de antena y de dobleM; si no están disponibles, la tarjeta se oculta.
+## Your channels, your order
 
-## Tus canales, a tu manera
+Reorder favourites with OK and the arrow keys. Hide channels or categories, restore them later, revisit recent channels or return to the previous channel. Stable DVB identities, or an unambiguous name fallback, help preserve your choices after retuning.
 
-Un menú con iconos a la izquierda y un panel grafito a la derecha, con el mismo estilo de Ajustes y el fondo de tu televisión.
+![Themed channel organisation](gallery/04-organise.png)
 
-En **Organizar**, elige un favorito con OK, muévelo con arriba o abajo y confirma con OK. Atrás cancela. Oculta el canal seleccionado en la guía, recupera canales ocultos y elige las categorías que quieres mostrar. Los cambios se guardan en Vela Lite, sin modificar la sintonización de la televisión.
+## Make Lite yours
 
-**Recientes** conserva hasta doce canales abiertos correctamente. El panel del directo reúne Lista, Favoritos y Recientes, con un botón **Canal anterior**. La identidad DVB permite conservar la organización tras resintonizar; cuando no está disponible se usa un nombre único, evitando confundir canales del mismo nombre.
+Choose a black or graphite background, clock visibility, reduced focus motion and your Home destination. Adjust reading size, guide density, contrast and screen margins. Reorder or hide the Inputs, Television and Apps destinations; Settings stays accessible.
 
-![Organizador de canales en el tema de Vela Lite](https://github.com/LucasLG92/vela-tv/releases/download/lite-v0.5.1-preview/Vela-Lite-Organizar-tema-demo.png)
+Create app folders and separate local profiles. Back up your preferences, configure them from your phone through a temporary local HTTPS session, or explicitly pair another Vela for compatible preference sync. Credentials remain on each television.
 
-*Captura nativa con datos de demostración.*
+Every menu is available in **English, Spanish and Portuguese**, with a manual selector or automatic system language. The same graphite panels, Inter typeface and focus style run through both editions.
 
-## Tus aplicaciones, a mano
+![Vela Lite settings and language selection](gallery/03-settings.png)
 
-Iconos grandes, nombres claros y doce aplicaciones por página. Abre las apps instaladas en tu televisor y vuelve a las entradas o al directo desde la barra lateral. El mando recorre cada pantalla con un foco visible y un camino predecible.
+## A small job, done well
 
-![Aplicaciones de la televisión en Vela Lite](gallery/03-aplicaciones.png)
+Lite contains **no Plex, Jellyfin, M3U, Xtream or Media3 runtime**. The tuner handles antenna playback. Small paged lists, recycled rows, local icons and disposable workers keep the launcher focused on its job. It has no background service.
 
-## Todo en su sitio
+Automatic checks and downloads use Lite's GitHub releases. Downloads are verified before Android asks you to install; completed APKs are cleaned from the updater's private cache. Full and Lite use separate Android packages.
 
-**Televisión, Aspecto, Actualizaciones, Sistema e Información.** Categorías fijas a la izquierda, opciones alineadas a la derecha y el tema grafito de Vela en toda la pantalla.
+[All personalisation tools](../guide/YOUR-VELA.md) · [HDMI detection](../guide/HDMI.md) · [Privacy](../guide/PRIVACY.md) · [Development and compatibility](DEVELOPMENT.md)
 
-Elige entre fondo grafito o negro, muestra el reloj, reduce el movimiento al enfocar y decide qué abre el botón Inicio. Los ajustes de la propia televisión siguen a un paso.
-
-![Ajustes integrados en Vela Lite](gallery/04-ajustes.png)
-
-[Aspecto](gallery/06-aspecto.png) · [Sistema](gallery/07-sistema.png) · [Información](gallery/08-informacion.png)
-
-## Siempre al día
-
-Vela Lite busca y descarga automáticamente sus nuevas versiones desde GitHub. Cuando haya una actualización preparada, solo tendrás que confirmar la instalación en Android. Después elimina la APK instalada al volver a abrir el inicio.
-
-La búsqueda y la descarga vienen activadas y puedes cambiarlas en Ajustes. Cada archivo se comprueba antes de instalarlo: integridad, aplicación, versión y firma.
-
-![Actualizaciones de Vela Lite](gallery/05-actualizaciones.png)
-
-## Ligera donde importa
-
-La guía carga los programas de la página visible y guarda los horarios y logos en caché. El inicio utiliza fondos estáticos; las consultas e imágenes de cada pantalla se liberan al salir. El actualizador realiza trabajos puntuales, sin un servicio permanente.
-
-El consumo real depende del televisor y de su sintonizador. [Consulta los límites y detalles técnicos](DEVELOPMENT.es.md#memoria-y-privacidad).
-
-## Elige la Vela que encaja contigo
-
-| | Vela Lite | Vela |
-| --- | --- | --- |
-| Uso principal | La propia TV, junto a un dispositivo HDMI | Tu centro de entretenimiento |
-| Entradas HDMI, antena y apps | Sí, según el firmware | Sí, según el firmware |
-| Guía, favoritos y tiempo restante | Sí | Sí |
-| Bibliotecas Plex y Jellyfin | — | Sí |
-| Listas M3U y cuentas Xtream | — | Sí |
-| Android mínimo | 8.0 | 11 |
-
-Vela Lite y Vela tienen paquetes independientes y pueden coexistir. [Explorar Vela](../README.md).
-
-## Antes de instalar
-
-Instala Lite **en el televisor receptor** para acceder a sus HDMI y a su antena. Las apps de tu TV Box siguen estando en ese dispositivo.
-
-El firmware debe compartir sus entradas, canales y sintonizador mediante las API de Android. La disponibilidad de programación y reproducción integrada puede variar por fabricante. Lite conserva el acceso a la televisión original y no cambia la sintonización ni elimina aplicaciones del sistema.
-
-**[Instalar Vela Lite](INSTALL.es.md)** · [Funcionamiento y compatibilidad](DEVELOPMENT.es.md) · [Licencia MIT](../LICENSE) · [Créditos de los logos](assets/channel-logos/CREDITS.txt)
+This preview depends on the HDMI and tuner information your television publishes. It cannot add a tuner to an HDMI box, make an unsupported input selectable or confirm physical reception without an antenna signal.

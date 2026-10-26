@@ -51,7 +51,7 @@ final class LiteTvUi {
     /** Stable DVB service identity survives provider row-id changes. Unique names provide a fallback. */
     static final class Favourites {
         private final SharedPreferences prefs;private Set<String> keys;
-        Favourites(Context c){prefs=c.getSharedPreferences("lite_tv",0);keys=new HashSet<>(prefs.getStringSet("favourites",Collections.emptySet()));}
+        Favourites(Context c){prefs=VelaWorkspace.prefs(c,"lite_tv");keys=new HashSet<>(prefs.getStringSet("favourites",Collections.emptySet()));}
         boolean has(LiveTvData.Channel c,List<LiveTvData.Channel> all){if(keys.contains(c.identity))return true;if(!keys.contains(c.alias))return false;int matches=0;for(LiveTvData.Channel other:all)if(c.alias.equals(other.alias))matches++;return matches==1;}
         void toggle(LiveTvData.Channel c,List<LiveTvData.Channel> all){if(has(c,all)){keys.remove(c.identity);keys.remove(c.alias);}else{if(keys.size()>=128){int count=0;for(LiveTvData.Channel item:all)if(has(item,all)&&++count>=128)return;}keys.add(c.identity);keys.add(c.alias);}prefs.edit().putStringSet("favourites",new HashSet<>(keys)).apply();}
     }

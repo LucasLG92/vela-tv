@@ -169,7 +169,7 @@ public class LiveTvActivity extends Activity {
     }
     private void setTimelineMode(boolean value){
         if(timelineMode==value){if(value)timeline.requestFocus();return;}timelineMode=value;updateViewMode();cancelTimeline();timelineProgrammes=Collections.emptyMap();
-        timelineOffset=selected==null?0:Math.max(0,pageChannels.indexOf(selected))/TvTimelineView.ROWS*TvTimelineView.ROWS;renderCards(page,true);
+        timelineOffset=selected==null?0:Math.max(0,pageChannels.indexOf(selected))/VelaReading.rows(this)*VelaReading.rows(this);renderCards(page,true);
     }
     private void updateViewMode(){
         boolean showing=timelineMode;grid.setVisibility(showing?View.GONE:View.VISIBLE);timeline.setVisibility(showing?View.VISIBLE:View.GONE);
@@ -179,14 +179,14 @@ public class LiveTvActivity extends Activity {
         long present=TvTimelineView.present(System.currentTimeMillis()/1000);guideEarlier.setEnabled(timelineStart>present);guideEarlier.setAlpha(timelineStart>present?1:.3f);guideLater.setEnabled(timelineStart<present+45*3600);guideLater.setAlpha(timelineStart<present+45*3600?1:.3f);
     }
     private boolean timelineChannels(int direction,boolean edge){
-        if(loading)return true;int offset=timelineOffset+direction*TvTimelineView.ROWS;
-        if(offset>=0&&offset<pageChannels.size()){timelineOffset=offset;selected=pageChannels.get(direction>0?offset:Math.min(offset+TvTimelineView.ROWS-1,pageChannels.size()-1));renderCards(page,true);return true;}
+        if(loading)return true;int offset=timelineOffset+direction*VelaReading.rows(this);
+        if(offset>=0&&offset<pageChannels.size()){timelineOffset=offset;selected=pageChannels.get(direction>0?offset:Math.min(offset+VelaReading.rows(this)-1,pageChannels.size()-1));renderCards(page,true);return true;}
         int target=page+direction;if(target<0||target*LiveTvData.PAGE_SIZE>=total)return false;
-        timelineOffset=direction>0?0:TvTimelineView.ROWS;timelineEnterLast=edge&&direction<0;selected=null;loadPage(target,true,0,false);return true;
+        timelineOffset=direction>0?0:VelaReading.rows(this);timelineEnterLast=edge&&direction<0;selected=null;loadPage(target,true,0,false);return true;
     }
     private void renderTimeline(boolean focus){
-        if(pageChannels.isEmpty())timelineOffset=0;else timelineOffset=Math.max(0,Math.min(timelineOffset,(pageChannels.size()-1)/TvTimelineView.ROWS*TvTimelineView.ROWS));
-        timelineChannels=new ArrayList<>(pageChannels.subList(timelineOffset,Math.min(pageChannels.size(),timelineOffset+TvTimelineView.ROWS)));
+        if(pageChannels.isEmpty())timelineOffset=0;else timelineOffset=Math.max(0,Math.min(timelineOffset,(pageChannels.size()-1)/VelaReading.rows(this)*VelaReading.rows(this)));
+        timelineChannels=new ArrayList<>(pageChannels.subList(timelineOffset,Math.min(pageChannels.size(),timelineOffset+VelaReading.rows(this))));
         if(!timelineChannels.contains(selected))selected=timelineChannels.isEmpty()?null:timelineChannels.get(timelineEnterLast?timelineChannels.size()-1:0);timelineEnterLast=false;
         timeline.removeAllViews();for(int i=0;i<timelineChannels.size();i++){
             LiveTvData.Channel ch=timelineChannels.get(i);LiveTvLogos.LogoView logo=new LiveTvLogos.LogoView(this,displayName(ch.name));logo.setScaleType(ImageView.ScaleType.FIT_CENTER);logo.setFocusable(false);logo.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);put(timeline,logo,10,timeline.logoY(i),60,60);images.add(logo);if(playback==null)logos.load(ch,logo);
@@ -260,7 +260,7 @@ public class LiveTvActivity extends Activity {
         if(playback==null){playerGroup=group.equals(FAVORITES)||group.equals(TvChannelLibrary.RECENT)?ALL:group;playback=new LiveTvPlayer(this,new LiveTvPlayer.Actions(){public void back(){browse();}public void zap(int direction){changeChannel(direction);}public void channels(int page){loadPlayerChannels(page);}public void choose(LiveTvData.Channel channel){choosePlayerChannel(channel);}public void favorite(LiveTvData.Channel channel){toggleFavorite(channel);}public void channels(int page,boolean favorites){loadPlayerChannels(page,favorites);}public void previous(){String scope=source,key=selected==null?"":TvChannelLibrary.key(selected);io.submit(()->{for(LiveTvData.Channel c:TvChannelLibrary.recent(LiveTvActivity.this,scope))if(!TvChannelLibrary.key(c).equals(key)){main.post(()->{if(active&&scope.equals(source))play(c);});return;}});}public void started(LiveTvData.Channel c){String scope=source;new TvPersonalization(LiveTvActivity.this,scope).played(TvChannelLibrary.key(c),c.name);io.submit(()->{try{TvChannelLibrary.remember(LiveTvActivity.this,scope,c);}catch(Exception ignored){}});}});root.addView(playback,new FrameLayout.LayoutParams(-1,-1));}
         pickerEpoch++;if(pickerJob!=null)pickerJob.cancel(true);playback.channels(pageChannels,guide,categoryName(name(groups,group)),page,total);playback.select(ch);playback.favorites(favorites);updateSelection();playback.resume();
     }
-    private void choosePlayerChannel(LiveTvData.Channel channel){if(playback==null)return;group=playback.pickerRecent?TvChannelLibrary.RECENT:playback.pickerFavorites?"@favorites":playerGroup;generation++;guideEpoch++;if(catalogJob!=null)catalogJob.cancel(true);if(guideJob!=null)guideJob.cancel(true);cancelTimeline();loading=false;guideLoading=false;pageChannels=new ArrayList<>(playback.pickerChannels);filtered=pageChannels;guide=new HashMap<>(playback.pickerGuide);page=playback.pickerPage;total=playback.pickerTotal;catalog=new LiveTvData.Catalog(source,pageChannels,true);timelineOffset=Math.max(0,pageChannels.indexOf(channel))/6*6;play(channel);loadGuide();}
+    private void choosePlayerChannel(LiveTvData.Channel channel){if(playback==null)return;group=playback.pickerRecent?TvChannelLibrary.RECENT:playback.pickerFavorites?"@favorites":playerGroup;generation++;guideEpoch++;if(catalogJob!=null)catalogJob.cancel(true);if(guideJob!=null)guideJob.cancel(true);cancelTimeline();loading=false;guideLoading=false;pageChannels=new ArrayList<>(playback.pickerChannels);filtered=pageChannels;guide=new HashMap<>(playback.pickerGuide);page=playback.pickerPage;total=playback.pickerTotal;catalog=new LiveTvData.Catalog(source,pageChannels,true);timelineOffset=Math.max(0,pageChannels.indexOf(channel))/VelaReading.rows(this)*VelaReading.rows(this);play(channel);loadGuide();}
     private String playerGroup="";
     private void loadPlayerChannels(int requested){loadPlayerChannels(requested,playback!=null&&playback.pickerFavorites);}
     private void loadPlayerChannels(int requested,boolean onlyFavorites){

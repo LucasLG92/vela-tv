@@ -1,233 +1,197 @@
-# Vela, por dentro
+# Vela in pictures
 
-Tu cine, tus aplicaciones, el directo y cada detalle de tu inicio. Recorre Vela en **52 capturas en 4K** y descubre cómo puedes hacerlo tuyo.
+Explore 48 native **4K screenshots** from 1.28.0-preview. Every control is shown in English. Film artwork and original channel/programme names retain their source language.
 
-[Descargar Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.25.2-preview) · [Instalación](../guide/INSTALL.es.md) · [Imágenes y créditos](CREDITS.md)
+These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 
-## Tu cine, en primer plano
+## Your library, centre stage
 
-![Tu cine, en primer plano](01-inicio.webp)
+![Your library, centre stage](01-home.webp)
 
-## Jellyfin, en tu inicio
+## A compact look in mint
 
-![Jellyfin con progreso y carteles de su servidor](34-jellyfin-inicio.webp)
+![A compact look in mint](02-mint-compact.webp)
 
-## Tu servidor. Tu biblioteca.
+## Larger posters in lavender
 
-![Una cuenta de Jellyfin vinculada](35-jellyfin-cuenta.webp)
+![Larger posters in lavender](03-lavender-large.webp)
 
-## Tus apps, con sus iconos originales
+## Pick up where you left off
 
-![Tus apps, con sus iconos originales](09-todas-las-apps.webp)
+![Pick up where you left off](04-continue-watching.webp)
 
-## Tus películas
+## Explore your complete library
 
-![Tus películas](28-peliculas.webp)
+![Explore your complete library](05-library-pages.webp)
 
-## Tus series
+## One home, familiar navigation
 
-![Tus series](29-series.webp)
+![One home, familiar navigation](06-sidebar.webp)
 
-## Encuentra justo lo que te apetece
+## Make your shortcuts yours
 
-![Filtros de biblioteca desde el servidor](38-filtros-biblioteca.webp)
+![Make your shortcuts yours](07-shortcut-actions.webp)
 
-## El orden lo eliges tú
+## Put apps in your order
 
-![Ordenación de películas y series](39-ordenar-biblioteca.webp)
+![Put apps in your order](08-reorder-shortcuts.webp)
 
-## Un estilo más compacto
+## Recognise every app
 
-![Un estilo más compacto](02-aspecto-menta-compacto.webp)
+![Recognise every app](09-apps.webp)
 
-## El cine, a lo grande
+## Every setting in its place
 
-![El cine, a lo grande](03-aspecto-lavanda-grande.webp)
+![Every setting in its place](10-settings.webp)
 
-## Retoma donde lo dejaste
+## Vela in your style
 
-![Retoma donde lo dejaste](04-seguir-viendo.webp)
+![Vela in your style](11-appearance.webp)
 
-## Acaba de llegar a tu biblioteca
+## Choose your accent
 
-![Últimas subidas](30-ultimas-subidas.webp)
+![Choose your accent](12-colours.webp)
 
-## Explora sin perder el hilo
+## Find your poster size
 
-![Filas con difuminados en los extremos](31-filas-difuminadas.webp)
+![Find your poster size](13-posters.webp)
 
-## Cada servicio, en su sitio
+## Set the atmosphere
 
-![Seguir viendo desde los servicios compatibles](32-servicios-seguir-viendo.webp)
+![Set the atmosphere](14-background.webp)
 
-El contenido de YouTube y Prime ilustra el diseño con progreso de ejemplo; su aparición real depende de lo que cada app comparta con Android TV.
+## Keep things light
 
-## Un capítulo visto. El siguiente, a mano.
+![Keep things light](15-performance.webp)
 
-![Acciones al mantener OK en Seguir viendo](36-marcar-como-visto.webp)
+## Choose your pinned apps
 
-## Tus series siguen contigo
+![Choose your pinned apps](16-shortcuts.webp)
 
-![El siguiente episodio pendiente desde Jellyfin](37-siguiente-episodio.webp)
+## Connect your own services
 
-## Siempre al día
+![Connect your own services](17-accounts.webp)
 
-![Actualizaciones desde GitHub con controles para el mando](33-actualizaciones.webp)
+## Give the screen a quiet moment
 
-## Tu biblioteca, página a página
+![Give the screen a quiet moment](18-screensaver-settings.webp)
 
-![Tu biblioteca, página a página](05-biblioteca-paginada.webp)
+## Weather for your chosen city
 
-## Todo a mano
+![Weather for your chosen city](19-weather.webp)
 
-![Todo a mano](06-menu-lateral.webp)
+## Let your library fill the screen
 
-## Elige tus accesos
+![Let your library fill the screen](20-library-screensaver.webp)
 
-![Elige tus accesos](07-menu-accesos.webp)
+## Your newest films first
 
-## El orden lo pones tú
+![Your newest films first](28-movies.webp)
 
-![El orden lo pones tú](08-ordenar-accesos.webp)
+## Stories worth coming back to
 
-## Tus ajustes
+![Stories worth coming back to](29-series.webp)
 
-![Tus ajustes](10-ajustes.webp)
+## Stay up to date from your TV
 
-## Hazlo tuyo
+![Stay up to date from your TV](33-updates.webp)
 
-![Hazlo tuyo](11-apariencia.webp)
+## Your evening at a glance
 
-## Seis colores de acento
+![Your evening at a glance](40-tv-guide.webp)
 
-![Seis colores de acento](12-colores.webp)
+## See what comes next
 
-## Tres tamaños de cartel
+![See what comes next](41-next-programmes.webp)
 
-![Tres tamaños de cartel](13-carteles.webp)
+## Connect Plex with a code
 
-## El fondo, a tu gusto
+![Connect Plex with a code](43-plex-link.webp)
 
-![El fondo, a tu gusto](14-fondo.webp)
+## Give each channel its own space
 
-## Imagen y rendimiento
+![Give each channel its own space](44-tv-channels.webp)
 
-![Imagen y rendimiento](15-rendimiento.webp)
+## The programme, without distractions
 
-## Tus accesos favoritos
+![The programme, without distractions](45-live-player.webp)
 
-![Tus accesos favoritos](16-accesos.webp)
+## Choose your television view
 
-## Tus cuentas y servicios
+![Choose your television view](46-tv-settings.webp)
 
-![Tus cuentas y servicios](17-cuentas.webp)
+## Browse without leaving the picture
 
-## Diseña tus pausas
+![Browse without leaving the picture](47-channel-drawer.webp)
 
-![Diseña tus pausas](18-salvapantallas-ajustes.webp)
+## Your connected devices, in view
 
-## El tiempo, a tu manera
+![Your connected devices, in view](48-hdmi-inputs.webp)
 
-![El tiempo, a tu manera](19-ubicacion-demo.webp)
+## Find the right device icon
 
-## Tu biblioteca, también al descansar
+![Find the right device icon](49-device-profiles.webp)
 
-![Tu biblioteca, también al descansar](20-salvapantallas-plex-demo.webp)
+## Brand colours, native icons
 
-## Paisajes en movimiento
+![Brand colours, native icons](50-xbox-input.webp)
 
-![Paisajes en movimiento](21-salvapantallas-aereos.webp)
+## Your system controls, together
 
-## Conecta lo que te gusta
+![Your system controls, together](51-system.webp)
 
-![Conecta lo que te gusta](22-cuentas-sin-vincular.webp)
+## Know your Vela
 
-## Tu cine empieza aquí
+![Know your Vela](52-about.webp)
 
-![Elige tu servidor de Plex](42-servidores-plex.webp)
+## Your channels, your order
 
-## Conecta con un código
+![Your channels, your order](53-organise-channels.webp)
 
-![Vincula Plex desde tu móvil u ordenador](43-vincular-plex.webp)
+## Vela in your language
 
-## Bienvenido a Vela
+![Vela in your language](54-language.webp)
 
-![Bienvenido a Vela](23-asistente.webp)
+## Design your own home
 
-## Tus servicios, desde el primer día
+![Design your own home](55-home-layout.webp)
 
-![Tus servicios, desde el primer día](24-asistente-cuentas.webp)
+## Bring your apps together
 
-## Encuentra tu próximo directo
+![Bring your apps together](56-app-folders.webp)
 
-![Encuentra tu próximo directo](25-television.webp)
+## Set up from your phone
 
-## Toda la programación, de un vistazo
+![Set up from your phone](57-phone-and-sync.webp)
 
-![Guía horizontal con canales y horarios reales](40-guia-horizontal.webp)
+## Fine-tune your programme guide
 
-## Descubre lo que viene después
+![Fine-tune your programme guide](58-guide-corrections.webp)
 
-![La programación de las próximas horas](41-proximos-programas.webp)
+## Find something for tonight
 
-## Elige tu fuente
+![Find something for tonight](59-discovery.webp)
 
+## Make every word comfortable
 
-![Tu lista, tus canales](26-listas-tv.webp)
+![Make every word comfortable](61-reading.webp)
 
-## Reproducción a pantalla completa
+## Keep your layout, keep control
 
-![Reproducción a pantalla completa](27-reproductor-video-demo.webp)
+![Keep your layout, keep control](62-backups.webp)
 
-<details>
-<summary>Sobre estas capturas</summary>
+## A space for everyone
 
-Capturas nativas a 3840 × 2160 de un emulador independiente. **35 imágenes nuevas o renovadas con Vela 1.21.0**, incluida toda la TV integrada, Inicio, apps y ajustes. Las vistas de Jellyfin y sus filtros conservan las capturas de demostración de 1.13–1.15; las de conexión de Plex corresponden a 1.20.2, con servidores ficticios y código «DEMO». Consulta la versión y procedencia de cada imagen en [el índice](index.json).
+![A space for everyone](63-profiles.webp)
 
-La TV utiliza la lista M3U pública de TDTChannels, logos originales, EPG dobleM y una emisión oficial de RTVE. Los carteles de cine se usan con autorización y los progresos se preparan como ejemplo. El clima está identificado como demostración. No se conectan cuentas personales al emulador ni se publican credenciales, perfil, servidor privado o archivos originales de la biblioteca. Los accesos de servicios usan aplicaciones de prueba; el salvapantallas de vídeo muestra material NASA/JSC. [Créditos de las imágenes](CREDITS.md) · [Compatibilidad](../guide/COMPATIBILITY.es.md).
+## Make the remote feel familiar
 
-</details>
+![Make the remote feel familiar](64-remote.webp)
 
-## El directo comparte tu inicio
+## Follow the programmes you enjoy
 
-![TV dentro de la barra de Vela](44-tv-navegacion.webp)
+![Follow the programmes you enjoy](65-programmes.webp)
 
-## Cambia de lista con el mando
+## Find it from one place
 
-![Logos grandes sin columna de categorías](45-tv-categorias.webp)
-
-## Elige cómo ver tus canales
-
-![Guía o Canales, desde Ajustes](46-ajustes-tv.webp)
-
-## Tus canales, sobre el directo
-
-![Programa, progreso y tiempo restante sin salir del vídeo](47-canales-durante-directo.webp)
-
-Derecha abre los canales; OK cambia de emisión y Atrás cierra el panel para seguir viendo.
-
-## Tus dispositivos, dentro de Vela
-
-![Entradas HDMI con iconos y dispositivo destacado](48-entradas-hdmi.webp)
-
-## Una entrada para cada momento
-
-![Xbox y las conexiones dentro de Vela](49-xbox-hdmi.webp)
-
-Los equipos sin señal aparecen como HDMI y su número. Los nombres y símbolos se muestran solo con un estado activo publicado por Android.
-
-## Elige qué has conectado
-
-![Perfiles de dispositivos HDMI](50-identificar-hdmi.webp)
-
-Mantén OK sobre una entrada para elegir su modelo o regresar a Automático. Nintendo, PlayStation, Xbox, Sega, ordenadores, streaming y equipos de vídeo o audio tienen sus perfiles.
-
-## El sistema, a mano
-
-![Pantalla de inicio y controles del televisor](51-sistema.webp)
-
-## Conoce tu Vela
-
-![Información, versión y licencias](52-informacion.webp)
-
-Las nuevas capturas 1.23 recorren los ajustes por categorías, la personalización y las actualizaciones. Las entradas conservan sus capturas de la versión 1.22. Los dispositivos HDMI son datos simulados del emulador que recorren el mismo código de identificación y vistas; no son una comprobación de consolas físicas. Consulta versión y procedencia en el índice.
+![Find it from one place](66-search.webp)

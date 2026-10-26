@@ -17,6 +17,8 @@ final class TvTimelineView extends FrameLayout {
         void selected(LiveTvData.Channel channel,LiveTvData.Programme programme);
         void activate(LiveTvData.Channel channel,LiveTvData.Programme programme);
         void options(LiveTvData.Channel channel);
+        default void correction(LiveTvData.Channel channel){}
+        default boolean history(){return false;}
         boolean channels(int direction);
         void time(int direction,long cursor);
     }
@@ -40,9 +42,9 @@ final class TvTimelineView extends FrameLayout {
         setOnFocusChangeListener((v,focused)->{if(!focused)remote.cancel();invalidate();if(focused)notifySelection();});
     }
     static long present(long now){return now-now%1800;}
-    void rowHeight(int pixels){rowHeight=Math.max(ROW,Math.min(120,pixels));requestLayout();invalidate();}
+    void rowHeight(int pixels){rowHeight=Math.max(ROW,Math.min(180,pixels));requestLayout();invalidate();}
     void data(List<LiveTvData.Channel> visible,Map<String,List<LiveTvData.Programme>> values,long from,LiveTvData.Channel selected,boolean waiting){
-        boolean changed=from!=start;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,Math.min(ROWS,visible.size())));programmes=values;
+        boolean changed=from!=start;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,Math.min(VelaReading.rows(getContext()),visible.size())));programmes=values;
         row=Math.max(0,Math.min(row,channels.size()-1));if(selected!=null)for(int i=0;i<channels.size();i++)if(channels.get(i).id.equals(selected.id))row=i;
         if(cursor<start||cursor>=start+SECONDS)cursor=Math.max(start,Math.min(start+SECONDS-1,now));
         invalidate();if(hasFocus()||changed)notifySelection();
@@ -56,7 +58,7 @@ final class TvTimelineView extends FrameLayout {
     private void notifySelection(){if(channels.isEmpty())return;describe();actions.selected(channels.get(row),programme());}
     private String time(long value){return clock.format(new Date(value*1000));}
     private float x(long value){return LABEL+(getWidth()-LABEL)*(value-start)/(float)SECONDS;}
-    private void label(Canvas c,String value,float x,float baseline,float width,int size,int color,Typeface font){if(width<12)return;paint.setTypeface(font);paint.setTextSize(size);paint.setColor(color);c.drawText(TextUtils.ellipsize(value,paint,width,TextUtils.TruncateAt.END).toString(),x,baseline,paint);}
+    private void label(Canvas c,String value,float x,float baseline,float width,int size,int color,Typeface font){if(width<12)return;paint.setTypeface(font);paint.setTextSize(size*VelaReading.scale(getContext()));paint.setColor(color);c.drawText(TextUtils.ellipsize(value,paint,width,TextUtils.TruncateAt.END).toString(),x,baseline,paint);}
     @Override protected void onDraw(Canvas c){
         super.onDraw(c);now=System.currentTimeMillis()/1000;int w=getWidth();
         label(c,date.format(new Date(start*1000)),12,31,LABEL-24,18,VelaTheme.SECONDARY,Ui.medium);
@@ -80,10 +82,11 @@ final class TvTimelineView extends FrameLayout {
         if(p!=null){String timing=time(p.start)+"–"+time(p.end);if(p.current(now))timing+="  ·  "+LiveTvActivity.remainingText(p.remainingMinutes(now));label(c,timing,left+14,top+59+(rowHeight-ROW)/2f,right-left-28,14,chosen?0xFF61636D:VelaTheme.SECONDARY,Ui.regular);}
     }
     @Override public boolean onKeyDown(int key,KeyEvent event){
+        if(key==KeyEvent.KEYCODE_INFO&&!channels.isEmpty()){if(event.getRepeatCount()==0)actions.correction(channels.get(row));return true;}
         if(remote.key(event))return true;
         if(channels.isEmpty())return super.onKeyDown(key,event);
         if(key==KeyEvent.KEYCODE_DPAD_UP||key==KeyEvent.KEYCODE_DPAD_DOWN){int direction=key==KeyEvent.KEYCODE_DPAD_UP?-1:1,target=row+direction;if(target<0||target>=channels.size()){if(actions.channels(direction))return true;return super.onKeyDown(key,event);}row=target;invalidate();notifySelection();return true;}
-        if(key==KeyEvent.KEYCODE_DPAD_LEFT||key==KeyEvent.KEYCODE_DPAD_RIGHT){int direction=key==KeyEvent.KEYCODE_DPAD_LEFT?-1:1;LiveTvData.Programme p=programme();long target=p==null?cursor+direction*1800:direction>0?p.end:p.start-1;if(target<start||target>=start+SECONDS){if(direction<0&&start<=present(now)){return super.onKeyDown(key,event);}actions.time(direction,target);}else cursor(target);return true;}
+        if(key==KeyEvent.KEYCODE_DPAD_LEFT||key==KeyEvent.KEYCODE_DPAD_RIGHT){int direction=key==KeyEvent.KEYCODE_DPAD_LEFT?-1:1;LiveTvData.Programme p=programme();long target=p==null?cursor+direction*1800:direction>0?p.end:p.start-1;if(target<start||target>=start+SECONDS){if(direction<0&&start<=present(now)&&!actions.history()){return super.onKeyDown(key,event);}actions.time(direction,target);}else cursor(target);return true;}
         return super.onKeyDown(key,event);
     }
     @Override protected void onDetachedFromWindow(){remote.cancel();super.onDetachedFromWindow();}

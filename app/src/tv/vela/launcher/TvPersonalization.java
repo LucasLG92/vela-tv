@@ -13,7 +13,7 @@ final class TvPersonalization {
         Item(String key,String label,boolean hidden){this.key=key;this.label=label;this.hidden=hidden;}
     }
     private final SharedPreferences prefs;
-    TvPersonalization(Context c,String source){prefs=c.getApplicationContext().getSharedPreferences("tv-personal-"+LiveTvData.hash(source),0);}
+    TvPersonalization(Context c,String source){prefs=VelaWorkspace.channelPrefs(c,source);}
     private List<Item> read(String name,int limit){
         List<Item> out=new ArrayList<>();String raw=prefs.getString(name,"");if(raw.length()>192*1024)return out;
         try{JSONArray a=new JSONArray(raw);Set<String> seen=new HashSet<>();for(int i=0;i<Math.min(a.length(),limit);i++){JSONObject j=a.optJSONObject(i);if(j==null)continue;String k=j.optString("k"),n=j.optString("n");if(!k.isEmpty()&&k.length()<=256&&seen.add(k))out.add(new Item(k,clean(n)));}}catch(JSONException invalid){}return out;

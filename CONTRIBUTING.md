@@ -1,16 +1,26 @@
-# Contribuir a Vela
+# Contributing to Vela
 
-Usa Java 8 y las APIs nativas de Android. El mínimo es Android 11; aísla y comprueba las APIs posteriores. Mantén los textos nuevos en portugués, inglés y español mediante `Ui.tr`.
+Use Java 8 and native Android APIs. Full Vela requires Android 11; Lite requires Android 8.0. Guard newer APIs and keep Full-only clients out of Lite's build whitelist.
 
-El inicio debe permanecer sin vídeo automático, sondeos de aplicaciones ni tareas continuas de dibujo. Limita imágenes, páginas y colas; cancela el trabajo obsoleto y libera imágenes y reproductores al ocultar la pantalla.
+## Keep it light
 
-Antes de enviar cambios:
+Do not add autoplay video, continuous drawing, service polling or unbounded lists to Home. Bound images, pages, queues and response sizes; cancel stale work. Release images, players, tuner sessions, listeners and temporary local servers when their screen leaves the foreground.
 
-1. Compila con la configuración neutra siguiendo [la guía](guide/BUILD.md).
-2. Ejecuta las pruebas relacionadas con el cambio. Los cambios de recuperación requieren `python tests/test_home_mode.py`.
-3. Ejecuta `python tools/audit_publication.py` sobre los archivos que vayas a publicar.
-4. Revisa las capturas y los avisos de licencia. No utilices una cuenta personal para las capturas públicas.
+Keep new menus inside Vela's existing graphite surfaces and Activity. Preserve remote focus, Back behaviour, reading size and screen margins.
 
-Describe el problema, el comportamiento resultante y las pruebas realizadas. No incluyas datos de un servidor real en código, pruebas, commits, issues ni imágenes.
+## Localisation
 
-La galería se genera en un emulador limpio mediante `--test gallery`. Sus datos de Plex son una simulación identificada como Demo y sus carteles tienen licencias abiertas. No debe ejecutarse en una televisión personal. Las aplicaciones de prueba usadas para mostrar accesos no son versiones funcionales de los servicios.
+Owned UI text belongs in `app/assets/i18n/en.json`, `es.json` and `pt.json`. Use `L10n.text("English source text")`; existing `Ui.tr` calls also use the selected catalogue. Update every catalogue and preserve formatting placeholders. Never translate server names, channel names, programme titles, user-created folders or provider protocol values.
+
+Run `python tools/check_localization.py`. Language selection is installation-local, supports System language and uses a tiny atomic record so Home and screensaver processes see the same choice. Only the selected translation catalogue is retained in memory.
+
+## Before submitting
+
+1. Build with neutral defaults using [the build guide](guide/BUILD.md).
+2. Run checks appropriate to the change. Recovery changes require `python tests/test_home_mode.py`.
+3. Run `python tools/audit_publication.py` and review the actual files you will publish.
+4. Inspect native screenshots, accessibility labels and licence notices. Use an owned clean emulator and demonstration data for public captures.
+
+Describe the concrete problem, resulting behaviour and verification. Never include personal credentials, provider URLs, signing keys or private Android data in code, tests, issues, images or commits.
+
+The gallery uses real native screens and authorised or openly licensed artwork. Test APK assets do not belong in a production APK. Demo labels and non-working pairing codes must be explicit; never imply that a simulated provider session proves access to a real account.

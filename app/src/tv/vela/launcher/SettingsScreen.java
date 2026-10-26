@@ -115,8 +115,9 @@ class SettingsScreen extends VelaScreen {
             TextView hint=text("← "+Ui.tr("Menu do Vela","Vela menu","Menú de Vela")+"\n→ "+Ui.tr("Opções","Options","Opciones"),17,VelaTheme.MUTED,Ui.regular);hint.setMaxLines(2);put(stage,hint,86,852,380,64);
             building=false;render(22);categories[0].requestFocus();
         }
-        private int categoryFor(int value){if(value==22)return 0;if(value==2||value>=17&&value<=20)return 1;if(value>=6&&value<=10)return 2;if(value==3||value>=14&&value<=16||value==21)return 3;if(value==11||value==12)return 4;if(value==23)return 5;if(value==4||value==5)return 7;return 6;}
+        private int categoryFor(int value){if(value==22)return 0;if(value==24||value==2||value>=17&&value<=20)return 1;if(value>=6&&value<=10)return 2;if(value==3||value>=14&&value<=16||value==21)return 3;if(value==11||value==12)return 4;if(value==23)return 5;if(value==4||value==5)return 7;return 6;}
         private void skin(){int selected=categoryFor(page);for(int i=0;i<categories.length;i++){boolean focus=categories[i].hasFocus();categories[i].setBackground(round(focus?Appearance.accent(activity):selected==i?0x2AFFFFFF:Color.TRANSPARENT,20));categoryText[i].setTextColor(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);categoryIcons[i].color(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);}}
+        private void tools(int page){if(activity.owner instanceof VelaHub.Owner)((VelaHub.Owner)activity.owner).tools(page);else activity.startActivity(new Intent(activity,HomeActivity.class).putExtra("velaTools",page));}
         private void navigation(){View target=activity.navigation.navigationTarget(activity);if(target!=null)target.requestFocus();else activity.finish();}
         private void focusOptions(){List<View> focusable=pane.getFocusables(FOCUS_FORWARD);if(!focusable.isEmpty())focusable.get(0).requestFocus();}
         boolean showingUpdates(){return updates!=null&&page==23;}
@@ -152,36 +153,43 @@ class SettingsScreen extends VelaScreen {
             if(page==10&&next!=10){searchGeneration++;if(searchJob!=null)searchJob.cancel(true);}
             Bundle previous=next==23&&updates!=null?updates.save():updateState;closeUpdates();updateState=previous;
             page=next;pane.removeAllViews();rows.clear();labels.clear();values.clear();status.setText("");pickerFocus=0;contentY=0;
-            scroll=new ScrollView(activity);scroll.setFillViewport(false);scroll.setClipToPadding(true);scroll.setVerticalScrollBarEnabled(false);scroll.setFocusable(false);put(pane,scroll,0,0,1134,622);rowHost=new FrameLayout(activity);scroll.addView(rowHost,new ScrollView.LayoutParams(1134,LayoutParams.WRAP_CONTENT));String[] captions={"Elige cómo ver el directo y conecta tus canales.","Color, carteles, fondos y rendimiento.","Una pausa con tu estilo, tu hora y tu tiempo.","Tus bibliotecas y tus servicios, conectados.","Elige las aplicaciones de tu barra lateral.","Vela "+version(),"El inicio y los controles de tu televisión.","Versión, configuración y licencias."};detail.setText(captions[categoryFor(page)]);skin();
+            scroll=new ScrollView(activity);scroll.setFillViewport(false);scroll.setClipToPadding(true);scroll.setVerticalScrollBarEnabled(false);scroll.setFocusable(false);put(pane,scroll,0,0,1134,622);rowHost=new FrameLayout(activity);scroll.addView(rowHost,new ScrollView.LayoutParams(1134,LayoutParams.WRAP_CONTENT));String[] captions={L10n.text("Choose your live TV view and connect your channels."),L10n.text("Colour, posters, backgrounds and performance."),L10n.text("A break with your style, clock and weather."),L10n.text("Your libraries and services, connected."),L10n.text("Choose the apps in your sidebar."),"Vela "+version(),L10n.text("Your home screen and television controls."),L10n.text("Version, settings and licences.")};detail.setText(captions[categoryFor(page)]);skin();
             if(page==0){
                 section(Ui.tr("SISTEMA","SYSTEM","SISTEMA"),0);
-                row("Pantalla de inicio",mode(),0,"Tu televisión, a tu manera.","Elige Vela como inicio o vuelve al inicio original de tu televisión.",()->open(1,0));
-                row("Ajustes del televisor","›",0,"Tu televisión, a mano.","Imagen, sonido, red, Bluetooth y los controles del televisor.",()->launch(new Intent(Settings.ACTION_SETTINGS)));
-                row(Ui.tr("Assistente de configuração","Setup guide","Asistente de configuración"),"›",0,"Todo a tu gusto.","Repasa cuentas, aplicaciones y ubicación sin borrar tu configuración.",()->activity.startActivity(new Intent(activity,SetupActivity.class)));
-                note("El inicio y el salvapantallas originales se conservan para poder volver cuando quieras.",0);
+                row(L10n.text("Home screen"),mode(),0,L10n.text("Your television, your way."),L10n.text("Choose Vela as your home screen or return to your TV's original home."),()->open(1,0));
+                row(L10n.text("TV settings"),"›",0,L10n.text("Your TV controls, close at hand."),L10n.text("Picture, sound, network, Bluetooth and television controls."),()->launch(new Intent(Settings.ACTION_SETTINGS)));
+                row(Ui.tr("Assistente de configuração","Setup guide","Asistente de configuración"),"›",0,L10n.text("Everything, your way."),L10n.text("Review accounts, apps and location without clearing your settings."),()->activity.startActivity(new Intent(activity,SetupActivity.class)));
+                row(L10n.text("Your Vela"),"›",0,L10n.text("Your Vela."),L10n.text("Backups, profiles, search, programmes, reading and diagnostics."),()->tools(1));
+                note(L10n.text("Your original home screen and screensaver are kept so you can return whenever you like."),0);
             }else if(page==23){
                 section(Ui.tr("ATUALIZAÇÕES","UPDATES","ACTUALIZACIONES"),0);detail.setText("Vela "+version());openUpdates();
             }else if(page==1){
-                section("PANTALLA DE INICIO",0);
-                row("Vela",isVela()?"✓":"Activar","Inicio, salvapantallas y recuperación.",54,"Tu inicio personal.","Activa Vela y su salvapantallas. La app guarda el retorno al inicio original de la televisión antes de completar la configuración.",()->switchHome(true));
-                row("Original",!isVela()?"✓":"","El inicio de fábrica de tu televisión.",178,"Siempre puedes volver.","Restaura el inicio y el salvapantallas originales de tu televisión.",()->switchHome(false));
-                note("El cambio puede tardar unos segundos. Si la TV pide autorización, marca Permitir siempre y acepta con el mando.",338);
+                section(L10n.text("HOME SCREEN"),0);
+                row("Vela",isVela()?"✓":L10n.text("Activate"),L10n.text("Home screen, screensaver and recovery."),54,L10n.text("Your personal home screen."),L10n.text("Enable Vela and its screensaver. Vela saves a route back to the TV's original home before completing setup."),()->switchHome(true));
+                row("Original",!isVela()?"✓":"",L10n.text("Your television's factory home screen."),178,L10n.text("You can always go back."),L10n.text("Restore your television's original home screen and screensaver."),()->switchHome(false));
+                note(L10n.text("The change can take a few seconds. If your TV requests permission, select Always allow and confirm with the remote."),338);
+            }else if(page==24){
+                section(L10n.text("LANGUAGE"),0);
+                for(int i=0;i<L10n.CODES.length;i++){final String code=L10n.CODES[i];String name=i==0?L10n.text("System language"):L10n.NAMES[i];row(name,code.equals(L10n.choice())?"✓":"",0,L10n.text("Make Vela feel at home."),L10n.text("Applies to every Vela menu. App names, channels and your library keep their original names."),()->{if(!L10n.choose(activity,code)){toast(L10n.text("Could not save language."));return;}Ui.init(activity);activity.changed();activity.owner.recreate();});}
+                note(L10n.text("Your accounts, favourites and television settings are kept."),0);
             }else if(page==2){
-                section("IMAGEN Y RENDIMIENTO",0);
-                row("Calidad de imagen",Visuals.light(activity)?"Ligera":"Alta",54,"La imagen que prefieras.","Alta conserva los fondos en Full HD. Ligera usa fondos de 720p y prescinde del desenfoque del menú. Los carteles siguen completos.",()->{Visuals.prefs(activity).edit().putBoolean("light",!Visuals.light(activity)).apply();render(2);});
-                row("Reducir movimiento",Visuals.reducedMotion(activity)?"Sí":"No",134,"Un foco más tranquilo.","Elimina el aumento y las transiciones de selección. También se respeta la desactivación de animaciones de Android.",()->{Visuals.prefs(activity).edit().putBoolean("reducedMotion",!Visuals.reducedMotion(activity)).apply();render(2);rows.get(1).requestFocus();});
-                section("MEMORIA",270);
+                section(L10n.text("PICTURE AND PERFORMANCE"),0);
+                row(L10n.text("Image quality"),Visuals.light(activity)?L10n.text("Light"):L10n.text("High"),54,L10n.text("The picture you prefer."),L10n.text("High keeps Full HD backgrounds. Light uses 720p backgrounds and skips menu blur. Posters keep their full quality."),()->{Visuals.prefs(activity).edit().putBoolean("light",!Visuals.light(activity)).apply();render(2);});
+                row(L10n.text("Reduce motion"),Visuals.reducedMotion(activity)?L10n.text("Yes"):L10n.text("No"),134,L10n.text("Calmer focus movement."),L10n.text("Remove focus scaling and transitions. Vela also respects Android's animation settings."),()->{Visuals.prefs(activity).edit().putBoolean("reducedMotion",!Visuals.reducedMotion(activity)).apply();render(2);rows.get(1).requestFocus();});
+                section(L10n.text("MEMORY"),270);
                 Debug.MemoryInfo memory=new Debug.MemoryInfo();Debug.getMemoryInfo(memory);
-                row("Memoria del proceso",String.format(Ui.locale(),"%.1f MB",memory.getTotalPss()/1024f),312,"Una lectura real.","Memoria compartida proporcional de Inicio y Ajustes en este instante. Incluye Android y gráficos; varía con las imágenes y el dispositivo. Pulsa para actualizar.",()->{render(2);rows.get(2).requestFocus();});
+                row(L10n.text("Process memory"),String.format(Ui.locale(),"%.1f MB",memory.getTotalPss()/1024f),312,L10n.text("A real measurement."),L10n.text("Current proportional memory for Home and Settings, including Android and graphics. It varies with artwork and device. Press to refresh."),()->{render(2);rows.get(2).requestFocus();});
 
                 row(Ui.tr("Personalizar aparência","Customize appearance","Personalizar apariencia"),"›",684,Ui.tr("Seu estilo.","Your style.","Tu estilo."),Ui.tr("Escolha cor, tamanho dos cartazes e intensidade do fundo. O desenho original fica disponível.","Choose color, poster size and background intensity. The original design stays available.","Elige color, tamaño de carteles e intensidad del fondo. El diseño original sigue disponible."),()->open(17,3));
-                note("Caché de imágenes: hasta "+Visuals.cacheKb(activity)/1024+" MB. Se vacía al salir de Inicio. No se reproducen vídeos ni se animan fondos en el inicio.",440);
+                note(L10n.text("Image cache: up to ")+Visuals.cacheKb(activity)/1024+L10n.text(" MB. Cleared when you leave Home. No videos or animated backgrounds play on Home."),440);
             }else if(page==17){
                 section(Ui.tr("APARÊNCIA","APPEARANCE","APARIENCIA"),0);
                 row(Ui.tr("Cor de destaque","Accent color","Color de acento"),Appearance.colorName(Appearance.colorIndex(activity)),54,Ui.tr("Um toque de cor.","A touch of color.","Un toque de color."),Ui.tr("A cor aparece na seleção do menu, na ação principal, no progresso e nos Ajustes.","Color appears in menu selection, the main action, progress and Settings.","El color aparece en la selección del menú, la acción principal, el progreso y los Ajustes."),()->render(18));
                 row(Ui.tr("Tamanho dos cartazes","Poster size","Tamaño de carteles"),Appearance.sizeName(Appearance.sizeIndex(activity)),134,Ui.tr("Seu cinema, na sua medida.","Your cinema, your size.","Tu cine, a tu medida."),Ui.tr("Três tamanhos com a proporção original. As páginas continuam limitadas a 24 títulos.","Three sizes with the original aspect ratio. Pages remain limited to 24 titles.","Tres tamaños con su proporción original. Las páginas siguen limitadas a 24 títulos."),()->render(19));
                 row(Ui.tr("Intensidade do fundo","Background intensity","Intensidad del fondo"),Appearance.backdropName(Appearance.backdropIndex(activity)),214,Ui.tr("O ambiente que você quiser.","Set the atmosphere.","El ambiente que quieras."),Ui.tr("Escureça o fundo para ler melhor ou deixe mais visível a imagem original.","Dim the background for reading or reveal more of the original artwork.","Oscurece el fondo para leer mejor o deja más visible la imagen original."),()->render(20));
                 row(Ui.tr("Restaurar aparência","Reset appearance","Restaurar apariencia"),"›",374,Ui.tr("Voltar ao desenho original.","Return to the original design.","Volver al diseño original."),Ui.tr("Restaura apenas cor, cartazes e fundo. Conserva contas, apps, clima e desempenho.","Resets only color, posters and background. Keeps accounts, apps, weather and performance.","Restaura solo color, carteles y fondo. Conserva cuentas, apps, clima y rendimiento."),()->{Appearance.reset(activity);render(17);rows.get(3).requestFocus();});
+                row(L10n.text("Reading and margins"),"›",0,L10n.text("Comfortable from the sofa."),L10n.text("Text size, guide density, contrast and screen margins."),()->tools(2));
+                row(L10n.text("Language"),L10n.name(),0,L10n.text("Vela in your language."),L10n.text("Choose a language or follow this television's system language."),()->render(24));
                 note(Ui.tr("As mudanças aparecem ao voltar ao início. Sem fundos adicionais, vídeos ou animações permanentes.","Changes appear when you return home. No additional backgrounds, videos or continuous animations.","Los cambios aparecen al volver al inicio. Sin fondos adicionales, vídeos ni animaciones permanentes."),520);
             }else if(page==18||page==19||page==20){
                 String key=page==18?"color":page==19?"size":"backdrop";int current=page==18?Appearance.colorIndex(activity):page==19?Appearance.sizeIndex(activity):Appearance.backdropIndex(activity),count=page==18?6:3;
@@ -190,53 +198,53 @@ class SettingsScreen extends VelaScreen {
             }else if(page==3){
                 section("YOUTUBE",0);
                 boolean allowed=activity.checkSelfPermission(TvSuggestions.PERMISSION)==PackageManager.PERMISSION_GRANTED;
-                row("Filas de la televisión",allowed?"Permitidas":"Activar",54,"Lo que comparte YouTube.","La disponibilidad de vídeos depende de lo que la aplicación de YouTube publique en tu televisión. No solicita tu contraseña.",()->{if(!allowed)activity.requestPermissions(new String[]{TvSuggestions.PERMISSION},80);else toast("El acceso ya está permitido.");});
-                row("Abrir YouTube","›",134,"Vuelve a tus vídeos.","Abre YouTube para ver tus recomendados personales, suscripciones y la lista Ver más tarde.",()->{Intent i=HomeApps.launchIntent(activity.getPackageManager(),TvSuggestions.YOUTUBE);if(i!=null)launch(i);else toast("YouTube no está instalado.");});
+                row(L10n.text("TV rows"),allowed?L10n.text("Allowed"):L10n.text("Activate"),54,L10n.text("Shared by YouTube."),L10n.text("Video availability depends on what YouTube shares with your TV. Vela does not request your password."),()->{if(!allowed)activity.requestPermissions(new String[]{TvSuggestions.PERMISSION},80);else toast(L10n.text("Access is already allowed."));});
+                row(L10n.text("Open YouTube"),"›",134,L10n.text("Back to your videos."),L10n.text("Open YouTube for your recommendations, subscriptions and Watch Later list."),()->{Intent i=HomeApps.launchIntent(activity.getPackageManager(),TvSuggestions.YOUTUBE);if(i!=null)launch(i);else toast(L10n.text("YouTube is not installed."));});
             }else if(page==4){
-                section("INFORMACIÓN",0);
-                row("Vela",version(),54,"Vela.","Tu biblioteca y tus aplicaciones, en una pantalla pensada para el mando de tu televisión.",()->{});
-                row("Televisión",Build.MANUFACTURER+" · "+Build.MODEL,134,"Tu dispositivo.","Los datos corresponden al dispositivo donde está instalada Vela.",()->{});
-                row("Android",Build.VERSION.RELEASE,214,"El sistema de tu TV.","Los ajustes de imagen, sonido, red y cuentas se gestionan desde Ajustes de la TV.",()->{});
-                row("Licencias","›",334,"Créditos y licencias.","Avisos de los componentes de código abierto, tipografías y símbolos utilizados en Vela.",()->open(5,7));
+                section(L10n.text("INFORMATION"),0);
+                row("Vela",version(),54,"Vela.",L10n.text("Your library and apps, on a screen designed for your TV remote."),()->{});
+                row(L10n.text("Television"),Build.MANUFACTURER+" · "+Build.MODEL,134,L10n.text("Your device."),L10n.text("Information about the device running Vela."),()->{});
+                row("Android",Build.VERSION.RELEASE,214,L10n.text("Your television's system."),L10n.text("Manage picture, sound, network and accounts in your TV's settings."),()->{});
+                row(L10n.text("Licences"),"›",334,L10n.text("Credits and licences."),L10n.text("Notices for the open-source components, fonts and symbols used in Vela."),()->open(5,7));
                 row(Ui.tr("Assistente de configuração","Setup guide","Asistente de configuración"),"›",434,Ui.tr("Tudo a seu gosto.","Make it yours.","Todo a tu gusto."),Ui.tr("Revise contas, apps e localização sem apagar sua configuração.","Review accounts, apps and location without erasing your setup.","Repasa cuentas, apps y ubicación sin borrar tu configuración."),()->activity.startActivity(new Intent(activity,SetupActivity.class)));
                 row(Ui.tr("Atualizações","Updates","Actualizaciones"),"›",534,Ui.tr("Sempre em dia.","Always up to date.","Siempre al día."),Ui.tr("Novas versões do GitHub, com verificação automática e instalação confirmada por você.","New GitHub releases, with automatic checks and installation confirmed by you.","Nuevas versiones de GitHub, con comprobación automática e instalación confirmada por ti."),()->render(23));
             }else if(page==6){
-                section("SALVAPANTALLAS",0);
-                row("Estilo",AmbientPrefs.styleName(activity),54,"Una pausa a tu gusto.","Aéreos muestra vídeos de paisajes y ciudades. Plex o Jellyfin usan las imágenes originales de tu biblioteca con movimiento suave.",()->render(7));
-                row("Vista previa","Abrir",134,"Así se verá en tu tele.","La vista previa utiliza el estilo y los ajustes que elijas. Cualquier flecha, OK o Atrás cierra la vista previa.",()->activity.showPreview());
-                row("Hora",AmbientPrefs.clock(activity)?"Visible":"Oculta",214,"La hora, de un vistazo.","El reloj permanece visible en los dos estilos. Se actualiza al cambiar de minuto, sin animaciones continuas.",()->{AmbientPrefs.get(activity).edit().putBoolean("clock",!AmbientPrefs.clock(activity)).apply();render(6);rows.get(2).requestFocus();});
-                row("Tiempo local",AmbientPrefs.weather(activity)?"Visible":"Oculto",294,"Tu tiempo, en tu pantalla.","Temperatura y estado del cielo junto a la hora. Se consultan al entrar y se reutilizan durante treinta minutos.",()->{AmbientPrefs.get(activity).edit().putBoolean("weather",!AmbientPrefs.weather(activity)).apply();render(6);rows.get(3).requestFocus();});
-                row("Ubicación",AmbientWeather.name(activity),374,"El tiempo de donde estás.","Usa la ubicación aproximada de la televisión o busca una ciudad. Si tu televisión no detecta su ubicación, puedes elegirla con el mando.",()->render(9));
-                row("Texto en pantalla",AmbientPrefs.captions(activity)?"Discreto":"Oculto",454,"La imagen es protagonista.","El lugar o el título aparece durante ocho segundos. La hora y el tiempo permanecen visibles si los activas.",()->{AmbientPrefs.get(activity).edit().putBoolean("captions",!AmbientPrefs.captions(activity)).apply();render(6);rows.get(5).requestFocus();});
-                if(AmbientPrefs.plex(activity))row("Cambiar imagen",AmbientPrefs.seconds(activity)==30?"30 segundos":AmbientPrefs.seconds(activity)==60?"1 minuto":"2 minutos",534,"A tu ritmo.","Elige cuánto dura cada fondo de Plex. Si reduces el movimiento en Imagen y rendimiento, las fotos se muestran sin zoom.",()->{int n=AmbientPrefs.seconds(activity);AmbientPrefs.get(activity).edit().putInt("seconds",n==30?60:n==60?120:30).apply();render(6);rows.get(6).requestFocus();});
-                else row("Tema",AmbientPrefs.themeName(activity),534,"Paisajes o ciudades.","Alterna todos los vídeos o elige paisajes naturales o ciudades. Se reproducen en silencio y requieren Internet.",()->render(8));
-                row("Activación en la TV","›",654,"Cuando tu tele descanse.","El tiempo de espera y la activación dependen de tu televisión. Abre los ajustes de salvapantallas de Android para elegirlos.",()->{Intent intent=new Intent(Settings.ACTION_DREAM_SETTINGS);if(intent.resolveActivity(activity.getPackageManager())==null)intent=new Intent(Settings.ACTION_SETTINGS);launch(intent);});
-                note("El tiempo usa Open-Meteo. Si no hay conexión, muestra los últimos datos hasta tres horas. Sin ubicación configurada, elige tu ciudad para activarlo.",758);
+                section(L10n.text("SCREENSAVER"),0);
+                row(L10n.text("Style"),AmbientPrefs.styleName(activity),54,L10n.text("A break, your way."),L10n.text("Aerials shows landscape and city videos. Plex or Jellyfin uses original library artwork with gentle movement."),()->render(7));
+                row(L10n.text("Preview"),L10n.text("Open"),134,L10n.text("See it on your screen."),L10n.text("The preview uses your chosen style and settings. Any arrow, OK or Back closes it."),()->activity.showPreview());
+                row(L10n.text("Clock"),AmbientPrefs.clock(activity)?L10n.text("Visible"):L10n.text("Hidden"),214,L10n.text("The time at a glance."),L10n.text("The clock stays visible in both styles. It updates each minute without continuous animation."),()->{AmbientPrefs.get(activity).edit().putBoolean("clock",!AmbientPrefs.clock(activity)).apply();render(6);rows.get(2).requestFocus();});
+                row(L10n.text("Local weather"),AmbientPrefs.weather(activity)?L10n.text("Visible"):L10n.text("Hidden"),294,L10n.text("Your weather, on your screen."),L10n.text("Temperature and sky conditions beside the clock. Fetched on entry and reused for thirty minutes."),()->{AmbientPrefs.get(activity).edit().putBoolean("weather",!AmbientPrefs.weather(activity)).apply();render(6);rows.get(3).requestFocus();});
+                row(L10n.text("Location"),AmbientWeather.name(activity),374,L10n.text("Weather where you are."),L10n.text("Use your TV's approximate location or search for a city. If location is unavailable, choose it with your remote."),()->render(9));
+                row(L10n.text("On-screen text"),AmbientPrefs.captions(activity)?L10n.text("Subtle"):L10n.text("Hidden"),454,L10n.text("Let the picture shine."),L10n.text("The place or title appears for eight seconds. The clock and weather remain visible when enabled."),()->{AmbientPrefs.get(activity).edit().putBoolean("captions",!AmbientPrefs.captions(activity)).apply();render(6);rows.get(5).requestFocus();});
+                if(AmbientPrefs.plex(activity))row(L10n.text("Change image"),AmbientPrefs.seconds(activity)==30?L10n.text("30 seconds"):AmbientPrefs.seconds(activity)==60?L10n.text("1 minute"):L10n.text("2 minutes"),534,L10n.text("At your own pace."),L10n.text("Choose how long each library image stays. With Reduce motion enabled, photos appear without zoom."),()->{int n=AmbientPrefs.seconds(activity);AmbientPrefs.get(activity).edit().putInt("seconds",n==30?60:n==60?120:30).apply();render(6);rows.get(6).requestFocus();});
+                else row(L10n.text("Theme"),AmbientPrefs.themeName(activity),534,L10n.text("Landscapes or cities."),L10n.text("Shuffle all videos or choose landscapes or cities. Videos play silently and require an Internet connection."),()->render(8));
+                row(L10n.text("Enable on your TV"),"›",654,L10n.text("When your television rests."),L10n.text("Idle time and activation depend on your TV. Choose them in Android's screensaver settings."),()->{Intent intent=new Intent(Settings.ACTION_DREAM_SETTINGS);if(intent.resolveActivity(activity.getPackageManager())==null)intent=new Intent(Settings.ACTION_SETTINGS);launch(intent);});
+                note(L10n.text("Weather uses Open-Meteo. Offline, the latest data stays available for up to three hours. Choose your city to enable weather."),758);
             }else if(page==7){
-                section("ESTILO DE SALVAPANTALLAS",0);
-                row("Aéreos",!AmbientPrefs.plex(activity)?"✓":"","Paisajes y ciudades en vídeo.",54,"Paisajes en movimiento.",Ui.tr("Paisagens e cidades em movimento, em tela cheia e sem som. Requer Internet.","Landscapes and cities in motion, full screen and silent. Internet required.","Paisajes y ciudades en movimiento, a pantalla completa y sin sonido. Requiere Internet."),()->{AmbientPrefs.get(activity).edit().putString("style","aerial").apply();render(6);});
-                row(Ui.tr("Sua biblioteca","Your library","Tu biblioteca"),AmbientPrefs.plex(activity)?"✓":"","Tus fondos originales con un zoom suave.",178,"Tu cine también descansa.",Ui.tr("Seus filmes e séries preenchem cada pausa com suas imagens originais.","Your movies and series fill each pause with their original artwork.","Tus películas y series llenan cada pausa con sus fondos originales."),()->{AmbientPrefs.get(activity).edit().putString("style","plex").apply();render(6);});
+                section(L10n.text("SCREENSAVER STYLE"),0);
+                row(L10n.text("Aerials"),!AmbientPrefs.plex(activity)?"✓":"",L10n.text("Landscapes and cities in motion."),54,L10n.text("Landscapes in motion."),Ui.tr("Paisagens e cidades em movimento, em tela cheia e sem som. Requer Internet.","Landscapes and cities in motion, full screen and silent. Internet required.","Paisajes y ciudades en movimiento, a pantalla completa y sin sonido. Requiere Internet."),()->{AmbientPrefs.get(activity).edit().putString("style","aerial").apply();render(6);});
+                row(Ui.tr("Sua biblioteca","Your library","Tu biblioteca"),AmbientPrefs.plex(activity)?"✓":"",L10n.text("Your original artwork with gentle zoom."),178,L10n.text("Your cinema takes a break, too."),Ui.tr("Seus filmes e séries preenchem cada pausa com suas imagens originais.","Your movies and series fill each pause with their original artwork.","Tus películas y series llenan cada pausa con sus fondos originales."),()->{AmbientPrefs.get(activity).edit().putString("style","plex").apply();render(6);});
             }else if(page==8){
-                section("TEMA DE LOS AÉREOS",0);
-                String[] themes={"all","landscape","city"},names={"Todos","Paisajes","Ciudades"};
-                for(int i=0;i<themes.length;i++){final String theme=themes[i];row(names[i],theme.equals(AmbientPrefs.theme(activity))?"✓":"",54+i*84,"Elige dónde viajar.","Vídeos reales de costas, montañas y ciudades. No se reproducen vídeos fuera del salvapantallas.",()->{AmbientPrefs.get(activity).edit().putString("theme",theme).apply();render(6);rows.get(6).requestFocus();});}
+                section(L10n.text("AERIAL THEME"),0);
+                String[] themes={"all","landscape","city"},names={L10n.text("All"),L10n.text("Landscapes"),L10n.text("Cities")};
+                for(int i=0;i<themes.length;i++){final String theme=themes[i];row(names[i],theme.equals(AmbientPrefs.theme(activity))?"✓":"",54+i*84,L10n.text("Choose where to go."),L10n.text("Real videos of coastlines, mountains and cities. Video plays only in the screensaver."),()->{AmbientPrefs.get(activity).edit().putString("theme",theme).apply();render(6);rows.get(6).requestFocus();});}
             }else if(page==9){
-                section("UBICACIÓN DEL TIEMPO",0);
+                section(L10n.text("WEATHER LOCATION"),0);
                 boolean allowed=activity.checkSelfPermission(AmbientWeather.PERMISSION)==PackageManager.PERMISSION_GRANTED;
-                row("Ubicación automática","auto".equals(AmbientWeather.mode(activity))&&allowed?"✓":allowed?"Activar":"Permitir",54,"El tiempo de tu televisión.","Solo necesita ubicación aproximada mientras usas Vela. Si la TV no obtiene una ubicación, se conserva tu ciudad manual como alternativa.",()->{if(!allowed)activity.requestPermissions(new String[]{AmbientWeather.PERMISSION},81);else locationPermission(true);});
+                row(L10n.text("Automatic location"),"auto".equals(AmbientWeather.mode(activity))&&allowed?"✓":allowed?L10n.text("Activate"):L10n.text("Allow"),54,L10n.text("Weather for your television."),L10n.text("Only approximate location while using Vela is needed. Your manual city stays available if location cannot be found."),()->{if(!allowed)activity.requestPermissions(new String[]{AmbientWeather.PERMISSION},81);else locationPermission(true);});
                 AmbientWeather.Place place=AmbientWeather.manual(activity);
-                row("Elegir ciudad",place==null?"Buscar":place.name,134,"Tu ciudad, siempre a mano.","Busca el nombre de tu ciudad o su código postal. Puedes añadir el país para afinar los resultados. No necesita permiso de ubicación.",()->{cityQuery=place==null?"":place.name;cityResults=Collections.emptyList();render(10);});
-                note("Open-Meteo recibe coordenadas aproximadas para consultar el tiempo. Al buscar una ciudad, recibe el texto de la búsqueda. Vela no solicita ubicación precisa ni acceso en segundo plano.",290);
-                note("Si Android tiene la ubicación desactivada o tu televisión no la facilita, elige una ciudad. Datos meteorológicos de Open-Meteo; búsqueda de lugares basada en GeoNames.",480);
+                row(L10n.text("Choose city"),place==null?L10n.text("Search"):place.name,134,L10n.text("Your city, close at hand."),L10n.text("Search for your city or postcode. Add a country to narrow results. Location permission is not required."),()->{cityQuery=place==null?"":place.name;cityResults=Collections.emptyList();render(10);});
+                note(L10n.text("Open-Meteo receives approximate coordinates for weather and your search text for city searches. Vela requests neither precise nor background location."),290);
+                note(L10n.text("Choose a city if Android location is off or unavailable. Weather by Open-Meteo; place search based on GeoNames."),480);
             }else if(page==10){
-                section("BUSCAR CIUDAD",0);
-                cityInput=new EditText(activity);cityInput.setId(View.generateViewId());cityInput.setText(cityQuery);cityInput.setSelection(cityInput.length());cityInput.setHint("Ciudad o código postal");cityInput.setTextSize(TypedValue.COMPLEX_UNIT_PX,27);cityInput.setTextColor(WHITE);cityInput.setHintTextColor(DIM);cityInput.setSingleLine(true);cityInput.setPadding(26,0,26,0);cityInput.setBackground(round(VelaTheme.CARD));cityInput.setImeOptions(EditorInfo.IME_ACTION_SEARCH);cityInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);put(rowHost,cityInput,0,0,1134,74);contentY=92;
-                cityInput.setOnFocusChangeListener((v,focus)->{cityInput.setBackground(round(focus?VelaTheme.RAISED:VelaTheme.CARD));if(focus){heading.setText("El tiempo de tu ciudad.");detail.setText("Escribe con el mando y pulsa Buscar. Elige el lugar correcto entre los resultados.");}});
+                section(L10n.text("SEARCH FOR A CITY"),0);
+                cityInput=new EditText(activity);cityInput.setId(View.generateViewId());cityInput.setText(cityQuery);cityInput.setSelection(cityInput.length());cityInput.setHint(L10n.text("City or postcode"));cityInput.setTextSize(TypedValue.COMPLEX_UNIT_PX,27);cityInput.setTextColor(WHITE);cityInput.setHintTextColor(DIM);cityInput.setSingleLine(true);cityInput.setPadding(26,0,26,0);cityInput.setBackground(round(VelaTheme.CARD));cityInput.setImeOptions(EditorInfo.IME_ACTION_SEARCH);cityInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);put(rowHost,cityInput,0,0,1134,74);contentY=92;
+                cityInput.setOnFocusChangeListener((v,focus)->{cityInput.setBackground(round(focus?VelaTheme.RAISED:VelaTheme.CARD));if(focus){heading.setText(L10n.text("Weather for your city."));detail.setText(L10n.text("Type with your remote and select Search. Choose the correct place from the results."));}});
                 cityInput.setOnEditorActionListener((v,action,event)->{if(action==EditorInfo.IME_ACTION_SEARCH){searchCities();return true;}return false;});
-                row("Buscar","›",146,"Encuentra tu ciudad.","Busca una ciudad o código postal. Si hay varias con el mismo nombre, elige la provincia y el país correctos.",this::searchCities);
+                row(L10n.text("Search"),"›",146,L10n.text("Find your city."),L10n.text("Search for a city or postcode. If names match, choose the correct region and country."),this::searchCities);
                 cityInput.setNextFocusDownId(rows.get(0).getId());rows.get(0).setNextFocusUpId(cityInput.getId());
-                for(int i=0;i<cityResults.size();i++){final AmbientWeather.Place place=cityResults.get(i);row(place.name,"Elegir",place.label,242+i*112,"El tiempo de "+place.name+".",place.label,()->{AmbientWeather.select(activity,place);if(activity.returnToSetup){activity.finish();return;}render(6);rows.get(4).requestFocus();});}
-                if(cityResults.isEmpty())note("Pulsa en el campo para escribir con el teclado de la televisión. Puedes cambiar la ciudad cuando quieras.",276);
+                for(int i=0;i<cityResults.size();i++){final AmbientWeather.Place place=cityResults.get(i);row(place.name,L10n.text("Choose"),place.label,242+i*112,L10n.text("Weather in ")+place.name+".",place.label,()->{AmbientWeather.select(activity,place);if(activity.returnToSetup){activity.finish();return;}render(6);rows.get(4).requestFocus();});}
+                if(cityResults.isEmpty())note(L10n.text("Select the field to type with your TV keyboard. You can change the city whenever you like."),276);
             }else if(page==11){
                 section(Ui.tr("ACESSOS DO MENU","MENU SHORTCUTS","ACCESOS DEL MENÚ"),0);
                 String[] selected=SidebarApps.slots(activity);
@@ -304,10 +312,10 @@ class SettingsScreen extends VelaScreen {
                     io.execute(()->{new PlexClient(activity).disconnect();CinemaImages.purgeDisk(activity);main.post(()->{if(!closed){render(15);status.setText(Ui.tr("Conta desconectada.","Account disconnected.","Cuenta desvinculada."));}});});
                 });
             }else{
-                section("LICENCIAS DE CÓDIGO ABIERTO",0);
+                section(L10n.text("OPEN-SOURCE LICENCES"),0);
                 ScrollView legalScroll=new ScrollView(activity);legalScroll.setFocusable(true);legalScroll.setVerticalScrollBarEnabled(false);put(rowHost,legalScroll,0,0,1134,610);
                 TextView legal=text(license(),18,0xFFCBD0DD,Ui.regular);legal.setGravity(Gravity.TOP);legal.setLineSpacing(5,1);legalScroll.addView(legal);legalScroll.requestFocus();
-                heading.setText("Gracias al código abierto.");detail.setText("Vela conserva los avisos exigidos por las licencias de sus componentes.");
+                heading.setText(L10n.text("Thanks to open source."));detail.setText(L10n.text("Vela preserves the notices required by its components' licences."));
             }
             for(int i=0;i<rows.size();i++){if(i>0)rows.get(i).setNextFocusUpId(rows.get(i-1).getId());if(i+1<rows.size())rows.get(i).setNextFocusDownId(rows.get(i+1).getId());}
             if(!categoryBrowsing&&page==10&&cityResults.isEmpty())cityInput.requestFocus();else if(!categoryBrowsing&&!rows.isEmpty())rows.get(page==12?pickerFocus:page==18?Appearance.colorIndex(activity):page==19?Appearance.sizeIndex(activity):page==20?Appearance.backdropIndex(activity):0).requestFocus();
@@ -330,24 +338,24 @@ class SettingsScreen extends VelaScreen {
         void locationPermission(boolean allowed){
             if(closed)return;
             if(allowed)AmbientWeather.prefs(activity).edit().putString("mode","auto").remove("cache").apply();
-            render(9);if(!allowed)status.setText("Sin permiso de ubicación. Puedes elegir una ciudad.");
+            render(9);if(!allowed)status.setText(L10n.text("Location permission is unavailable. You can choose a city."));
         }
         private void searchCities(){
             cityQuery=cityInput.getText().toString().trim();
-            if(cityQuery.length()<2){status.setText("Escribe al menos dos caracteres.");cityInput.requestFocus();return;}
-            if(cityQuery.length()>100){status.setText("Escribe una búsqueda más corta.");return;}
+            if(cityQuery.length()<2){status.setText(L10n.text("Enter at least two characters."));cityInput.requestFocus();return;}
+            if(cityQuery.length()>100){status.setText(L10n.text("Enter a shorter search."));return;}
             ((InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(cityInput.getWindowToken(),0);
-            rows.get(0).requestFocus();status.setText("Buscando ciudades…");
+            rows.get(0).requestFocus();status.setText(L10n.text("Searching for cities…"));
             if(searchJob!=null)searchJob.cancel(true);int epoch=++searchGeneration;String query=cityQuery;
             searchJob=io.submit(()->{try{List<AmbientWeather.Place> places=AmbientWeather.search(query);main.post(()->{
                 if(closed||!active||page!=10||epoch!=searchGeneration)return;cityResults=places;render(10);
-                if(places.isEmpty())status.setText("No hay resultados. Prueba el nombre de la ciudad o añade el país.");else rows.get(1).requestFocus();
-            });}catch(Exception ignored){main.post(()->{if(!closed&&active&&page==10&&epoch==searchGeneration)status.setText("No se ha podido buscar. Comprueba Internet y vuelve a intentarlo.");});}});
+                if(places.isEmpty())status.setText(L10n.text("No results. Try a city name or add the country."));else rows.get(1).requestFocus();
+            });}catch(Exception ignored){main.post(()->{if(!closed&&active&&page==10&&epoch==searchGeneration)status.setText(L10n.text("Search failed. Check your connection and try again."));});}});
         }
         private void note(String s,int y){TextView t=text(s,21,DIM,Ui.regular);t.setGravity(Gravity.TOP);t.setLineSpacing(7,1);t.setMaxLines(6);put(rowHost,t,6,contentY+18,1118,174);contentY+=210;}
         private String license(){StringBuilder s=new StringBuilder();for(String file:new String[]{"licenses/upstream-MIT.txt","licenses/device-icons.txt","licenses/simple-icons-CC0.txt","licenses/simple-icons-DISCLAIMER.txt","licenses/live-tv-sources.txt","licenses/tdtchannels-Apache-2.0.txt","ambient/sources.txt","fonts/OFL.txt","symbols/LICENSE-material-symbols.txt","brands/sources.txt","brands/JELLYFIN-ARTWORK-LICENSE.txt"})try(java.io.InputStream in=activity.getAssets().open(file);java.io.ByteArrayOutputStream out=new java.io.ByteArrayOutputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);s.append(new String(out.toByteArray(),"UTF-8")).append("\n\n");}catch(Exception ignored){}return s.toString();}
         private void toast(String s){Toast.makeText(activity,s,Toast.LENGTH_SHORT).show();}
-        private void launch(Intent i){try{activity.startActivity(i);}catch(ActivityNotFoundException|SecurityException e){toast("No se ha podido abrir esta opción.");}}
+        private void launch(Intent i){try{activity.startActivity(i);}catch(ActivityNotFoundException|SecurityException e){toast(L10n.text("Could not open this option."));}}
         private void open(int page,int selected){returnRow=selected;render(page);}
         private boolean isVela(){return HomeMode.FREE.equals(state.optString("mode"))&&!state.optBoolean("homeReverted");}
         private boolean selectedAsHome(){
@@ -355,7 +363,7 @@ class SettingsScreen extends VelaScreen {
             android.content.pm.ResolveInfo resolved=activity.getPackageManager().resolveActivity(intent,android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
             return resolved!=null&&resolved.activityInfo!=null&&activity.getPackageName().equals(resolved.activityInfo.packageName);
         }
-        private String mode(){return isVela()?"Vela":selectedAsHome()?"Vela · completar":"Original";}
+        private String mode(){return isVela()?"Vela":selectedAsHome()?L10n.text("Vela · finish setup"):"Original";}
         private boolean busy(){return !state.optString("busy").isEmpty()||pendingAt!=0;}
         private void switchHome(boolean personal){
             boolean recovery=state.optBoolean("switchPending")||!HomeMode.stringList(state,"disabled").isEmpty();
@@ -385,6 +393,7 @@ class SettingsScreen extends VelaScreen {
             if(key==KeyEvent.KEYCODE_BACK&&root&&categories[categoryFor(page)].hasFocus()){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
 
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==21){if(e.getAction()==KeyEvent.ACTION_UP)render(14);return true;}
+            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==24){if(e.getAction()==KeyEvent.ACTION_UP){render(17);rows.get(rows.size()-1).requestFocus();}return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page>=17&&page<=20)){if(e.getAction()==KeyEvent.ACTION_UP){int old=page;render(old==17?2:17);rows.get(old==17?3:old-18).requestFocus();}return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(activity.returnToSetup||activity.returnToCaller)&&page==activity.entryPage){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page==15||page==16)){if(e.getAction()==KeyEvent.ACTION_UP)render(page==16?15:14);return true;}

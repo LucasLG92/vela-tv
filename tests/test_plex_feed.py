@@ -12,7 +12,7 @@ sdk=Path(os.environ.get('ANDROID_HOME',os.environ.get('ANDROID_SDK_ROOT','')))
 android=sdk/'platforms/android-34/android.jar'
 suffix='.exe' if os.name=='nt' else ''
 subprocess.run([str(jdk/('javac'+suffix)),'-encoding','UTF-8','-cp',os.pathsep.join([str(library),str(android)]),
-    '-d',str(output),str(root/'app/src/tv/vela/launcher/PlexClient.java'),str(root/'app/src/tv/vela/launcher/JellyfinClient.java'),str(root/'app/src/tv/vela/launcher/CatalogFilters.java'),str(root/'tests/PlexFeedTest.java'),str(root/'tests/CatalogFiltersTest.java')],check=True)
+    '-d',str(output),str(root/'tests/FeedUi.java'),str(root/'app/src/tv/vela/launcher/L10n.java'),str(root/'app/src/tv/vela/launcher/PlexClient.java'),str(root/'app/src/tv/vela/launcher/JellyfinClient.java'),str(root/'app/src/tv/vela/launcher/CatalogFilters.java'),str(root/'tests/PlexFeedTest.java'),str(root/'tests/CatalogFiltersTest.java')],check=True)
 subprocess.run([str(jdk/('java'+suffix)),'-cp',os.pathsep.join([str(output),str(library),str(android)]),'tv.vela.launcher.PlexFeedTest'],check=True)
 
 subprocess.run([str(jdk/('java'+suffix)),'-cp',os.pathsep.join([str(output),str(library),str(android)]),'tv.vela.launcher.CatalogFiltersTest'],check=True)

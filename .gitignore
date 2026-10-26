@@ -15,6 +15,7 @@ local.properties
 
 # Build output
 out/
+.build-deps/
 *.apk
 __pycache__/
 *.pyc

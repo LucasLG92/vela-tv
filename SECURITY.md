@@ -1,11 +1,15 @@
-# Seguridad y privacidad
+# Security and privacy
 
-No adjuntes contraseñas, códigos de vinculación activos, tokens de Plex, URLs privadas de listas, claves de firma, archivos de recuperación ni capturas de cuentas personales a un issue.
+Do not attach passwords, active pairing codes, Plex/Jellyfin tokens, private playlist URLs, signing keys, recovery files or personal account screenshots to an issue.
 
-Para comunicar una vulnerabilidad, usa **Security → Report a vulnerability** si está disponible en este repositorio. Si no aparece, abre un issue sin detalles explotables ni datos sensibles para acordar cómo comunicarla de forma privada.
+To report a vulnerability, use **Security → Report a vulnerability** when available. Otherwise, open an issue without sensitive details or an actionable exploit so a private reporting route can be agreed.
 
-Los informes útiles indican versión de Vela, versión de Android, pasos de reproducción y comportamiento observado. Revisa y elimina los datos personales de cualquier registro antes de compartirlo.
+Useful reports include the Vela version, Android version, reproduction steps and observed behaviour. Remove personal data from logs before sharing them.
 
-Las publicaciones oficiales deben contener una compilación neutra. Nunca se publica `config.properties`, una clave de firma, el almacenamiento privado de Android ni el historial de trabajo personal. El APK no debe construirse con `--local-config` para distribuirlo.
+Official releases must use neutral configuration. Never publish `config.properties`, signing material, private Android storage or personal work history. Do not distribute a build made with `--local-config` or `-UseLocalConfig`.
 
-La versión pública actual es una **preview**. La integración de las webs oficiales y las diferencias entre fabricantes requieren pruebas físicas; no se promete compatibilidad universal.
+Phone configuration is a temporary local HTTPS session. Check the address shown on the TV before accepting its self-signed certificate. Peer preference sync checks a certificate fingerprint from the pairing link; pairing links themselves should be kept private. Sessions stop when their screen leaves the foreground.
+
+IPTV source credentials stay on the configured device and are excluded from preference backups and sync. Update APKs are checked for hash, package, version and signer before installation. Android still requires user confirmation.
+
+Vela is a preview. Manufacturer-specific Home, HDMI and tuner behaviour requires device testing; universal compatibility is not claimed. See [privacy](guide/PRIVACY.md) and [compatibility](guide/COMPATIBILITY.md).

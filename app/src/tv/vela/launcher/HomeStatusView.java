@@ -60,8 +60,8 @@ final class HomeStatusView extends FrameLayout {
         }else{
             temperature.setText("—");icon.setVisibility(GONE);icon.setImageDrawable(null);symbol="";
             AmbientWeather.Place place=AmbientWeather.manual(getContext());
-            boolean setup=message.contains("ubicación");
-            String status=setup?Ui.tr("Configure o tempo em Ajustes","Set weather location in Settings","Configura el tiempo en Ajustes"):message.isEmpty()||message.startsWith("Consultando")?Ui.tr("Consultando…","Loading…","Consultando…"):Ui.tr("Tempo indisponível","Weather unavailable","Tiempo no disponible");
+            boolean setup=message.equals(Ui.tr("Escolha sua localização nos Ajustes","Choose your location in Settings","Elige tu ubicación en Ajustes"));
+            String status=setup?Ui.tr("Configure o tempo em Ajustes","Set weather location in Settings","Configura el tiempo en Ajustes"):message.isEmpty()||message.startsWith(L10n.text("Loading weather for "))?Ui.tr("Consultando…","Loading…","Consultando…"):Ui.tr("Tempo indisponível","Weather unavailable","Tiempo no disponible");
             city.setText(status+(place!=null&&!setup?" · "+place.name:""));
             setContentDescription(clock.getText()+" · "+city.getText());
         }
