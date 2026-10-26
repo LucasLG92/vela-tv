@@ -32,7 +32,7 @@ public class PlexFeedTest {
         require(list.get(1).progress==.5f,"watch progress");
         require(list.get(1).thumb.equals("/library/metadata/11/thumb/1"),"poster must come from server metadata");
         require(list.get(1).logo.equals("/library/metadata/11/clearLogo/1"),"title logo must come from real server artwork");
-        require(list.get(0).section.equals("Seguir viendo"),"continue watching must come first");
+        require(list.get(0).section.equals(Ui.problem("Continue watching","Seguir viendo")),"continue watching must come first in the selected UI language");
         require(list.get(0).continuing&&list.get(1).continuing&&!list.get(2).continuing,"continue-watching rows must use the hub, not just an offset");
         require(list.get(2).key.equals("11")&&!list.get(2).continuing&&list.get(2).recentlyAdded,"a recently added film may also appear in resume without merging the rows");
         require(list.get(3).type.equals("show"),"new series must remain visible");
