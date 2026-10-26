@@ -35,7 +35,7 @@
 - Validated backups, restore preview and Undo.
 - Temporary local HTTPS phone configuration and explicit foreground peer preference sync without credentials.
 - Programme follow/optional cached alerts, allowed remote shortcuts and local diagnostics.
-- English, Spanish and Portuguese, manually selected or following Android; neutral English fallback.
+- English, Spanish, Portuguese, French, German and Italian, manually selected or following Android; neutral English fallback.
 
 ## Screensaver and updates
 

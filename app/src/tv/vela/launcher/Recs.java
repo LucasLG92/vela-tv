@@ -152,7 +152,7 @@ final class Recs {
     String error() { return error; }
 
     static String periodLabel() {
-        return (Ui.es ? PERIOD_LABEL_ES : Ui.en ? PERIOD_LABEL_EN : PERIOD_LABEL)[period(System.currentTimeMillis())];
+        int p=period(System.currentTimeMillis());return Ui.tr(PERIOD_LABEL[p],PERIOD_LABEL_EN[p],PERIOD_LABEL_ES[p]);
     }
 
     private static int period(long now) {
@@ -447,7 +447,7 @@ final class Recs {
     /** Genre, runtime (or seasons) and the service it's on, among the ones the TV has. */
     private void fetchDetails(Pick p) throws Exception {
         JSONObject o = get("/" + p.kind + "/" + p.id
-                + "?language=" + lang() + "&append_to_response=watch/providers,images&include_image_language=null,es,pt,en");
+                + "?language=" + lang() + "&append_to_response=watch/providers,images&include_image_language=null,"+Ui.language+",en");
         String best = bestBackdrop(o.optJSONObject("images"));
         if (best != null) p.backdrop = best;
         List<String> parts = new ArrayList<>();
@@ -463,8 +463,7 @@ final class Recs {
             else if (minutes > 0) parts.add(minutes >= 60 ? (minutes / 60) + " h " + (minutes % 60) + " min" : minutes + " min");
         } else {
             int seasons = o.optInt("number_of_seasons");
-            if (seasons > 0 && Ui.en) parts.add(seasons == 1 ? "1 season" : seasons + " seasons");
-            else if (seasons > 0) parts.add(seasons == 1 ? "1 temporada" : seasons + " temporadas");
+            if (seasons > 0) parts.add(String.format(Ui.locale(),L10n.text(seasons==1?"%d season":"%d seasons"),seasons));
         }
         JSONObject wp = o.optJSONObject("watch/providers");
         JSONObject br = wp == null ? null : wp.optJSONObject("results") == null ? null : wp.optJSONObject("results").optJSONObject(REGION);
@@ -495,15 +494,16 @@ final class Recs {
     };
 
     private static String genre(String name) {
-        for (String[] g : Ui.es ? GENRES_ES : GENRES_PT) if (g[0].equalsIgnoreCase(name)) return g[1];
+        for (int i=0;i<GENRES_PT.length;i++){String[] g=GENRES_PT[i];if(g[0].equalsIgnoreCase(name))return Ui.tr(g[1],g[0],GENRES_ES[i][1]);}
         return name;
     }
 
     /** The same for lists saved earlier ("Série · Action & Adventure · …" in Portuguese). */
     private static String fixGenres(String meta) {
-        for (String[] g : Ui.es ? GENRES_ES : GENRES_PT) {
-            meta = meta.replace(" · " + g[0] + " ·", " · " + g[1] + " ·");
-            if (meta.endsWith(" · " + g[0])) meta = meta.substring(0, meta.length() - g[0].length()) + g[1];
+        for (String[] g : GENRES_PT) {
+            String translated=genre(g[0]);
+            meta = meta.replace(" · " + g[0] + " ·", " · " + translated + " ·");
+            if (meta.endsWith(" · " + g[0])) meta = meta.substring(0, meta.length() - g[0].length()) + translated;
         }
         return meta;
     }

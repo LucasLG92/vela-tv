@@ -124,7 +124,7 @@ The last case targets Full using isolated storage, real SQLite and synthetic off
 
 ## Shared tools and playback
 
-Full 1.28.0 / Lite 0.8.0 previews include native layout/folders, temporary local HTTPS mobile setup, opt-in paired preference sync, guide corrections/discovery and playback controls. See [the feature guide](YOUR-VELA.md).
+Full 1.28.1 / Lite 0.8.1 previews include native layout/folders, temporary local HTTPS mobile setup, opt-in paired preference sync, guide corrections/discovery and playback controls. See [the feature guide](YOUR-VELA.md).
 
 Owned-emulator regressions (install the matching built APK first):
 
@@ -138,7 +138,7 @@ The playback fixture must be owned synthetic clear HLS and a synthetic Xtream ar
 
 ## UI languages
 
-English, Spanish and Portuguese share catalogue keys. Only the selected translation catalogue is loaded; English is the source fallback. Language belongs to the installation, not a profile or sync partner. Keep provider titles unchanged.
+English, Spanish, Portuguese, French, German and Italian share catalogue keys. Only the selected translation catalogue is loaded; English is the source fallback. Language belongs to the installation, not a profile or sync partner. Keep provider titles unchanged.
 
 ```sh
 python tools/check_localization.py

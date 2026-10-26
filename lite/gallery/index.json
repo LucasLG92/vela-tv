@@ -111,13 +111,13 @@
   },
   {
     "file": "12-language.png",
-    "title": "Choose your language",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "title": "Vela in six languages",
+    "source": "Native owned-emulator 3840×2160 production settings capture; no linked accounts, credentials or personal location. Six-language UI and real language switching verified.",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "0.8.0-preview",
-    "sha256": "ed6015c1fc467deb08d70128c927f23d2c145143b3b29cd520b6826e76ff4665"
+    "version": "0.8.1-preview",
+    "sha256": "0a10c19a2cf728c83a39aacbcced6db4d328e69761fa57b173b843a083ee8c07"
   },
   {
     "file": "13-home-layout.png",
@@ -218,5 +218,35 @@
     "height": 2160,
     "version": "0.8.0-preview",
     "sha256": "14e95b891dbe019b4fd4659f266df04c06121b7b6e82afe57f25dfc1f9e6ef81"
+  },
+  {
+    "file": "23-language-fr.png",
+    "title": "French menus",
+    "source": "Native owned-emulator 3840×2160 production settings capture; no linked accounts, credentials or personal location. Six-language UI and real language switching verified.",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.8.1-preview",
+    "sha256": "39e4f152c2b08db9a1677a6451581955b2d3fa37695b76925276f80560afe5ef"
+  },
+  {
+    "file": "24-language-de.png",
+    "title": "German menus",
+    "source": "Native owned-emulator 3840×2160 production settings capture; no linked accounts, credentials or personal location. Six-language UI and real language switching verified.",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.8.1-preview",
+    "sha256": "d54ab442c2291d00e127d27e171f69b67d273a8b2313e8b09d1e2a9bd12c6a18"
+  },
+  {
+    "file": "25-language-it.png",
+    "title": "Italian menus",
+    "source": "Native owned-emulator 3840×2160 production settings capture; no linked accounts, credentials or personal location. Six-language UI and real language switching verified.",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.8.1-preview",
+    "sha256": "c00899a295d33a41c58e3ae7ad8c7c7f3ea6dc6cdfe329ed310385b3fa646f73"
   }
 ]

@@ -266,40 +266,16 @@ final class HomeData {
     /** The weather in words, from Open-Meteo's WMO code. */
     static String condition(int code, boolean day) {
         if (code < 0) return "";
-        if (Ui.es) {
-            if (code == 0) return "Despejado";
-            if (code == 1) return "Poco nuboso";
-            if (code == 2) return "Parcialmente nublado";
-            if (code == 3) return "Nublado";
-            if (code == 45 || code == 48) return "Niebla";
-            if (code >= 51 && code <= 57) return "Llovizna";
-            if (code == 65 || code == 67 || code == 82) return "Lluvia intensa";
-            if (code >= 71 && code <= 77 || code == 85 || code == 86) return "Nieve";
-            if (code >= 95) return "Tormentas";
-            return "Lluvia";
-        }
-        if (Ui.en) {
-            if (code == 0) return "Clear";
-            if (code == 1) return day ? "Mostly Sunny" : "Mostly Clear";
-            if (code == 2) return "Partly Cloudy";
-            if (code == 3) return "Cloudy";
-            if (code == 45 || code == 48) return "Fog";
-            if (code >= 51 && code <= 57) return "Drizzle";
-            if (code == 65 || code == 67 || code == 82) return "Heavy Rain";
-            if (code >= 71 && code <= 77 || code == 85 || code == 86) return "Snow";
-            if (code >= 95) return "Thunderstorms";
-            return "Rain";
-        }
-        if (code == 0) return day ? "Céu limpo" : "Noite limpa";
-        if (code == 1) return "Poucas nuvens";
-        if (code == 2) return "Parcialmente nublado";
-        if (code == 3) return "Nublado";
-        if (code == 45 || code == 48) return "Neblina";
-        if (code >= 51 && code <= 57) return "Garoa";
-        if (code == 65 || code == 67 || code == 82) return "Chuva forte";
-        if (code >= 71 && code <= 77 || code == 85 || code == 86) return "Neve";
-        if (code >= 95) return "Tempestade";
-        return "Chuva";
+        if (code == 0) return Ui.tr("Céu limpo","Clear","Despejado");
+        if (code == 1) return Ui.tr("Poucas nuvens","Mostly clear","Poco nuboso");
+        if (code == 2) return Ui.tr("Parcialmente nublado","Partly cloudy","Parcialmente nublado");
+        if (code == 3) return Ui.tr("Nublado","Cloudy","Nublado");
+        if (code == 45 || code == 48) return Ui.tr("Neblina","Fog","Niebla");
+        if (code >= 51 && code <= 57) return Ui.tr("Garoa","Drizzle","Llovizna");
+        if (code == 65 || code == 67 || code == 82) return Ui.tr("Chuva forte","Heavy rain","Lluvia intensa");
+        if (code >= 71 && code <= 77 || code == 85 || code == 86) return Ui.tr("Neve","Snow","Nieve");
+        if (code >= 95) return Ui.tr("Tempestade","Thunderstorms","Tormentas");
+        return Ui.tr("Chuva","Rain","Lluvia");
     }
 
     private static String currencySymbol() {
@@ -335,7 +311,7 @@ final class HomeData {
     static String hour(long at) {
         if (Ui.es) return new SimpleDateFormat("HH:mm", Ui.ES).format(new java.util.Date(at));
         return Ui.en ? new SimpleDateFormat("h a", Locale.US).format(new java.util.Date(at))
-                : new SimpleDateFormat("HH'h'", PT).format(new java.util.Date(at));
+                : new SimpleDateFormat(Ui.language.equals("pt")?"HH'h'":"HH:mm", Ui.locale()).format(new java.util.Date(at));
     }
 
     /** How long ago the data was fetched, if it's stale (no internet): "12 min ago". */
@@ -344,8 +320,6 @@ final class HomeData {
         long age = System.currentTimeMillis() - at;
         if (age < every * 2) return "";
         long minutes = age / 60_000;
-        if (Ui.es) return minutes < 60 ? "hace " + minutes + " min" : "hace " + (minutes / 60) + " h";
-        if (Ui.en) return minutes < 60 ? minutes + " min ago" : (minutes / 60) + " h ago";
-        return minutes < 60 ? "há " + minutes + " min" : "há " + (minutes / 60) + " h";
+        return String.format(Ui.locale(),L10n.text(minutes<60?"%d min ago":"%d h ago"),minutes<60?minutes:minutes/60);
     }
 }

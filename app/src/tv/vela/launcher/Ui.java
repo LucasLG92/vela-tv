@@ -64,9 +64,7 @@ final class Ui {
     private static String language() {
         String lang = Config.LANGUAGE.trim().toLowerCase(Locale.ROOT);
         if (lang.equals("auto")) lang = Locale.getDefault().getLanguage();
-        if (lang.startsWith("es")) return "es";
-        if (lang.startsWith("pt")) return "pt";
-        return "en";
+        return L10n.normalize(lang);
     }
 
     static Locale locale() { return L10n.locale(); }

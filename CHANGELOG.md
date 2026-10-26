@@ -1,5 +1,12 @@
 # Changelog
 
+## Vela 1.28.1 Preview and Vela Lite 0.8.1 Preview · 2026-10-26
+
+- Add complete French, German and Italian catalogues alongside English, Spanish and Portuguese in both editions. All six languages support explicit selection and Android system-language detection.
+- Locale-aware dates and metadata requests, translated mobile setup and legacy weather/recommendation labels. Content titles and connected accounts retain their source text.
+- The picker fits all seven choices, including System language. One bounded catalogue remains loaded; no translation network service runs in Vela.
+- Native six-language settings and recreation tests, catalogue/placeholder checks, and refreshed selector screenshots in both galleries.
+
 ## Vela 1.28.0 Preview and Vela Lite 0.8.0 Preview · 2026-10-26
 
 - Complete English, Spanish and Portuguese menus in both editions, including shared tools, guide actions, playback controls and local phone setup. Choose an installation language or follow Android; unsupported system languages fall back to English. Provider content keeps its original text.

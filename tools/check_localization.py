@@ -34,6 +34,8 @@ def main():
     catalogues = {p.stem: json.loads(p.read_text(encoding='utf-8')) for p in (ROOT / 'app/assets/i18n').glob('*.json')}
     english = catalogues['en']
     issues = []
+    if set(catalogues) != {'en','es','pt','fr','de','it'}:
+        issues.append('Expected all six UI language catalogues')
     for language, values in catalogues.items():
         if set(values) != set(english):
             issues.append(language + ': catalogue keys differ')

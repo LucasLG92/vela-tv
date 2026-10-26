@@ -388,8 +388,11 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         lightButtons.add(HomeApps.action(HomeApps.SETTINGS, "settings", Ui.tr("Configurações", "Settings", "Ajustes"), "settings"));
     }
 
+    private static String tabsLanguage="";
+    private static String[] localizedTabs;
     private static String[] tabs() {
-        return Ui.es ? TABS_ES : Ui.en ? TABS_EN : TABS;
+        if(!tabsLanguage.equals(Ui.language)){localizedTabs=new String[3];for(int i=0;i<3;i++)localizedTabs[i]=Ui.tr(TABS[i],TABS_EN[i],TABS_ES[i]);tabsLanguage=Ui.language;}
+        return localizedTabs;
     }
 
     @Override public void onData() {

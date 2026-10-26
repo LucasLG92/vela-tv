@@ -10,4 +10,4 @@ The main documentation and public galleries are now in English.
 - [Compatibility](COMPATIBILITY.md)
 - [Privacy](PRIVACY.md)
 
-Both apps offer English, Spanish and Portuguese menus, with manual or system-language selection. Provider titles and user-created names keep their original text.
+Both apps offer English, Spanish, Portuguese, French, German and Italian menus, with manual or system-language selection. Provider titles and user-created names keep their original text.

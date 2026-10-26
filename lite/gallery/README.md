@@ -1,6 +1,6 @@
 # Vela Lite in pictures
 
-Explore 22 native **4K screenshots** from 0.8.0-preview. Every control is shown in English. Film artwork and original channel/programme names retain their source language.
+Explore 25 native **4K screenshots** from Lite 0.8 previews. The main gallery is in English; the language previews also show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](../../gallery/CREDITS.md) · [Image manifest](index.json)
 
@@ -91,3 +91,19 @@ These are actual Android views captured in an owned emulator. Libraries, progres
 ## Keep up with your programmes
 
 ![Keep up with your programmes](22-programmes.png)
+
+## Six languages, one familiar interface
+
+Choose English, Spanish, Portuguese, French, German or Italian, or follow Android. Changing language keeps your accounts, library and preferences.
+
+### French menus
+
+![French menus](23-language-fr.png)
+
+### German menus
+
+![German menus](24-language-de.png)
+
+### Italian menus
+
+![Italian menus](25-language-it.png)

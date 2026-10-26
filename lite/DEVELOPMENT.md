@@ -24,16 +24,16 @@ Manual EPG mapping/time correction, source-provided genres and programme follow/
 
 Lite shares layout/folders, local profiles, reading, remote tools, validated backups and compatible preference sync. HDMI/TV/Apps navigation can be reordered/hidden, with Settings retained. Phone setup is a foreground local HTTPS session; Full-only source login actions are excluded.
 
-English, Spanish and Portuguese catalogues are shared with Full Vela. The selected catalogue alone is loaded; English uses source text. Language persists per installation through a tiny atomic record, not a service or observer. It does not change the system or provider content.
+English, Spanish, Portuguese, French, German and Italian catalogues are shared with Full Vela. The selected catalogue alone is loaded; English uses source text. Language persists per installation through a tiny atomic record, not a service or observer. It does not change the system or provider content.
 
 ## Updates
 
 Visible opening can trigger a daily check and automatic download; there is no resident update service or polling alarm. Lite filters out Full releases and verifies HTTPS origin, size, SHA-256, package, version, minimum Android and signer. A requested install survives Android's permission flow and resumes on return. Android confirms installation; the next opening cleans the installed APK.
 
-Publish a new matching version with a tag such as `lite-v0.8.0-preview` and an uploaded `Vela-Lite-0.8.0-preview.apk` asset with GitHub's SHA-256 digest. Then update the auxiliary feed from the published release metadata:
+Publish a new matching version with a tag such as `lite-v0.8.1-preview` and an uploaded `Vela-Lite-0.8.1-preview.apk` asset with GitHub's SHA-256 digest. Then update the auxiliary feed from the published release metadata:
 
 ```sh
-python lite/tools/update_feed.py --release release.json --apk Vela-Lite-0.8.0-preview.apk
+python lite/tools/update_feed.py --release release.json --apk Vela-Lite-0.8.1-preview.apk
 ```
 
 The tool rejects draft releases and mismatched local size/hash. Commit `lite/updates.json` only after the actual release/asset is verified. Never publish signing keys.

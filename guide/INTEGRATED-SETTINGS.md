@@ -21,6 +21,6 @@ Private account/list forms use a protected window. Fields are excluded from save
 
 Build a neutral APK and use an owned emulator. The native `integrated-settings`, `apps-grid`, `plex-link`, `personalization`, `updates` and `integrated-update-permission` checks exercise navigation, lifecycle and permissions. Update checks require `tests/build_update_fixtures.py` after building.
 
-`tests/run_localization.py` checks English, Spanish and Portuguese, actual language selection/recreation, System language, deterministic English fallback and shared settings/tools. Gallery pairing codes are non-working DEMO data.
+`tests/run_localization.py` checks English, Spanish, Portuguese, French, German and Italian, actual language selection/recreation, System language, deterministic English fallback and shared settings/tools. Gallery pairing codes are non-working DEMO data.
 
 [Build and tests](BUILD.md) · [Personalisation tools](YOUR-VELA.md)

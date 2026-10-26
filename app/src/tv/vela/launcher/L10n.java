@@ -8,8 +8,8 @@ import org.json.*;
 
 /** Installation-local UI language. Only the selected small catalogue is retained in RAM. */
 final class L10n {
-    static final String[] CODES={"auto","en","es","pt"};
-    static final String[] NAMES={"","English","Español","Português"};
+    static final String[] CODES={"auto","en","es","pt","fr","de","it"};
+    static final String[] NAMES={"","English","Español","Português","Français","Deutsch","Italiano"};
     private static volatile String language=normalize(Locale.getDefault().getLanguage());
     private static volatile String choice="auto";
     private static volatile JSONObject messages=new JSONObject();
@@ -33,7 +33,7 @@ final class L10n {
     }
     static String language(){return language;}
     static String choice(){return choice;}
-    static Locale locale(){return Locale.forLanguageTag(language.equals("pt")?"pt-BR":language.equals("es")?"es-ES":"en-US");}
+    static Locale locale(){return Locale.forLanguageTag(language.equals("pt")?"pt-BR":language.equals("es")?"es-ES":language.equals("fr")?"fr-FR":language.equals("de")?"de-DE":language.equals("it")?"it-IT":"en-US");}
     static String text(String english){return language.equals("en")?english:messages.optString(english,english);}
     static String tr(String portuguese,String english,String spanish){if(language.equals("en"))return english;return messages.optString(english,language.equals("es")?spanish:language.equals("pt")?portuguese:english);}
     static String name(){for(int i=1;i<CODES.length;i++)if(CODES[i].equals(choice))return NAMES[i];return text("System language");}

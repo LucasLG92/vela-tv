@@ -1,8 +1,8 @@
 # Images and credits
 
-The current English gallery shows native Vela 1.28.0 and Lite 0.8.0 views, captured at 3840×2160 on an owned emulator. Movie posters and backdrops were retrieved from Plex with the user's permission to publish interface screenshots. Profiles, library names, progress, pagination, connected-device states and Lite tuner programmes are demonstrations. The weather city is Reykjavík, explicitly labelled Demo.
+The current English gallery shows native Vela 1.28.x and Lite 0.8.x views, captured at 3840×2160 on an owned emulator. Movie posters and backdrops were retrieved from Plex with the user's permission to publish interface screenshots. Profiles, library names, progress, pagination, connected-device states and Lite tuner programmes are demonstrations. The weather city is Reykjavík, explicitly labelled Demo.
 
-Movie artwork and trademarks belong to their respective owners. Their appearance illustrates Vela and does not imply sponsorship or affiliation. The code's MIT licence **does not apply to that artwork**. Original Plex assets, private paths, credentials and library video files are not redistributed in this repository or the production APKs. Some original posters retain Spanish lettering; interface controls and demonstration metadata are English.
+Movie artwork and trademarks belong to their respective owners. Their appearance illustrates Vela and does not imply sponsorship or affiliation. The code's MIT licence **does not apply to that artwork**. Original Plex assets, private paths, credentials and library video files are not redistributed in this repository or the production APKs. Some original posters retain Spanish lettering; the main interface gallery and demonstration metadata are English. Additional language previews show French, German and Italian.
 
 Titles include Oppenheimer, Inception, Avatar: Fire and Ash, Spider-Man: Brand New Day, Gladiator II, The Wild Robot, Superman, Star Wars: The Mandalorian and Grogu, The Last of Us, Stranger Things, Breaking Bad and Death of a Unicorn. Each installation uses its own library's artwork and availability.
 

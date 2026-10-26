@@ -17,5 +17,5 @@ with zipfile.ZipFile(apk) as z:
  assert not re.search(r'E: service\b',components),'Unexpected background service'
  assert len(re.findall(r'E: receiver\b',components))==1 and 'VelaReminderReceiver' in components,'Only the cached programme reminder receiver may be declared'
  assert len(re.findall(r'E: provider\b',components))==1 and 'LiteUpdateProvider' in components,'Only the private APK provider may be declared'
- assert len(data)<1900*1024,'Lite package grew beyond its shared-tools, three-language catalogue and local-font budget'
+ assert len(data)<2100*1024,'Lite package grew beyond its shared-tools, six-language catalogue and local-font budget'
 print(json.dumps({'result':'PASS','package':'tv.vela.launcher.lite','minimum_android':'8.0','bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'permissions':permissions,'background_services':0,'cached_reminder_receivers':1,'private_apk_providers':1,'full_vela_clients_in_apk':False,'font_identical_to_vela':True},indent=2))

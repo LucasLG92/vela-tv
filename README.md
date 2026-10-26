@@ -4,9 +4,9 @@
 
 A personal home screen for **Android TV and Google TV**. Bring your Plex or Jellyfin library, live channels, apps and HDMI devices together in a calm interface made for your remote.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.28.0-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.28.1-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
 
-**Android 11+ · English / Español / Português · Preview · MIT**
+**Android 11+ · English / Español / Português / Français / Deutsch / Italiano · Preview · MIT**
 
 ![Vela home with continue watching, original artwork and recently added titles](gallery/01-home.webp)
 
@@ -52,7 +52,7 @@ Configure apps, folders and favourites **from your phone** through a temporary l
 
 ![Home layout, folders and personalisation tools](gallery/55-home-layout.webp)
 
-Every menu is available in **English, Spanish and Portuguese**. Choose a language in Appearance or follow your TV's system language. Channel names, account names and library titles keep their original text.
+Every menu is available in **English, Spanish, Portuguese, French, German and Italian**. Choose a language in Appearance or follow your TV's system language. Channel names, account names and library titles keep their original text.
 
 [Personalisation, phone setup, profiles and sync](guide/YOUR-VELA.md) · [Integrated settings](guide/INTEGRATED-SETTINGS.md)
 

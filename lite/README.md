@@ -4,9 +4,9 @@
 
 Your **HDMI devices, antenna television and apps**, in a clean home screen made for your remote. Vela Lite is for the television that sits alongside a TV box, console or computer.
 
-**[Download Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.8.0-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
+**[Download Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.8.1-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
-**Android TV / Google TV · Android 8.0+ · English / Español / Português · Preview**
+**Android TV / Google TV · Android 8.0+ · English / Español / Português / Français / Deutsch / Italiano · Preview**
 
 ![Vela Lite HDMI home](gallery/01-inputs.png)
 
@@ -38,7 +38,7 @@ Choose a black or graphite background, clock visibility, reduced focus motion an
 
 Create app folders and separate local profiles. Back up your preferences, configure them from your phone through a temporary local HTTPS session, or explicitly pair another Vela for compatible preference sync. Credentials remain on each television.
 
-Every menu is available in **English, Spanish and Portuguese**, with a manual selector or automatic system language. The same graphite panels, Inter typeface and focus style run through both editions.
+Every menu is available in **English, Spanish, Portuguese, French, German and Italian**, with a manual selector or automatic system language. The same graphite panels, Inter typeface and focus style run through both editions.
 
 ![Vela Lite settings and language selection](gallery/03-settings.png)
 
