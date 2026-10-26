@@ -10,7 +10,7 @@ Guide draws a three-hour window in one Canvas view, normally six channels, or tw
 
 Lite reads, but never rewrites, the TV channel database. Provider observers run while the guide is visible. After retuning, new Android channel IDs replace old URIs; stable DVB identity or an unambiguous name fallback preserves preferences. Locked channels remain blocked, and the original TV is offered when integrated playback is unavailable.
 
-Hold OK toggles favourites in the guide, cards, drawer or current programme. Organise shares Full Vela's graphite panel and bounded preferences: up to 128 favourite positions, 256 hidden channels, 512 hidden categories and twelve recent successful channels. The same session supports previous-channel navigation. These preferences affect Lite only.
+Hold OK opens channel actions in the guide, cards, drawer or current programme, including favourites and guide correction. Organise shares Full Vela's graphite panel and bounded preferences: up to 128 favourite positions, 256 hidden channels, 512 hidden categories and twelve recent successful channels. The same session supports previous-channel navigation. These preferences affect Lite only.
 
 ## Programme guide
 
@@ -30,10 +30,10 @@ English, Spanish, Portuguese, French, German and Italian catalogues are shared w
 
 Visible opening can trigger a daily check and automatic download; there is no resident update service or polling alarm. Lite filters out Full releases and verifies HTTPS origin, size, SHA-256, package, version, minimum Android and signer. A requested install survives Android's permission flow and resumes on return. Android confirms installation; the next opening cleans the installed APK.
 
-Publish a new matching version with a tag such as `lite-v0.8.1-preview` and an uploaded `Vela-Lite-0.8.1-preview.apk` asset with GitHub's SHA-256 digest. Then update the auxiliary feed from the published release metadata:
+Publish a new matching version with a tag such as `lite-v0.10.1-preview` and an uploaded `Vela-Lite-0.10.1-preview.apk` asset with GitHub's SHA-256 digest. Then update the auxiliary feed from the published release metadata:
 
 ```sh
-python lite/tools/update_feed.py --release release.json --apk Vela-Lite-0.8.1-preview.apk
+python lite/tools/update_feed.py --release release.json --apk Vela-Lite-0.10.1-preview.apk
 ```
 
 The tool rejects draft releases and mismatched local size/hash. Commit `lite/updates.json` only after the actual release/asset is verified. Never publish signing keys.

@@ -10,8 +10,9 @@ import java.util.*;
 final class VelaShows {
     static final int MAX_RULES=32,MAX_AIRINGS=128;
     static final class Airing {
-        final String title,channel;final long start,end;
-        Airing(String title,String channel,long start,long end){this.title=VelaWorkspace.clean(title,240);this.channel=VelaWorkspace.clean(channel,120);this.start=start;this.end=end;}
+        final String title,channel,eventId;final long start,end;
+        Airing(String title,String channel,long start,long end){this(title,channel,start,end,"");}
+        Airing(String title,String channel,long start,long end,String id){eventId=id==null?"":id;this.title=VelaWorkspace.clean(title,240);this.channel=VelaWorkspace.clean(channel,120);this.start=start;this.end=end;}
     }
     static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"vela-programmes");}
     static String identity(String title){return VelaWorkspace.normal(title).replaceFirst("\\s+(?:t\\s*\\d+\\s*e\\s*\\d+|s\\d+e\\d+|temporada\\s+\\d+.*|episodio\\s+\\d+.*|cap[ií]tulo\\s+\\d+.*)$","").trim();}

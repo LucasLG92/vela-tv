@@ -162,13 +162,13 @@ final class InstalledAppsGrid extends GridView {
             image=new ImageView(getContext());image.setScaleType(ImageView.ScaleType.FIT_CENTER);image.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);artwork.addView(image,new LayoutParams(-1,-1));
             initial=caption(56,Ui.displaySemibold);initial.setTextColor(0xFFB9BDCA);artwork.addView(initial,new LayoutParams(-1,-1));
             label=caption(21,Ui.medium);label.setSingleLine(true);label.setEllipsize(android.text.TextUtils.TruncateAt.END);label.setPadding(8,0,8,0);
-            LayoutParams name=new LayoutParams(-1,32);name.topMargin=207;addView(label,name);
+            LayoutParams name=new LayoutParams(-1,32);name.topMargin=215;addView(label,name);
             pin=new View(getContext());pin.setBackground(shape(Appearance.accent(getContext()),3));LayoutParams p=new LayoutParams(5,5,Gravity.TOP|Gravity.CENTER_HORIZONTAL);p.topMargin=245;addView(pin,p);
         }
         private TextView caption(int size,android.graphics.Typeface font){TextView text=new TextView(getContext());text.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);text.setTypeface(font);text.setGravity(Gravity.CENTER);text.setIncludeFontPadding(false);text.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);return text;}
         void selected(boolean value){
             if(styled&&focused==value)return;styled=true;focused=value;
-            artwork.setScaleX(focused?1.07f:1);artwork.setScaleY(focused?1.07f:1);artwork.setElevation(focused?18:0);
+            boolean enlarge=focused&&!Visuals.reducedMotion(getContext());artwork.setScaleX(enlarge?1.045f:1);artwork.setScaleY(enlarge?1.045f:1);artwork.setElevation(focused?10:0);
             GradientDrawable outline=shape(Color.TRANSPARENT,43);if(focused)outline.setStroke(2,0xCCFFFFFF);artwork.setForeground(outline);
             label.setTextColor(focused?0xFFFFFFFF:0xFFC5CAD5);
         }

@@ -1,7 +1,7 @@
 """Run shared workspace coverage against an explicitly chosen owned emulator, in either edition."""
 from pathlib import Path
 import argparse,os,subprocess
-p=argparse.ArgumentParser();p.add_argument('--serial',required=True);p.add_argument('--adb-port',default='5038');p.add_argument('--lite',action='store_true');p.add_argument('--data',action='store_true');a=p.parse_args();assert not (a.lite and a.data),'Data tests are Full only';testclass='AndroidWorkspaceDataTest' if a.data else 'AndroidWorkspaceTest'
+p=argparse.ArgumentParser();p.add_argument('--serial',required=True);p.add_argument('--adb-port',default='5038');p.add_argument('--lite',action='store_true');p.add_argument('--data',action='store_true');p.add_argument('--next',action='store_true');p.add_argument('--polish',action='store_true');p.add_argument('--media',action='store_true');a=p.parse_args();assert not (a.lite and (a.data or a.media)),'Data tests are Full only';testclass='AndroidPolishTest' if a.polish else 'AndroidNextMediaTest' if a.media else 'AndroidNextTest' if a.next else 'AndroidWorkspaceDataTest' if a.data else 'AndroidWorkspaceTest'
 repo=Path(__file__).resolve().parents[1];root=repo/'lite' if a.lite else repo;sdk=Path(os.environ['ANDROID_HOME']);jdk=Path(os.environ['JAVA_HOME']);bt=max((sdk/'build-tools').iterdir(),key=lambda p:tuple(map(int,p.name.split('.'))));win=os.name=='nt';exe='.exe' if win else '';bat='.bat' if win else '';adb=[sdk/('platform-tools/adb'+exe),'-P',a.adb_port,'-s',a.serial]
 def run(args,**kwargs):return subprocess.run(list(map(str,args)),check=True,**kwargs)
 assert subprocess.check_output(list(map(str,adb+['shell','getprop','ro.kernel.qemu']))).decode().strip()=='1','Owned emulator required'

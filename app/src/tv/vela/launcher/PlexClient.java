@@ -15,7 +15,7 @@ class PlexClient {
     static final String PRODUCT = "Vela";
     final SharedPreferences prefs;
     PlexClient(Context context) {
-        prefs = context.getSharedPreferences("plex", Context.MODE_PRIVATE);
+        prefs = VelaAccountScope.prefs(context,"plex");
         if (!prefs.contains("client")) prefs.edit().putString("client", UUID.randomUUID().toString()).commit();
     }
     String name() { return prefs.getString("serverName", "Plex"); }
@@ -120,7 +120,7 @@ class PlexClient {
         float progress = -1,thumbAspect;
         long durationMs,positionMs=-1,lastPlayedMs,addedAtMs;
         boolean continuing,tvSource,landscape,recentlyAdded,nextEpisode;
-        String seriesKey="";
+        String seriesKey="",externalId="";Film alternative;
         long remainingMs(){return durationMs>0&&positionMs>=0&&positionMs<durationMs?durationMs-positionMs:-1;}
     }
     static final int PAGE_SIZE = 24;
@@ -177,10 +177,10 @@ class PlexClient {
         if (!connected()) return Collections.emptyList();
         String server=identity();
         String uri=prefs.getString("serverUri",""),token=prefs.getString("serverToken","");
-        JSONObject root=new JSONObject(request(uri+"/hubs?count=8&includeExternalMetadata=0",token,null,15000));
-        try{mergeContinue(root,new JSONObject(request(uri+"/hubs/continueWatching?count=12",token,null,6000)));}
+        JSONObject root=new JSONObject(request(uri+"/hubs?count=8&includeExternalMetadata=0&includeGuids=1",token,null,15000));
+        try{mergeContinue(root,new JSONObject(request(uri+"/hubs/continueWatching?count=12&includeGuids=1",token,null,6000)));}
         catch(Exception ignored){if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();}
-        try{mergeRecent(root,new JSONObject(request(uri+"/library/recentlyAdded?includeExternalMetadata=0&X-Plex-Container-Start=0&X-Plex-Container-Size=24",token,null,6000)));}
+        try{mergeRecent(root,new JSONObject(request(uri+"/library/recentlyAdded?includeExternalMetadata=0&includeGuids=1&X-Plex-Container-Start=0&X-Plex-Container-Size=24",token,null,6000)));}
         catch(Exception ignored){if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();}
         String body=root.toString();List<Film> films=parseHubs(root);
         if(server.equals(identity()))prefs.edit().putString("libraryCache", body).putLong("libraryAt", System.currentTimeMillis()).apply();
@@ -248,11 +248,13 @@ class PlexClient {
         return bounded;
     }
     private static boolean recentHub(String id){return id.equals("vela.recent")||id.endsWith(".recent")||id.contains("recentlyadded");}
+    Film item(String key)throws Exception{if(!key.matches("[0-9]{1,20}"))throw new IOException("Invalid item");JSONObject root=new JSONObject(request(prefs.getString("serverUri","")+"/library/metadata/"+key+"?includeGuids=1",prefs.getString("serverToken",""),null,10000));JSONObject container=root.optJSONObject("MediaContainer");JSONArray items=container==null?null:container.optJSONArray("Metadata");return items==null||items.length()!=1?null:parseFilm(items.getJSONObject(0),false);}
+    private static String externalId(JSONObject item){JSONArray ids=item.optJSONArray("Guid");for(String provider:new String[]{"tmdb","imdb","tvdb"})for(int i=0;ids!=null&&i<ids.length();i++){JSONObject id=ids.optJSONObject(i);String value=id==null?"":id.optString("id");if(value.matches(provider+"://[A-Za-z0-9_-]{1,40}"))return value;}return "";}
     private static Film parseFilm(JSONObject item,boolean resume) {
         String type=item.optString("type"),key=item.optString("ratingKey");
         if(key.isEmpty()||(!type.equals("movie")&&!type.equals("show")&&!type.equals("episode")))return null;
         Film film=new Film();film.key=key;film.type=type;film.continuing=resume;
-        film.title=item.optString(type.equals("episode")?"grandparentTitle":"title",item.optString("title"));
+        film.externalId=externalId(item);film.title=item.optString(type.equals("episode")?"grandparentTitle":"title",item.optString("title"));
         film.summary=item.optString("summary");
         film.thumb=item.optString(type.equals("episode")?"grandparentThumb":"thumb",item.optString("thumb"));
         film.art=item.optString("art",item.optString("grandparentArt",film.thumb));

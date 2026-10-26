@@ -4,7 +4,7 @@ Full Vela brings **M3U, Xtream and antenna** into the Home interface. Live TV si
 
 ## M3U playlists
 
-Open Television → Playlists and settings → Configure M3U playlist. Enter the playlist URL and optional XMLTV address. An EPG declared in the playlist header can be used automatically. Choose Save and use M3U.
+Open Settings → Television → Configure M3U playlist. Enter the playlist URL and optional XMLTV address. An EPG declared in the playlist header can be used automatically. Choose Save and use M3U.
 
 HTTPS is preferred. An explicit HTTP option is available for playlists/signals that require it; HTTP traffic is not encrypted. Private URLs are entered in protected forms and stored encrypted on the device.
 
@@ -12,7 +12,7 @@ EXTINF metadata, EXTGRP categories, original logos, guide IDs and up to four dir
 
 ## Xtream
 
-Open Television → Playlists and settings → Xtream account. Enter server, username and password, connect, then open your channels. Each installation uses its own account; no personal account is bundled.
+Open Settings → Television → Xtream account. Enter server, username and password, connect, then open your channels. Each installation uses its own account; no personal account is bundled.
 
 Use HTTPS when offered. HTTP requires an explicit choice. The account is validated before saving. Live categories and programmes depend on the server. Provider film/series VOD libraries are not imported. Compatible advertised catch-up archives are supported separately; Vela does not record the provider's channels.
 
@@ -26,7 +26,7 @@ Saved channels may remain listed without reception; playback then reports No ant
 
 ## Find and organise
 
-Hold OK to add or remove a favourite. Open Organise to move favourites with OK and Up/Down, hide/restore channels, show/hide categories or clear recent history. Back cancels a pending move.
+Hold OK for the channel menu, including Add/remove favourite, guide correction and organisation. Open Organise to move favourites with OK and Up/Down, hide/restore channels, show/hide categories or clear recent history. Back cancels a pending move.
 
 Preferences are source/account scoped, with up to 128 manual favourite positions, 256 hidden channels, 512 hidden categories and twelve recent successfully opened channels. Hidden categories do not remove their channels from All channels. Hidden channels stay in the source but leave visible lists and recent navigation. Previous channel uses the visible successful-playback history.
 
@@ -36,7 +36,7 @@ Catalogues are indexed on disk before paging; hidden-channel filters apply befor
 
 Guide is the default view. It shows a three-hour window, normally six channels, with categories left of the logos and time controls below. Channels view uses large cards without the category column; Up/Down changes lists while retaining the column where possible.
 
-Left/Right explores programmes and shifts the window at an edge. Now returns to the present. OK opens a live programme or details of a future/past programme. Hold OK toggles its channel favourite. The footer shows logo, title, time and valid remaining-time/progress data. Missing information remains a gap rather than a fabricated schedule.
+Left/Right explores programmes and shifts the window at an edge. Now returns to the present. OK opens a live programme or details of a future/past programme. Hold OK opens its channel actions. The footer shows logo, title, time and valid remaining-time/progress data. Missing information remains a gap rather than a fabricated schedule.
 
 The initial external XMLTV is [EPG dobleM](https://github.com/davidmuma/EPG_dobleM). It is streamed into a bounded private index, refreshed when used after four hours; a failed import keeps the previous index. Future listings cover up to 48 hours, with up to 24 previous hours for supported archives in Full. Per-block reads and decoded logos stay bounded. Channel IDs and normalised names are matched conservatively, and ambiguous aliases are refused. If an external current programme is missing, the source/native guide can fill it.
 
@@ -47,16 +47,17 @@ Guide corrections lets you explicitly choose an identity and adjust its time off
 | Control | Action |
 | --- | --- |
 | OK | Show/hide programme information; retry if all signals failed |
-| Hold OK | Toggle channel favourite |
+| Hold OK | Channel actions, including favourites |
+| Left | Show information; when visible, open playback controls |
 | Right / Up / Down | Open the channel drawer without stopping video |
 | OK in drawer | Switch to the selected channel |
 | Left / Back in drawer | Close it and keep watching |
 | CH+ / CH− | Change channel directly, across pages |
 | Previous channel / LAST_CHANNEL | Return to the previous available channel |
-| MENU | Audio, supported subtitles, picture format and signal controls |
-| Back without a panel | Return to the guide and release playback |
+| MENU | Toggle audio, supported subtitles, picture format, sleep timer and signal controls |
+| Back | Close an overlay, then dismiss information; with neither visible, return to the guide |
 
-The introductory live/quality badges disappear after four seconds, programme information after six. Up next shows the next valid airing. Drawer rows include logo, current programme, progress and remaining time, using hours and minutes above an hour. Browsing reuses the current decoder.
+The introductory live/quality badges disappear after three seconds once playback is ready; programme information hides after five seconds. Up next shows the next valid airing. Drawer rows include logo, current programme, progress and remaining time, using hours and minutes above an hour. Browsing reuses the current decoder. [Full and Lite remote reference](PLAYER.md).
 
 ## Pause, rewind and past programmes
 

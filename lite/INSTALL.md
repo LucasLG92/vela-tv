@@ -17,11 +17,11 @@ Choose English, Spanish, Portuguese, French, German, Italian or System language 
 | Browse inputs/apps/programmes | Arrows |
 | Open or choose | OK |
 | Identify an HDMI device | Hold OK on the input |
-| Add/remove a channel favourite | Hold OK |
+| Channel actions and favourites | Hold OK |
 | Explore channels during playback | Right, Up or Down |
 | Show/hide programme information | OK |
-| Audio/subtitles/picture controls | MENU |
-| Close a panel or return | Back |
+| Audio/subtitles/picture controls | Left while information is visible, or MENU |
+| Close overlay/information, then return | Back |
 
 ## Updates
 

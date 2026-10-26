@@ -64,8 +64,9 @@ final class TvTimelineView extends FrameLayout {
         label(c,date.format(new Date(start*1000)),12,31,LABEL-24,18,VelaTheme.SECONDARY,Ui.medium);
         for(int i=0;i<6;i++){float px=LABEL+(w-LABEL)*i/6f;label(c,time(start+i*1800),px+10,31,(w-LABEL)/6f-20,18,VelaTheme.SECONDARY,Ui.medium);paint.setColor(0x10FFFFFF);c.drawRect(px,HEADER,px+1,HEADER+channels.size()*rowHeight,paint);}
         for(int i=0;i<channels.size();i++){
-            float top=HEADER+i*rowHeight;boolean focused=hasFocus()&&row==i;paint.setColor(row==i?0x25363841:0x10262831);c.drawRoundRect(0,top,LABEL-10,top+rowHeight-8,13,13,paint);
-            label(c,(favoriteIds.contains(channels.get(i).id)?"★ ":"")+LiveTvActivity.displayName(channels.get(i).name),80,top+36+(rowHeight-ROW)/2f,LABEL-106,21,0xFFF6F7FB,Ui.medium);
+            float top=HEADER+i*rowHeight;boolean focused=hasFocus()&&row==i;paint.setColor(row==i?VelaTheme.SELECTED:0x0CFFFFFF);c.drawRoundRect(0,top,LABEL-10,top+rowHeight-8,13,13,paint);
+            if(favoriteIds.contains(channels.get(i).id))label(c,"★",LABEL-31,top+22,22,12,VelaTheme.SECONDARY,Ui.medium);
+            label(c,LiveTvActivity.displayName(channels.get(i).name),80,top+36+(rowHeight-ROW)/2f,LABEL-106,21,0xFFF6F7FB,Ui.medium);
             String quality=channels.get(i).antenna()?channels.get(i).number:TvChannelNames.quality(channels.get(i).name);label(c,quality,80,top+60+(rowHeight-ROW)/2f,LABEL-106,13,VelaTheme.MUTED,Ui.medium);
             List<LiveTvData.Programme> list=programmes.getOrDefault(channels.get(i).id,Collections.emptyList());long edge=start;
             c.save();c.clipRect(LABEL,top,w,top+rowHeight-8);
@@ -76,10 +77,11 @@ final class TvTimelineView extends FrameLayout {
     }
     private void block(Canvas c,long from,long to,float top,LiveTvData.Programme p,boolean focused){
         if(to<=from)return;float left=Math.max(LABEL,x(from))+3,right=Math.min(getWidth(),x(to))-3;if(right-left<3)return;
-        boolean chosen=focused&&(p==null?cursor>=from&&cursor<to:p.start<=cursor&&p.end>cursor);paint.setColor(chosen?Appearance.accent(getContext()):p==null?0x16262831:p.current(now)?VelaTheme.RAISED:VelaTheme.CARD);c.drawRoundRect(left,top,right,top+rowHeight-8,12,12,paint);
+        boolean chosen=focused&&(p==null?cursor>=from&&cursor<to:p.start<=cursor&&p.end>cursor);paint.setColor(chosen?Appearance.accent(getContext()):p==null?0x16262831:p.current(now)?0xFF282F3A:VelaTheme.CARD);c.drawRoundRect(left,top,right,top+rowHeight-8,12,12,paint);
+        if(right-left<72)return;
         String title=p==null?(loading?Ui.tr("Carregando…","Loading…","Cargando…"):Ui.tr("Sem programação","No programme information","Sin programación")):p.title;
         label(c,title,left+14,top+31+(rowHeight-ROW)/2f,right-left-28,21,chosen?VelaTheme.INK:p==null?VelaTheme.MUTED:0xFFF0F3F8,Ui.medium);
-        if(p!=null){String timing=time(p.start)+"–"+time(p.end);if(p.current(now))timing+="  ·  "+LiveTvActivity.remainingText(p.remainingMinutes(now));label(c,timing,left+14,top+59+(rowHeight-ROW)/2f,right-left-28,14,chosen?0xFF61636D:VelaTheme.SECONDARY,Ui.regular);}
+        if(p!=null&&right-left>=180*VelaReading.scale(getContext())){String timing=time(p.start)+"–"+time(p.end);if(p.current(now)&&right-left>=330*VelaReading.scale(getContext()))timing+="  ·  "+LiveTvActivity.remainingText(p.remainingMinutes(now));label(c,timing,left+14,top+59+(rowHeight-ROW)/2f,right-left-28,14,chosen?0xFF61636D:VelaTheme.SECONDARY,Ui.regular);}
     }
     @Override public boolean onKeyDown(int key,KeyEvent event){
         if(key==KeyEvent.KEYCODE_INFO&&!channels.isEmpty()){if(event.getRepeatCount()==0)actions.correction(channels.get(row));return true;}

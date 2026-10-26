@@ -98,9 +98,9 @@ class SettingsScreen extends VelaScreen {
             stage=new FrameLayout(a);stage.setClipChildren(false);addView(stage,new LayoutParams(1790,940));
             ImageView mark=new ImageView(a);mark.setImageResource(R.drawable.vela_mark);put(stage,mark,86,26,48,48);
             put(stage,text("Vela",31,WHITE,Ui.semibold),152,20,320,62);
-            put(stage,text(Ui.tr("Sua televisão, do seu jeito.","Your television, your way.","Tu televisión, a tu manera."),20,VelaTheme.SECONDARY,Ui.medium),86,92,378,42);
-            surface=new FrameLayout(a);surface.setBackground(round(0xB51C1D25,32));put(stage,surface,520,12,1218,904);
-            heading=text("",42,WHITE,Ui.displaySemibold);put(surface,heading,42,26,1134,72);
+            put(stage,text(VelaWorkspace.profiles(a).get(VelaWorkspace.active(a)),20,VelaTheme.SECONDARY,Ui.medium),86,92,378,42);
+            surface=new FrameLayout(a);surface.setBackground(round(VelaTheme.PANEL,VelaTheme.PANEL_RADIUS));put(stage,surface,520,12,1218,904);
+            heading=text("",38,WHITE,Ui.displaySemibold);put(surface,heading,42,26,1134,72);
             detail=text("",23,VelaTheme.SECONDARY,Ui.regular);detail.setMaxLines(2);detail.setEllipsize(android.text.TextUtils.TruncateAt.END);detail.setGravity(Gravity.TOP);put(surface,detail,42,106,1134,66);
             pane=new FrameLayout(a);pane.setClipChildren(true);put(surface,pane,42,194,1134,622);
             status=text("",18,VelaTheme.SECONDARY,Ui.regular);status.setMaxLines(2);put(surface,status,48,826,1118,64);
@@ -116,7 +116,7 @@ class SettingsScreen extends VelaScreen {
             building=false;render(22);categories[0].requestFocus();
         }
         private int categoryFor(int value){if(value==22)return 0;if(value==24||value==2||value>=17&&value<=20)return 1;if(value>=6&&value<=10)return 2;if(value==3||value>=14&&value<=16||value==21)return 3;if(value==11||value==12)return 4;if(value==23)return 5;if(value==4||value==5)return 7;return 6;}
-        private void skin(){int selected=categoryFor(page);for(int i=0;i<categories.length;i++){boolean focus=categories[i].hasFocus();categories[i].setBackground(round(focus?Appearance.accent(activity):selected==i?0x2AFFFFFF:Color.TRANSPARENT,20));categoryText[i].setTextColor(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);categoryIcons[i].color(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);}}
+        private void skin(){int selected=categoryFor(page);for(int i=0;i<categories.length;i++){boolean focus=categories[i].hasFocus();categories[i].setBackground(round(focus?Appearance.accent(activity):selected==i?VelaTheme.SELECTED:Color.TRANSPARENT,VelaTheme.CONTROL_RADIUS));categoryText[i].setTextColor(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);categoryIcons[i].color(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);}}
         private void tools(int page){if(activity.owner instanceof VelaHub.Owner)((VelaHub.Owner)activity.owner).tools(page);else activity.startActivity(new Intent(activity,HomeActivity.class).putExtra("velaTools",page));}
         private void navigation(){View target=activity.navigation.navigationTarget(activity);if(target!=null)target.requestFocus();else activity.finish();}
         private void focusOptions(){List<View> focusable=pane.getFocusables(FOCUS_FORWARD);if(!focusable.isEmpty())focusable.get(0).requestFocus();}
@@ -144,8 +144,8 @@ class SettingsScreen extends VelaScreen {
             TextView name=text(label,23,WHITE,Ui.medium);name.setSingleLine(true);name.setEllipsize(android.text.TextUtils.TruncateAt.END);put(row,name,24,secondary.isEmpty()?0:12,650,secondary.isEmpty()?78:38);
             TextView right=text(value,22,DIM,Ui.regular);right.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.setSingleLine(true);right.setEllipsize(android.text.TextUtils.TruncateAt.END);put(row,right,710,0,398,height);
             TextView sub=text(secondary,19,DIM,Ui.regular);sub.setSingleLine(true);sub.setEllipsize(android.text.TextUtils.TruncateAt.END);if(!secondary.isEmpty())put(row,sub,24,58,650,32);
-            rows.add(row);labels.add(name);values.add(right);row.setBackground(round(VelaTheme.CARD));
-            row.setNextFocusLeftId(categories[categoryFor(page)].getId());row.setOnFocusChangeListener((v,focused)->{row.setBackground(round(focused?Appearance.accent(activity):VelaTheme.CARD));name.setTextColor(focused?INK:WHITE);right.setTextColor(focused?0xFF60636C:DIM);sub.setTextColor(focused?0xFF656874:DIM);if(focused)status.setText(description);});
+            rows.add(row);labels.add(name);values.add(right);row.setBackground(VelaTheme.row(false,Appearance.accent(activity)));
+            row.setNextFocusLeftId(categories[categoryFor(page)].getId());row.setOnFocusChangeListener((v,focused)->{row.setBackground(VelaTheme.row(focused,Appearance.accent(activity)));name.setTextColor(focused?INK:WHITE);right.setTextColor(focused?0xFF60636C:DIM);sub.setTextColor(focused?0xFF656874:DIM);if(focused)status.setText(description);});
             row.setOnClickListener(v->{action.run();activity.changed();});
         }
         void render(int next){
@@ -296,9 +296,10 @@ class SettingsScreen extends VelaScreen {
                 note(Ui.tr("A vista escolhida é aplicada ao voltar à televisão.","Your chosen view applies when you return to TV.","La vista elegida se aplica al volver a la televisión."),470);
             }else if(page==21){
                 section(Ui.tr("BIBLIOTECA DO INÍCIO","HOME LIBRARY","BIBLIOTECA DE INICIO"),0);LibraryClient library=new LibraryClient(activity);PlexClient plex=new PlexClient(activity);JellyfinClient jellyfin=new JellyfinClient(activity);
-                row("Plex",plex.connected()?(library.isJellyfin()?plex.name():"✓ "+plex.name()):Ui.tr("Conectar","Connect","Conectar"),54,"Plex",Ui.tr("Usa esta biblioteca sem desconectar Jellyfin.","Use this library without unlinking Jellyfin.","Usa esta biblioteca sin desvincular Jellyfin."),()->{if(plex.connected()){LibraryClient.activate(activity,"Plex");render(21);}else activity.startActivity(new Intent(activity,PlexLinkActivity.class));});
+                row("Plex",plex.connected()?(library.isJellyfin()||library.both()?plex.name():"✓ "+plex.name()):Ui.tr("Conectar","Connect","Conectar"),54,"Plex",Ui.tr("Usa esta biblioteca sem desconectar Jellyfin.","Use this library without unlinking Jellyfin.","Usa esta biblioteca sin desvincular Jellyfin."),()->{if(plex.connected()){LibraryClient.activate(activity,"Plex");render(21);}else activity.startActivity(new Intent(activity,PlexLinkActivity.class));});
                 row("Jellyfin",jellyfin.connected()?(library.isJellyfin()?"✓ "+jellyfin.name():jellyfin.name()):Ui.tr("Conectar","Connect","Conectar"),154,"Jellyfin",Ui.tr("Usa esta biblioteca sem desconectar Plex.","Use this library without unlinking Plex.","Usa esta biblioteca sin desvincular Plex."),()->{if(jellyfin.connected()){LibraryClient.activate(activity,"Jellyfin");render(21);}else activity.startActivity(new Intent(activity,JellyfinLinkActivity.class));});
-                note(Ui.tr("A troca é aplicada ao voltar ao início. Cada servidor mantém seu usuário, progresso e imagens.","Switching applies when you return home. Each server keeps its user, progress and artwork.","El cambio se aplica al volver a Inicio. Cada servidor mantiene su usuario, progreso e imágenes."),310);
+                row(L10n.text("Plex + Jellyfin together"),library.both()?"✓":L10n.text("Both accounts must be connected"),254,L10n.text("One home, both libraries"),L10n.text("Keep separate accounts and progress. Duplicate titles are combined only when their external IDs match."),()->{if(plex.connected()&&jellyfin.connected()){LibraryClient.activate(activity,"Both");render(21);}});
+                note(Ui.tr("A troca é aplicada ao voltar ao início. Cada servidor mantém seu usuário, progresso e imagens.","Switching applies when you return home. Each server keeps its user, progress and artwork.","El cambio se aplica al volver a Inicio. Cada servidor mantiene su usuario, progreso e imágenes."),410);
             }else if(page==15){
                 section("PLEX",0);PlexClient plex=new PlexClient(activity);
                 row(plex.connected()?Ui.tr("Alterar servidor","Change server","Cambiar servidor"):Ui.tr("Conectar Plex","Connect Plex","Conectar Plex"),plex.connected()?plex.name():"›",54,Ui.tr("Sua biblioteca, conectada.","Your library, connected.","Tu biblioteca, conectada."),Ui.tr("Use o código em plex.tv/link. Se houver um único servidor, ele será escolhido automaticamente; se houver vários, você escolhe.","Use the code at plex.tv/link. A single server is selected automatically; if there are several, you choose.","Usa el código en plex.tv/link. Si solo hay un servidor, se elige automáticamente; si hay varios, tú eliges."),()->activity.startActivity(new Intent(activity,PlexLinkActivity.class)));

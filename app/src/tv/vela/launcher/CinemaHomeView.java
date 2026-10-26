@@ -19,7 +19,7 @@ final class CinemaHomeView extends FrameLayout {
     private static final int BG=0xFF090A0D, WHITE=0xFFF7F7FA, DIM=0xFFB0B2BC;
     private static final android.animation.TimeInterpolator EASE=new android.view.animation.DecelerateInterpolator(1.5f);
     private final Activity activity;
-    private final FrameLayout stage,surface,sidebar,overlay;private TextView toolsSearch;
+    private final FrameLayout stage,surface,sidebar,overlay;private VelaHub toolsLayer;private CharSequence toolsHeading;private final Map<View,Integer> toolsHidden=new IdentityHashMap<>();
     private final View scrim,sideTint,backdropShade,backdropLeft,backdropBottom;
     private final ImageView backdrop,titleLogo,sidebarArt,providerMark;
     private final FrameLayout account;
@@ -115,12 +115,11 @@ final class CinemaHomeView extends FrameLayout {
         backdropShade=new View(activity);backdropShade.setBackgroundColor(BG);place(backdropShade,96,0,1824,1080);
         View top=new View(activity);top.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0x85090A0D,0x00090A0D}));place(top,96,0,1824,180);
         pageTitle=text(L10n.text("Home"),32,WHITE,Ui.displaySemibold);place(pageTitle,190,56,800,48);
-        toolsSearch=button(L10n.text("Search"),20);place(toolsSearch,1320,56,155,50);toolsSearch.setOnClickListener(v->((VelaHub.Owner)activity).tools(0));
         headerStatus=new HomeStatusView(activity);place(headerStatus,1500,42,340,72);
         updateHint=text("",17,DIM,Ui.medium);updateHint.setSingleLine();updateHint.setEllipsize(android.text.TextUtils.TruncateAt.END);updateHint.setVisibility(GONE);place(updateHint,194,118,1300,30);
         providerMark=new ImageView(activity);providerMark.setScaleType(ImageView.ScaleType.FIT_START);providerMark.setImageDrawable(brand(0));place(providerMark,194,250,94,43);
         connection=text(L10n.text("Your library"),17,0xFFD2D2DC,Ui.medium);connection.setSingleLine();connection.setEllipsize(android.text.TextUtils.TruncateAt.END);place(connection,306,252,690,38);
-        title=text(L10n.text("Your cinema starts here."),62,WHITE,Ui.displaySemibold);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);title.setLineSpacing(0,.95f);place(title,190,307,800,146);
+        title=text(L10n.text("Your cinema starts here."),58,WHITE,Ui.displaySemibold);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);title.setLineSpacing(0,.95f);place(title,190,307,800,146);
         titleLogo=new ImageView(activity);titleLogo.setScaleType(ImageView.ScaleType.FIT_START);titleLogo.setVisibility(GONE);place(titleLogo,194,307,650,146);
         meta=text("Plex · Jellyfin · YouTube · Prime Video",19,0xFFD1D1DA,Ui.medium);meta.setSingleLine();meta.setEllipsize(android.text.TextUtils.TruncateAt.END);place(meta,194,463,800,34);
         summary=text(L10n.text("Connect Plex to discover your library."),21,0xFFE1E1E6,Ui.regular);summary.setMaxLines(2);summary.setEllipsize(android.text.TextUtils.TruncateAt.END);summary.setLineSpacing(5,1);place(summary,194,504,720,70);
@@ -163,7 +162,7 @@ final class CinemaHomeView extends FrameLayout {
             LayoutParams ip=new LayoutParams(27,30,Gravity.CENTER_VERTICAL);ip.leftMargin=16;nav.addView(icon,ip);sideIcons.add(icon);
             TextView label=text(names[i],21,WHITE,Ui.medium);label.setSingleLine(true);label.setEllipsize(android.text.TextUtils.TruncateAt.END);label.setAlpha(0);label.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);LayoutParams lp=new LayoutParams(206,56);lp.leftMargin=64;nav.addView(label,lp);sideLabels.add(label);
             nav.setOnFocusChangeListener((v,f)->{if(f)setSidebar(true);styleSide(index,f);});nav.setOnClickListener(v->activateSide(index));
-            nav.setOnKeyListener((v,key,event)->{if(key==KeyEvent.KEYCODE_DPAD_RIGHT){if(event.getAction()==KeyEvent.ACTION_DOWN)leaveSidebar();return true;}return false;});styleSide(i,false);
+            nav.setOnKeyListener((v,key,event)->{if(key==KeyEvent.KEYCODE_DPAD_RIGHT){if(event.getAction()==KeyEvent.ACTION_DOWN){if(activeSide()==v)leaveSidebar();else activateSide(index);}return true;}return false;});styleSide(i,false);
         }
         // Stable destination IDs, explicit remote order: Home, live TV, movies, series, library.
         int[] primaryOrder={0,6,1,2,3};for(int n=0;n+1<primaryOrder.length;n++){View before=sideButtons.get(primaryOrder[n]),after=sideButtons.get(primaryOrder[n+1]);before.setNextFocusDownId(after.getId());after.setNextFocusUpId(before.getId());after.setAccessibilityTraversalAfter(before.getId());}
@@ -175,7 +174,7 @@ final class CinemaHomeView extends FrameLayout {
         accountIcon=new ImageView(activity);accountIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);accountIcon.setBackground(round(0x33FFFFFF,22));accountIcon.setClipToOutline(true);accountIcon.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);LayoutParams ai=new LayoutParams(42,42,Gravity.CENTER_VERTICAL);ai.leftMargin=9;account.addView(accountIcon,ai);
         accountInitial=text("",21,WHITE,Ui.medium);accountInitial.setGravity(Gravity.CENTER);accountInitial.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);account.addView(accountInitial,new LayoutParams(ai));
         accountTitle=text("",21,WHITE,Ui.displaySemibold);accountTitle.setSingleLine(true);accountTitle.setEllipsize(android.text.TextUtils.TruncateAt.END);accountTitle.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);accountTitle.setAlpha(0);LayoutParams at=new LayoutParams(206,32);at.leftMargin=74;at.topMargin=1;account.addView(accountTitle,at);
-        account.setOnFocusChangeListener((v,f)->{if(f)setSidebar(true);accountTitle.setAlpha(sidebarOpen?1:0);account.setBackground(f?round(0x28FFFFFF,20):null);});account.setOnClickListener(v->manageLibrary());account.setOnLongClickListener(v->{((VelaHub.Owner)activity).tools(4);return true;});
+        account.setOnFocusChangeListener((v,f)->{if(f)setSidebar(true);accountTitle.setAlpha(sidebarOpen?1:0);account.setBackground(f?round(0x28FFFFFF,20):null);});account.setOnClickListener(v->manageLibrary());sideButtons.get(0).setOnLongClickListener(v->{((VelaHub.Owner)activity).toolsLayout();return true;});account.setOnLongClickListener(v->{((VelaHub.Owner)activity).tools(4);return true;});
         account.setOnKeyListener((v,key,event)->{if(key==KeyEvent.KEYCODE_DPAD_RIGHT){if(event.getAction()==KeyEvent.ACTION_DOWN)leaveSidebar();return true;}return false;});
         // The account heading follows the same reveal as the sidebar labels.
         sideLabels.add(accountTitle);
@@ -198,7 +197,7 @@ final class CinemaHomeView extends FrameLayout {
     private TextView text(String s,int size,int color,Typeface face){TextView v=new TextView(activity);v.setText(s);v.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);v.setTextColor(color);v.setTypeface(face);v.setIncludeFontPadding(false);v.setGravity(Gravity.CENTER_VERTICAL);return v;}
     private void focusable(View v,String description){v.setId(View.generateViewId());v.setFocusable(true);v.setFocusableInTouchMode(true);v.setClickable(true);v.setDefaultFocusHighlightEnabled(false);v.setContentDescription(description);}
     private GradientDrawable round(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(radius);return d;}
-    private TextView button(String s,int size){TextView v=text(s,size,WHITE,Ui.medium);focusable(v,s);v.setContentDescription(null);v.setGravity(Gravity.CENTER);v.setPadding(20,6,20,6);v.setBackground(round(0xFF262831,18));v.setOnFocusChangeListener((view,f)->{v.setBackground(round(f?0xFF454852:0xFF262831,18));lift(v,f?1.035f:1,0,f?16:0);});return v;}
+    private TextView button(String s,int size){TextView v=text(s,size,WHITE,Ui.medium);focusable(v,s);v.setContentDescription(null);v.setGravity(Gravity.CENTER);v.setPadding(20,6,20,6);v.setBackground(VelaTheme.shape(VelaTheme.CARD,VelaTheme.CONTROL_RADIUS));v.setOnFocusChangeListener((view,f)->{v.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);v.setBackground(VelaTheme.shape(f?Appearance.accent(activity):VelaTheme.CARD,VelaTheme.CONTROL_RADIUS));lift(v,f?1.02f:1,0,f?8:0);});return v;}
     private Drawable symbol(String name,int size){try(java.io.InputStream in=activity.getAssets().open("symbols/"+name+".png")){Bitmap b=BitmapFactory.decodeStream(in);if(b==null)return null;Drawable d=new BitmapDrawable(getResources(),b);d.setBounds(0,0,size,size);d.setTint(0xFFE1E1E8);return d;}catch(java.io.IOException ignored){return null;}}
     private Drawable brand(int index){
         if(index==0)return activity.getDrawable(R.drawable.logo_plex);int b=index-1;
@@ -218,13 +217,21 @@ final class CinemaHomeView extends FrameLayout {
     private void place(View v,int x,int y,int w,int h){LayoutParams p=new LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;surface.addView(v,p);}
     private void lift(View v,float scale,float y,float z){if(Visuals.reducedMotion(activity)){scale=1;y=0;}v.animate().cancel();v.animate().scaleX(scale).scaleY(scale).translationY(y).translationZ(z).setDuration(Visuals.duration(activity,170)).setInterpolator(EASE).start();}
     @Override protected void onSizeChanged(int w,int h,int ow,int oh){float safe=1-2*VelaReading.margin(activity);float s=Math.min(w*safe/1920f,h*safe/1080f);stage.setPivotX(0);stage.setPivotY(0);stage.setScaleX(s);stage.setScaleY(s);stage.setTranslationX((w-1920*s)/2);stage.setTranslationY((h-1080*s)/2);}
-    private View activeSide(){if(panels!=null)return sideButtons.get(panels.navigationIndex());if(livePage)return sideButtons.get(6);if(filter!=3)return sideButtons.get(filter==4?3:filter);for(int i=0;i<sidePackages.length;i++)if(SidebarApps.YOUTUBE.equals(sidePackages[i])&&appButtons.get(i).getVisibility()==VISIBLE)return appButtons.get(i);return sideButtons.get(0);}
-    private void styleSide(int i,boolean f){boolean selected=panels!=null?i==panels.navigationIndex():livePage?i==6:filter!=3&&i==(filter==4?3:filter);sideButtons.get(i).setBackground(f?round(Appearance.accent(activity),28):selected?round(Appearance.tint(activity,0x25),28):null);sideLabels.get(i).setTextColor(f?BG:WHITE);sideIcons.get(i).setColorFilter(f?BG:0xFFDDDEE7);}
-    private void styleApp(int slot,boolean focused){if(slot<0)return;boolean moving=reorderOriginal!=null&&slot==reorderSlot;boolean context=sidePackages[slot].equals(menuPackage);appButtons.get(slot).setBackground(moving?round(Appearance.tint(activity,0x99),28):focused||context?round(Appearance.tint(activity,0x3C),28):panels==null&&!livePage&&filter==3&&SidebarApps.YOUTUBE.equals(sidePackages[slot])?round(Appearance.tint(activity,0x25),28):null);appButtons.get(slot).setTranslationZ(moving?16:0);}
+    private View activeSide(){if(toolsLayer!=null)return sideButtons.get(7);if(panels!=null)return sideButtons.get(panels.navigationIndex());if(livePage)return sideButtons.get(6);if(filter!=3)return sideButtons.get(filter==4?3:filter);for(int i=0;i<sidePackages.length;i++)if(SidebarApps.YOUTUBE.equals(sidePackages[i])&&appButtons.get(i).getVisibility()==VISIBLE)return appButtons.get(i);return sideButtons.get(0);}
+    private void styleSide(int i,boolean f){boolean selected=toolsLayer!=null?i==7:panels!=null?i==panels.navigationIndex():livePage?i==6:filter!=3&&i==(filter==4?3:filter);sideButtons.get(i).setBackground(f?round(Appearance.accent(activity),28):selected?round(Appearance.tint(activity,0x25),28):null);sideLabels.get(i).setTextColor(f?BG:WHITE);sideIcons.get(i).setColorFilter(f?BG:0xFFDDDEE7);}
+    private void styleApp(int slot,boolean focused){if(slot<0)return;boolean moving=reorderOriginal!=null&&slot==reorderSlot;boolean context=sidePackages[slot].equals(menuPackage);appButtons.get(slot).setBackground(moving?round(Appearance.tint(activity,0x99),28):focused||context?round(Appearance.tint(activity,0x3C),28):toolsLayer==null&&panels==null&&!livePage&&filter==3&&SidebarApps.YOUTUBE.equals(sidePackages[slot])?round(Appearance.tint(activity,0x25),28):null);appButtons.get(slot).setTranslationZ(moving?16:0);}
     private void styleSidebar(){for(int i=0;i<sideButtons.size();i++)styleSide(i,sideButtons.get(i).hasFocus());for(int i=0;i<appButtons.size();i++)styleApp(i,appButtons.get(i).hasFocus());}
-    private void setSidebar(boolean open){if(sidebarOpen==open)return;sidebarOpen=open;LayoutParams p=(LayoutParams)sidebar.getLayoutParams();p.width=open?300:76;sidebar.setLayoutParams(p);List<FrameLayout> buttons=new ArrayList<>(sideButtons);buttons.addAll(appButtons);for(FrameLayout v:buttons){LayoutParams q=(LayoutParams)v.getLayoutParams();q.width=open?284:60;v.setLayoutParams(q);}List<TextView> labels=new ArrayList<>(sideLabels);labels.addAll(appLabels);for(TextView v:labels){v.animate().cancel();v.animate().alpha(open?1:0).setDuration(Visuals.duration(activity,110)).start();}serverLabel.setAlpha(open?1:0);sidebarArt.setVisibility(open&&heroBitmap!=null?VISIBLE:GONE);scrim.animate().alpha(open?.19f:0).setDuration(Visuals.duration(activity,140)).start();}
-    private void leaveSidebar(){setSidebar(false);if(panels!=null){panels.focusContent();return;}if(livePage){liveTv.focusContent();return;}View v=lastContent;if(v==null||!v.isAttachedToWindow()||v.getVisibility()!=VISIBLE)v=play;v.requestFocus();}
+    private void setSidebar(boolean open){if(sidebarOpen==open)return;if(open&&toolsLayer!=null){scrim.bringToFront();sidebar.bringToFront();overlay.bringToFront();}sidebarOpen=open;LayoutParams p=(LayoutParams)sidebar.getLayoutParams();p.width=open?300:76;sidebar.setLayoutParams(p);List<FrameLayout> buttons=new ArrayList<>(sideButtons);buttons.addAll(appButtons);for(FrameLayout v:buttons){LayoutParams q=(LayoutParams)v.getLayoutParams();q.width=open?284:60;v.setLayoutParams(q);}List<TextView> labels=new ArrayList<>(sideLabels);labels.addAll(appLabels);for(TextView v:labels){v.animate().cancel();v.animate().alpha(open?1:0).setDuration(Visuals.duration(activity,110)).start();}serverLabel.setAlpha(open?1:0);sidebarArt.setVisibility(open&&heroBitmap!=null?VISIBLE:GONE);scrim.animate().alpha(open?.19f:0).setDuration(Visuals.duration(activity,140)).start();}
+    private void leaveSidebar(){setSidebar(false);if(toolsLayer!=null){toolsLayer.focusNavigation();return;}if(panels!=null){panels.focusContent();return;}if(livePage){liveTv.focusContent();return;}View v=lastContent;if(v==null||!v.isAttachedToWindow()||v.getVisibility()!=VISIBLE)v=play;v.requestFocus();}
+    void mountTools(VelaHub tools){sharedChrome();toolsLayer=tools;toolsHeading=pageTitle.getText();toolsHidden.clear();for(View view:new View[]{surface,panels,liveTv,overlay})if(view!=null){toolsHidden.put(view,view.getVisibility());view.setVisibility(INVISIBLE);}pageTitle.setText(L10n.text("Your Vela"));updateHint.setVisibility(GONE);LayoutParams bounds=new LayoutParams(1790,940);bounds.leftMargin=112;bounds.topMargin=116;stage.addView(tools,stage.indexOfChild(scrim),bounds);sidebar.setVisibility(VISIBLE);setSidebar(false);headerStatus.start();styleSidebar();}
+    void unmountTools(){toolsLayer=null;for(Map.Entry<View,Integer> item:toolsHidden.entrySet())item.getKey().setVisibility(item.getValue());toolsHidden.clear();if(toolsHeading!=null)pageTitle.setText(toolsHeading);toolsHeading=null;styleSidebar();}
+    void resumeTools(){if(toolsLayer!=null)headerStatus.start();}
+    void toolsContent(){setSidebar(false);}
+    void toolsNavigation(){sideButtons.get(7).requestFocus();}
+    int navigationDestination(){if(panels!=null)return panels.navigationIndex();if(livePage)return 6;return filter==1?1:filter==2?2:filter==4?3:0;}
+    void navigateSection(int destination){activateSide(destination);}
     private void activateSide(int i){
+        if(toolsLayer!=null){((HomeActivity)activity).afterTools(v->v.activateSide(i));return;}if(i==7&&VelaSessions.blocked(activity)){((VelaHub.Owner)activity).tools(4);return;}
         if(i<=3){if(panels!=null){closePanel(false);resume();}if(livePage){leaveLiveTv();resume();}changeFilter(i==3?4:i);setSidebar(false);play.requestFocus();return;}
         if(i==4)showApps(sideButtons.get(i));else if(i==5)showInputs(sideButtons.get(i));else if(i==6)openLiveTv();else openPanel(new Intent(activity,SettingsActivity.class));
     }
@@ -233,12 +240,12 @@ final class CinemaHomeView extends FrameLayout {
         if(livePage){setSidebar(false);liveTv.focusContent();return;}
         pause();releaseImages();surface.setVisibility(INVISIBLE);livePage=true;updateHint.setVisibility(GONE);pageTitle.setText(Ui.tr("TV em direto","Live TV","TV en directo"));
         // The same header and navigation stay attached; TV is a lazy section in this HomeActivity.
-        for(View chrome:new View[]{pageTitle,headerStatus,updateHint,toolsSearch})if(chrome.getParent()==surface){LayoutParams p=(LayoutParams)chrome.getLayoutParams();surface.removeView(chrome);stage.addView(chrome,stage.indexOfChild(sidebar),p);}
+        for(View chrome:new View[]{pageTitle,headerStatus,updateHint})if(chrome.getParent()==surface){LayoutParams p=(LayoutParams)chrome.getLayoutParams();surface.removeView(chrome);stage.addView(chrome,stage.indexOfChild(sidebar),p);}
         liveTv=new HomeLiveTvView(activity,this,new HomeLiveTvView.Host(){
             public void focusNavigation(){sideButtons.get(6).requestFocus();}
             public void contentFocused(View view){lastContent=view;setSidebar(false);}
-            public boolean ownsFocus(){return getVisibility()==VISIBLE&&!sidebarOpen&&!toolsSearch.hasFocus();}
-            public void modal(boolean open){toolsSearch.setFocusable(!open);sidebar.setDescendantFocusability(open?FOCUS_BLOCK_DESCENDANTS:FOCUS_AFTER_DESCENDANTS);}
+            public boolean ownsFocus(){return getVisibility()==VISIBLE&&!sidebarOpen;}
+            public void modal(boolean open){sidebar.setDescendantFocusability(open?FOCUS_BLOCK_DESCENDANTS:FOCUS_AFTER_DESCENDANTS);}
         });stage.addView(liveTv,1,new LayoutParams(1920,1080));headerStatus.start();setSidebar(false);styleSidebar();liveTv.resume();
     }
     private void leaveLiveTv(){
@@ -246,11 +253,11 @@ final class CinemaHomeView extends FrameLayout {
     }
     private boolean sidebarFocused(){View focus=activity.getCurrentFocus();for(View v=focus;v!=null;){if(v==sidebar)return true;android.view.ViewParent p=v.getParent();v=p instanceof View?(View)p:null;}return false;}
     boolean route(Intent intent){if(!HomeScreenHost.handles(intent))return false;if(panels==null)openPanel(intent);else panels.open(panels.screen,intent);return true;}
-    void settings(){openPanel(new Intent(activity,SettingsActivity.class));}
+    void settings(){if(VelaSessions.blocked(activity)){((VelaHub.Owner)activity).tools(4);return;}openPanel(new Intent(activity,SettingsActivity.class));}
     void searchChannel(LiveTvData.Channel channel){openLiveTv();if(liveTv!=null)liveTv.openSearch(channel);}
     boolean showingUpdates(){return panels!=null&&panels.showingUpdates();}
     boolean canShowInstaller(){return panels!=null&&panels.updatesActive();}
-    private void sharedChrome(){for(View chrome:new View[]{pageTitle,headerStatus,updateHint,toolsSearch})if(chrome.getParent()==surface){LayoutParams p=(LayoutParams)chrome.getLayoutParams();surface.removeView(chrome);stage.addView(chrome,stage.indexOfChild(sidebar),p);}}
+    private void sharedChrome(){for(View chrome:new View[]{pageTitle,headerStatus,updateHint})if(chrome.getParent()==surface){LayoutParams p=(LayoutParams)chrome.getLayoutParams();surface.removeView(chrome);stage.addView(chrome,stage.indexOfChild(sidebar),p);}}
     private void openPanel(Intent intent){openPanel(intent,null);}
     private void openPanel(Intent intent,Bundle saved){
         if(panels!=null){panels.root(intent);setSidebar(false);styleSidebar();return;}
@@ -261,7 +268,7 @@ final class CinemaHomeView extends FrameLayout {
             public void contentFocused(){setSidebar(false);styleSidebar();}
             public void changed(){refreshSidebarApps();styleSidebar();if(((HomeActivity)activity).foreground()){headerStatus.stop();headerStatus.start();}}
             public void title(String text){pageTitle.setText(text);refreshSidebarApps();styleSidebar();}
-            public void fullscreen(boolean enabled){sidebar.setVisibility(enabled?GONE:VISIBLE);pageTitle.setVisibility(enabled?GONE:VISIBLE);headerStatus.setVisibility(enabled?GONE:VISIBLE);toolsSearch.setVisibility(enabled?GONE:VISIBLE);if(enabled)headerStatus.stop();else if(!closed&&((HomeActivity)activity).foreground())headerStatus.start();}
+            public void fullscreen(boolean enabled){sidebar.setVisibility(enabled?GONE:VISIBLE);pageTitle.setVisibility(enabled?GONE:VISIBLE);headerStatus.setVisibility(enabled?GONE:VISIBLE);if(enabled)headerStatus.stop();else if(!closed&&((HomeActivity)activity).foreground())headerStatus.start();}
             public void exit(){boolean tv=panelReturnLive;closePanel(false);if(tv)openLiveTv();else resume();}
         });stage.addView(panels,1,new LayoutParams(1920,1080));setSidebar(false);
         if(saved==null)panels.root(intent);else panels.restore(saved);if(((HomeActivity)activity).foreground())panels.resume();headerStatus.start();styleSidebar();
@@ -320,7 +327,7 @@ final class CinemaHomeView extends FrameLayout {
         reorderHint.setVisibility(VISIBLE);updateReorderHint();styleSidebar();return true;
     }
     private boolean openShortcutMenu(View view){
-        int slot=appButtons.indexOf(view);if(closed||!((HomeActivity)activity).foreground()||slot<0||!availableApps[slot])return false;
+        int slot=appButtons.indexOf(view);if(toolsLayer!=null&&slot>=0){String pkg=sidePackages[slot];((HomeActivity)activity).afterTools(v->{for(int n=0;n<v.sidePackages.length;n++)if(pkg.equals(v.sidePackages[n])){v.openShortcutMenu(v.appButtons.get(n));break;}});return true;}if(closed||!((HomeActivity)activity).foreground()||slot<0||!availableApps[slot])return false;
         if(reorderOriginal!=null||menuPackage!=null)return true;
         menuPackage=sidePackages[slot];menuSnapshot=sidePackages.clone();menuAction=0;menuConfirmArmed=false;consumeConfirmUp=confirmHeld;
         view.cancelLongPress();view.setPressed(false);view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);setSidebar(true);
@@ -380,7 +387,7 @@ final class CinemaHomeView extends FrameLayout {
         int next=slot+(down?1:-1);while(next>=0&&next<sidePackages.length&&!availableApps[next])next+=down?1:-1;
         View target=next>=0&&next<sidePackages.length?appButtons.get(next):sideButtons.get(down?4:3);target.requestFocus();
     }
-    private void openYouTubeContent(){if(panels!=null){closePanel(false);resume();}if(livePage){leaveLiveTv();resume();}changeFilter(3);setSidebar(false);play.requestFocus();loadYouTube();}
+    private void openYouTubeContent(){if(toolsLayer!=null){((HomeActivity)activity).afterTools(v->v.openYouTubeContent());return;}if(panels!=null){closePanel(false);resume();}if(livePage){leaveLiveTv();resume();}changeFilter(3);setSidebar(false);play.requestFocus();loadYouTube();}
     private void enableYouTube(){if(activity.checkSelfPermission(TvSuggestions.PERMISSION)!=PackageManager.PERMISSION_GRANTED)activity.requestPermissions(new String[]{TvSuggestions.PERMISSION},80);else loadYouTube();}
     private void updateAccount(){
         String name=plex.connected()?plex.name():Ui.tr("Conectar biblioteca","Connect library","Conectar biblioteca");
@@ -626,7 +633,7 @@ final class CinemaHomeView extends FrameLayout {
                 TextView episode=text(provider==null?film.provider:film.packageName.equals(JellyfinClient.PACKAGE)?"Jellyfin"+(film.episodeLabel.isEmpty()?"":" · "+film.episodeLabel):film.episodeLabel,14,DIM,Ui.medium);episode.setSingleLine(true);episode.setEllipsize(android.text.TextUtils.TruncateAt.END);episode.setGravity(provider==null?Gravity.LEFT:Gravity.RIGHT);LayoutParams ep=new LayoutParams(provider==null?width:width-markWidth-10,22);ep.leftMargin=provider==null?0:markWidth+10;ep.topMargin=contentHeight+8;card.addView(episode,ep);
                 TextView remaining=text(ContinueWatching.remaining(film),17,WHITE,Ui.medium);remaining.setSingleLine(true);remaining.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams rp=new LayoutParams(width,26);rp.topMargin=contentHeight+32;card.addView(remaining,rp);
             }
-            card.setOnFocusChangeListener((v,f)->{lift(v,f?1.055f:1,f?-6:0,f?26:0);if(f){lastContent=v;setSidebar(false);revealCard(row,v);main.post(()->{if(v.hasFocus()&&v.isAttachedToWindow())revealCard(row,v);});selectFilm(film);schedulePosters();}});card.setOnClickListener(v->{selectFilm(film);openFilm();});if(resume)card.setOnLongClickListener(v->showWatchedMenu(film,v));
+            card.setOnFocusChangeListener((v,f)->{lift(v,f?1.035f:1,f?-4:0,f?14:0);if(f){lastContent=v;setSidebar(false);revealCard(row,v);main.post(()->{if(v.hasFocus()&&v.isAttachedToWindow())revealCard(row,v);});selectFilm(film);schedulePosters();}});card.setOnClickListener(v->{selectFilm(film);openFilm();});card.setOnLongClickListener(v->showWatchedMenu(film,v));
             LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(width,height);p.rightMargin=28;row.posters.addView(card,p);row.items.add(card);cards.add(card);
             posterImages.add(image);posterFilms.add(film);posterRequests.add(null);posterRails.add(row.rail);
         }
@@ -663,15 +670,17 @@ final class CinemaHomeView extends FrameLayout {
         main.postDelayed(heroLoad,90);
     }
     private boolean showWatchedMenu(PlexClient.Film film,View from){
-        if(watchedBusy||!film.continuing)return true;consumeConfirmUp=confirmHeld;from.cancelLongPress();from.setPressed(false);from.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        startOverlay(Ui.tr("Continuar assistindo","Continue watching","Seguir viendo"),from);overlay.setBackgroundColor(0xED090A0D);String account=plex.identity();
+        if(watchedBusy)return true;consumeConfirmUp=confirmHeld;from.cancelLongPress();from.setPressed(false);from.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        startOverlay(film.continuing?L10n.text("Continue watching"):L10n.text("Library"),from);overlay.setBackgroundColor(0xED090A0D);String account=plex.identity();
         TextView name=text(film.title,40,WHITE,Ui.displaySemibold);name.setMaxLines(2);name.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams np=new LayoutParams(1560,110);np.leftMargin=84;np.topMargin=158;overlay.addView(name,np);
         TextView info=text(film.provider+(film.episodeLabel.isEmpty()?"":" · "+film.episodeLabel),23,DIM,Ui.medium);LayoutParams ip=new LayoutParams(1540,42);ip.leftMargin=84;ip.topMargin=276;overlay.addView(info,ip);
-        watchedStatus=text("",24,DIM,Ui.regular);watchedStatus.setMaxLines(4);watchedStatus.setGravity(Gravity.TOP);LayoutParams sp=new LayoutParams(1480,160);sp.leftMargin=84;sp.topMargin=704;overlay.addView(watchedStatus,sp);watchedMark=null;
+        watchedStatus=text("",24,DIM,Ui.regular);watchedStatus.setMaxLines(4);watchedStatus.setGravity(Gravity.TOP);LayoutParams sp=new LayoutParams(1480,160);sp.leftMargin=84;sp.topMargin=862;overlay.addView(watchedStatus,sp);watchedMark=null;
         boolean supported=plex.canMarkWatched(film);
         if(supported){option(Ui.tr("Marcar como assistido","Mark as watched","Marcar como visto"),354,()->markWatched(film,account),true);watchedMark=(TextView)overlay.getChildAt(overlay.getChildCount()-1);watchedStatus.setText(film.type.equals("episode")?Ui.tr("Atualiza somente este episódio na sua conta de ","Updates only this episode in your ","Actualiza solo este episodio en tu cuenta de ")+film.provider+".":Ui.tr("Atualiza este filme na sua conta de ","Updates this movie in your ","Actualiza esta película en tu cuenta de ")+film.provider+".");}
         else watchedStatus.setText(Ui.tr("O estado de reprodução deste app é gerenciado no próprio aplicativo.","This app manages its watched status inside its own application.","El estado de visto de esta app se gestiona dentro de su aplicación."));
-        option(Ui.tr("Abrir em ","Open in ","Abrir en ")+film.provider,supported?460:354,()->{closeOverlay();selectFilm(film);openFilm();},!supported);option(Ui.tr("Cancelar","Cancel","Cancelar"),supported?566:460,this::closeOverlay,false);return true;
+        try{org.json.JSONObject ref=plex.reference(film);if(ref!=null)option(VelaWatchlist.contains(activity,ref.optString("id"))?L10n.text("Remove from Watch later"):L10n.text("Save for later"),supported?450:344,()->{try{VelaWatchlist.toggle(activity,ref);closeOverlay();note(L10n.text("Watch later updated"));}catch(Exception bad){watchedStatus.setText(L10n.text("Could not save this item."));}},!supported);}catch(Exception ignored){}
+        if(film.alternative!=null)option(L10n.text("Also available on ")+film.alternative.provider,660,()->{PlexClient.Film other=film.alternative;closeOverlay();selectFilm(other);openFilm();},false);
+        option(Ui.tr("Abrir em ","Open in ","Abrir en ")+film.provider,supported?546:440,()->{closeOverlay();selectFilm(film);openFilm();},!supported);option(Ui.tr("Cancelar","Cancel","Cancelar"),supported?756:650,this::closeOverlay,false);return true;
     }
     private void markWatched(PlexClient.Film film,String account){
         if(watchedBusy)return;watchedBusy=true;TextView status=watchedStatus,action=watchedMark;if(action!=null)action.setEnabled(false);status.setText(Ui.tr("Salvando no servidor…","Saving to the server…","Guardando en el servidor…"));
@@ -686,13 +695,13 @@ final class CinemaHomeView extends FrameLayout {
         if(selected.tvSource){Intent intent=ContinueWatching.launch(activity,selected);if(intent!=null)launch(intent);else openPackage(selected.packageName,selected.provider);return;}
         Intent intent=plex.open(selected);if(intent!=null&&intent.resolveActivity(activity.getPackageManager())!=null)launch(intent);else openPackage(selected.packageName,selected.provider);
     }
-    private void manageLibrary(){activity.startActivity(plex.connected()?new Intent(activity,plex.linkActivity()):new Intent(activity,SettingsActivity.class).putExtra("page",14));}
-    private void openPackage(String pkg,String name){Intent intent=HomeApps.launchIntent(activity.getPackageManager(),pkg);if(intent==null){note(name+L10n.text(" is not installed."));return;}launch(intent);}
+    private void manageLibrary(){if(toolsLayer!=null){((HomeActivity)activity).afterTools(v->v.manageLibrary());return;}activity.startActivity(plex.both()?new Intent(activity,SettingsActivity.class).putExtra("page",21):plex.connected()?new Intent(activity,plex.linkActivity()):new Intent(activity,SettingsActivity.class).putExtra("page",14));}
+    private void openPackage(String pkg,String name){if(toolsLayer!=null){((HomeActivity)activity).afterTools(v->v.openPackage(pkg,name));return;}Intent intent=HomeApps.launchIntent(activity.getPackageManager(),pkg);if(intent==null){note(name+L10n.text(" is not installed."));return;}launch(intent);}
     private void launch(Intent intent){try{activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}catch(ActivityNotFoundException|SecurityException e){note(L10n.text("Could not open this option."));}}
     private void note(String s){Toast.makeText(activity,s,Toast.LENGTH_SHORT).show();}
     private void releaseAppsGrid(){if(installedApps!=null){installedApps.release();installedApps=null;}}
-    private TextView startOverlay(String heading,View from){releaseFilterSheet();releaseAppsGrid();overlayReturn=from;toolsSearch.setFocusable(false);setSidebar(false);surface.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);if(panels!=null)panels.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);overlay.removeAllViews();overlay.setBackgroundColor(0xFD0C0D12);overlay.setVisibility(VISIBLE);TextView h=text(heading,46,WHITE,Ui.displaySemibold);LayoutParams p=new LayoutParams(1400,70);p.leftMargin=84;p.topMargin=68;overlay.addView(h,p);TextView close=button(Ui.tr("Fechar","Close","Cerrar"),20);p=new LayoutParams(140,56);p.leftMargin=1692;p.topMargin=76;overlay.addView(close,p);close.setOnClickListener(v->closeOverlay());return close;}
-    private void closeOverlay(){if(overlay.getVisibility()!=VISIBLE)return;releaseFilterSheet();releaseAppsGrid();overlay.setVisibility(GONE);overlay.removeAllViews();toolsSearch.setFocusable(true);surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(panels!=null)panels.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(overlayReturn!=null&&overlayReturn.isAttachedToWindow())overlayReturn.requestFocus();else play.requestFocus();}
+    private TextView startOverlay(String heading,View from){releaseFilterSheet();releaseAppsGrid();overlayReturn=from;setSidebar(false);surface.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);if(panels!=null)panels.setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);overlay.removeAllViews();overlay.setBackgroundColor(0xFD0C0D12);overlay.setVisibility(VISIBLE);TextView h=text(heading,38,WHITE,Ui.displaySemibold);LayoutParams p=new LayoutParams(1400,70);p.leftMargin=84;p.topMargin=68;overlay.addView(h,p);TextView close=button(Ui.tr("Fechar","Close","Cerrar"),20);p=new LayoutParams(140,56);p.leftMargin=1692;p.topMargin=76;overlay.addView(close,p);close.setOnClickListener(v->closeOverlay());return close;}
+    private void closeOverlay(){if(overlay.getVisibility()!=VISIBLE)return;releaseFilterSheet();releaseAppsGrid();overlay.setVisibility(GONE);overlay.removeAllViews();surface.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);sidebar.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(panels!=null)panels.setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);if(overlayReturn!=null&&overlayReturn.isAttachedToWindow())overlayReturn.requestFocus();else play.requestFocus();}
     private void showApps(View from){openPanel(new Intent(HomeScreenHost.APPS));}
     private void option(String label,int y,Runnable action,boolean focus){TextView v=button(label,23);LayoutParams p=new LayoutParams(740,82);p.leftMargin=84;p.topMargin=y;overlay.addView(v,p);v.setOnClickListener(w->action.run());if(focus)v.requestFocus();}
     private void showSettings(View from){openPanel(new Intent(activity,SettingsActivity.class));}

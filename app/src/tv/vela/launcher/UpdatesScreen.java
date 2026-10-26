@@ -61,7 +61,7 @@ final class UpdatesScreen extends VelaScreen {
     }
     private TextView text(String value,int size,int color){TextView view=new TextView(this);view.setText(value);view.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);view.setTextColor(color);view.setTypeface(Ui.medium);view.setIncludeFontPadding(false);view.setGravity(Gravity.CENTER_VERTICAL);return view;}
     private void put(View view,int x,int y,int width,int height){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(width,height);p.leftMargin=x;p.topMargin=y;stage.addView(view,p);}
-    private GradientDrawable round(int color){GradientDrawable drawable=new GradientDrawable();drawable.setColor(color);drawable.setCornerRadius(18);return drawable;}
+    private GradientDrawable round(int color){GradientDrawable drawable=new GradientDrawable();drawable.setColor(color);drawable.setCornerRadius(VelaTheme.CONTROL_RADIUS);return drawable;}
     private TextView button(String value,int y,Runnable run){TextView view=text(value,detailOnly?23:25,0xFFF7F7FA);view.setId(View.generateViewId());view.setFocusable(true);view.setFocusableInTouchMode(true);view.setDefaultFocusHighlightEnabled(false);view.setSingleLine();view.setEllipsize(android.text.TextUtils.TruncateAt.END);view.setPadding(26,0,26,0);view.setBackground(round(VelaTheme.CARD));put(view,detailOnly?0:936,y,detailOnly?1134:840,detailOnly?72:76);view.setOnFocusChangeListener((v,focused)->{view.setBackground(round(focused?Appearance.accent(this):VelaTheme.CARD));view.setTextColor(focused?VelaTheme.INK:0xFFF7F7FA);});view.setOnClickListener(v->run.run());return view;}
     private void render(){
         ReleaseFeed.Release release=Updates.available(this);int state=Updates.state();boolean busy=state!=Updates.IDLE,ready=Updates.ready(this,release);

@@ -14,12 +14,17 @@ import java.util.concurrent.*;
 final class LiveTvLogos {
     /** One layer: transparent logos replace the initials instead of revealing letters underneath. */
     static final class LogoView extends ImageView {
-        private final Paint initials=new Paint(Paint.ANTI_ALIAS_FLAG);private final String label;
+        private final Paint initials=new Paint(Paint.ANTI_ALIAS_FLAG);private String label;
+        private boolean plated,lightPlate;
+        void label(String name){label=name.substring(0,Math.min(2,name.length())).toUpperCase(Ui.locale());invalidate();}
+        void plated(){plated=true;skinPlate();}
+        private void skinPlate(){if(!plated)return;int side=Math.min(getWidth(),getHeight()),pad=Math.max(6,Math.round(side*.12f));setPadding(pad,pad,pad,pad);setBackground(VelaTheme.shape(lightPlate?0xFFF0F1F6:VelaTheme.CARD,Math.max(12,Math.round(side*.22f))));}
+        @Override protected void onSizeChanged(int w,int h,int oldw,int oldh){super.onSizeChanged(w,h,oldw,oldh);skinPlate();}
         interface ColorListener{void color(int value);}private ColorListener listener;
         void setColorListener(ColorListener value){listener=value;}
-        @Override public void setImageBitmap(Bitmap bitmap){super.setImageBitmap(bitmap);if(listener!=null&&bitmap!=null){float[] hsv=new float[3];int chosen=0xFF243449;float best=.1f;for(int y=0;y<bitmap.getHeight();y+=Math.max(1,bitmap.getHeight()/8))for(int x=0;x<bitmap.getWidth();x+=Math.max(1,bitmap.getWidth()/8)){int color=bitmap.getPixel(x,y);if(Color.alpha(color)<160)continue;Color.colorToHSV(color,hsv);float score=hsv[1]*hsv[2];if(score>best){best=score;chosen=color;}}listener.color(chosen);}}
+        @Override public void setImageBitmap(Bitmap bitmap){super.setImageBitmap(bitmap);if(plated){int count=0,dark=0;if(bitmap!=null)for(int y=0;y<bitmap.getHeight();y+=Math.max(1,bitmap.getHeight()/8))for(int x=0;x<bitmap.getWidth();x+=Math.max(1,bitmap.getWidth()/8)){int color=bitmap.getPixel(x,y);if(Color.alpha(color)<160)continue;count++;if((Color.red(color)*.2126+Color.green(color)*.7152+Color.blue(color)*.0722)<64)dark++;}lightPlate=count>2&&dark>count*.65;skinPlate();}if(listener!=null&&bitmap!=null){float[] hsv=new float[3];int chosen=0xFF243449;float best=.1f;for(int y=0;y<bitmap.getHeight();y+=Math.max(1,bitmap.getHeight()/8))for(int x=0;x<bitmap.getWidth();x+=Math.max(1,bitmap.getWidth()/8)){int color=bitmap.getPixel(x,y);if(Color.alpha(color)<160)continue;Color.colorToHSV(color,hsv);float score=hsv[1]*hsv[2];if(score>best){best=score;chosen=color;}}listener.color(chosen);}}
         LogoView(Context c,String name){super(c);label=name.substring(0,Math.min(2,name.length())).toUpperCase(Ui.locale());initials.setColor(0xFF647991);initials.setTextSize(33);initials.setTypeface(Ui.semibold);initials.setTextAlign(Paint.Align.CENTER);}
-        @Override protected void onDraw(Canvas canvas){super.onDraw(canvas);if(getDrawable()==null)canvas.drawText(label,getWidth()/2f,getHeight()/2f-(initials.ascent()+initials.descent())/2f,initials);}
+        @Override protected void onDraw(Canvas canvas){super.onDraw(canvas);if(getDrawable()==null){initials.setTextSize(Math.max(18,Math.min(getWidth(),getHeight())*.32f));canvas.drawText(label,getWidth()/2f,getHeight()/2f-(initials.ascent()+initials.descent())/2f,initials);}}
     }
     private final Context context;private final Handler main=new Handler(Looper.getMainLooper());
     private final ThreadPoolExecutor io=Visuals.worker(2);private final List<Future<?>> jobs=new ArrayList<>();

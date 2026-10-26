@@ -2,511 +2,650 @@
   {
     "file": "01-home.webp",
     "title": "Your library, centre stage",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "7577295398464534bef20fdeaf820a9cd0c7f607c861d4b3672c3fe41d567141"
+    "version": "1.30.1-preview",
+    "sha256": "235960632af120c87ac75f2edc8505735ab3dcbbe20d9148750f75ddbad209c7"
   },
   {
     "file": "02-mint-compact.webp",
     "title": "A compact look in mint",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "d36e9637fd052a933c4f9055d8d42057b7969d9b0b526b96bc9f99af35a78d93"
+    "version": "1.30.1-preview",
+    "sha256": "854b9627be23d30fde9927b868712617e1876b1901abd4f0e50a5f240a3b384c"
   },
   {
     "file": "03-lavender-large.webp",
     "title": "Larger posters in lavender",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "8849b648f6db8de31147a848854668fde180bb777d574dc591e7a5c60bf6e6aa"
+    "version": "1.30.1-preview",
+    "sha256": "9f42194ce7379b04695fbc5645681af081c61dc8ab194a4da4c3cf792845c5f3"
   },
   {
     "file": "04-continue-watching.webp",
     "title": "Pick up where you left off",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "2faec260d3144508b797bb31253575b5a5ceb85a4744e9ae6464843451ec9383"
+    "version": "1.30.1-preview",
+    "sha256": "f3bf5d41a42a097d5b646ca1c13fb83d1bb43e56fabe603d76f89b9fbe772646"
   },
   {
     "file": "05-library-pages.webp",
     "title": "Explore your complete library",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "3641bcf8bae925e62f22d68cdcdd6b55cf6d85d65f826e5a560b81b5449937f4"
+    "version": "1.30.1-preview",
+    "sha256": "112372ff8f3c479ac6bc5e79f30c13f41eaaa3c958517f13eb5f52b81097b125"
   },
   {
     "file": "06-sidebar.webp",
     "title": "One home, familiar navigation",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "5a212fd16b81eecb7f951b4721ec6bd5592bdfd6c16ac267b8af3d05cec87086"
+    "version": "1.30.1-preview",
+    "sha256": "2f48225c3f6b3feff81814b80eaad0fb243c7fb55c0323cc770d292d12f4eaff"
   },
   {
     "file": "07-shortcut-actions.webp",
     "title": "Make your shortcuts yours",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "f0279792857592f3c8853eccf8ddabdc40698901b75f02362d993ee3983b5405"
+    "version": "1.30.1-preview",
+    "sha256": "3a70977af3950b819a6d1017fdc314ff53653273ec4fb8472e07ad50f4781f20"
   },
   {
     "file": "08-reorder-shortcuts.webp",
     "title": "Put apps in your order",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "224b615ac6407ebf24a0435ff67797cbbc9982b44a5d81c3e366bcc57705c3fa"
+    "version": "1.30.1-preview",
+    "sha256": "09e2158f28463622035c0696eb84868ebd06ccafe3cf2d5d0ecee09f3840db94"
   },
   {
     "file": "09-apps.webp",
     "title": "Recognise every app",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "bdc4ca8ad160fc39ca1431176b977321245ad97e5f94c33474252785dcab181f"
+    "version": "1.30.1-preview",
+    "sha256": "7002009b7a82706192ab8fb2b04bf1c8d6cc87bcdefc74ccd1e5771a7202a9e9"
   },
   {
     "file": "10-settings.webp",
     "title": "Every setting in its place",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "a8105f9f7206667055a773d37520605f18537e879db6065b40845058e0ae549c"
+    "version": "1.30.1-preview",
+    "sha256": "cb2673bd3f251c9a3c96d9696efefc32597bcee00dc7007f2a03a3c8630119c3"
   },
   {
     "file": "11-appearance.webp",
     "title": "Vela in your style",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "ce818d6976aa9db7db2312a1cc1837035cbabb8c947398fb792d5f191b51d209"
+    "version": "1.30.1-preview",
+    "sha256": "8fbbd9143736c682a36d528fac72be5de60bfef80f49a5d28a27789c39ef4b32"
   },
   {
     "file": "12-colours.webp",
     "title": "Choose your accent",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "b1324c791a2496ec3e640f7e5ae6a76bb0f4d2b1c08ee9b15d60ca24afab50d5"
+    "version": "1.30.1-preview",
+    "sha256": "23939345e1732ceb5fa92d0c38541bc8744750575c01a8dc4b09a164f69306f6"
   },
   {
     "file": "13-posters.webp",
     "title": "Find your poster size",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "cea5995a2fb9fdb4194fb2a0665bf15b36ab6b1f81e7dd046bf0bd6936a5301a"
+    "version": "1.30.1-preview",
+    "sha256": "1075c48493d15ffb3f104c7753e41182800c0698b70e82bbf8993213f9be1828"
   },
   {
     "file": "14-background.webp",
     "title": "Set the atmosphere",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "247f58186af610860e66fd169244e6e0bcad47e141444cda16c4bd2914b6973a"
+    "version": "1.30.1-preview",
+    "sha256": "5f5dacb3c7847c79b28be681e8c291454986f161a51868a0f3b453d90b53ca90"
   },
   {
     "file": "15-performance.webp",
     "title": "Keep things light",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "ab7c11de28005a80e12ae0d32a248b5660697bf5ca10d7874d3c1f5002d2e4f9"
+    "version": "1.30.1-preview",
+    "sha256": "996191856ca0e50f2f338fe65944ee3c271a253f89a5494a2ca0f2064268d890"
   },
   {
     "file": "16-shortcuts.webp",
     "title": "Choose your pinned apps",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "dea784c2d53623c5c24c594efa47ee7819eb9b9bffd68f6d8da30787c5b95cf6"
+    "version": "1.30.1-preview",
+    "sha256": "5543deb979d7015b6c5e86aa9e2cb47672c1b636827c3d07df9e5ec64a00fdef"
   },
   {
     "file": "17-accounts.webp",
     "title": "Connect your own services",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "4ffe1e40a2ce9ea43495d2c6deb9e1065b778d1258327ef112432352517726a6"
+    "version": "1.30.1-preview",
+    "sha256": "4c6ede34a6d99d166879b2bd0750aa2bd1cfa81f074c7f185c751b061f08c9f6"
   },
   {
     "file": "18-screensaver-settings.webp",
     "title": "Give the screen a quiet moment",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "935c38bc39f13b60d202b66246d5415f9a4978078dd03fe73fc2a19b6a960eba"
+    "version": "1.30.1-preview",
+    "sha256": "1878967b678f727f523c7f14dcdd6a1e9790380f17f31d6f51d5f07c3e86f372"
   },
   {
     "file": "19-weather.webp",
     "title": "Weather for your chosen city",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "68ddcb2449283de8cb8994d110bdc3490098bafa93c8fefb24f49a1542913b61"
+    "version": "1.30.1-preview",
+    "sha256": "a09a5f51b53ca704c1d8eb36a185119899ccb988f84953bacff3eda0c8359c2d"
   },
   {
     "file": "20-library-screensaver.webp",
     "title": "Let your library fill the screen",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "448b0f4f7724d3d9d107c9edca6d2405796a1b9735cf722a45c479333a56b4a5"
+    "version": "1.30.1-preview",
+    "sha256": "4b9cfa88e6d09ea5bcb923e5bca05c6b3aad15c930fd6d41cd8b13199b004778"
   },
   {
     "file": "28-movies.webp",
     "title": "Your newest films first",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "58f7e4fe6358e40ce309907a0ab2fb8fd6d4e1f4444b520403f08d2f77f7d4a3"
+    "version": "1.30.1-preview",
+    "sha256": "2f7f7cc87f8f501b3545893c1a38b9732709b32377fe48c57a8cb6aad1aac0f2"
   },
   {
     "file": "29-series.webp",
     "title": "Stories worth coming back to",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "7d0b6e21502cab3d1c03e4f21109c4a85167e0d2ba4c82c45d3523804e6a5874"
+    "version": "1.30.1-preview",
+    "sha256": "e5ea99977efd2e76fc9aa1dbbb79072cd9faa7f6b3cfcdc6e8bc525ae560a28a"
   },
   {
     "file": "33-updates.webp",
     "title": "Stay up to date from your TV",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "c76458fc72893c179afebd02b4cd33dc9b1c3e8a717e0c10b0c8aecc90934c73"
+    "version": "1.30.1-preview",
+    "sha256": "ede2a82cc0d4af0af6abfd87bcc9dbdb9ddf96ececc6345d14f141853e1db269"
   },
   {
     "file": "40-tv-guide.webp",
     "title": "Your evening at a glance",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "2d8397907e7eec32f8f4de6c383551f2ad80f67c5ad624ba5ce569a60b115395"
+    "version": "1.30.1-preview",
+    "sha256": "45d842f7bffee48dc04aef071a4bdfe6b771913dfe044d4409dfe9b05f743b0b"
   },
   {
     "file": "41-next-programmes.webp",
     "title": "See what comes next",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "f708c9c1e69e8a8aacae4679ab2b49651e492dfa8c65a8caf583ef96de72ca23"
+    "version": "1.30.1-preview",
+    "sha256": "1581bfa71fdc417a2a97a280eeb61aacb0c6930f23fe462cfa88221f84b9f0a2"
   },
   {
     "file": "43-plex-link.webp",
     "title": "Connect Plex with a code",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "4009262c4f9788a97f3d40743d6011a3c0dafdcc6169108bc44c1b307c1f1d50"
+    "version": "1.30.1-preview",
+    "sha256": "3d2fcdeaa36a177444d517a5088ca9130cde527fa6506f35a0f8b095e1504d18"
   },
   {
     "file": "44-tv-channels.webp",
     "title": "Give each channel its own space",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "dfc6d1d44d49dda5aa847f897aa635b68e9d0fda037dbee6fa5c6f7d4d5d1cf1"
+    "version": "1.30.1-preview",
+    "sha256": "ebe92b4e071423da1637e545cf9ad2f42f1a91202c38000ba4798ea72a2041d6"
   },
   {
     "file": "45-live-player.webp",
     "title": "The programme, without distractions",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "77551aecb0fdbc1cce62beeea0c3bee1ec93d72906c863e40dfab5c4c7d22a8d"
+    "version": "1.30.1-preview",
+    "sha256": "447497dab870ebd58226a533ba7f858f55f7cc1250c92c6b0d85a4a7736a24dd"
   },
   {
     "file": "46-tv-settings.webp",
     "title": "Choose your television view",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "f3121dc35b25b65789d900bcf1092c4fedf18d03fa10f67529a9485df8b355f3"
+    "version": "1.30.1-preview",
+    "sha256": "2ee4a280aa8ffbf07de5050e60c5cb14cea2cb251a23edeb5b4588db8878f8bc"
   },
   {
     "file": "47-channel-drawer.webp",
     "title": "Browse without leaving the picture",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "8a95d32aafa2123caea1e4c402117682f2556fab7f91aefbd4122a4e75e4cce4"
+    "version": "1.30.1-preview",
+    "sha256": "419e08efe33e0edb9be168edb1b1174a375822b3f899be865823874e5d0e9c67"
   },
   {
     "file": "48-hdmi-inputs.webp",
     "title": "Your connected devices, in view",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "40e926511eb5512c820f5373d185c55364614ec234620f2e7888e0c653ee1f01"
+    "version": "1.30.1-preview",
+    "sha256": "a1c37c7d0e9e7182618b3b4f4979c322d6d7b33823138e626fe26944db5633e1"
   },
   {
     "file": "49-device-profiles.webp",
     "title": "Find the right device icon",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "cfd119eda589f7e3f8d9cfaf0bf222d528b02f80ba269d4e86523c876d2a1f98"
+    "version": "1.30.1-preview",
+    "sha256": "c2b6d3684cb3a1c5881b21bf6361db0ded9894ddc6a18890434f2f9e9f103b0b"
   },
   {
     "file": "50-xbox-input.webp",
     "title": "Brand colours, native icons",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "bf7567ae900a46060d315cb543bf0685cf42668b9d315416b72916302d927904"
+    "version": "1.30.1-preview",
+    "sha256": "b0d4e208771571353297b6fcddb587af85afeea0531851e54d0cdfed307e50c8"
   },
   {
     "file": "51-system.webp",
     "title": "Your system controls, together",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "3b04375d7a264935ec851b80ee6f8e85986bde1eb17b1cff51ef9cf05ee1d792"
+    "version": "1.30.1-preview",
+    "sha256": "269f605d51267f735a45afdb92da0c7ebeddd7ce6006ce9fcd296cce87e3116b"
   },
   {
     "file": "52-about.webp",
     "title": "Know your Vela",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "518518755c382fe1c78489efcb3dd6d97bb38d8ecbe7db370c79d9e810047f30"
+    "version": "1.30.1-preview",
+    "sha256": "6b6a48d32c4f7ff982d8a38fa193361bad749fb78ee3c3ae2e323bf037407f6d"
   },
   {
     "file": "53-organise-channels.webp",
     "title": "Your channels, your order",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "0439b4c031b2ef8fcfed8f9b85116d9f9c8fc668c92f2e45a82a6b45d99af6bf"
+    "version": "1.30.1-preview",
+    "sha256": "dcf23f70e9094d53bdbb90c562adb778a6e29fc27ed9dde0c6526e41109cec2a"
   },
   {
     "file": "54-language.webp",
-    "title": "Vela in six languages",
-    "source": "Native owned-emulator 3840×2160 production settings capture; no linked accounts, credentials or personal location. Six-language UI and real language switching verified.",
+    "title": "Vela in your language",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.1-preview",
-    "sha256": "ccbc50ebda59528327b1796e723efd659e435031603a9f8694a6a2ab93dd44dd"
+    "version": "1.30.1-preview",
+    "sha256": "8c67345c8b4b6cb3c2c3df03e0b97cb71e367ca17ce9b77ac3d2a1afbf9efd48"
   },
   {
     "file": "55-home-layout.webp",
     "title": "Design your own home",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "7c764175c86993c1f5ef64065e70dd89f213fc1d29751fd01c2595f44a317712"
+    "version": "1.30.1-preview",
+    "sha256": "5465fec936c03f3218768b1316710723e54ff2ab0d09698307a80689be197911"
   },
   {
     "file": "56-app-folders.webp",
     "title": "Bring your apps together",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "852e3a9b97e28de619934b0d1e213febbfcd28eb5a4681556c43918b4c8bdc15"
+    "version": "1.30.1-preview",
+    "sha256": "be5fba8b7ffec1eeda8c242daa9b0187d1acf1b2aae36d9a87753e7e22343892"
   },
   {
     "file": "57-phone-and-sync.webp",
     "title": "Set up from your phone",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "3fae5155752a001ed0d469f791678e0ec10cff69b527de712e86db43b6e8d994"
+    "version": "1.30.1-preview",
+    "sha256": "d7d3d243006a3c88cb60911eeb69e688939f6d44e40027f01e77d8d02e9e0ca3"
   },
   {
     "file": "58-guide-corrections.webp",
     "title": "Fine-tune your programme guide",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "1010ba40c8a87d7e6fb05ee5ce62cd11f959cb7e9c853d21bee1e6ac7e5efbd3"
+    "version": "1.30.1-preview",
+    "sha256": "515919aa860b3f956fd7bacfe199ebb1c80f41ae207d790d83dee420c3cd97f5"
   },
   {
     "file": "59-discovery.webp",
     "title": "Find something for tonight",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "72edbf7b1c3823bb44f1bc419e1fc950dd0155b9bfee6fa250ed8cb841100dda"
+    "version": "1.30.1-preview",
+    "sha256": "3245475b6db76eca3549197c1a2e63c15f8af8822f7abba9dfcdeaa629b1e720"
   },
   {
     "file": "61-reading.webp",
     "title": "Make every word comfortable",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "0b049dd85b663292d87737320a818824d3cbbb24363f917e5ef6c2d37ee23f5c"
+    "version": "1.30.1-preview",
+    "sha256": "e4104b139357f451e9faf0abc400f8da5ea6622c0e374b7fca06e568ab8886bb"
   },
   {
     "file": "62-backups.webp",
     "title": "Keep your layout, keep control",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "1bf5dd3643f421baa957878654872fccecbc58a9827d69488c28f3281f923a2e"
+    "version": "1.30.1-preview",
+    "sha256": "7f65c717e18adc57ceea3f28ef8675c618bd4fd4ec20e9f5aebed59d17352ae1"
   },
   {
     "file": "63-profiles.webp",
     "title": "A space for everyone",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "8c9a2507d9e744f4069d04bafcd3e5f6b9442f0db20f94292ee39e4e82443d51"
+    "version": "1.30.1-preview",
+    "sha256": "292536d9d5e11c0f53d842b0085eccfd28e334685ba2aaf48113edaec365470b"
   },
   {
     "file": "64-remote.webp",
     "title": "Make the remote feel familiar",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "57c6729ab48d61f46f892eb64678540420a03d8fcf33d99201e034c1ef089992"
+    "version": "1.30.1-preview",
+    "sha256": "618dee52bc9ad26a9326a5462de57ff00af4c08b5757a32095af5e0c623905f4"
   },
   {
     "file": "65-programmes.webp",
     "title": "Follow the programmes you enjoy",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "fbf9f86a69d84b91fde345e4d3c12864dda766a17941659d7af258c5bad4bafd"
+    "version": "1.30.1-preview",
+    "sha256": "fd62c524267e51d44356faebe10abc2242805d4f76d7abc6467da7f2584e21f5"
   },
   {
     "file": "66-search.webp",
     "title": "Find it from one place",
-    "source": "Native 3840×2160 English production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.0-preview",
-    "sha256": "24739647a6146a3eff18735c5ccddec3856eb7c67421821d6a61d0a0ed7e4efa"
+    "version": "1.30.1-preview",
+    "sha256": "fcd76b131cb49e6ef7be7fc6e4eb1996a2a969446cbb8e76d5658dbc0eb1d922"
   },
   {
     "file": "71-language-fr.webp",
-    "title": "French menus",
-    "source": "Native owned-emulator 3840×2160 production settings capture; no linked accounts, credentials or personal location. Six-language UI and real language switching verified.",
+    "title": "Bonjour, Vela",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "fr",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.1-preview",
-    "sha256": "81ff55ee89ee60a48fcf00c10687b66ff193b8e055fbee373225f7564b6c9d73"
+    "version": "1.30.1-preview",
+    "sha256": "034c7d2c5c93a36d501312e58fc0f821ce81b5edd0285643458ad23fcf715231"
   },
   {
     "file": "72-language-de.webp",
-    "title": "German menus",
-    "source": "Native owned-emulator 3840×2160 production settings capture; no linked accounts, credentials or personal location. Six-language UI and real language switching verified.",
+    "title": "Hallo, Vela",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "de",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.1-preview",
-    "sha256": "6e1a1ee812ec9d63605938f7f720daddcb98a35b80499992edd356ffd0bb8f72"
+    "version": "1.30.1-preview",
+    "sha256": "23d9ce2e967ecb9feec2f4967251212c436929e9b8bab6342d4aa9882fbeada0"
   },
   {
     "file": "73-language-it.webp",
-    "title": "Italian menus",
-    "source": "Native owned-emulator 3840×2160 production settings capture; no linked accounts, credentials or personal location. Six-language UI and real language switching verified.",
+    "title": "Ciao, Vela",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "it",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.28.1-preview",
-    "sha256": "698a40f75478ef2f6d2cc1adaa0e765b8dba825a741cfc654d339ff5fd81363d"
+    "version": "1.30.1-preview",
+    "sha256": "b825135f76e4ab1daceac76938769b265b77bdf886f84272785a16153c664474"
+  },
+  {
+    "file": "74-home-editor.webp",
+    "title": "Arrange your home, then save",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.30.1-preview",
+    "sha256": "4e79585c4e012eb4108f4ac5d8e06d945ae6d1289bc8ae4fa445e92b976917f3"
+  },
+  {
+    "file": "75-watch-later.webp",
+    "title": "Keep something for later",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.30.1-preview",
+    "sha256": "df7200681c22431520487f1f80e91e5a82f9751b81824d5d251157b8330c3eb2"
+  },
+  {
+    "file": "76-compatibility.webp",
+    "title": "Get to know your television",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.30.1-preview",
+    "sha256": "42f1c451221fdb39132cf1295aab30541fce11b2da00fc4d54ecb0aab91de873"
+  },
+  {
+    "file": "77-channel-actions.webp",
+    "title": "One channel, useful actions",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.30.1-preview",
+    "sha256": "96e2c5b7d165faab12985b85edcb33f32013ca02c3794a33dd79fbacd183e86c"
+  },
+  {
+    "file": "78-sleep-timer.webp",
+    "title": "Let the evening wind down",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.30.1-preview",
+    "sha256": "da93dafa30777d7f7409d1828d4f41d788aef5296da9895de80e1a66c0a0bffb"
+  },
+  {
+    "file": "79-guest-space.webp",
+    "title": "A welcoming space for guests",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.30.1-preview",
+    "sha256": "cd1142fe124028fd6592950bc9377a617521fff452ad8cb85c55304d0bb43e2e"
+  },
+  {
+    "file": "80-playback-controls.webp",
+    "title": "The right controls, within reach",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.30.1-preview",
+    "sha256": "700f47ccca4f7648fd7a675750483fbc0b076ef4a077f42ae217dd712685bd99"
+  },
+  {
+    "file": "81-combined-libraries.webp",
+    "title": "Both libraries, one home",
+    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.30.1-preview",
+    "sha256": "4adb7f6b1939746cb4ff345806ba050225474319995e4ceee7af67171cc80959"
   }
 ]

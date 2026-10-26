@@ -1,5 +1,16 @@
 # Changelog
 
+## Vela 1.30.1 Preview and Vela Lite 0.10.1 Preview · 2026-10-26
+
+- Settings and personalisation tools remain inside the launcher sidebar, with quieter graphite rows, clearer typography, consistent focus and preserved positions during asynchronous work.
+- Shared in-channel information: contrast-aware logo, clock, progress and next programme. Left reaches controls, Right opens channels, Back closes information before leaving. Introductory badges and information hide after playback is ready.
+- Lite: prevent a focus-triggered category reset when opening or returning from the language picker; verified with the remote and all six languages.
+- Cleaner channel drawer and playback controls, on-demand sleep timer, persistent Lite logos during metadata updates, and Android 8–9 gradient compatibility.
+- Explicit Save/Cancel home editor, own Watch later, settings PIN and guest space, Android voice search and a compatibility assistant in both editions.
+- Full: independent Plex/Jellyfin accounts per profile, optional combined libraries, bounded merged Home rows and account-bound Watch later resolution.
+- Trusted EPG event identifiers for cross-channel grouping; similar programme titles alone do not identify one event.
+- Native layout, focus, lifecycle, playback, profile and bounded-storage tests; refreshed English Full/Lite galleries and six-language previews. No new service or background decoder.
+
 ## Vela 1.28.1 Preview and Vela Lite 0.8.1 Preview · 2026-10-26
 
 - Add complete French, German and Italian catalogues alongside English, Spanish and Portuguese in both editions. All six languages support explicit selection and Android system-language detection.

@@ -1,6 +1,6 @@
 # Your Vela
 
-Open **Settings → System → Your Vela**. Search also has a Home-header button. Hold OK on Full Vela's avatar to open Profiles; Lite uses the top sidebar icon.
+Open **Settings → System → Your Vela**. Search lives here and on supported remote search keys. Hold OK on Full Vela's avatar to open Profiles; Lite uses the top sidebar icon.
 
 These tools share Vela's graphite panels, Inter typeface and remote focus. Up/Down chooses a category, Right enters its options and Left returns to the menu. Back closes a panel, cancels a pending restore or finishes a remote test.
 
@@ -19,6 +19,8 @@ Antenna organisation uses a DVB service identity or an unambiguous channel-name 
 ## Search across your television
 
 Search installed apps, HDMI inputs, channels and programmes from the saved EPG. Full Vela also searches the active Plex/Jellyfin library, in bounded pages and groups of library sections. Open an app, input or channel from its result, or follow a programme title.
+
+Use Search by voice, or the search key when Android forwards it to Vela. Exact, unambiguous app/channel/input commands can open a destination. Recognition depends on the installed Android recognizer, which handles its own permissions and processing. Vela adds no permanent microphone listener.
 
 This does not search every streaming app's private catalogue or import its accounts. Local results can remain available when a connected library is offline.
 
@@ -39,7 +41,9 @@ Programme alerts are optional. Android notification permission is requested when
 
 ## Local profiles
 
-Up to six local profiles separate appearance, shortcuts, reading, followed programmes and channel organisation. Connected service accounts remain shared on the installation; profiles are not independent Plex/Jellyfin logins or parental-control boundaries. Deleting a profile removes its local preferences and pairing links, while keeping accounts.
+Up to six local profiles separate appearance, shortcuts, reading, followed programmes, Watch later and channel organisation. In Full, each profile links its own Plex/Jellyfin accounts; the default profile retains its existing authorizations. Deleting a profile removes those local library authorizations and pairing links. IPTV sources remain installation-scoped.
+
+Protect settings with a local PIN and enter a separate guest space from Profiles. PIN material is salted, rate-limited and excluded from backup/sync. This protects Vela settings; it is not a content-rating filter, Android parental control or an account switcher for external apps.
 
 ## Your remote and device
 
@@ -49,7 +53,7 @@ The local device report shows version, Android/device information, current proce
 
 ## Arrange Home and apps
 
-Full Vela can reorder, show/hide and resize its Home rows. Lite can reorder or hide Inputs, Television and Apps; Settings remains accessible. Layout is saved per profile.
+Full Vela can reorder, show/hide and resize its Home rows. Lite can reorder or hide Inputs, Television and Apps; Settings remains accessible. Layout is saved per profile. Choose Edit home sections, or hold OK on Home in Full / a main navigation item in Lite, for an explicit Save/Cancel editor. Changes remain a small in-memory draft until saved.
 
 Create up to twelve folders, each with up to 64 installed-app shortcuts. Open them from Apps → Folders and layout. Original icons are drawn at a small fixed size, twelve apps per page. Removing a shortcut or folder does not uninstall apps.
 
@@ -71,18 +75,30 @@ Accounts, passwords, provider addresses, location and viewing history are never 
 
 ## Correct and explore your guide
 
-Guide corrections lets you find the EPG identity, preview three airings and assign it to a channel. INFO from the guide brings the selected channel to this tool. The per-channel offset ranges from −12 to +14 hours and does not change Android's clock.
+Guide corrections lets you find the EPG identity, preview three airings and assign it to a channel. Hold OK on a channel → Correct programme guide, or use INFO from the guide, to bring the selected channel to this tool. The per-channel offset ranges from −12 to +14 hours and does not change Android's clock.
 
 Matching uses a normalised name independent of HD/FHD variants and Android row numbers. Channels with the same normalised name share the correction. Available programmes still depend on the cached guide's time window.
 
-What to watch explores Now, Tonight (18:00–04:00) and the next 48 hours. Movie, sports, documentary and kids filters use real EPG categories; absent metadata is not invented. Exact same-channel/title/time duplicates are grouped within a page. Different channels are not assumed to carry the same broadcast.
+What to watch explores Now, Tonight (18:00–04:00) and the next 48 hours. Movie, sports, documentary and kids filters use real EPG categories; absent metadata is not invented. Exact same-channel/title/time duplicates are grouped within a page. Cross-channel events are grouped only when the feed provides a trusted programme-level `dd_progid`; similar names alone are never treated as the same event.
 
 ## Playback controls
 
-MENU opens controls over the current video: audio, supported text subtitles, picture format and safe signal details. Source/tuner capabilities decide which tracks exist. Audio delay stays in the television's sound settings because these player APIs do not expose it to Vela.
+Left opens information, then controls over the current video; MENU toggles them directly. Controls include audio, supported text subtitles, picture format and safe signal details. Source/tuner capabilities decide which tracks exist. Audio delay stays in the television's sound settings because these player APIs do not expose it to Vela.
 
 Full Vela's optional local HLS pause is off by default. One selected compatible clear HLS signal uses Media3 with a short queue (4 MiB target) and a private disk history capped at 15 minutes, 256 MiB and 240 segments. The queue target is not total process RAM. Pause, rewind and Return to live navigate what has been buffered since opening the channel. Leaving or changing signals cleans storage. Protected, byte-range or unsupported sources keep direct playback.
 
 Both editions offer antenna time shifting only when the manufacturer's tuner declares support. Lite contains no HLS/IPTV player or recording engine.
 
 Full Vela offers past programmes only where M3U/Xtream explicitly advertises a compatible archive. Its EPG retains up to 24 previous hours for selection, within the provider's archive range. Supported M3U templates or the account's Xtream route/time zone are used. An archive failure is not silently replaced by the live programme.
+
+## Watch later and combined libraries
+
+Hold OK on a library/search item or save from programme details. Open Programmes → Watch later to revisit it; hold OK to remove. Each profile stores at most 64 small references, with a 64K UTF-16 character cap. Credentials, artwork and media files are not copied into this list. Media resolves against the original account; broadcast entries open the channel and are not recordings.
+
+In Full, Settings → Home library → Plex + Jellyfin together keeps both libraries available. Home merges at most twelve continuing and twelve recent items. Each library retains its own server filters and pages. Stable external identifiers determine duplicates; an alternate provider remains in the item menu.
+
+## Playback and compatibility
+
+Playback controls include a sleep timer: 30/60 minutes or the known end of the current live programme. One player-owned callback stops Vela playback and returns to the launcher. Leaving playback cancels it; it does not turn off the television or control another app.
+
+Remote & diagnostics → Compatibility assistant explains Home selection, HDMI state, antenna availability and installation permission. The local report contains no account credentials or network addresses. It does not silently alter firmware settings. [Player navigation](PLAYER.md).

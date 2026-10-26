@@ -1,6 +1,6 @@
 # Vela in pictures
 
-Explore 51 native **4K screenshots** from Vela 1.28 previews. The main gallery is in English; the language previews also show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 59 native **4K screenshots** from **1.30.1-preview**. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 
@@ -196,18 +196,46 @@ These are actual Android views captured in an owned emulator. Libraries, progres
 
 ![Find it from one place](66-search.webp)
 
-## Six languages, one familiar interface
+## Bonjour, Vela
 
-Choose English, Spanish, Portuguese, French, German or Italian, or follow Android. Changing language keeps your accounts, library and preferences.
+![Bonjour, Vela](71-language-fr.webp)
 
-### French menus
+## Hallo, Vela
 
-![French menus](71-language-fr.webp)
+![Hallo, Vela](72-language-de.webp)
 
-### German menus
+## Ciao, Vela
 
-![German menus](72-language-de.webp)
+![Ciao, Vela](73-language-it.webp)
 
-### Italian menus
+## Arrange your home, then save
 
-![Italian menus](73-language-it.webp)
+![Arrange your home, then save](74-home-editor.webp)
+
+## Keep something for later
+
+![Keep something for later](75-watch-later.webp)
+
+## Get to know your television
+
+![Get to know your television](76-compatibility.webp)
+
+## One channel, useful actions
+
+![One channel, useful actions](77-channel-actions.webp)
+
+## Let the evening wind down
+
+![Let the evening wind down](78-sleep-timer.webp)
+
+## A welcoming space for guests
+
+![A welcoming space for guests](79-guest-space.webp)
+
+## The right controls, within reach
+
+![The right controls, within reach](80-playback-controls.webp)
+
+## Both libraries, one home
+
+![Both libraries, one home](81-combined-libraries.webp)

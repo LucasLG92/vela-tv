@@ -58,6 +58,6 @@ Open **Settings → Appearance → Customize appearance → Language** in Full V
 | Channel list or guide | OK opens the selected channel |
 | CH+ / CH− | Change channel directly |
 | Channel drawer | Back closes it and keeps the current video |
-| During playback | MENU opens playback controls |
+| During playback | Left shows information, then controls; MENU toggles controls |
 
 If Lite's tuner is blocked or unavailable, its recovery action can still open the original television app. [Personalisation and backups](YOUR-VELA.md) · [Compatibility](COMPATIBILITY.md).

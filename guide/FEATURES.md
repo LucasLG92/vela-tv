@@ -2,7 +2,7 @@
 
 ## Library
 
-- Plex/Jellyfin original posters and backgrounds, with one active library and both authorisations kept.
+- Plex/Jellyfin original posters and backgrounds, with independent profile accounts and an optional combined library.
 - Separate Movies and Series, newest additions first, server-backed filters and pages of up to 24 titles.
 - Landscape Continue watching with available progress/remaining time, watched actions and next available episodes.
 - Recently added portrait posters and directional row-edge fades.
@@ -13,9 +13,9 @@
 - Full: direct M3U, Xtream and antenna sources. Lite: the television's native antenna only.
 - Horizontal guide by default; channel-card view from Settings.
 - Original logos, current/next programmes, hours/minutes remaining and progress.
-- Hold-OK favourites, custom order, hidden channels/categories, recent and previous channel.
+- Hold-OK channel actions and favourites, custom order, hidden channels/categories, recent and previous channel.
 - Full conservative quality grouping and automatic same-channel failure fallback.
-- Channel drawer over the current video, MENU playback controls and timed information.
+- Channel drawer over the current video, shared now/next information, Left/MENU controls, sleep timer and timed badges.
 - Manual EPG identity/time correction and genre-based Now/Tonight/48-hour discovery.
 - Optional compatible clear-HLS pause/rewind and advertised provider archives in Full; OEM-supported antenna time shifting in both.
 
@@ -31,7 +31,8 @@
 - Shared graphite design, accent colours, poster sizes and background intensity.
 - Full Home-row order/visibility/size; Lite Inputs/TV/Apps navigation order and visibility.
 - Text size, guide density, higher contrast, screen margins and reduced motion.
-- Up to six local preference profiles; accounts remain installation-shared.
+- Up to six local profiles; Full Plex/Jellyfin accounts are independent per profile.
+- Settings PIN and guest space, own Watch later list, voice search through Android and a compatibility assistant.
 - Validated backups, restore preview and Undo.
 - Temporary local HTTPS phone configuration and explicit foreground peer preference sync without credentials.
 - Programme follow/optional cached alerts, allowed remote shortcuts and local diagnostics.

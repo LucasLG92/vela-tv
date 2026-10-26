@@ -124,7 +124,7 @@ The last case targets Full using isolated storage, real SQLite and synthetic off
 
 ## Shared tools and playback
 
-Full 1.28.1 / Lite 0.8.1 previews include native layout/folders, temporary local HTTPS mobile setup, opt-in paired preference sync, guide corrections/discovery and playback controls. See [the feature guide](YOUR-VELA.md).
+Full 1.30.1 / Lite 0.10.1 previews include integrated settings/tools, layout/folders, temporary local HTTPS mobile setup, opt-in paired preference sync, guide corrections/discovery, Watch later, profile settings protection and the shared player interface. Full additionally includes profile-scoped and combined Plex/Jellyfin libraries. See [the feature guide](YOUR-VELA.md).
 
 Owned-emulator regressions (install the matching built APK first):
 

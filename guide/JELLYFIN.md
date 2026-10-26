@@ -12,7 +12,7 @@ Install **Jellyfin for Android TV** and sign in to the same server/user there. C
 
 Hold OK in Continue watching to mark the selected film or episode as watched. The change affects the authorised Jellyfin user and refreshes the row. Next Up supplies available pending episodes; partly watched episodes take priority.
 
-Keep Plex and Jellyfin connected and switch the active library from **Accounts → Home library**. Switching keeps both authorisations and also selects the library artwork used by the screensaver. The two catalogues are not mixed.
+Keep Plex and Jellyfin connected and switch the active library from **Accounts → Home library**. Switching keeps both authorisations and also selects the library artwork used by the screensaver. Choose Plex + Jellyfin together to merge bounded Home rows while keeping independent provider pages, filters and playback. Each local Vela profile links its own accounts.
 
 Disconnect from Vela removes the local Jellyfin session and metadata and attempts to revoke that session on the server. Server content, Plex configuration and the official Jellyfin app's session are kept.
 

@@ -12,7 +12,9 @@ A personal home screen for **Android TV and Google TV**. Bring your Plex or Jell
 
 ## Pick up your story
 
-Connect **Plex or Jellyfin** and let your own posters and artwork fill the screen. Continue watching shows what you have started, how much time remains and the next available episode. Hold OK to mark one film or episode as watched on your connected server.
+Connect **Plex, Jellyfin or both together** and let your own posters and artwork fill the screen. Continue watching shows what you have started, how much time remains and the next available episode. Hold OK to mark one film or episode as watched on your connected server.
+
+Save a film, episode or broadcast to your own **Watch later** list. Each local profile can link its own Plex and Jellyfin accounts.
 
 Recently added brings your newest films and series home. Open Movies or Series to browse the full library in small pages, with server-backed filters and newest additions first.
 
@@ -26,13 +28,15 @@ Recently added brings your newest films and series home. Open Movies or Series t
 
 Your **M3U playlists, Xtream service and television antenna**, in the same Vela interface. Explore a horizontal programme guide or large channel cards. See what is on, how long it has left and what comes next.
 
-Hold OK for favourites. Put them in your order, hide channels and categories you do not use, revisit recent channels or return to the previous channel. During playback, press Right to browse without leaving the picture.
+Hold OK for channel actions and favourites. Put them in your order, hide channels and categories you do not use, revisit recent channels or return to the previous channel. During playback, press Right to browse without leaving the picture. A quiet information strip shows the channel, progress, clock and next programme; Left opens playback controls when the strip is visible.
 
 ![Horizontal television guide with categories, original channel logos and programme progress](gallery/40-tv-guide.webp)
 
 The Full edition can try another matching signal when a stream fails. You can correct an EPG match or time offset yourself. What to watch explores Now, Tonight and the next 48 hours, with categories supplied by the guide.
 
 For supported clear HLS streams, enable optional **local pause and rewind**. The selected channel uses one decoder and a bounded private disk buffer, cleared on exit. Past programmes are available only when your source explicitly advertises a compatible archive. Antenna pause depends on your television's tuner.
+
+![Channel information and next programme over live playback](gallery/45-live-player.webp)
 
 [Live TV setup and controls](guide/IPTV.md) · [Compatibility and limits](guide/COMPATIBILITY.md)
 
@@ -46,7 +50,7 @@ Press OK on a pinned app to launch it. Press Right on YouTube to explore the row
 
 ## A home that feels like yours
 
-Choose your accent, poster size and background intensity. Arrange, resize or hide home rows. Create local profiles with separate layouts and favourites, adjust reading size and guide density, or set screen margins for your television.
+Choose your accent, poster size and background intensity. Arrange, resize or hide home rows. Create local profiles with separate layouts, favourites and library accounts. Add a settings PIN and a separate guest space, adjust reading size and guide density, or set screen margins for your television.
 
 Configure apps, folders and favourites **from your phone** through a temporary local HTTPS session. Explicitly pair another Vela to receive compatible preferences when it opens. Accounts and provider credentials stay on each television, and conflicting local edits are kept for review.
 
@@ -54,7 +58,13 @@ Configure apps, folders and favourites **from your phone** through a temporary l
 
 Every menu is available in **English, Spanish, Portuguese, French, German and Italian**. Choose a language in Appearance or follow your TV's system language. Channel names, account names and library titles keep their original text.
 
-[Personalisation, phone setup, profiles and sync](guide/YOUR-VELA.md) · [Integrated settings](guide/INTEGRATED-SETTINGS.md)
+Settings and personalisation stay within the main sidebar, with clear categories and the same remote navigation throughout. Use your remote’s search key for voice search when Android provides a recognizer, or open Search in Your Vela.
+
+[Personalisation, phone setup, profiles and sync](guide/YOUR-VELA.md) · [Integrated settings](guide/INTEGRATED-SETTINGS.md) · [Player controls](guide/PLAYER.md)
+
+| Settings that stay in Vela | A list for later |
+| --- | --- |
+| ![Integrated graphite settings](gallery/10-settings.webp) | ![Your own Watch later](gallery/75-watch-later.webp) |
 
 ## Your connected devices, in view
 
@@ -81,6 +91,7 @@ Choose aerial landscapes and cities, or artwork from your connected library. Add
 | Guide, favourites, hidden channels, recent and previous channel | Yes | Yes |
 | Apps, folders and HDMI devices | Yes | Yes |
 | Phone setup, local profiles, backups and preference sync | Yes | Yes, compatible settings |
+| Watch later, settings PIN, guest space and sleep timer | Yes | Yes, broadcasts only in Watch later |
 | Screensaver | Aerials or library artwork | Television's own screensaver |
 | Optional HLS pause and provider archives | Supported sources | — |
 | Tuner pause | When the manufacturer exposes it | When the manufacturer exposes it |

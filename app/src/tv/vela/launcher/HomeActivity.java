@@ -16,12 +16,14 @@ import android.widget.TextView;
  */
 public class HomeActivity extends Activity implements VelaHub.Owner {
     private CinemaHomeView home;
-    private VelaHub hub;private android.view.View toolsReturnFocus;private VelaProgrammeRefresh programmes;private final android.os.Handler toolsMain=new android.os.Handler(android.os.Looper.getMainLooper());
+    private boolean channelHeld;private VelaPlaybackPanel channelMenu;private VelaHub hub;private String toolsProfile;private int toolsDestination;private Bundle toolsPanels;private android.view.View toolsReturnFocus;private VelaProgrammeRefresh programmes;private final android.os.Handler toolsMain=new android.os.Handler(android.os.Looper.getMainLooper());
     private final Runnable programmeTick=new Runnable(){public void run(){if(!foreground)return;scanProgrammes();toolsMain.postDelayed(this,60000);}};
     private void scanProgrammes(){if(hub!=null)return;if(programmes==null)programmes=new VelaProgrammeRefresh(this);programmes.check(new FullToolsData(this){public void activate(VelaHub.Hit hit){}public void closed(boolean changed){}});}
     private VelaSync sync;
     private void stopSync(){if(sync!=null){sync.close();sync=null;}}
-    private void startSync(){stopSync();if(!foreground||hub!=null)return;sync=new VelaSync(this);sync.resume(()->{if(foreground&&hub==null)recreate();});}
+    private void startSync(){stopSync();if(!foreground||hub!=null||VelaSessions.guest(this))return;sync=new VelaSync(this);sync.resume(()->{if(foreground&&hub==null)recreate();});}
+    @Override public void channelOptions(String name,Runnable favorite,VelaShows.Airing airing){if(channelMenu!=null)channelMenu.close();android.view.View restore=getCurrentFocus();channelHeld=true;channelMenu=VelaChannelMenu.show(this,(android.widget.FrameLayout)findViewById(android.R.id.content),name,favorite,airing,()->toolsGuide(name),()->{channelMenu=null;if(restore!=null&&restore.isAttachedToWindow())restore.requestFocus();});}
+    @Override public void toolsLayout(){tools(6);if(hub!=null)hub.editHome();}
     @Override public void toolsGuide(String name){tools(9);if(hub!=null)hub.guideFix(name);}
     private boolean destroying;
     private int toolsKey=-1;
@@ -30,7 +32,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     boolean foreground(){return foreground;}
     TvInputs.Source createInputsSource(){return new TvInputs.SystemSource(this);}
     PlexClient createPlexClient(){return new PlexClient(this);}
-    boolean canShowInstaller(){return foreground&&hub==null&&home!=null&&home.canShowInstaller();}
+    boolean canShowInstaller(){return foreground&&!VelaSessions.blocked(this)&&hub==null&&home!=null&&home.canShowInstaller();}
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,14 +65,14 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     @Override protected void onResume() {
         super.onResume();
         foreground=true;toolsMain.removeCallbacks(programmeTick);programmeTick.run();
-        if(home!=null&&hub==null){home.resume();if(!home.showingUpdates())Updates.resumeInstallation(this);}VelaShows.schedule(this);startSync();
+        if(home!=null&&hub==null){home.resume();if(!home.showingUpdates())Updates.resumeInstallation(this);}else if(home!=null)home.resumeTools();VelaShows.schedule(this);startSync();
     }
 
     @Override protected void onPause() {
         foreground=false;stopSync();toolsMain.removeCallbacksAndMessages(null);if(programmes!=null)programmes.pause();
         if(hub!=null)hub.pause();
         if (home != null) home.pause();
-        super.onPause();
+        if(channelMenu!=null)channelMenu.close();super.onPause();
     }
 
     @Override protected void onStop() {
@@ -91,7 +93,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         super.onNewIntent(intent);
         setIntent(intent);
         if(intent.hasExtra("velaTools")){int page=intent.getIntExtra("velaTools",0);intent.removeExtra("velaTools");tools(page);return;}
-        if(hub!=null){hub.close();return;}
+        if(hub!=null){hub.close();if(home!=null)home.reset();return;}
         if(home!=null){if("settings".equals(intent.getStringExtra("velaEntry")))home.settings();else home.reset();}
     }
 
@@ -101,10 +103,11 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         super.onDestroy();
     }
 
-    @Override public boolean dispatchKeyEvent(KeyEvent event) {
-        if(event.getKeyCode()==toolsKey){if(event.getAction()==KeyEvent.ACTION_UP)toolsKey=-1;return true;}
+    @Override public boolean dispatchKeyEvent(KeyEvent event) {if(channelMenu!=null){if(channelHeld&&TvRemotePress.select(event.getKeyCode())){if(event.getAction()==KeyEvent.ACTION_UP){channelHeld=false;return true;}if(event.getRepeatCount()>0)return true;channelHeld=false;}return channelMenu.remote(event)||super.dispatchKeyEvent(event);}
+        if(VelaVoice.key(event.getKeyCode())){if(event.getAction()==KeyEvent.ACTION_UP){if(hub==null)tools(0);if(hub!=null)hub.voice();}return true;}if(event.getKeyCode()==toolsKey){if(event.getAction()==KeyEvent.ACTION_UP)toolsKey=-1;return true;}
         if(hub!=null){if(hub.remote(event))return true;KeyEvent mapped=VelaRemote.gamepad(event);if(mapped!=event&&hub.remote(mapped))return true;return super.dispatchKeyEvent(mapped);}
         int target=VelaRemote.destination(this,event);if(target>=0){toolsKey=event.getKeyCode();tools(target);return true;}event=VelaRemote.gamepad(event);
+
         if (home != null && home.onKey(event)) return true;
         return super.dispatchKeyEvent(event);
     }
@@ -117,21 +120,26 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
 
     @Override public void startActivity(Intent intent){
         if(home!=null){
+            if(VelaSessions.blocked(this)&&(intent.getComponent()!=null&&intent.getComponent().getPackageName().equals(getPackageName())&&!intent.getComponent().getClassName().equals(HomeActivity.class.getName())||intent.getAction()!=null&&intent.getAction().startsWith("android.settings."))){tools(4);return;}
             if(intent.getComponent()!=null&&intent.getComponent().getClassName().equals(HomeActivity.class.getName())){home.reset();return;}
             if(home.route(intent))return;
         }
         super.startActivity(intent);
     }
-    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==VelaHub.EXPORT||request==VelaHub.IMPORT){if(hub==null)tools(1);hub.result(request,result,data);return;}if(home!=null)home.activityResult(request,result,data);}
+    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==VelaVoice.REQUEST){if(hub==null)tools(0);hub.voiceResult(result,data);return;}if(request==VelaHub.EXPORT||request==VelaHub.IMPORT){if(hub==null)tools(1);hub.result(request,result,data);return;}if(home!=null)home.activityResult(request,result,data);}
     @Override protected void onSaveInstanceState(Bundle state){if(hub!=null)state.putInt("velaTools",hub.page());if(home!=null){Bundle screens=home.savePanels();if(screens!=null)state.putBundle("velaScreens",screens);}super.onSaveInstanceState(state);}
 
+    void afterTools(java.util.function.Consumer<CinemaHomeView> action){if(hub!=null)hub.close();if(!destroying&&home!=null)action.accept(home);}
     @Override public void tools(int page){
+        if(VelaSessions.blocked(this)&&page!=0&&page!=3&&page!=8)page=4;
         stopSync();
-        if(hub!=null){hub.close();if(destroying)return;}if(home==null)return;if(programmes!=null)programmes.pause();toolsReturnFocus=getCurrentFocus();home.pause();home.releaseImages();home.setVisibility(android.view.View.INVISIBLE);
+        if(hub!=null){hub.close();if(destroying)return;}if(home==null)return;if(programmes!=null)programmes.pause();toolsReturnFocus=getCurrentFocus();toolsProfile=VelaWorkspace.active(this);toolsDestination=home.navigationDestination();toolsPanels=home.savePanels();home.pause();home.releaseImages();
         hub=new VelaHub(this,new FullToolsData(this){
             public void activate(VelaHub.Hit hit){try{if(hit.value instanceof Intent)startActivity((Intent)hit.value);else if(hit.value instanceof TvInputs.Entry){TvInputs.Entry e=(TvInputs.Entry)hit.value;startActivity(new Intent(Intent.ACTION_VIEW,android.media.tv.TvContract.buildChannelUriForPassthroughInput(e.inputId)));}else if(hit.value instanceof LiveTvData.Channel)home.searchChannel((LiveTvData.Channel)hit.value);else if(hit.value instanceof PlexClient.Film){Intent i=new LibraryClient(HomeActivity.this).open((PlexClient.Film)hit.value);if(i!=null)startActivity(i);}}catch(RuntimeException unavailable){android.widget.Toast.makeText(HomeActivity.this,"No se puede abrir en este dispositivo.",android.widget.Toast.LENGTH_SHORT).show();}}
-            public void closed(boolean changed){hub=null;android.view.View restore=toolsReturnFocus;toolsReturnFocus=null;if(destroying)return;if(changed){if(home.getViewTreeObserver().isAlive())home.getViewTreeObserver().removeOnGlobalLayoutListener(reading);home.destroy();home=new CinemaHomeView(HomeActivity.this);setContentView(home);home.getViewTreeObserver().addOnGlobalLayoutListener(reading);}home.setVisibility(android.view.View.VISIBLE);if(foreground&&home!=null)home.resume();if(!changed&&restore!=null&&restore.isAttachedToWindow()&&restore.isShown())restore.requestFocus();scanProgrammes();startSync();}
-        },page);((android.widget.FrameLayout)findViewById(android.R.id.content)).addView(hub,new android.widget.FrameLayout.LayoutParams(-1,-1));hub.bringToFront();
+            public boolean navigation(){home.toolsNavigation();return true;}
+            public void contentFocused(){home.toolsContent();}
+            public void closed(boolean changed){hub=null;home.unmountTools();android.view.View restore=toolsReturnFocus;toolsReturnFocus=null;if(destroying)return;if(changed){if(home.getViewTreeObserver().isAlive())home.getViewTreeObserver().removeOnGlobalLayoutListener(reading);home.destroy();home=new CinemaHomeView(HomeActivity.this);setContentView(home);home.getViewTreeObserver().addOnGlobalLayoutListener(reading);if(toolsProfile!=null&&toolsProfile.equals(VelaWorkspace.active(HomeActivity.this))){if(toolsPanels!=null)home.restorePanels(toolsPanels);else if(toolsDestination!=0)home.navigateSection(toolsDestination);}}home.setVisibility(android.view.View.VISIBLE);if(foreground&&home!=null)home.resume();if(!changed&&restore!=null&&restore.isAttachedToWindow()&&restore.isShown())restore.requestFocus();scanProgrammes();startSync();}
+        },page,true);home.mountTools(hub);
     }
 
 }

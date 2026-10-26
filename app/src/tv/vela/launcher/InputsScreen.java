@@ -30,22 +30,22 @@ final class InputsScreen extends VelaScreen {
     private TextView text(String value,int size,int color){TextView v=new TextView(this);v.setText(value);v.setTextColor(color);v.setTypeface(Ui.medium);v.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,size);v.setIncludeFontPadding(false);v.setSingleLine();v.setEllipsize(android.text.TextUtils.TruncateAt.END);v.setGravity(Gravity.CENTER_VERTICAL);return v;}
     private GradientDrawable rounded(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(radius);return d;}
     private void place(FrameLayout parent,View v,int x,int y,int w,int h){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;parent.addView(v,p);}
-    private TextView action(String title,Runnable click){TextView v=text(title,24,VelaTheme.WHITE);v.setFocusable(true);v.setDefaultFocusHighlightEnabled(false);v.setGravity(Gravity.CENTER);v.setBackground(rounded(VelaTheme.CARD,22));v.setOnFocusChangeListener((w,f)->{v.setBackground(rounded(f?Appearance.accent(this):VelaTheme.CARD,22));v.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);});v.setOnClickListener(w->click.run());return v;}
+    private TextView action(String title,Runnable click){TextView v=text(title,24,VelaTheme.WHITE);v.setFocusable(true);v.setDefaultFocusHighlightEnabled(false);v.setGravity(Gravity.CENTER);v.setBackground(rounded(VelaTheme.CARD,VelaTheme.CONTROL_RADIUS));v.setOnFocusChangeListener((w,f)->{v.setBackground(rounded(f?Appearance.accent(this):VelaTheme.CARD,VelaTheme.CONTROL_RADIUS));v.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);});v.setOnClickListener(w->click.run());return v;}
     private void systemSettings(){try{startActivity(new Intent(Settings.ACTION_SETTINGS));}catch(RuntimeException unavailable){Toast.makeText(this,t("Ajustes indisponíveis","Settings unavailable","Ajustes no disponibles"),Toast.LENGTH_SHORT).show();}}
     private void launch(TvInputs.Entry entry){if(entry==null)return;try{startActivity(new Intent(Intent.ACTION_VIEW,TvContract.buildChannelUriForPassthroughInput(entry.inputId)));}catch(RuntimeException unavailable){Toast.makeText(this,t("Entrada indisponível","Input unavailable","Entrada no disponible"),Toast.LENGTH_SHORT).show();}}
     private void feature(TvInputs.Entry entry){
         heroEntry=entry;if(icons!=null)heroWell.setBackground(icons.surface(entry.model,false,62));heroName.setText(entry.title);heroPort.setText(entry.port+"  ·  "+TvInputs.status(entry.state));
         boolean named=!entry.model.equals("other")&&entry.state==TvInputs.CONNECTED;
-        open.setText(t("Abrir ","Open ","Abrir ")+(named?entry.title:entry.port)+"  →");
+        open.setText(L10n.text("Open")+"  →");
         if(icons!=null)icons.load(entry.model,heroIcon,true);else heroIcon.setImageDrawable(null);
     }
     private void render(){
         picking=false;boolean navFocus=navigation.navigationTarget(this)!=null&&navigation.navigationTarget(this).hasFocus();
         if(icons!=null)icons.clearViews();root=new FrameLayout(this);cards.clear();
 
-        heroName=text("",60,VelaTheme.WHITE);place(root,heroName,60,40,900,92);heroPort=text("",24,VelaTheme.SECONDARY);place(root,heroPort,64,140,860,45);
-        open=action("",()->launch(heroEntry));place(root,open,64,223,550,72);open.setOnLongClickListener(v->{if(heroEntry!=null){consumeConfirmUp=true;choose(heroEntry);}return true;});
-        open.setBackground(rounded(Appearance.accent(this),36));open.setTextColor(VelaTheme.INK);open.setOnFocusChangeListener((v,f)->{open.setBackground(rounded(Appearance.accent(this),36));open.animate().cancel();open.animate().scaleX(f?1.035f:1).scaleY(f?1.035f:1).setDuration(Visuals.duration(this,150)).start();});
+        heroName=text("",56,VelaTheme.WHITE);place(root,heroName,78,40,900,92);heroPort=text("",24,VelaTheme.SECONDARY);place(root,heroPort,80,140,860,45);
+        open=action("",()->launch(heroEntry));place(root,open,80,223,360,62);open.setOnLongClickListener(v->{if(heroEntry!=null){consumeConfirmUp=true;choose(heroEntry);}return true;});
+        open.setBackground(rounded(Appearance.accent(this),VelaTheme.CONTROL_RADIUS));open.setTextColor(VelaTheme.INK);open.setOnFocusChangeListener((v,f)->{open.setBackground(rounded(Appearance.accent(this),VelaTheme.CONTROL_RADIUS));open.animate().cancel();open.animate().scaleX(f?1.035f:1).scaleY(f?1.035f:1).setDuration(Visuals.duration(this,150)).start();});
         heroWell=new FrameLayout(this);GradientDrawable heroSurface=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{0xFF363842,0xFF17181E});heroSurface.setCornerRadius(62);heroSurface.setStroke(1,0x20FFFFFF);heroWell.setBackground(heroSurface);place(root,heroWell,1160,22,324,324);heroIcon=new InputArtwork(this,"other");place(heroWell,heroIcon,58,58,208,208);
         place(root,text(t("Suas conexões","Your connections","Tus conexiones"),29,VelaTheme.WHITE),64,386,1000,54);
         HorizontalScrollView scroll=new HorizontalScrollView(this);scroll.setHorizontalScrollBarEnabled(false);scroll.setClipToPadding(false);scroll.setClipChildren(false);scroll.setFillViewport(false);LinearLayout strip=new LinearLayout(this);strip.setClipChildren(false);strip.setClipToPadding(false);strip.setOrientation(LinearLayout.HORIZONTAL);strip.setPadding(24,20,24,20);scroll.addView(strip);place(root,scroll,40,448,1704,334);

@@ -1,6 +1,6 @@
 # Vela Lite in pictures
 
-Explore 25 native **4K screenshots** from Lite 0.8 previews. The main gallery is in English; the language previews also show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 33 native **4K screenshots** from **0.10.1-preview**. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](../../gallery/CREDITS.md) · [Image manifest](index.json)
 
@@ -92,18 +92,46 @@ These are actual Android views captured in an owned emulator. Libraries, progres
 
 ![Keep up with your programmes](22-programmes.png)
 
-## Six languages, one familiar interface
+## Bonjour, Vela
 
-Choose English, Spanish, Portuguese, French, German or Italian, or follow Android. Changing language keeps your accounts, library and preferences.
+![Bonjour, Vela](23-language-fr.png)
 
-### French menus
+## Hallo, Vela
 
-![French menus](23-language-fr.png)
+![Hallo, Vela](24-language-de.png)
 
-### German menus
+## Ciao, Vela
 
-![German menus](24-language-de.png)
+![Ciao, Vela](25-language-it.png)
 
-### Italian menus
+## Arrange your home, then save
 
-![Italian menus](25-language-it.png)
+![Arrange your home, then save](26-home-editor.png)
+
+## Keep something for later
+
+![Keep something for later](27-watch-later.png)
+
+## Get to know your television
+
+![Get to know your television](28-compatibility.png)
+
+## One channel, useful actions
+
+![One channel, useful actions](29-channel-actions.png)
+
+## Let the evening wind down
+
+![Let the evening wind down](30-sleep-timer.png)
+
+## A welcoming space for guests
+
+![A welcoming space for guests](31-guest-space.png)
+
+## Keep control of your broadcast
+
+![Keep control of your broadcast](32-playback-controls.png)
+
+## Now and next, beautifully clear
+
+![Now and next, beautifully clear](33-live-player.png)
