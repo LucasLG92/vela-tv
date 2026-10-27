@@ -36,11 +36,9 @@ class SetupScreen extends VelaScreen {
         };
         root.setBackgroundColor(VelaTheme.BACKGROUND);stage=new FrameLayout(this);root.addView(stage,new FrameLayout.LayoutParams(1920,1080));
         GradientDrawable glow=new GradientDrawable();glow.setGradientType(GradientDrawable.RADIAL_GRADIENT);glow.setGradientCenter(.24f,.40f);glow.setGradientRadius(1300);glow.setColors(new int[]{VelaTheme.PANEL,0xFF14151A,VelaTheme.BACKGROUND});stage.setBackground(glow);
-        TextView brand=text("VELA",26,VelaTheme.SECONDARY,Ui.semibold);brand.setLetterSpacing(.22f);put(brand,112,76,650,48);
-        ImageView mark=new ImageView(this);mark.setImageResource(R.drawable.vela_mark);mark.setColorFilter(VelaTheme.WHITE);put(mark,116,205,120,120);
-        progress=text("",20,DIM,Ui.medium);put(progress,116,390,650,36);
-        title=text("",59,WHITE,Ui.displaySemibold);title.setMaxLines(3);title.setGravity(Gravity.TOP);put(title,112,448,670,235);
-        description=text("",25,0xFFBAC5D6,Ui.regular);description.setMaxLines(6);description.setGravity(Gravity.TOP);description.setLineSpacing(8,1);put(description,116,705,630,225);
+        progress=text("",20,DIM,Ui.medium);put(progress,116,226,650,36);
+        title=text("",59,WHITE,Ui.displaySemibold);title.setMaxLines(3);title.setGravity(Gravity.TOP);put(title,112,284,670,235);
+        description=text("",25,0xFFBAC5D6,Ui.regular);description.setMaxLines(6);description.setGravity(Gravity.TOP);description.setLineSpacing(8,1);put(description,116,548,630,225);
         actions=new LinearLayout(this);actions.setOrientation(LinearLayout.VERTICAL);put(actions,943,244,820,650);
         footnote=text("",20,0xFF8F9EB6,Ui.regular);footnote.setGravity(Gravity.TOP);footnote.setMaxLines(3);put(footnote,951,916,800,94);
         setContentView(root);getWindow().setBackgroundDrawable(null);

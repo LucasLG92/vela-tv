@@ -96,8 +96,8 @@ class SettingsScreen extends VelaScreen {
             super(a);activity=a;setClipChildren(false);
             if(!activity.navigation.embedded())setBackgroundColor(VelaTheme.BACKGROUND);
             stage=new FrameLayout(a);stage.setClipChildren(false);addView(stage,new LayoutParams(1790,940));
-            ImageView mark=new ImageView(a);mark.setImageResource(R.drawable.vela_mark);put(stage,mark,86,30,40,40);
-            put(stage,text("Vela",28,WHITE,Ui.semibold),144,24,320,52);
+            ImageView mark=new ImageView(a);mark.setImageResource(R.drawable.vela_mark);mark.setContentDescription("Vela");mark.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);put(stage,mark,86,24,52,52);
+            put(stage,text("Vela",28,WHITE,Ui.semibold),156,24,308,52);
             put(stage,text(VelaWorkspace.profiles(a).get(VelaWorkspace.active(a)),18,VelaTheme.SECONDARY,Ui.medium),86,84,378,34);
             surface=new FrameLayout(a);surface.setBackground(VelaTheme.panel());put(stage,surface,520,12,1218,904);
             heading=text("",36,WHITE,Ui.displaySemibold);put(surface,heading,42,30,1134,62);

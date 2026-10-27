@@ -24,13 +24,13 @@
   {
     "file": "03-settings.png",
     "title": "Every Lite setting, together",
-    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "0.10.1-preview",
-    "sha256": "c76988d3e4abc55a2af61ec2f3b89ffcb9696cef0faf4c9ef48ae6bac5641def"
+    "version": "0.14.1-preview",
+    "sha256": "5e2b1b788f89d9dbf92ea513e1f4e074d2d74c862138500c8729287c5a7e7a93"
   },
   {
     "file": "04-organise.png",
@@ -46,13 +46,13 @@
   {
     "file": "05-apps.png",
     "title": "Your installed apps, within reach",
-    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "0.10.1-preview",
-    "sha256": "f32399867128f333cd1be455967ee32f9b48ffa05fd1c5726e418bff85402ca3"
+    "version": "0.14.1-preview",
+    "sha256": "fe142e38974359f3a7ca0307127c3338248d1fd7ae3482acb023b051a63cb195"
   },
   {
     "file": "06-updates.png",
@@ -365,23 +365,23 @@
   {
     "file": "34-continuous-settings.png",
     "title": "Settings in one continuous canvas",
-    "source": "Native 3840×2160 production views on an owned clean emulator; synthetic profiles and demonstration metadata; authorised original movie artwork. No personal accounts, provider credentials or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "0.14.0-preview",
-    "sha256": "0ebf3dd2851fa3b8c79167868cf5f5229783c03ab29ef833d81e813ca2dbd37b"
+    "version": "0.14.1-preview",
+    "sha256": "d806d087d1355baf3a7c35d4b7c269994078b22b5d410df5fb37d7f656da1260"
   },
   {
     "file": "35-continuous-tools.png",
     "title": "Personalisation that belongs to your home",
-    "source": "Native 3840×2160 production views on an owned clean emulator; synthetic profiles and demonstration metadata; authorised original movie artwork. No personal accounts, provider credentials or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "0.14.0-preview",
-    "sha256": "26a9be415b7adf403c636a845ea8899ed9d9ccc2c22079bca3dd1e2f2b5389be"
+    "version": "0.14.1-preview",
+    "sha256": "7315b8201f19484c506b559fd091926e1b05120fd49ff0730104b6e9249635ff"
   }
 ]

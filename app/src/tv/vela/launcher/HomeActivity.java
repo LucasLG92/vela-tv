@@ -132,6 +132,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     @Override protected void onSaveInstanceState(Bundle state){if(hub!=null)state.putInt("velaTools",hub.page());if(home!=null){Bundle screens=home.savePanels();if(screens!=null)state.putBundle("velaScreens",screens);}super.onSaveInstanceState(state);}
 
     void afterTools(java.util.function.Consumer<CinemaHomeView> action){if(hub!=null)hub.close();if(!destroying&&home!=null)action.accept(home);}
+    void reopenActivity(org.json.JSONObject item){if(home!=null)home.resumeActivity(item);}
     @Override public void tools(int page){
         if(VelaSessions.blocked(this)&&page!=0&&page!=3&&page!=8)page=4;
         stopSync();

@@ -37,7 +37,6 @@ class PlexLinkScreen extends VelaScreen {
         FrameLayout root=new FrameLayout(this){@Override protected void onSizeChanged(int w,int h,int ow,int oh){if(stage==null)return;float scale=Math.min(w/1920f,h/1080f);stage.setScaleX(scale);stage.setScaleY(scale);stage.setTranslationX((w-1920*scale)/2);stage.setTranslationY((h-1080*scale)/2);}};
         root.setBackgroundColor(VelaTheme.BACKGROUND);stage=new FrameLayout(this);stage.setPivotX(0);stage.setPivotY(0);root.addView(stage,new FrameLayout.LayoutParams(1920,1080));
         GradientDrawable glow=new GradientDrawable();glow.setGradientType(GradientDrawable.RADIAL_GRADIENT);glow.setGradientRadius(1260);glow.setGradientCenter(.12f,.38f);glow.setColors(new int[]{VelaTheme.PANEL,VelaTheme.BACKGROUND});stage.setBackground(glow);
-        TextView brand=text("VELA",24,VelaTheme.SECONDARY);brand.setLetterSpacing(.22f);put(stage,brand,116,66,650,42);
         put(stage,text(t("Conectar Plex","Connect Plex","Conectar Plex"),58,0xFFF7F7FA),112,132,740,90);
         ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.logo_plex);logo.setScaleType(ImageView.ScaleType.FIT_START);put(stage,logo,116,324,304,112);
         TextView title=text(t("Seu cinema.\nSempre com você.","Your cinema.\nAlways with you.","Tu cine.\nSiempre contigo."),49,0xFFF7F7FA);title.setTypeface(Ui.displaySemibold);put(stage,title,116,532,680,142);

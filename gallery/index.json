@@ -2,13 +2,13 @@
   {
     "file": "01-home.webp",
     "title": "Your library, centre stage",
-    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.30.1-preview",
-    "sha256": "235960632af120c87ac75f2edc8505735ab3dcbbe20d9148750f75ddbad209c7"
+    "version": "1.35.1-preview",
+    "sha256": "3334ed75de3b4ace692513b0db68e4badc668dce3fb997bfbb36058466b0b0ef"
   },
   {
     "file": "02-mint-compact.webp",
@@ -57,13 +57,13 @@
   {
     "file": "06-sidebar.webp",
     "title": "One home, familiar navigation",
-    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.30.1-preview",
-    "sha256": "2f48225c3f6b3feff81814b80eaad0fb243c7fb55c0323cc770d292d12f4eaff"
+    "version": "1.35.1-preview",
+    "sha256": "121bf2d849a1956d47a61ccef2e328dc891c20478652f74d900e1f1fd67122f8"
   },
   {
     "file": "07-shortcut-actions.webp",
@@ -90,24 +90,24 @@
   {
     "file": "09-apps.webp",
     "title": "Recognise every app",
-    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.30.1-preview",
-    "sha256": "7002009b7a82706192ab8fb2b04bf1c8d6cc87bcdefc74ccd1e5771a7202a9e9"
+    "version": "1.35.1-preview",
+    "sha256": "6cc3450c286f64393142ede9a0130ed24e7e003d1efcc2259cb6d7e6aabe970d"
   },
   {
     "file": "10-settings.webp",
     "title": "Every setting in its place",
-    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.30.1-preview",
-    "sha256": "cb2673bd3f251c9a3c96d9696efefc32597bcee00dc7007f2a03a3c8630119c3"
+    "version": "1.35.1-preview",
+    "sha256": "0b2efba7bd238a9671e5dcc8acc7a36128afd5bb4d702f83685c91af0858032f"
   },
   {
     "file": "11-appearance.webp",
@@ -651,23 +651,23 @@
   {
     "file": "60-continuous-navigation.webp",
     "title": "A full-screen backdrop behind your navigation",
-    "source": "Native 3840×2160 production views on an owned clean emulator; synthetic profiles and demonstration metadata; authorised original movie artwork. No personal accounts, provider credentials or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.35.0-preview",
-    "sha256": "1bee7f6d0a9ddfd18080f6cbd857f17f237f6c36c376ccaf01fc16f71a4d1f91"
+    "version": "1.35.1-preview",
+    "sha256": "121bf2d849a1956d47a61ccef2e328dc891c20478652f74d900e1f1fd67122f8"
   },
   {
     "file": "61-continuous-settings.webp",
     "title": "Settings with a continuous graphite canvas",
-    "source": "Native 3840×2160 production views on an owned clean emulator; synthetic profiles and demonstration metadata; authorised original movie artwork. No personal accounts, provider credentials or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.35.0-preview",
-    "sha256": "44cb8a3bacc1a14dfad00afb42bd184af1ce2e3fe10e65c04f96253572312052"
+    "version": "1.35.1-preview",
+    "sha256": "71be56f38c4bd891ec99128d0e0bf01501e71e57c0b30c633ea25ff5297bc37b"
   }
 ]

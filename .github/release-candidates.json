@@ -1,0 +1,89 @@
+{
+  "repository": "LucasLG92/vela-tv",
+  "releases": [
+    {
+      "package": "tv.vela.launcher",
+      "version": "1.35.1-preview",
+      "code": 69,
+      "tag": "v1.35.1-preview",
+      "title": "Vela 1.35.1 Preview \u00b7 A cleaner home",
+      "file": "Vela-1.35.1-preview.apk",
+      "size": 4431451,
+      "sha256": "a7e6f50d9773d65cf22ac84401a7c39bdcdfcd87cf7a2454f4d7b1feb2de7339",
+      "blob_sha": "c7dcfab5fb97afb4589c9e9ba11acbf479d3e786",
+      "chunks": [
+        {
+          "sha": "271de9e9bac4352b38192cf8872ee523d61c8e41",
+          "size": 524288
+        },
+        {
+          "sha": "16eca960e61b388ff5ff9200a36bd938d2c7cf06",
+          "size": 524288
+        },
+        {
+          "sha": "a8bcdb55d02ab8d2ce9b927303c7eebf7bd3f18b",
+          "size": 524288
+        },
+        {
+          "sha": "ea14d8b80b344368279f22c5876a7e5364f4ff04",
+          "size": 524288
+        },
+        {
+          "sha": "484f720d0984b16c9980b5ecad04feedc5110321",
+          "size": 524288
+        },
+        {
+          "sha": "901ff5e1f27c62a0297bcaf2a379089e79ee0275",
+          "size": 524288
+        },
+        {
+          "sha": "d1e2d3448b1879a77d51d0a1cae59f89dd4f86d0",
+          "size": 524288
+        },
+        {
+          "sha": "3b79cfc5368add5b1907c1535b56ab782dc76537",
+          "size": 524288
+        },
+        {
+          "sha": "cb4ae3c7df5e29e464de75b1edbfac113037d9e1",
+          "size": 237147
+        }
+      ],
+      "notes": "guide/releases/1.35.1-preview.md"
+    },
+    {
+      "package": "tv.vela.launcher.lite",
+      "version": "0.14.1-preview",
+      "code": 28,
+      "tag": "lite-v0.14.1-preview",
+      "title": "Vela Lite 0.14.1 Preview \u00b7 A quieter interface",
+      "file": "Vela-Lite-0.14.1-preview.apk",
+      "size": 2279537,
+      "sha256": "c10c43fbf91c5a0f849ba795a6e639ec73d28352985118893d2e47f816eb9e2a",
+      "blob_sha": "6907c3c537d9d5025ecdde4364d28a9f4ae9dcb2",
+      "chunks": [
+        {
+          "sha": "b185b1c192aafd98641f719d88c4817211663b82",
+          "size": 524288
+        },
+        {
+          "sha": "a1fabd663095c274477ab65bf2224d2f6b9c0f29",
+          "size": 524288
+        },
+        {
+          "sha": "eff0fec7b228f5249b8354bcaa7af452237ce42b",
+          "size": 524288
+        },
+        {
+          "sha": "f69b1acab9b4bea955c3b299cb982276e93ff7b0",
+          "size": 524288
+        },
+        {
+          "sha": "397a656b09204efa5eb1734a89197bb5d2c5047d",
+          "size": 182385
+        }
+      ],
+      "notes": "guide/releases/lite-0.14.1-preview.md"
+    }
+  ]
+}

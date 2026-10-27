@@ -25,10 +25,9 @@ final class TvSettingsScreen extends VelaScreen {
     protected void onCreate(Bundle state){
         FrameLayout root=new FrameLayout(this){protected void onSizeChanged(int w,int h,int ow,int oh){float scale=Math.min(w/1920f,h/1080f);stage.setPivotX(0);stage.setPivotY(0);stage.setScaleX(scale);stage.setScaleY(scale);stage.setTranslationX((w-1920*scale)/2);stage.setTranslationY((h-1080*scale)/2);}};
         stage=new FrameLayout(this);root.addView(stage,new FrameLayout.LayoutParams(1920,1080));
-        put(stage,text("VELA",24),116,66,650,42);put(stage,text(t("Sua televisão","Your television","Tu televisión"),58),112,132,750,90);
-        ImageView mark=new ImageView(this);mark.setImageResource(R.drawable.vela_mark);mark.setColorFilter(VelaTheme.WHITE);put(stage,mark,220,318,184,184);
-        put(stage,text(t("Suas fontes.\nSeus canais.","Your sources.\nYour channels.","Tus fuentes.\nTus canales."),43),116,570,650,140);
-        TextView help=text(t("Listas M3U, conta Xtream, antena e guia. A conexão fica cifrada neste dispositivo.","M3U playlists, Xtream, antenna and guide. Connections stay encrypted on this device.","Listas M3U, cuenta Xtream, antena y guía. Las conexiones se guardan cifradas en este dispositivo."),24);help.setMaxLines(5);help.setGravity(Gravity.TOP);put(stage,help,116,742,630,180);
+        put(stage,text(t("Sua televisão","Your television","Tu televisión"),58),112,132,750,90);
+        put(stage,text(t("Suas fontes.\nSeus canais.","Your sources.\nYour channels.","Tus fuentes.\nTus canales."),43),116,316,650,140);
+        TextView help=text(t("Listas M3U, conta Xtream, antena e guia. A conexão fica cifrada neste dispositivo.","M3U playlists, Xtream, antenna and guide. Connections stay encrypted on this device.","Listas M3U, cuenta Xtream, antena y guía. Las conexiones se guardan cifradas en este dispositivo."),24);help.setMaxLines(5);help.setGravity(Gravity.TOP);put(stage,help,116,514,630,180);
         pane=new FrameLayout(this);put(stage,pane,936,140,840,800);status=text("",22);status.setMaxLines(3);put(stage,status,936,948,840,100);setContentView(root);
     }
     private static String t(String pt,String en,String es){return Ui.tr(pt,en,es);}

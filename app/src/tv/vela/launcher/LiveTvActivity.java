@@ -63,7 +63,6 @@ public class LiveTvActivity extends Activity {
         root=new FrameLayout(this){@Override protected void onSizeChanged(int w,int h,int ow,int oh){if(stage==null)return;float s=Math.min(w/1920f,h/1080f);stage.setPivotX(0);stage.setPivotY(0);stage.setScaleX(s);stage.setScaleY(s);stage.setTranslationX((w-1920*s)/2);stage.setTranslationY((h-1080*s)/2);}};
         root.setBackgroundColor(0xFF0A1019);stage=new FrameLayout(this);stage.setClipChildren(false);root.addView(stage,new FrameLayout.LayoutParams(1920,1080));
         GradientDrawable background=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{0xFF1B293B,0xFF101925,0xFF0A1019});stage.setBackground(background);
-        TextView brand=text("VELA",17,0xFF9CACC2,Ui.semibold);brand.setLetterSpacing(.2f);put(stage,brand,90,50,400,30);
         put(stage,text(t("Em direto","Live TV","En directo"),55,WHITE,Ui.displaySemibold),86,92,1050,82);
         header=new HomeStatusView(this);put(stage,header,1504,64,340,76);
         timelineMode=LiveTvData.guideView(this);

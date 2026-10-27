@@ -77,3 +77,9 @@ An explicit EPG match now also chooses its original channel logo, ahead of the p
 ## Continuous backgrounds
 
 Home artwork and its fades belong to a stationary full-screen layer. Opening navigation scales the foreground controls only, so the wallpaper has no inset rectangular edge. Integrated Full settings, TV and tools use one fixed graphite canvas. Lite retains its screen-sized black/graphite renderer and embedded tools stay transparent. These changes reuse the existing image and caches, without an extra bitmap or background service.
+
+## Identity refinement · Full 1.35.1 / Lite 0.14.1
+
+The profile-local Recent activity action now belongs to the Apps header, beside drawer controls. Home artwork and Lite HDMI composition stay clear. Up from the app grid reaches the recent action; Left/Right connects it with folder controls, and Down returns to the grid. Unavailable apps and disconnected inputs are omitted.
+
+Only the main Settings header shows the in-app Vela mark. Lite uses the existing profile symbol in its sidebar; personalisation shows the active profile with no repeated brand icon. The existing vector identity and matching Android launcher assets are refined with graphite and one restrained accent. No raster logo, additional cache, decoder, service or monitoring is introduced. Native checks cover both launch routes and actual remote focus.

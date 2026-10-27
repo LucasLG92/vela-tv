@@ -37,9 +37,7 @@ final class TvChannelOrganizer extends FrameLayout implements AutoCloseable {
         super(c);provider=p;
         surface=new FrameLayout(c);surface.setBackground(plate(0xB51C1D25,32));
         put(this,surface,520,12,1218,904);
-        ImageView mark=new ImageView(c);mark.setImageResource(R.drawable.vela_mark);
-        put(this,mark,86,26,48,48);
-        put(this,label(c.getPackageName().endsWith(".lite")?"Vela Lite":"Vela",31),152,20,320,62);
+        put(this,label(L10n.text("Television"),31),86,20,378,62);
         TextView intro=label(t("Organize your television","Organiza tu televisión"),20);
         intro.setTextColor(VelaTheme.SECONDARY);put(this,intro,86,92,378,42);
         String[] names={t("Favourites","Favoritos"),t("Hidden channels","Canales ocultos"),t("Categories","Categorías"),t("Recent","Recientes")};

@@ -42,7 +42,7 @@ For supported clear HLS streams, enable optional **local pause and rewind**. The
 
 ## Recognise every app
 
-Large, rounded icons make your apps easy to find. Pin more shortcuts to the sidebar, hold OK to rearrange or remove them, and group installed apps into folders. Removing a shortcut keeps the app installed.
+Large, rounded icons make your apps easy to find. A quiet Recent activity shortcut in Apps returns to your last available app, input or channel. Pin more shortcuts to the sidebar, hold OK to rearrange or remove them, and group installed apps into folders. Removing a shortcut keeps the app installed.
 
 Press OK on a pinned app to launch it. Press Right on YouTube to explore the rows it shares with Android TV. Other services can appear in Continue watching when they publish compatible Watch Next information; Vela never imports their private sessions.
 

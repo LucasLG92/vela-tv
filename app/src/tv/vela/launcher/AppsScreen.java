@@ -12,20 +12,26 @@ final class AppsScreen extends VelaScreen {
     private FrameLayout root;
     private InstalledAppsGrid grid;
     private int selection;
+    private View recent;
     AppsScreen(Activity owner,Navigation navigation){super(owner,navigation);}
     protected void onCreate(Bundle state){if(state!=null)selection=state.getInt("selection",0);}
     protected void onResume(){
         root=new FrameLayout(this);TextView status=label(Ui.tr("Carregando aplicativos…","Loading apps…","Cargando aplicaciones…"),22),count=label("",20),hint=label(Ui.tr("Seus favoritos primeiro","Your favorites first","Tus favoritas primero"),24);
         hint.setText(L10n.text("▦  Folders and layout"));hint.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,21);hint.setGravity(Gravity.CENTER);hint.setDefaultFocusHighlightEnabled(false);hint.setBackground(VelaTheme.shape(VelaTheme.CARD,VelaTheme.CONTROL_RADIUS));hint.setOnFocusChangeListener((v,f)->{hint.setTextColor(f?VelaTheme.INK:VelaTheme.SECONDARY);hint.setBackground(VelaTheme.shape(f?Appearance.accent(this):VelaTheme.CARD,VelaTheme.CONTROL_RADIUS));});hint.setFocusable(true);hint.setId(View.generateViewId());hint.setOnKeyListener((v,k,e)->{if(e.getAction()==KeyEvent.ACTION_DOWN&&k==KeyEvent.KEYCODE_DPAD_LEFT){navigation.navigationTarget(this).requestFocus();return true;}if(e.getAction()==KeyEvent.ACTION_DOWN&&k==KeyEvent.KEYCODE_DPAD_DOWN){if(grid!=null)grid.requestFocus();return true;}return false;});hint.setOnClickListener(v->{if(owner instanceof VelaHub.Owner)((VelaHub.Owner)owner).tools(6);});place(hint,80,22,400,52);place(count,1420,22,270,48);place(status,74,100,1600,70);
-        View menu=navigation.navigationTarget(this);
-        grid=new InstalledAppsGrid(this,Arrays.asList(SidebarApps.slots(this)),hint,status,count,item->{Intent intent=HomeApps.launchIntent(getPackageManager(),item.pkg);if(intent!=null)startActivity(intent);},false);place(grid,26,90,1738,810);grid.initialSelection(selection);setContentView(root);
+        org.json.JSONObject item=VelaRecentActivity.available(this);
+        if(item.length()>0&&(owner instanceof HomeActivity||VelaRecentActivity.intent(this,item)!=null)){
+            recent=new VelaRecentActivity.Card(this,item,()->{if(owner instanceof HomeActivity)((HomeActivity)owner).reopenActivity(item);else {Intent intent=VelaRecentActivity.intent(this,item);if(intent!=null)startActivity(intent);}});
+            place(recent,720,8,640,78);recent.setNextFocusLeftId(hint.getId());hint.setNextFocusRightId(recent.getId());
+            recent.setOnKeyListener((v,k,e)->{if(e.getAction()==KeyEvent.ACTION_DOWN&&k==KeyEvent.KEYCODE_DPAD_DOWN){if(grid!=null)grid.requestFocus();return true;}return false;});
+        }
+        grid=new InstalledAppsGrid(this,Arrays.asList(SidebarApps.slots(this)),recent==null?hint:recent,status,count,app->{Intent intent=HomeApps.launchIntent(getPackageManager(),app.pkg);if(intent!=null)startActivity(intent);},false);place(grid,26,90,1738,810);grid.initialSelection(selection);setContentView(root);
     }
     private TextView label(String text,int size){TextView v=new TextView(this);v.setText(text);v.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,size);v.setTextColor(VelaTheme.SECONDARY);v.setTypeface(Ui.medium);return v;}
     private void place(View v,int x,int y,int w,int h){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;root.addView(v,p);}
     void focusGrid(){if(grid!=null)grid.requestFocus();}
     @Override boolean standaloneChrome(){return false;}
     @Override boolean navigationLeft(){return grid==null||grid.getSelectedItemPosition()%InstalledAppsGrid.COLUMNS==0;}
-    protected void onPause(){if(grid!=null){selection=Math.max(0,grid.getSelectedItemPosition());grid.release();grid=null;}if(root!=null)root.removeAllViews();}
+    protected void onPause(){recent=null;if(grid!=null){selection=Math.max(0,grid.getSelectedItemPosition());grid.release();grid=null;}if(root!=null)root.removeAllViews();}
     protected void onDestroy(){onPause();}
     @Override void onTrimMemory(int level){if(grid!=null)grid.trim();}
     protected void onSaveInstanceState(Bundle out){out.putInt("selection",grid==null?selection:Math.max(0,grid.getSelectedItemPosition()));}

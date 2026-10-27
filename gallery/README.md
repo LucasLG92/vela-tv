@@ -1,6 +1,6 @@
 # Vela in pictures
 
-Explore 61 native **4K screenshots**. The newest navigation and settings captures show **1.35.0-preview**; earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 61 native **4K screenshots**. The newest Home, navigation, Apps and Settings captures show **1.35.1-preview**; earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 

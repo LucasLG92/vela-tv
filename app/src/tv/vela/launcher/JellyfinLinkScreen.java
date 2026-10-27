@@ -36,7 +36,7 @@ final class JellyfinLinkScreen extends VelaScreen {
         FrameLayout root=new FrameLayout(this){@Override protected void onSizeChanged(int w,int h,int ow,int oh){if(stage==null)return;float scale=Math.min(w/1920f,h/1080f);stage.setScaleX(scale);stage.setScaleY(scale);stage.setTranslationX((w-1920*scale)/2);stage.setTranslationY((h-1080*scale)/2);}};
         root.setBackgroundColor(VelaTheme.BACKGROUND);stage=new FrameLayout(this);stage.setPivotX(0);stage.setPivotY(0);root.addView(stage,new FrameLayout.LayoutParams(1920,1080));
         GradientDrawable glow=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{0xFF293C55,VelaTheme.BACKGROUND});stage.setBackground(glow);
-        put(stage,text("VELA",24,VelaTheme.SECONDARY),116,66,650,42);put(stage,text("Jellyfin",60,0xFFF7F7FA),112,132,740,90);
+        put(stage,text("Jellyfin",60,0xFFF7F7FA),112,132,740,90);
         ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.brand_jellyfin);put(stage,logo,230,318,180,180);
         put(stage,text(t("Sua biblioteca.\nSeu servidor.","Your library.\nYour server.","Tu biblioteca.\nTu servidor."),43,0xFFF7F7FA),116,565,650,124);
         detail=text(t("Cartazes, novidades e progresso direto do Jellyfin. Autorize o código em um dispositivo onde você já tenha entrado.","Posters, recent additions and progress straight from Jellyfin. Authorize the code on a device where you are already signed in.","Carteles, novedades y progreso directamente de Jellyfin. Autoriza el código desde un dispositivo donde ya hayas iniciado sesión."),24,VelaTheme.SECONDARY);detail.setMaxLines(6);detail.setGravity(Gravity.TOP);put(stage,detail,116,720,650,220);

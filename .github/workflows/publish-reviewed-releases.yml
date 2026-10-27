@@ -1,0 +1,39 @@
+name: Publish reviewed APKs
+on:
+  push:
+    branches: [main]
+    paths: ['.github/release-candidates.json']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: reviewed-releases-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'LucasLG92/vela-tv' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.1.0'
+          log-accepted-android-sdk-licenses: false
+      - name: Check source and publisher safety
+        run: |
+          python3 tools/audit_publication.py
+          python3 tools/check_localization.py
+          python3 tests/test_release_publication.py
+      - name: Verify both signed APKs and publish previews
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/publish_releases.py --source "$GITHUB_SHA"

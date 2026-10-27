@@ -36,7 +36,7 @@ Reorder favourites with OK and the arrow keys. Hide channels or categories, rest
 
 ## Make Lite yours
 
-Settings and tools share the home screen's continuous background, including when you expand the sidebar.
+Settings and tools share the home screen's continuous background, including when you expand the sidebar. In Apps, Recent activity brings your last available app, input or channel within reach.
 
 ![Integrated settings with continuous background](gallery/34-continuous-settings.png)
 

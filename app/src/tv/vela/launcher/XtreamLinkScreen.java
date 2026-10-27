@@ -31,7 +31,7 @@ final class XtreamLinkScreen extends VelaScreen {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         FrameLayout root=new FrameLayout(this){@Override protected void onSizeChanged(int w,int h,int ow,int oh){if(stage==null)return;float s=Math.min(w/1920f,h/1080f);stage.setScaleX(s);stage.setScaleY(s);stage.setTranslationX((w-1920*s)/2);stage.setTranslationY((h-1080*s)/2);}};
         root.setBackgroundColor(VelaTheme.BACKGROUND);stage=new FrameLayout(this);stage.setPivotX(0);stage.setPivotY(0);stage.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{VelaTheme.PANEL,VelaTheme.BACKGROUND}));root.addView(stage,new FrameLayout.LayoutParams(1920,1080));
-        put(stage,text("VELA",24,VelaTheme.SECONDARY),116,66,650,42);put(stage,text("IPTV · Xtream",57,0xFFF7F7FA),112,132,740,90);
+        put(stage,text("IPTV · Xtream",57,0xFFF7F7FA),112,132,740,90);
         TextView mark=text("TV",128,0xFFF7F7FA);mark.setGravity(Gravity.CENTER);put(stage,mark,170,338,360,184);
         put(stage,text(t("Sua televisão.\nSeus canais.","Your television.\nYour channels.","Tu televisión.\nTus canales."),43,0xFFF7F7FA),116,570,650,134);
         TextView description=text(t("Conecte seu serviço Xtream. Canais e programação dentro de Vela. Seus dados ficam cifrados neste dispositivo.","Connect your Xtream service. Channels and listings inside Vela. Your account stays encrypted on this device.","Conecta tu servicio Xtream. Canales y programación dentro de Vela. Los datos de tu cuenta se guardan cifrados en este dispositivo."),24,VelaTheme.SECONDARY);description.setGravity(Gravity.TOP);description.setMaxLines(7);put(stage,description,116,754,650,230);
