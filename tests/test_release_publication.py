@@ -44,6 +44,11 @@ class PublicationSafety(unittest.TestCase):
         responses=['Signer #1 certificate SHA-256 digest: '+p.SIGNER,"package: name='example.other' versionCode='69' versionName='1.35.1-preview'"]
         with patch.object(Path,'read_bytes',return_value=self.data),patch.object(p,'sdk_tools',return_value=Path('sdk')),patch.object(p.subprocess,'check_output',side_effect=responses):
             with self.assertRaises(ValueError):p.verify_apk(Path('synthetic.apk'),self.item)
+    def test_draft_without_a_git_tag_is_resolved(self):
+        draft={'tag_name':'v1.35.1-preview','draft':True,'id':42}
+        with patch.object(p,'api',side_effect=[None,[draft]]):self.assertEqual(p.find_release('v1.35.1-preview'),draft)
+    def test_missing_release_is_not_confused_with_another_draft(self):
+        with patch.object(p,'api',side_effect=[None,[{'tag_name':'v0.0.0-preview','draft':True,'id':1}]]):self.assertIsNone(p.find_release('v1.35.1-preview'))
     def test_published_assets_are_never_overwritten(self):
         release={'draft':False,'assets':[{'name':self.item['file'],'state':'uploaded','id':1},{'name':self.item['file']+'.sha256','state':'uploaded','id':2}]}
         with patch.object(p,'api',side_effect=[release,b'tampered']),patch.object(p,'gh') as mutations:

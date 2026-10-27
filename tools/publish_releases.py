@@ -60,6 +60,13 @@ def api(path,missing=False,binary=False):
     result=gh('api','-H','Accept: application/octet-stream' if binary else 'Accept: application/vnd.github+json',f'repos/{REPO}/{path}',missing=missing)
     return result if binary or result is None else json.loads(result)
 
+def find_release(tag):
+    release=api('releases/tags/'+tag,missing=True)
+    if release is None:
+        # Draft releases need not have a Git tag yet; resolve them by release ID.
+        release=next((r for r in api('releases?per_page=100') if r['tag_name']==tag),None)
+    return release
+
 def asset_bytes(asset):
     require(asset.get('state')=='uploaded' and isinstance(asset.get('id'),int),'Incomplete release asset')
     return api('releases/assets/'+str(asset['id']),binary=True)
@@ -72,12 +79,16 @@ def verify_assets(release,item):
     require(asset_bytes(assets[item['file']+'.sha256'])==expected,'Release checksum file mismatch')
 
 def publish(item,path,source):
-    release=api('releases/tags/'+item['tag'],missing=True)
+    release=find_release(item['tag'])
     if release is not None and not release['draft']:
         verify_assets(release,item);print('Already published and verified:',release['html_url']);return release
     if release is None:
         gh('release','create',item['tag'],'--repo',REPO,'--target',source,'--title',item['title'],'--notes-file',str(ROOT/item['notes']),'--draft','--prerelease','--latest=false')
-        release=api('releases/tags/'+item['tag'])
+        release=find_release(item['tag'])
+    if release['target_commitish']!=source:
+        require(not release['assets'],'An existing draft with assets belongs to a different source commit')
+        gh('release','edit',item['tag'],'--repo',REPO,'--target',source)
+        release=api('releases/'+str(release['id']))
     require(release['target_commitish']==source,'Draft belongs to a different source commit')
     expected={item['file'],item['file']+'.sha256'}
     require({a['name'] for a in release['assets']}<=expected,'Draft contains unexpected assets')
@@ -85,9 +96,9 @@ def publish(item,path,source):
     for file in (path,Path(str(path)+'.sha256')):
         if file.name in present:require(asset_bytes(present[file.name])==file.read_bytes(),'Existing draft asset differs; refusing overwrite')
         else:gh('release','upload',item['tag'],str(file),'--repo',REPO)
-    verify_assets(api('releases/tags/'+item['tag']),item)
+    verify_assets(api('releases/'+str(release['id'])),item)
     gh('release','edit',item['tag'],'--repo',REPO,'--draft=false','--prerelease','--latest=false')
-    published=api('releases/tags/'+item['tag']);require(not published['draft'] and published['prerelease'],'Release was not published as a preview')
+    published=api('releases/'+str(release['id']));require(not published['draft'] and published['prerelease'],'Release was not published as a preview')
     verify_assets(published,item)
     ref=api('git/ref/tags/'+item['tag'])['object']
     if ref['type']=='tag':ref=api('git/tags/'+ref['sha'])['object']
@@ -106,7 +117,7 @@ def main():
     for item in items:
         if args.local_dir:path=args.local_dir/item['file']
         else:
-            previous=api('releases/tags/'+item['tag'],missing=True)
+            previous=find_release(item['tag'])
             existing=next((a for a in previous['assets'] if a['name']==item['file']),None) if previous else None
             if existing:data=asset_bytes(existing)
             else:
