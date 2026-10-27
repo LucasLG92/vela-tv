@@ -361,5 +361,27 @@
     "height": 2160,
     "version": "0.10.1-preview",
     "sha256": "87e45052ac6a6aabe63e328be9ccabc4ae2c0c8e97c8d2bdcbf521154593d9b7"
+  },
+  {
+    "file": "34-continuous-settings.png",
+    "title": "Settings in one continuous canvas",
+    "source": "Native 3840×2160 production views on an owned clean emulator; synthetic profiles and demonstration metadata; authorised original movie artwork. No personal accounts, provider credentials or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.14.0-preview",
+    "sha256": "0ebf3dd2851fa3b8c79167868cf5f5229783c03ab29ef833d81e813ca2dbd37b"
+  },
+  {
+    "file": "35-continuous-tools.png",
+    "title": "Personalisation that belongs to your home",
+    "source": "Native 3840×2160 production views on an owned clean emulator; synthetic profiles and demonstration metadata; authorised original movie artwork. No personal accounts, provider credentials or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.14.0-preview",
+    "sha256": "26a9be415b7adf403c636a845ea8899ed9d9ccc2c22079bca3dd1e2f2b5389be"
   }
 ]

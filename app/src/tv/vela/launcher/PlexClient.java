@@ -112,6 +112,7 @@ class PlexClient {
         throw new IOException(Ui.problem("Could not connect securely. Check that the server is on.","No se ha podido conectar de forma segura. Comprueba que el servidor esté encendido."));
     }
     static final class Film {
+        String detailTitle="";
         String key, title, summary, thumb, art, meta, type;
         String logo = "";
         String provider = "Plex", intent;
@@ -173,6 +174,12 @@ class PlexClient {
         }
         return new LibraryPage(result,offset,total,received);
     }
+    List<LibraryCollection> collections(Section section,int offset)throws Exception{
+        if(!section.key.matches("[0-9]{1,20}")||offset<0)throw new IOException("Invalid collection page");JSONObject root=catalogJson("/library/sections/"+section.key+"/collections?X-Plex-Container-Start="+offset+"&X-Plex-Container-Size=12",1024*1024);JSONObject container=root.getJSONObject("MediaContainer");if(container.optInt("offset",offset)!=offset)throw new IOException("Invalid collection offset");JSONArray a=container.optJSONArray("Metadata");if(a!=null&&a.length()>12)throw new IOException("Collection page limit");List<LibraryCollection> out=new ArrayList<>();String account=profileKey(identity());for(int i=0;a!=null&&i<a.length();i++){JSONObject j=a.getJSONObject(i);if(j.optString("type").equals("collection"))out.add(new LibraryCollection("Plex",j.getString("ratingKey"),j.optString("title"),account));}return out;
+    }
+    LibraryPage collectionItems(String key,int offset,int limit)throws Exception{if(!key.matches("[0-9]{1,20}")||offset<0||limit<1||limit>PAGE_SIZE)throw new IOException("Invalid collection");return parseChildren(catalogJson("/library/metadata/"+key+"/children?includeGuids=1&X-Plex-Container-Start="+offset+"&X-Plex-Container-Size="+limit,2*1024*1024),offset,limit);}
+    LibraryPage children(Film parent,int offset)throws Exception{return collectionItems(parent.key,offset,PAGE_SIZE);}
+    static LibraryPage parseChildren(JSONObject root,int offset,int limit)throws Exception{JSONObject c=root.getJSONObject("MediaContainer");JSONArray a=c.optJSONArray("Metadata");int received=a==null?0:a.length();if(received>limit||c.optInt("offset",offset)!=offset)throw new IOException("Child page limit");List<Film> out=new ArrayList<>();for(int i=0;i<received;i++){Film f=parseFilm(a.getJSONObject(i),false);if(f!=null)out.add(f);}return new LibraryPage(out,offset,c.has("totalSize")?Math.max(0,c.optInt("totalSize")):-1,received);}
     List<Film> library() throws Exception {
         if (!connected()) return Collections.emptyList();
         String server=identity();
@@ -248,14 +255,14 @@ class PlexClient {
         return bounded;
     }
     private static boolean recentHub(String id){return id.equals("vela.recent")||id.endsWith(".recent")||id.contains("recentlyadded");}
-    Film item(String key)throws Exception{if(!key.matches("[0-9]{1,20}"))throw new IOException("Invalid item");JSONObject root=new JSONObject(request(prefs.getString("serverUri","")+"/library/metadata/"+key+"?includeGuids=1",prefs.getString("serverToken",""),null,10000));JSONObject container=root.optJSONObject("MediaContainer");JSONArray items=container==null?null:container.optJSONArray("Metadata");return items==null||items.length()!=1?null:parseFilm(items.getJSONObject(0),false);}
+    Film item(String key)throws Exception{if(!key.matches("[0-9]{1,20}"))throw new IOException("Invalid item");JSONObject root=catalogJson("/library/metadata/"+key+"?includeGuids=1",2*1024*1024);JSONObject container=root.optJSONObject("MediaContainer");JSONArray items=container==null?null:container.optJSONArray("Metadata");return items==null||items.length()!=1?null:parseFilm(items.getJSONObject(0),false);}
     private static String externalId(JSONObject item){JSONArray ids=item.optJSONArray("Guid");for(String provider:new String[]{"tmdb","imdb","tvdb"})for(int i=0;ids!=null&&i<ids.length();i++){JSONObject id=ids.optJSONObject(i);String value=id==null?"":id.optString("id");if(value.matches(provider+"://[A-Za-z0-9_-]{1,40}"))return value;}return "";}
     private static Film parseFilm(JSONObject item,boolean resume) {
-        String type=item.optString("type"),key=item.optString("ratingKey");
-        if(key.isEmpty()||(!type.equals("movie")&&!type.equals("show")&&!type.equals("episode")))return null;
+        String type=item.optString("type"),key=item.optString("ratingKey");if(resume&&type.equals("season"))return null;
+        if(key.isEmpty()||(!type.equals("movie")&&!type.equals("show")&&!type.equals("episode")&&!type.equals("season")))return null;
         Film film=new Film();film.key=key;film.type=type;film.continuing=resume;
         film.externalId=externalId(item);film.title=item.optString(type.equals("episode")?"grandparentTitle":"title",item.optString("title"));
-        film.summary=item.optString("summary");
+        film.summary=item.optString("summary");film.detailTitle=item.optString("title");
         film.thumb=item.optString(type.equals("episode")?"grandparentThumb":"thumb",item.optString("thumb"));
         film.art=item.optString("art",item.optString("grandparentArt",film.thumb));
         JSONArray artwork=item.optJSONArray("Image");

@@ -25,7 +25,7 @@ final class VelaReading {
         APPLIED.put(v,size);if(Math.abs(v.getTextSize()-size)>.1f)v.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);if(contrast){int color=v.getCurrentTextColor();float l=(Color.red(color)+Color.green(color)+Color.blue(color))/3f;if(l>100&&l<200&&Math.abs(Color.red(color)-Color.blue(color))<40)v.setTextColor(0xFFE0E1E8);}
     }
     static void apply(View root){walk(root,scale(root.getContext()),prefs(root.getContext()).getBoolean("contrast",false));}
-    private static void walk(View root,float scale,boolean contrast){if(root instanceof VelaHub)return;if(root instanceof TextView)fitText((TextView)root,scale,contrast);if(root instanceof ViewGroup){ViewGroup group=(ViewGroup)root;for(int i=0;i<group.getChildCount();i++)walk(group.getChildAt(i),scale,contrast);}}
+    private static void walk(View root,float scale,boolean contrast){if(root instanceof VelaHub||root instanceof VelaContentDetails)return;if(root instanceof TextView)fitText((TextView)root,scale,contrast);if(root instanceof ViewGroup){ViewGroup group=(ViewGroup)root;for(int i=0;i<group.getChildCount();i++)walk(group.getChildAt(i),scale,contrast);}}
     static final class Stage extends android.widget.FrameLayout {
         private final int width,height;private final boolean safe;
         Stage(Context c,int width,int height){this(c,width,height,true);}

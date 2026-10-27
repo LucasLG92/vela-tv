@@ -48,7 +48,7 @@ public class AndroidAppsGridTest extends Instrumentation {
             }
             check(grid.getCount()==all.size(),"Favorites duplicated or removed installed apps");
             for(int i=0;i<pinned.size();i++)check(((SidebarApps.Choice)grid.getItemAtPosition(i)).pkg.equals(pinned.get(i)),"Favorite order was lost beyond the fourth app");
-            View close=(View)field(grid,"close");ui(()->{grid.requestFocus();grid.setSelection(0);});Thread.sleep(180);key(KeyEvent.KEYCODE_DPAD_UP);check(a.getCurrentFocus()==close,"Up did not reach Close; selected="+grid.getSelectedItemPosition()+" focus="+a.getCurrentFocus());key(KeyEvent.KEYCODE_DPAD_RIGHT);check(grid.hasFocus(),"Right did not return from navigation");
+            View close=(View)field(grid,"close");ui(()->{grid.requestFocus();grid.setSelection(0);});Thread.sleep(180);key(KeyEvent.KEYCODE_DPAD_UP);check(a.getCurrentFocus()==close,"Up did not reach the folders control; selected="+grid.getSelectedItemPosition()+" focus="+a.getCurrentFocus());key(KeyEvent.KEYCODE_DPAD_DOWN);check(grid.hasFocus(),"Down did not return from the folders control");key(KeyEvent.KEYCODE_DPAD_LEFT);check(from.hasFocus(),"Left did not reach app navigation");key(KeyEvent.KEYCODE_DPAD_RIGHT);check(grid.hasFocus(),"Right did not return from app navigation");
             ui(()->grid.setSelection(0));Thread.sleep(120);
             int count=grid.getCount();
             for(int i=0;i<(count+5)/6;i++)key(KeyEvent.KEYCODE_DPAD_DOWN);

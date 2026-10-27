@@ -91,7 +91,7 @@ final class InstalledAppsGrid extends GridView {
     }
 
     private void icon(Tile tile,SidebarApps.Choice choice){
-        tile.pkg=choice.pkg;tile.label.setText(choice.label);tile.setContentDescription(choice.label);
+        tile.pkg=choice.pkg;tile.label.setText(choice.label);tile.setContentDescription(choice.label+(favorites.contains(choice.pkg)?", "+L10n.text("Favorite"):""));
         tile.pin.setVisibility(favorites.contains(choice.pkg)?VISIBLE:INVISIBLE);
         tile.initial.setText(choice.label.isEmpty()?"?":choice.label.substring(0,choice.label.offsetByCodePoints(0,1)).toUpperCase(Ui.locale()));
         Bitmap cached=icons.get(choice.pkg);tile.image.setImageBitmap(cached);tile.initial.setVisibility(cached==null?VISIBLE:GONE);
@@ -163,14 +163,14 @@ final class InstalledAppsGrid extends GridView {
             initial=caption(56,Ui.displaySemibold);initial.setTextColor(0xFFB9BDCA);artwork.addView(initial,new LayoutParams(-1,-1));
             label=caption(21,Ui.medium);label.setSingleLine(true);label.setEllipsize(android.text.TextUtils.TruncateAt.END);label.setPadding(8,0,8,0);
             LayoutParams name=new LayoutParams(-1,32);name.topMargin=215;addView(label,name);
-            pin=new View(getContext());pin.setBackground(shape(Appearance.accent(getContext()),3));LayoutParams p=new LayoutParams(5,5,Gravity.TOP|Gravity.CENTER_HORIZONTAL);p.topMargin=245;addView(pin,p);
+            pin=new View(getContext());GradientDrawable badge=shape(Appearance.accent(getContext()),7);badge.setStroke(3,VelaTheme.PANEL);pin.setBackground(badge);LayoutParams p=new LayoutParams(14,14,Gravity.TOP|Gravity.RIGHT);p.topMargin=18;p.rightMargin=44;addView(pin,p);
         }
         private TextView caption(int size,android.graphics.Typeface font){TextView text=new TextView(getContext());text.setTextSize(TypedValue.COMPLEX_UNIT_PX,size);text.setTypeface(font);text.setGravity(Gravity.CENTER);text.setIncludeFontPadding(false);text.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);return text;}
         void selected(boolean value){
             if(styled&&focused==value)return;styled=true;focused=value;
-            boolean enlarge=focused&&!Visuals.reducedMotion(getContext());artwork.setScaleX(enlarge?1.045f:1);artwork.setScaleY(enlarge?1.045f:1);artwork.setElevation(focused?10:0);
-            GradientDrawable outline=shape(Color.TRANSPARENT,43);if(focused)outline.setStroke(2,0xCCFFFFFF);artwork.setForeground(outline);
-            label.setTextColor(focused?0xFFFFFFFF:0xFFC5CAD5);
+            VelaFocus.card(artwork,focused);
+            artwork.setForeground(null);
+            label.setTextColor(focused?VelaTheme.WHITE:VelaTheme.SECONDARY);label.setBackground(focused?VelaTheme.shape(VelaTheme.RAISED,12):null);
         }
     }
     private static GradientDrawable shape(int color,int radius){GradientDrawable shape=new GradientDrawable();shape.setColor(color);shape.setCornerRadius(radius);return shape;}

@@ -36,7 +36,6 @@ final class HomeScreenHost extends FrameLayout implements VelaScreen.Navigation 
     private int navigationIndex=7;
     HomeScreenHost(Activity activity,Actions actions){
         super(activity);this.activity=activity;this.actions=actions;setClipChildren(false);
-        GradientDrawable background=new GradientDrawable();background.setGradientType(GradientDrawable.RADIAL_GRADIENT);background.setGradientCenter(.3f,.3f);background.setGradientRadius(1680);background.setColors(new int[]{VelaTheme.PANEL,0xFF121318,VelaTheme.BACKGROUND});setBackground(background);
         pane=new FrameLayout(activity);pane.setClipChildren(true);addView(pane,contentBounds(false));
         getViewTreeObserver().addOnGlobalFocusChangeListener(focusListener);
     }

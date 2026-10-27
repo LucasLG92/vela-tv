@@ -1,6 +1,6 @@
 # Build and test
 
-Requirements: JDK 17+, Android SDK platform **36**, build-tools 36.1+, Python 3.10+ and platform-tools. The app uses Java 8, minSdk 30 and targetSdk 33. There is no Gradle daemon. The Full build fetches checksum-pinned AndroidX Media3 1.11.1 dependencies from official Google Maven/Maven Central, caches them under ignored `.build-deps/` and strips unused code with R8. Only the optional HLS pause path instantiates this decoder. Lite continues to compile against platform 34 without Media3.
+Requirements: JDK 17+, Android SDK platform **36**, build-tools 36.1+, Python 3.10+ and platform-tools. The app uses Java 8, minSdk 30 and targetSdk 33. There is no Gradle daemon. The Full build fetches checksum-pinned AndroidX Media3 1.11.1 dependencies from official Google Maven/Maven Central, caches them under ignored `.build-deps/` and strips unused code with R8. Only optional HLS pause or content frame-rate matching instantiates this decoder. Lite continues to compile against platform 34 without Media3.
 
 ```sh
 export JAVA_HOME=/path/to/jdk-17
@@ -147,3 +147,15 @@ python tests/run_localization.py --serial <owned-emulator> --adb-port 5038 --lit
 ```
 
 The native checks select each language, recreate the actual Activity, verify system-language fallback and capture the themed menus at native 4K.
+
+
+## Local optimisation checks
+
+See [frame-rate matching](FRAME-RATE.md) and [the optimisation pass](OPTIMIZATION.md) for the native controls comparison, cadence policy tests and owned synthetic playback fixtures.
+
+
+## Local design and usability checks
+
+See [the design preview](DESIGN-UPDATE.md) for visual styles, content information, server collections, programme artwork, last activity, temporary measurements and the owned-emulator fixture commands.
+
+See [interface refinement](INTERFACE.md) for the shared UI, scroll-safe settings, focus restoration and native remote-layout checks.

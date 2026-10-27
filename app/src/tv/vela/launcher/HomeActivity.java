@@ -23,6 +23,8 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     private void stopSync(){if(sync!=null){sync.close();sync=null;}}
     private void startSync(){stopSync();if(!foreground||hub!=null||VelaSessions.guest(this))return;sync=new VelaSync(this);sync.resume(()->{if(foreground&&hub==null)recreate();});}
     @Override public void channelOptions(String name,Runnable favorite,VelaShows.Airing airing){if(channelMenu!=null)channelMenu.close();android.view.View restore=getCurrentFocus();channelHeld=true;channelMenu=VelaChannelMenu.show(this,(android.widget.FrameLayout)findViewById(android.R.id.content),name,favorite,airing,()->toolsGuide(name),()->{channelMenu=null;if(restore!=null&&restore.isAttachedToWindow())restore.requestFocus();});}
+    @Override public void programmeDetails(VelaShows.Airing airing){tools(8);if(hub!=null)hub.programme(airing);}
+    @Override public void toolsStyles(){tools(6);if(hub!=null)hub.styles();}
     @Override public void toolsLayout(){tools(6);if(hub!=null)hub.editHome();}
     @Override public void toolsGuide(String name){tools(9);if(hub!=null)hub.guideFix(name);}
     private boolean destroying;
@@ -35,7 +37,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     boolean canShowInstaller(){return foreground&&!VelaSessions.blocked(this)&&hub==null&&home!=null&&home.canShowInstaller();}
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);long homeCreated=android.os.SystemClock.elapsedRealtimeNanos();
         Watchdog.install(this);
         if (Watchdog.crashedTooOften(this)) {
             // Don't try to draw again: only show a notice while the main process restores the original home screen.
@@ -53,7 +55,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         Ui.init(this);
         boolean setup=Personalization.needed(this);
         home = new CinemaHomeView(this);
-        setContentView(home);
+        setContentView(home);VelaPerformance.firstFrame(home,homeCreated);
         if(savedInstanceState!=null&&savedInstanceState.containsKey("velaScreens"))home.restorePanels(savedInstanceState.getBundle("velaScreens"));else if("settings".equals(getIntent().getStringExtra("velaEntry")))home.settings();else if(setup)home.route(new Intent(this,SetupActivity.class));
         getWindow().getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
                 | android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
@@ -124,7 +126,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
             if(intent.getComponent()!=null&&intent.getComponent().getClassName().equals(HomeActivity.class.getName())){home.reset();return;}
             if(home.route(intent))return;
         }
-        super.startActivity(intent);
+        super.startActivity(intent);VelaRecentActivity.launched(this,intent);
     }
     @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==VelaVoice.REQUEST){if(hub==null)tools(0);hub.voiceResult(result,data);return;}if(request==VelaHub.EXPORT||request==VelaHub.IMPORT){if(hub==null)tools(1);hub.result(request,result,data);return;}if(home!=null)home.activityResult(request,result,data);}
     @Override protected void onSaveInstanceState(Bundle state){if(hub!=null)state.putInt("velaTools",hub.page());if(home!=null){Bundle screens=home.savePanels();if(screens!=null)state.putBundle("velaScreens",screens);}super.onSaveInstanceState(state);}

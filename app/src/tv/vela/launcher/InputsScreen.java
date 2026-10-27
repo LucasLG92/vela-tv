@@ -43,10 +43,10 @@ final class InputsScreen extends VelaScreen {
         picking=false;boolean navFocus=navigation.navigationTarget(this)!=null&&navigation.navigationTarget(this).hasFocus();
         if(icons!=null)icons.clearViews();root=new FrameLayout(this);cards.clear();
 
-        heroName=text("",56,VelaTheme.WHITE);place(root,heroName,78,40,900,92);heroPort=text("",24,VelaTheme.SECONDARY);place(root,heroPort,80,140,860,45);
-        open=action("",()->launch(heroEntry));place(root,open,80,223,360,62);open.setOnLongClickListener(v->{if(heroEntry!=null){consumeConfirmUp=true;choose(heroEntry);}return true;});
-        open.setBackground(rounded(Appearance.accent(this),VelaTheme.CONTROL_RADIUS));open.setTextColor(VelaTheme.INK);open.setOnFocusChangeListener((v,f)->{open.setBackground(rounded(Appearance.accent(this),VelaTheme.CONTROL_RADIUS));open.animate().cancel();open.animate().scaleX(f?1.035f:1).scaleY(f?1.035f:1).setDuration(Visuals.duration(this,150)).start();});
-        heroWell=new FrameLayout(this);GradientDrawable heroSurface=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{0xFF363842,0xFF17181E});heroSurface.setCornerRadius(62);heroSurface.setStroke(1,0x20FFFFFF);heroWell.setBackground(heroSurface);place(root,heroWell,1160,22,324,324);heroIcon=new InputArtwork(this,"other");place(heroWell,heroIcon,58,58,208,208);
+        View featureSurface=new View(this);featureSurface.setBackground(VelaTheme.panel());place(root,featureSurface,64,14,1654,342);heroName=text("",52,VelaTheme.WHITE);place(root,heroName,104,52,900,92);heroPort=text("",24,VelaTheme.SECONDARY);place(root,heroPort,106,150,860,45);
+        open=action("",()->launch(heroEntry));place(root,open,106,236,300,60);open.setOnLongClickListener(v->{if(heroEntry!=null){consumeConfirmUp=true;choose(heroEntry);}return true;});
+        open.setBackground(rounded(Appearance.accent(this),VelaTheme.CONTROL_RADIUS));open.setTextColor(VelaTheme.INK);open.setOnFocusChangeListener((v,f)->{open.setBackground(rounded(Appearance.accent(this),VelaTheme.CONTROL_RADIUS));VelaFocus.card(open,f);});
+        heroWell=new FrameLayout(this);GradientDrawable heroSurface=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{0xFF363842,0xFF17181E});heroSurface.setCornerRadius(62);heroSurface.setStroke(1,0x20FFFFFF);heroWell.setBackground(heroSurface);place(root,heroWell,1230,42,288,288);heroIcon=new InputArtwork(this,"other");place(heroWell,heroIcon,50,50,188,188);
         place(root,text(t("Suas conexões","Your connections","Tus conexiones"),29,VelaTheme.WHITE),64,386,1000,54);
         HorizontalScrollView scroll=new HorizontalScrollView(this);scroll.setHorizontalScrollBarEnabled(false);scroll.setClipToPadding(false);scroll.setClipChildren(false);scroll.setFillViewport(false);LinearLayout strip=new LinearLayout(this);strip.setClipChildren(false);strip.setClipToPadding(false);strip.setOrientation(LinearLayout.HORIZONTAL);strip.setPadding(24,20,24,20);scroll.addView(strip);place(root,scroll,40,448,1704,334);
         scroll.setOnScrollChangeListener((v,x,y,ox,oy)->{if(icons!=null)icons.refreshVisible();});
@@ -55,10 +55,10 @@ final class InputsScreen extends VelaScreen {
             TvInputs.Entry entry=entries.get(i);FrameLayout card=new FrameLayout(this);card.setId(View.generateViewId());card.setFocusable(true);card.setFocusableInTouchMode(true);card.setDefaultFocusHighlightEnabled(false);card.setClipChildren(false);LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(232,294);cp.rightMargin=28;strip.addView(card,cp);cards.add(card);int index=i;
             FrameLayout well=new FrameLayout(this);well.setClipChildren(false);place(card,well,8,0,216,216);
             InputArtwork art=new InputArtwork(this,entry.model);place(well,art,43,43,130,130);if(icons!=null)icons.load(entry.model,art);
-            TextView port=text(entry.port,15,VelaTheme.SECONDARY);place(well,port,16,12,100,25);
+            TextView port=text(entry.port,15,VelaTheme.WHITE);VelaTheme.inputPort(port);place(well,port,16,12,100,25);
             TextView name=text(entry.title,21,VelaTheme.SECONDARY),status=text(TvInputs.status(entry.state),15,VelaTheme.MUTED);place(card,name,4,230,224,30);place(card,status,4,268,224,25);
             card.setContentDescription(entry.title+", "+entry.port+", "+TvInputs.status(entry.state));
-            java.util.function.Consumer<Boolean> style=f->{well.setBackground(icons.surface(entry.model,f,37));name.setTextColor(f?VelaTheme.WHITE:VelaTheme.SECONDARY);art.setAlpha(entry.state==TvInputs.DISCONNECTED?.4f:entry.state==TvInputs.STANDBY?.6f:1f);well.animate().cancel();well.animate().scaleX(f?1.045f:1).scaleY(f?1.045f:1).translationY(f?-3:0).setDuration(Visuals.duration(this,150)).start();};style.accept(false);
+            java.util.function.Consumer<Boolean> style=f->{well.setBackground(icons.surface(entry.model,f,37));name.setTextColor(f?VelaTheme.WHITE:VelaTheme.SECONDARY);art.setAlpha(entry.state==TvInputs.DISCONNECTED?.4f:entry.state==TvInputs.STANDBY?.6f:1f);VelaFocus.card(well,f);};style.accept(false);
             card.setOnFocusChangeListener((v,f)->{style.accept(f);if(f){selected=entry.key;column=index;feature(entry);}});card.setOnClickListener(v->launch(entry));card.setOnLongClickListener(v->{consumeConfirmUp=true;choose(entry);return true;});
             if(entry.key.equals(selected)){restore=card;initial=entry;}
         }

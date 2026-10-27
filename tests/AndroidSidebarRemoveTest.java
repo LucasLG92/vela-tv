@@ -30,7 +30,7 @@ public class AndroidSidebarRemoveTest extends Instrumentation {
         check(menu()&&field(home,"reorderOriginal")==null,"Initial held release activated an action");
     }
     private void chooseRemove()throws Exception{key(KeyEvent.KEYCODE_DPAD_RIGHT);check((Integer)field(home,"menuAction")==1&&((View)field(home,"shortcutRemove")).hasFocus(),"Remove action cannot be selected");}
-    private boolean tile(View view,String label){if(view.isClickable()&&label.contentEquals(view.getContentDescription()==null?"":view.getContentDescription()))return true;if(view instanceof ViewGroup)for(int i=0;i<((ViewGroup)view).getChildCount();i++)if(tile(((ViewGroup)view).getChildAt(i),label))return true;return false;}
+    private void fixedUncheckedHome(){try{fixed().get(0).performClick();}catch(Exception e){throw new RuntimeException(e);}}
     private void installed(Context c,String pkg,String path,boolean enabled)throws Exception{ApplicationInfo info=c.getPackageManager().getApplicationInfo(pkg,0);check(info.sourceDir.equals(path)&&info.enabled==enabled&&HomeApps.launchIntent(c.getPackageManager(),pkg)!=null,"Removing a shortcut changed or uninstalled the app");}
     public void onCreate(Bundle args){super.onCreate(args);start();}
     public void onStart(){
@@ -48,7 +48,10 @@ public class AndroidSidebarRemoveTest extends Instrumentation {
             Bitmap shot=getUiAutomation().takeScreenshot();check(shot!=null,"No context action screenshot");try(OutputStream out=new FileOutputStream(new File(c.getExternalFilesDir(null),"sidebar-remove-menu.png"))){shot.compress(Bitmap.CompressFormat.PNG,100,out);}finally{shot.recycle();}
             key(KeyEvent.KEYCODE_DPAD_CENTER);List<String> expected=new ArrayList<>(Arrays.asList(original));expected.remove(0);
             check(!menu()&&Arrays.equals(expected.toArray(new String[0]),SidebarApps.slots(c))&&Arrays.equals(SidebarApps.slots(c),displayed()),"Removing first shortcut changed another entry or did not refresh home");check(apps().get(0).hasFocus(),"Focus did not move to next shortcut");installed(c,app,source,enabled);
-            View all=fixed().get(4);ui(()->all.performClick());check(tile((View)field(home,"overlay"),"Plex"),"Removed app is missing from All Apps");key(KeyEvent.KEYCODE_BACK);
+            View all=fixed().get(4);ui(()->all.performClick());InstalledAppsGrid grid=null;long until=SystemClock.uptimeMillis()+15_000;
+            while(SystemClock.uptimeMillis()<until){waitForIdleSync();HomeScreenHost host=(HomeScreenHost)field(home,"panels");if(host!=null&&host.screen instanceof AppsScreen){grid=(InstalledAppsGrid)field(host.screen,"grid");if(grid!=null&&grid.getCount()>0)break;}Thread.sleep(70);}
+            boolean found=false;if(grid!=null)for(int i=0;i<grid.getCount();i++)found|=((SidebarApps.Choice)grid.getItemAtPosition(i)).pkg.equals(app);
+            check(found,"Removed app is missing from integrated All Apps");ui(()->fixedUncheckedHome());
             SidebarApps.add(c,app);ui(()->home.resume());focus(app);holdOK();chooseRemove();key(KeyEvent.KEYCODE_DPAD_CENTER);
             check(Arrays.equals(expected.toArray(new String[0]),SidebarApps.slots(c))&&apps().get(apps().size()-1).hasFocus(),"Removing last shortcut lost order or previous focus");installed(c,app,source,enabled);
             prefs.edit().putString("slots",new org.json.JSONArray(Collections.singletonList(app)).toString()).commit();ui(()->home.resume());focus(app);holdOK();chooseRemove();key(KeyEvent.KEYCODE_DPAD_CENTER);

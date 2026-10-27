@@ -31,7 +31,7 @@ final class VelaWorkspace {
     private static boolean allowed(String n,String k){
         if(n.equals("vela-layout"))return k.equals("document");
         if(n.equals("vela-epg-fixes"))return k.equals("entries");
-        if(n.equals("visuals"))return k.matches("appearance_(color|size|backdrop)")||Arrays.asList("light","reducedMotion").contains(k);
+        if(n.equals("visuals"))return k.matches("appearance_(color|size|backdrop|style)")||Arrays.asList("light","reducedMotion").contains(k);
         if(n.equals("sidebar_apps"))return k.equals("slots");
         if(n.equals("input_cards"))return k.matches("device_[a-f0-9]{64}");
         if(n.equals("lite_home"))return Arrays.asList("black_background","show_clock","reduce_motion","start_section").contains(k);

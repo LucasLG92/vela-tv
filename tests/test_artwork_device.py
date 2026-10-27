@@ -7,6 +7,7 @@ import argparse,os,subprocess
 parser=argparse.ArgumentParser()
 parser.add_argument('--serial',required=True)
 parser.add_argument('--adb-port',default='5037')
+parser.add_argument('--browse-only',action='store_true',help='Check Home TV browsing and remote UI without opening a stream')
 parser.add_argument('--no-captures',action='store_true',help='Skip optional live-video captures on emulators whose compositor cannot capture a decoder surface')
 parser.add_argument('--test',choices=['tv-personalization','channel-controls','artwork','up-next','ambient','weather','sidebar','reorder','remove','catalog','home-status','account','personalization','live-tv','tv-progress','continue-watching','appearance','gallery','apps-grid','updates','update-permission','jellyfin','watched','catalog-filters','xtream','m3u','tv-logos','tv-redesign','tv-timeline','tv-fallback','plex-link','home-tv','integrated-settings','inputs','integrated-update-permission'],default='artwork')
 parser.add_argument('--jellyfin-fixture',help='Private JSON for an owned loopback Jellyfin fixture; emulator only')
@@ -50,7 +51,7 @@ try:
     if args.test in ('update-permission','integrated-update-permission'):
         from update_permission_flow import run_flow
         result=run_flow(adb,integrated=args.test=='integrated-update-permission')+'\nINSTRUMENTATION_CODE: -1\n'
-    else:result=subprocess.check_output(list(map(str,adb+['shell','am','instrument','-w']+(['-e','captures','false'] if args.no_captures else [])+['tv.vela.launcher.tests/tv.vela.launcher.'+test_class])),timeout=240).decode('utf-8','replace')
+    else:result=subprocess.check_output(list(map(str,adb+['shell','am','instrument','-w']+(['-e','captures','false'] if args.no_captures else [])+(['-e','browse-only','true'] if args.browse_only else [])+['tv.vela.launcher.tests/tv.vela.launcher.'+test_class])),timeout=240).decode('utf-8','replace')
     (out/('result-'+args.test+'.txt')).write_text(result,encoding='utf-8')
     print(result)
     assert 'INSTRUMENTATION_CODE: -1' in result,'Artwork lifecycle test failed'

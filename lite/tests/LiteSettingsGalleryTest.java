@@ -28,9 +28,9 @@ public final class LiteSettingsGalleryTest extends Instrumentation {
         int[] pages={0,1,2,3,4};String[] files={"04-ajustes","06-aspecto","05-actualizaciones","07-sistema","08-informacion"};
         for(int i=0;i<pages.length;i++){final View category=categories[pages[i]];ui(category::requestFocus);check(category.hasFocus(),"Category focus missing");shot(files[i]);key(KeyEvent.KEYCODE_DPAD_RIGHT);check(!category.hasFocus(),"Options could not be reached");key(KeyEvent.KEYCODE_DPAD_LEFT);check(category.hasFocus(),"Left skipped category");}
         key(KeyEvent.KEYCODE_DPAD_DOWN);check(categories[4].hasFocus(),"Category navigation overflowed");
-        ui(categories[1]::requestFocus);key(KeyEvent.KEYCODE_DPAD_RIGHT);for(int i=0;i<5;i++)key(KeyEvent.KEYCODE_DPAD_DOWN);key(KeyEvent.KEYCODE_DPAD_CENTER);
+        ui(categories[1]::requestFocus);key(KeyEvent.KEYCODE_DPAD_RIGHT);List<View> options=(List<View>)field(settings,"controls");ui(options.get(options.size()-1)::requestFocus);key(KeyEvent.KEYCODE_DPAD_CENTER);
         check((Integer)field(settings,"page")==1&&(Boolean)field(settings,"languages")&&((List<?>)field(settings,"controls")).size()==7,"Opening Language lost its page while replacing focused rows");
-        key(KeyEvent.KEYCODE_BACK);check((Integer)field(settings,"page")==1&&!(Boolean)field(settings,"languages")&&((List<?>)field(settings,"controls")).size()==6,"Returning from Language lost Appearance");
+        key(KeyEvent.KEYCODE_BACK);check((Integer)field(settings,"page")==1&&!(Boolean)field(settings,"languages")&&((List<?>)field(settings,"controls")).size()==7,"Returning from Language lost Appearance");
         result.putString("result","PASS five native 4K settings captures, category/options remote navigation, bottom boundary and remote opening/back from the seven-choice language picker without reentrant focus resets. No account, network, TV provider or system changes.");
     }catch(Throwable failure){result.putString("error",android.util.Log.getStackTraceString(failure));}finally{if(activity!=null)ui(activity::finish);for(Map.Entry<SharedPreferences,Map<String,?>> entry:saved.entrySet())restore(entry.getKey(),entry.getValue());}finish(result.containsKey("error")?1:-1,result);}
 }

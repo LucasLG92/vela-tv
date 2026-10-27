@@ -37,7 +37,7 @@ class SettingsScreen extends VelaScreen {
         if(getIntent().hasExtra("page")){
             int target=getIntent().getIntExtra("page",0);getIntent().removeExtra("page");
             returnToSetup=getIntent().getBooleanExtra("fromSetup",false);getIntent().removeExtra("fromSetup");
-            if(target==1||target==3||target==4||target==9||target==11||target==14||target==15||target==17||target==21||target==22||target==23){entryPage=target;view.render(target);}
+            if(target==1||target==3||target==4||target==9||target==11||target==14||target==15||target==17||target==21||target==22||target==23||target==25){entryPage=target;view.render(target);}
         }
         else if(view.page==14||view.page==15||view.page==21||view.page==22)view.render(view.page);
         if(getIntent().getBooleanExtra("plex",false)){getIntent().removeExtra("plex");startActivity(new Intent(this,PlexLinkActivity.class));}
@@ -73,7 +73,7 @@ class SettingsScreen extends VelaScreen {
         private final FrameLayout stage,pane,surface;
         private ScrollView scroll;private int contentY;
         private final View[] categories=new View[8];private final TextView[] categoryText=new TextView[8];private final CategoryIcon[] categoryIcons=new CategoryIcon[8];
-        private final int[] destinations={22,2,6,14,11,23,0,4};
+        private final int[] destinations={22,17,6,14,11,23,0,4};
         private final String[] categoryTitles={Ui.tr("Televisão","Television","Televisión"),Ui.tr("Aspecto","Appearance","Aspecto"),Ui.tr("Protetor de tela","Screensaver","Salvapantallas"),Ui.tr("Contas","Accounts","Cuentas"),Ui.tr("Menu","Menu","Menú"),Ui.tr("Atualizações","Updates","Actualizaciones"),Ui.tr("Sistema","System","Sistema"),Ui.tr("Informações","Information","Información")};
         private boolean building=true,categoryBrowsing;private UpdatesScreen updates;private Bundle updateState;
         private FrameLayout rowHost;
@@ -85,7 +85,7 @@ class SettingsScreen extends VelaScreen {
         private JSONObject state=new JSONObject();
         private boolean active,closed,reading,observedBusy;
         private long pendingAt;
-        private int page,returnRow,searchGeneration,savedRow=-1;
+        private int page,returnRow,searchGeneration,savedRow=-1;private final int[] focusMemory=new int[26];
         private int shortcutSlot,pickerFocus;
         private EditText cityInput;
         private String cityQuery="";
@@ -96,12 +96,12 @@ class SettingsScreen extends VelaScreen {
             super(a);activity=a;setClipChildren(false);
             if(!activity.navigation.embedded())setBackgroundColor(VelaTheme.BACKGROUND);
             stage=new FrameLayout(a);stage.setClipChildren(false);addView(stage,new LayoutParams(1790,940));
-            ImageView mark=new ImageView(a);mark.setImageResource(R.drawable.vela_mark);put(stage,mark,86,26,48,48);
-            put(stage,text("Vela",31,WHITE,Ui.semibold),152,20,320,62);
-            put(stage,text(VelaWorkspace.profiles(a).get(VelaWorkspace.active(a)),20,VelaTheme.SECONDARY,Ui.medium),86,92,378,42);
-            surface=new FrameLayout(a);surface.setBackground(round(VelaTheme.PANEL,VelaTheme.PANEL_RADIUS));put(stage,surface,520,12,1218,904);
-            heading=text("",38,WHITE,Ui.displaySemibold);put(surface,heading,42,26,1134,72);
-            detail=text("",23,VelaTheme.SECONDARY,Ui.regular);detail.setMaxLines(2);detail.setEllipsize(android.text.TextUtils.TruncateAt.END);detail.setGravity(Gravity.TOP);put(surface,detail,42,106,1134,66);
+            ImageView mark=new ImageView(a);mark.setImageResource(R.drawable.vela_mark);put(stage,mark,86,30,40,40);
+            put(stage,text("Vela",28,WHITE,Ui.semibold),144,24,320,52);
+            put(stage,text(VelaWorkspace.profiles(a).get(VelaWorkspace.active(a)),18,VelaTheme.SECONDARY,Ui.medium),86,84,378,34);
+            surface=new FrameLayout(a);surface.setBackground(VelaTheme.panel());put(stage,surface,520,12,1218,904);
+            heading=text("",36,WHITE,Ui.displaySemibold);put(surface,heading,42,30,1134,62);
+            detail=text("",21,VelaTheme.SECONDARY,Ui.regular);detail.setMaxLines(2);detail.setEllipsize(android.text.TextUtils.TruncateAt.END);detail.setGravity(Gravity.TOP);put(surface,detail,42,106,1134,66);
             pane=new FrameLayout(a);pane.setClipChildren(true);put(surface,pane,42,194,1134,622);
             status=text("",18,VelaTheme.SECONDARY,Ui.regular);status.setMaxLines(2);put(surface,status,48,826,1118,64);
             for(int i=0;i<categories.length;i++){
@@ -115,11 +115,11 @@ class SettingsScreen extends VelaScreen {
             TextView hint=text("← "+Ui.tr("Menu do Vela","Vela menu","Menú de Vela")+"\n→ "+Ui.tr("Opções","Options","Opciones"),17,VelaTheme.MUTED,Ui.regular);hint.setMaxLines(2);put(stage,hint,86,852,380,64);
             building=false;render(22);categories[0].requestFocus();
         }
-        private int categoryFor(int value){if(value==22)return 0;if(value==24||value==2||value>=17&&value<=20)return 1;if(value>=6&&value<=10)return 2;if(value==3||value>=14&&value<=16||value==21)return 3;if(value==11||value==12)return 4;if(value==23)return 5;if(value==4||value==5)return 7;return 6;}
+        private int categoryFor(int value){if(value==22||value==25)return 0;if(value==24||value==2||value>=17&&value<=20)return 1;if(value>=6&&value<=10)return 2;if(value==3||value>=14&&value<=16||value==21)return 3;if(value==11||value==12)return 4;if(value==23)return 5;if(value==4||value==5)return 7;return 6;}
         private void skin(){int selected=categoryFor(page);for(int i=0;i<categories.length;i++){boolean focus=categories[i].hasFocus();categories[i].setBackground(round(focus?Appearance.accent(activity):selected==i?VelaTheme.SELECTED:Color.TRANSPARENT,VelaTheme.CONTROL_RADIUS));categoryText[i].setTextColor(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);categoryIcons[i].color(focus?INK:selected==i?WHITE:VelaTheme.SECONDARY);}}
         private void tools(int page){if(activity.owner instanceof VelaHub.Owner)((VelaHub.Owner)activity.owner).tools(page);else activity.startActivity(new Intent(activity,HomeActivity.class).putExtra("velaTools",page));}
         private void navigation(){View target=activity.navigation.navigationTarget(activity);if(target!=null)target.requestFocus();else activity.finish();}
-        private void focusOptions(){List<View> focusable=pane.getFocusables(FOCUS_FORWARD);if(!focusable.isEmpty())focusable.get(0).requestFocus();}
+        private void focusOptions(){List<View> focusable=pane.getFocusables(FOCUS_FORWARD);if(!focusable.isEmpty())focusable.get(Math.min(page<focusMemory.length?focusMemory[page]:0,focusable.size()-1)).requestFocus();}
         boolean showingUpdates(){return updates!=null&&page==23;}
         private void closeUpdates(){if(updates!=null){updates.destroy();updates=null;}updateState=null;}
         private void openUpdates(){
@@ -145,7 +145,7 @@ class SettingsScreen extends VelaScreen {
             TextView right=text(value,22,DIM,Ui.regular);right.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.setSingleLine(true);right.setEllipsize(android.text.TextUtils.TruncateAt.END);put(row,right,710,0,398,height);
             TextView sub=text(secondary,19,DIM,Ui.regular);sub.setSingleLine(true);sub.setEllipsize(android.text.TextUtils.TruncateAt.END);if(!secondary.isEmpty())put(row,sub,24,58,650,32);
             rows.add(row);labels.add(name);values.add(right);row.setBackground(VelaTheme.row(false,Appearance.accent(activity)));
-            row.setNextFocusLeftId(categories[categoryFor(page)].getId());row.setOnFocusChangeListener((v,focused)->{row.setBackground(VelaTheme.row(focused,Appearance.accent(activity)));name.setTextColor(focused?INK:WHITE);right.setTextColor(focused?0xFF60636C:DIM);sub.setTextColor(focused?0xFF656874:DIM);if(focused)status.setText(description);});
+            row.setNextFocusLeftId(categories[categoryFor(page)].getId());row.setOnFocusChangeListener((v,focused)->{row.setBackground(VelaTheme.row(focused,Appearance.accent(activity)));name.setTextColor(focused?INK:WHITE);right.setTextColor(focused?0xFF60636C:DIM);sub.setTextColor(focused?0xFF656874:DIM);if(focused){status.setText(description);if(page<focusMemory.length)focusMemory[page]=rows.indexOf(row);}});
             row.setOnClickListener(v->{action.run();activity.changed();});
         }
         void render(int next){
@@ -153,7 +153,7 @@ class SettingsScreen extends VelaScreen {
             if(page==10&&next!=10){searchGeneration++;if(searchJob!=null)searchJob.cancel(true);}
             Bundle previous=next==23&&updates!=null?updates.save():updateState;closeUpdates();updateState=previous;
             page=next;pane.removeAllViews();rows.clear();labels.clear();values.clear();status.setText("");pickerFocus=0;contentY=0;
-            scroll=new ScrollView(activity);scroll.setFillViewport(false);scroll.setClipToPadding(true);scroll.setVerticalScrollBarEnabled(false);scroll.setFocusable(false);put(pane,scroll,0,0,1134,622);rowHost=new FrameLayout(activity);scroll.addView(rowHost,new ScrollView.LayoutParams(1134,LayoutParams.WRAP_CONTENT));String[] captions={L10n.text("Choose your live TV view and connect your channels."),L10n.text("Colour, posters, backgrounds and performance."),L10n.text("A break with your style, clock and weather."),L10n.text("Your libraries and services, connected."),L10n.text("Choose the apps in your sidebar."),"Vela "+version(),L10n.text("Your home screen and television controls."),L10n.text("Version, settings and licences.")};detail.setText(captions[categoryFor(page)]);skin();
+            scroll=new ScrollView(activity);scroll.setFillViewport(false);scroll.setClipToPadding(true);scroll.setVerticalScrollBarEnabled(true);scroll.setScrollbarFadingEnabled(false);scroll.setScrollBarSize(3);scroll.setFocusable(false);put(pane,scroll,0,0,1134,610);rowHost=new FrameLayout(activity);scroll.addView(rowHost,new ScrollView.LayoutParams(1134,LayoutParams.WRAP_CONTENT));String[] captions={L10n.text("Choose your live TV view and connect your channels."),L10n.text("Colour, posters, backgrounds and performance."),L10n.text("A break with your style, clock and weather."),L10n.text("Your libraries and services, connected."),L10n.text("Choose the apps in your sidebar."),"Vela "+version(),L10n.text("Your home screen and television controls."),L10n.text("Version, settings and licences.")};detail.setText(captions[categoryFor(page)]);skin();
             if(page==0){
                 section(Ui.tr("SISTEMA","SYSTEM","SISTEMA"),0);
                 row(L10n.text("Home screen"),mode(),0,L10n.text("Your television, your way."),L10n.text("Choose Vela as your home screen or return to your TV's original home."),()->open(1,0));
@@ -168,6 +168,11 @@ class SettingsScreen extends VelaScreen {
                 row("Vela",isVela()?"✓":L10n.text("Activate"),L10n.text("Home screen, screensaver and recovery."),54,L10n.text("Your personal home screen."),L10n.text("Enable Vela and its screensaver. Vela saves a route back to the TV's original home before completing setup."),()->switchHome(true));
                 row("Original",!isVela()?"✓":"",L10n.text("Your television's factory home screen."),178,L10n.text("You can always go back."),L10n.text("Restore your television's original home screen and screensaver."),()->switchHome(false));
                 note(L10n.text("The change can take a few seconds. If your TV requests permission, select Always allow and confirm with the remote."),338);
+            }else if(page==25){
+                section(L10n.text("Match content frame rate"),0);detail.setText(L10n.text("Smoother video on compatible displays."));
+                String description=L10n.text("Applies to Vela's network player. Display switching may briefly blank the screen. External apps, HDMI and antenna keep their own display controls.");
+                for(int i=0;i<3;i++){final int mode=i;row(VelaFrameRate.name(i),VelaFrameRate.mode(activity)==i?"✓":"",0,L10n.text("Match content frame rate"),"",()->{VelaFrameRate.mode(activity,mode);render(25);rows.get(mode).requestFocus();});}
+                note(description,0);
             }else if(page==24){
                 section(L10n.text("LANGUAGE"),0);
                 for(int i=0;i<L10n.CODES.length;i++){final String code=L10n.CODES[i];String name=i==0?L10n.text("System language"):L10n.NAMES[i];row(name,code.equals(L10n.choice())?"✓":"",0,L10n.text("Make Vela feel at home."),L10n.text("Applies to every Vela menu. App names, channels and your library keep their original names."),()->{if(!L10n.choose(activity,code)){toast(L10n.text("Could not save language."));return;}Ui.init(activity);activity.changed();activity.owner.recreate();});}
@@ -183,13 +188,14 @@ class SettingsScreen extends VelaScreen {
                 row(Ui.tr("Personalizar aparência","Customize appearance","Personalizar apariencia"),"›",684,Ui.tr("Seu estilo.","Your style.","Tu estilo."),Ui.tr("Escolha cor, tamanho dos cartazes e intensidade do fundo. O desenho original fica disponível.","Choose color, poster size and background intensity. The original design stays available.","Elige color, tamaño de carteles e intensidad del fondo. El diseño original sigue disponible."),()->open(17,3));
                 note(L10n.text("Image cache: up to ")+Visuals.cacheKb(activity)/1024+L10n.text(" MB. Cleared when you leave Home. No videos or animated backgrounds play on Home."),440);
             }else if(page==17){
-                section(Ui.tr("APARÊNCIA","APPEARANCE","APARIENCIA"),0);
+                section(Ui.tr("APARÊNCIA","APPEARANCE","APARIENCIA"),0);row(L10n.text("Visual styles"),VelaStyle.name(VelaStyle.selected(activity)),0,L10n.text("A complete look, with a preview"),L10n.text("Cinema, Compact or Minimal. Review before saving."),()->{if(activity.owner instanceof VelaHub.Owner)((VelaHub.Owner)activity.owner).toolsStyles();else tools(6);});
                 row(Ui.tr("Cor de destaque","Accent color","Color de acento"),Appearance.colorName(Appearance.colorIndex(activity)),54,Ui.tr("Um toque de cor.","A touch of color.","Un toque de color."),Ui.tr("A cor aparece na seleção do menu, na ação principal, no progresso e nos Ajustes.","Color appears in menu selection, the main action, progress and Settings.","El color aparece en la selección del menú, la acción principal, el progreso y los Ajustes."),()->render(18));
                 row(Ui.tr("Tamanho dos cartazes","Poster size","Tamaño de carteles"),Appearance.sizeName(Appearance.sizeIndex(activity)),134,Ui.tr("Seu cinema, na sua medida.","Your cinema, your size.","Tu cine, a tu medida."),Ui.tr("Três tamanhos com a proporção original. As páginas continuam limitadas a 24 títulos.","Three sizes with the original aspect ratio. Pages remain limited to 24 titles.","Tres tamaños con su proporción original. Las páginas siguen limitadas a 24 títulos."),()->render(19));
                 row(Ui.tr("Intensidade do fundo","Background intensity","Intensidad del fondo"),Appearance.backdropName(Appearance.backdropIndex(activity)),214,Ui.tr("O ambiente que você quiser.","Set the atmosphere.","El ambiente que quieras."),Ui.tr("Escureça o fundo para ler melhor ou deixe mais visível a imagem original.","Dim the background for reading or reveal more of the original artwork.","Oscurece el fondo para leer mejor o deja más visible la imagen original."),()->render(20));
-                row(Ui.tr("Restaurar aparência","Reset appearance","Restaurar apariencia"),"›",374,Ui.tr("Voltar ao desenho original.","Return to the original design.","Volver al diseño original."),Ui.tr("Restaura apenas cor, cartazes e fundo. Conserva contas, apps, clima e desempenho.","Resets only color, posters and background. Keeps accounts, apps, weather and performance.","Restaura solo color, carteles y fondo. Conserva cuentas, apps, clima y rendimiento."),()->{Appearance.reset(activity);render(17);rows.get(3).requestFocus();});
+                row(Ui.tr("Restaurar aparência","Reset appearance","Restaurar apariencia"),"›",374,Ui.tr("Voltar ao desenho original.","Return to the original design.","Volver al diseño original."),Ui.tr("Restaura apenas cor, cartazes e fundo. Conserva contas, apps, clima e desempenho.","Resets only color, posters and background. Keeps accounts, apps, weather and performance.","Restaura solo color, carteles y fondo. Conserva cuentas, apps, clima y rendimiento."),()->{Appearance.reset(activity);render(17);rows.get(4).requestFocus();});
                 row(L10n.text("Reading and margins"),"›",0,L10n.text("Comfortable from the sofa."),L10n.text("Text size, guide density, contrast and screen margins."),()->tools(2));
                 row(L10n.text("Language"),L10n.name(),0,L10n.text("Vela in your language."),L10n.text("Choose a language or follow this television's system language."),()->render(24));
+                row(L10n.text("Picture and performance"),"›",0,L10n.text("The picture you prefer."),L10n.text("Colour, posters, backgrounds and performance."),()->open(2,7));
                 note(Ui.tr("As mudanças aparecem ao voltar ao início. Sem fundos adicionais, vídeos ou animações permanentes.","Changes appear when you return home. No additional backgrounds, videos or continuous animations.","Los cambios aparecen al volver al inicio. Sin fondos adicionales, vídeos ni animaciones permanentes."),520);
             }else if(page==18||page==19||page==20){
                 String key=page==18?"color":page==19?"size":"backdrop";int current=page==18?Appearance.colorIndex(activity):page==19?Appearance.sizeIndex(activity):Appearance.backdropIndex(activity),count=page==18?6:3;
@@ -293,6 +299,8 @@ class SettingsScreen extends VelaScreen {
                 row(Ui.tr("Canais","Channels","Canales"),guide?"":"✓",134,Ui.tr("Seus canais em destaque.","Your channels, front and center.","Tus canales, protagonistas."),Ui.tr("Logos grandes e o programa no ar. Use as setas para cima e para baixo para mudar de categoria.","Large logos and the current programme. Use Up and Down to change category.","Logos grandes y el programa en emisión. Usa las flechas arriba y abajo para cambiar de categoría."),()->{LiveTvData.guideView(activity,false);render(22);rows.get(1).requestFocus();});
                 section(Ui.tr("SUAS FONTES","YOUR SOURCES","TUS FUENTES"),300);
                 row(Ui.tr("Listas e ajustes","Playlists and settings","Listas y ajustes"),"›",342,Ui.tr("Seus canais, conectados.","Your channels, connected.","Tus canales, conectados."),Ui.tr("Configure suas listas M3U, conta Xtream, antena e guia de programação.","Configure your M3U playlists, Xtream account, antenna and programme guide.","Configura tus listas M3U, tu cuenta Xtream, la antena y la guía de programación."),()->activity.startActivity(new Intent(activity,LiveTvActivity.class).putExtra("sources",true)));
+                section(L10n.text("Playback controls"),1);
+                row(L10n.text("Match content frame rate"),VelaFrameRate.name(VelaFrameRate.mode(activity)),0,L10n.text("Smoother video on compatible displays."),L10n.text("Off, seamless changes, or allow display switching. Applies only while Vela plays a network channel."),()->open(25,0));
                 note(Ui.tr("A vista escolhida é aplicada ao voltar à televisão.","Your chosen view applies when you return to TV.","La vista elegida se aplica al volver a la televisión."),470);
             }else if(page==21){
                 section(Ui.tr("BIBLIOTECA DO INÍCIO","HOME LIBRARY","BIBLIOTECA DE INICIO"),0);LibraryClient library=new LibraryClient(activity);PlexClient plex=new PlexClient(activity);JellyfinClient jellyfin=new JellyfinClient(activity);
@@ -394,8 +402,9 @@ class SettingsScreen extends VelaScreen {
             if(key==KeyEvent.KEYCODE_BACK&&root&&categories[categoryFor(page)].hasFocus()){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
 
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==21){if(e.getAction()==KeyEvent.ACTION_UP)render(14);return true;}
+            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==25){if(e.getAction()==KeyEvent.ACTION_UP){render(22);rows.get(3).requestFocus();}return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==24){if(e.getAction()==KeyEvent.ACTION_UP){render(17);rows.get(rows.size()-1).requestFocus();}return true;}
-            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page>=17&&page<=20)){if(e.getAction()==KeyEvent.ACTION_UP){int old=page;render(old==17?2:17);rows.get(old==17?3:old-18).requestFocus();}return true;}
+            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page>=17&&page<=20)){if(e.getAction()==KeyEvent.ACTION_UP){int old=page;render(old==17?2:17);rows.get(old==17?3:old-17).requestFocus();}return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(activity.returnToSetup||activity.returnToCaller)&&page==activity.entryPage){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page==15||page==16)){if(e.getAction()==KeyEvent.ACTION_UP)render(page==16?15:14);return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page!=0){if(e.getAction()==KeyEvent.ACTION_UP){if(page==5){render(4);rows.get(3).requestFocus();}else if(page==12){render(11);rows.get(shortcutSlot<0?SidebarApps.slots(activity).length:Math.min(shortcutSlot,rows.size()-1)).requestFocus();}else if(page==10){render(9);rows.get(1).requestFocus();}else if(page==7||page==8||page==9){int focus=page==9?4:page==8?6:0;render(6);rows.get(focus).requestFocus();}else{int parent=destinations[categoryFor(page)];render(parent);categories[categoryFor(parent)].requestFocus();}}return true;}

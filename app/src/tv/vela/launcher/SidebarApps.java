@@ -101,10 +101,17 @@ final class SidebarApps {
     static Drawable icon(Context c,String pkg){
         for(int i=0;i<3;i++)if(pkg.equals(DEFAULTS[i])){
             String file="brands/icon-"+(i==0?"plex":i==1?"youtube":"prime")+".png";
-            try(java.io.InputStream in=c.getAssets().open(file)){
-                BitmapFactory.Options options=new BitmapFactory.Options();options.inSampleSize=4;
-                Bitmap bitmap=BitmapFactory.decodeStream(in,null,options);
-                if(bitmap!=null)return new BitmapDrawable(c.getResources(),bitmap);
+            try{
+                BitmapFactory.Options options=new BitmapFactory.Options();options.inJustDecodeBounds=true;
+                try(java.io.InputStream in=c.getAssets().open(file)){BitmapFactory.decodeStream(in,null,options);}
+                int sample=1;while(Math.max(options.outWidth,options.outHeight)/sample>192)sample*=2;
+                options.inJustDecodeBounds=false;options.inSampleSize=sample;
+                Bitmap bitmap;try(java.io.InputStream in=c.getAssets().open(file)){bitmap=BitmapFactory.decodeStream(in,null,options);}
+                if(bitmap!=null){
+                    int largest=Math.max(bitmap.getWidth(),bitmap.getHeight());
+                    if(largest>96){Bitmap smaller=Bitmap.createScaledBitmap(bitmap,Math.max(1,Math.round(bitmap.getWidth()*96f/largest)),Math.max(1,Math.round(bitmap.getHeight()*96f/largest)),true);if(smaller!=bitmap)bitmap.recycle();bitmap=smaller;}
+                    return new BitmapDrawable(c.getResources(),bitmap);
+                }
             }catch(java.io.IOException ignored){}
         }
         if(pkg.isEmpty())return null;

@@ -36,6 +36,10 @@ Reorder favourites with OK and the arrow keys. Hide channels or categories, rest
 
 ## Make Lite yours
 
+Settings and tools share the home screen's continuous background, including when you expand the sidebar.
+
+![Integrated settings with continuous background](gallery/34-continuous-settings.png)
+
 Choose a black or graphite background, clock visibility, reduced focus motion and your Home destination. Adjust reading size, guide density, contrast and screen margins. Reorder or hide the Inputs, Television and Apps destinations; Settings stays accessible.
 
 Create app folders and separate local profiles. Keep a **Watch later** list of broadcasts, protect settings with a local PIN and offer visitors a separate guest space. Back up your preferences, configure them from your phone through a temporary local HTTPS session, or explicitly pair another Vela for compatible preference sync. Credentials remain on each television.

@@ -1,5 +1,35 @@
 # Changelog
 
+## Vela 1.35.0 Preview and Vela Lite 0.14.0 Preview · 2026-10-27
+
+- Both: continuous full-screen backgrounds when opening navigation and switching menu tabs. Full reuses the existing artwork and fades outside the shrinking foreground; integrated settings, live TV and tools share a stationary graphite canvas. Lite keeps its existing black/graphite choice. No extra bitmap, image cache, service or decoder.
+- Native regression coverage checks stationary background bounds, settings tabs, embedded tools, twelve language/text-size combinations per edition and cinematic artwork with expanded navigation.
+- Lite: return to the current guide after asynchronous metadata rebuilds, discarding detached focus references and retaining the selected channel.
+- Full: enter the first channel when paging down in the guide and the last when paging up, including catalog boundaries. Preserve selection when programme data arrives. Shared timeline data resets stale row positions when channel identities change.
+- Full: make What to watch reachable by explicit remote focus routes from the source/organise controls and return to Guide or Watch now according to the chosen view.
+- Both: explicit EPG corrections select the matching guide logo before provider/native artwork; decoded caches include the chosen EPG identity. Restoring automatic matching restores the original logo. Existing image budgets remain unchanged.
+- Product Design audit follow-up: keep the entire inactive screen visible beside expanded navigation with one shared right-anchored View transform. Restore full size and position on return; apply immediately with reduced motion. No extra bitmap, image load or background runtime.
+- Lite: Back closes expanded navigation and restores the selected device/control; Right on the active section reuses that content instead of rebuilding it. Clear stale focus references when content is replaced.
+- Both: improve HDMI port-label contrast on bright original brand colours using the existing text node and one passive background.
+- Both: use the accurate Recent activity caption for app/input/channel reopening, with six translations.
+- Both: give expanded navigation an opaque graphite surface independent of content artwork; remove Full's sidebar scene image and blur path. Share passive native chrome, readable labels, profile hit areas and distinct active/focus states.
+- Full: separate pinned apps, bound original brand-icon decoding to 96 pixels, and position the information action after variable playback captions to prevent overlap.
+- Native navigation checks cover six languages, normal/large text, D-pad return, opacity and bounded images. Full additionally verifies the expanded panel remains identical when actual movie artwork changes.
+- Refine the shared graphite surfaces, hierarchy, remote focus and Home composition. Keep the sidebar and original provider/device artwork.
+- Open visual customization directly from Appearance in Full. Quality and performance remain available from that page.
+- Make Lite settings scrollable, remove overlapping appearance options, and retain the last focused option in settings and tools.
+- Allow remote scrolling through complete synopses; keep native detail and broadcast actions in the existing shell.
+- Align HDMI feature panels across editions, clarify focused app icons, reduce the TV discovery action and prevent the EPG time marker crossing programme text. Group next-programme information in a passive player card.
+
+- Both: previewable Cinema, Compact and Minimal styles; consistent focus; richer programme information and original EPG artwork; expanded guide selection without moving channel rows.
+- Full: native movie/series information, on-demand paged seasons and episodes, and account-bound Plex/Jellyfin collections pinned to Home with three-row/eight-title limits.
+- Both: one profile-local last-activity card and a temporary performance lab with process memory, actual frame timings, first-draw timing and a local baseline. No monitoring service.
+- Visible-only programme images, bounded transfers/decodes, cancelled work and an ephemeral 512 KiB artwork cache. Full optional XMLTV metadata has separate storage budgets; Lite retains its independent tuner runtime.
+- Full: optional content frame-rate matching, with Off, Seamless only and Allow display switching in integrated TV settings and playback controls. Device-local policy; one existing engine, bounded timestamp inference and restoration on pause/exit.
+- Direct HLS/TS/archive playback with the optional engine, same-signal system-player fallback, audio-only handling and normal archive completion.
+- Both: reusable playback rows, fewer repeated preference/track operations, preserved focus and caption intent. Full additionally avoids unchanged surface layouts and empty-caption allocations; shared transport helpers remove duplicate branches.
+- Native old/new control comparison: 164 versus 4 row views for forty option changes. This measures view creation, not whole-app RAM. Cadence, lifecycle, source fallback and existing playback/UI regressions are checked separately.
+
 ## Vela 1.30.1 Preview and Vela Lite 0.10.1 Preview · 2026-10-26
 
 - Settings and personalisation tools remain inside the launcher sidebar, with quieter graphite rows, clearer typography, consistent focus and preserved positions during asynchronous work.

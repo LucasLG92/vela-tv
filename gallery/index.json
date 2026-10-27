@@ -647,5 +647,27 @@
     "height": 2160,
     "version": "1.30.1-preview",
     "sha256": "4adb7f6b1939746cb4ff345806ba050225474319995e4ceee7af67171cc80959"
+  },
+  {
+    "file": "60-continuous-navigation.webp",
+    "title": "A full-screen backdrop behind your navigation",
+    "source": "Native 3840×2160 production views on an owned clean emulator; synthetic profiles and demonstration metadata; authorised original movie artwork. No personal accounts, provider credentials or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.35.0-preview",
+    "sha256": "1bee7f6d0a9ddfd18080f6cbd857f17f237f6c36c376ccaf01fc16f71a4d1f91"
+  },
+  {
+    "file": "61-continuous-settings.webp",
+    "title": "Settings with a continuous graphite canvas",
+    "source": "Native 3840×2160 production views on an owned clean emulator; synthetic profiles and demonstration metadata; authorised original movie artwork. No personal accounts, provider credentials or private location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.35.0-preview",
+    "sha256": "44cb8a3bacc1a14dfad00afb42bd184af1ce2e3fe10e65c04f96253572312052"
   }
 ]

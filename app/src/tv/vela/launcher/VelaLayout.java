@@ -22,7 +22,7 @@ final class VelaLayout {
     static void save(Context c,JSONObject j)throws Exception{validate(j);if(!prefs(c).edit().putString("document",j.toString()).commit())throw new IOException("Layout write failed");}
     static List<String> order(Context c){List<String> out=new ArrayList<>();JSONArray a=read(c).optJSONArray("order");for(int i=0;a!=null&&i<a.length();i++)out.add(a.optString(i));for(String key:ROWS)if(!out.contains(key))out.add(key);return out;}
     static boolean visible(Context c,String key){JSONArray a=read(c).optJSONArray("hidden");for(int i=0;a!=null&&i<a.length();i++)if(key.equals(a.optString(i)))return false;return true;}
-    static int size(Context c,String key,int fallback){JSONObject j=read(c).optJSONObject("sizes");return j==null?fallback:j.optInt(key,fallback);}
+    static int size(Context c,String key,int fallback){JSONObject j=read(c).optJSONObject("sizes");int base=key.equals("inputs")||key.equals("apps")?VelaStyle.value(c,"size",fallback):fallback;return j==null?base:j.optInt(key,base);}
     static String label(String row){return row.equals("resume")?L10n.text("Continue watching"):row.equals("recent")?L10n.text("Recently added"):row.equals("inputs")?L10n.text("HDMI inputs"):row.equals("tv")?L10n.text("Television"):row.equals("apps")?L10n.text("Apps"):L10n.text("Library");}
     static JSONArray folders(Context c){JSONArray a=read(c).optJSONArray("folders");return a==null?new JSONArray():a;}
     static void move(Context c,String key,int direction)throws Exception{List<String> a=order(c);int from=a.indexOf(key),to=Math.max(0,Math.min(a.size()-1,from+direction));Collections.swap(a,from,to);save(c,read(c).put("order",new JSONArray(a)));}

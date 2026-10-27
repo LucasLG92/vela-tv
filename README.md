@@ -50,6 +50,10 @@ Press OK on a pinned app to launch it. Press Right on YouTube to explore the row
 
 ## A home that feels like yours
 
+The sidebar opens over a continuous full-screen backdrop, with clear labels and a complete preview of your content. Settings and personalisation stay in the same graphite canvas.
+
+![Expanded navigation over a continuous full-screen backdrop](gallery/60-continuous-navigation.webp)
+
 Choose your accent, poster size and background intensity. Arrange, resize or hide home rows. Create local profiles with separate layouts, favourites and library accounts. Add a settings PIN and a separate guest space, adjust reading size and guide density, or set screen margins for your television.
 
 Configure apps, folders and favourites **from your phone** through a temporary local HTTPS session. Explicitly pair another Vela to receive compatible preferences when it opens. Accounts and provider credentials stay on each television, and conflicting local edits are kept for review.

@@ -27,8 +27,9 @@ final class LiveTvData {
         boolean antenna(){return true;}
     }
     static final class Programme {
-        final long start,end;final String title,description;
-        Programme(long start,long end,String title,String description){this.start=start;this.end=end;this.title=title;this.description=description;}
+        final long start,end;final String title,description,image;
+        Programme(long start,long end,String title,String description){this(start,end,title,description,"");}
+        Programme(long start,long end,String title,String description,String image){this.start=start;this.end=end;this.title=title;this.description=description;this.image=VelaProgrammeArt.url(image);}
         boolean current(long now){return start<=now&&end>now;}
         long remainingMinutes(long now){return current(now)?1+(end-now-1)/60:0;}
         int progress(long now){return end<=start?0:(int)Math.max(0,Math.min(1000,1000d*(now-start)/(end-start)));}
