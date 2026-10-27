@@ -2,7 +2,7 @@
 
 Vela Lite needs an Android TV/Google TV television running Android 8.0 or later. Install it on the television itself when another HDMI device handles your content; installing it on that box cannot expose the television's own ports or antenna.
 
-1. Download the Lite APK from the [official release](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.10.1-preview) and transfer it with your usual APK installation method.
+1. Download the Lite APK from the [official release](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.14.1-preview) and transfer it with your usual APK installation method.
 2. Open it and confirm installation. Android may ask to allow the file manager to install apps.
 3. Open Vela Lite. In Settings → System → Home screen, select it as the default when your firmware allows.
 4. Open Television and allow access to the TV guide. Channels must already be tuned in the manufacturer's television app.

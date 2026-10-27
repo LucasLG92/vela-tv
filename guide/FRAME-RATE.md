@@ -1,6 +1,6 @@
 # Match the video, keep your home comfortable
 
-Available in **Vela 1.35.0-preview**. Frame-rate matching is exclusive to Full Vela's network player.
+Available in **Vela 1.35.1-preview**. Frame-rate matching is exclusive to Full Vela's network player.
 
 Open **Settings → Television → Match content frame rate**, or the same option in playback controls:
 

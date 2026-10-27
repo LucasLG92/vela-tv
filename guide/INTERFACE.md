@@ -1,6 +1,6 @@
 # Interface refinement
 
-Available in **Vela 1.35.0-preview** and **Vela Lite 0.14.0-preview**.
+Available in **Vela 1.35.1-preview** and **Vela Lite 0.14.1-preview**.
 
 ## A common visual language
 

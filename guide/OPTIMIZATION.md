@@ -1,6 +1,6 @@
 # Optimisation pass: playback and shared controls
 
-Available in **Vela 1.35.0-preview** and **Vela Lite 0.14.0-preview**.
+Available in **Vela 1.35.1-preview** and **Vela Lite 0.14.1-preview**.
 
 The left navigation, graphite theme and existing source/library behaviour remain the foundation. Full adds optional [content frame-rate matching](FRAME-RATE.md); Lite keeps its native tuner and excludes the Full playback engine.
 

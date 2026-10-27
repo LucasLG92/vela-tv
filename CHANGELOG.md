@@ -6,8 +6,6 @@
 - Reserve the in-app Vela mark for the main Settings header; use a neutral profile affordance in Lite and text-only personalisation headers.
 - Refine the existing native vector identity and matching Android launcher assets without adding raster artwork, a cache or background work.
 
-## Vela 1.35.0 Preview and Vela Lite 0.14.0 Preview · 2026-10-27
-
 - Both: continuous full-screen backgrounds when opening navigation and switching menu tabs. Full reuses the existing artwork and fades outside the shrinking foreground; integrated settings, live TV and tools share a stationary graphite canvas. Lite keeps its existing black/graphite choice. No extra bitmap, image cache, service or decoder.
 - Native regression coverage checks stationary background bounds, settings tabs, embedded tools, twelve language/text-size combinations per edition and cinematic artwork with expanded navigation.
 - Lite: return to the current guide after asynchronous metadata rebuilds, discarding detached focus references and retaining the selected channel.
