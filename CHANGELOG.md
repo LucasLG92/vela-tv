@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.37.1-preview — 2026-10-28
+
+- Full: fix local live pause startup for redirected HLS sources. Follow bounded media redirects and resolve all relative media addresses against the final playlist location. Preserve account transport, normal TLS validation, disk limits and one-player behaviour.
+- Add a native regression that fails with the published 1.37.0 buffer and passes with the fix. Check playlist, segment and initialisation URLs, redirect loops, invalid schemes and cleanup.
+- Lite remains at 0.16.0; no change to antenna playback.
+
 ## 1.37.0-preview / Lite 0.16.0-preview — 2026-10-28
 
 - Learn a remote button in Settings → System → Remote shortcuts, then choose separate short and long press actions.

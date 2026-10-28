@@ -4,7 +4,7 @@ import argparse,os,subprocess,shutil,re
 
 p=argparse.ArgumentParser()
 p.add_argument('--serial',required=True);p.add_argument('--adb-port',default='5038')
-p.add_argument('--lite',action='store_true');p.add_argument('--test',choices=['shared','library','uiux','navigation','tv-fixes','identity','recent-channel','voice','home-composition','remote'],default='shared')
+p.add_argument('--lite',action='store_true');p.add_argument('--test',choices=['shared','library','uiux','navigation','tv-fixes','identity','recent-channel','voice','home-composition','remote','hls-redirect'],default='shared')
 p.add_argument('--art',type=Path,required=True);p.add_argument('--fixture',default='');p.add_argument('--language',default='es')
 a=p.parse_args();assert not(a.lite and a.test in ('library','home-composition'))
 repo=Path(__file__).resolve().parents[1];root=repo/'lite' if a.lite else repo
@@ -14,7 +14,7 @@ exe='.exe' if os.name=='nt' else '';bat='.bat' if os.name=='nt' else ''
 adb=[sdk/('platform-tools/adb'+exe),'-P',a.adb_port,'-s',a.serial]
 def run(args):return subprocess.run(list(map(str,args)),check=True)
 assert subprocess.check_output(list(map(str,adb+['shell','getprop','ro.kernel.qemu']))).strip()==b'1','Owned emulator required'
-cls={'shared':'AndroidRefinementTest','library':'AndroidLibraryDesignTest','uiux':'AndroidUiUxTest','navigation':'AndroidNavigationTest','tv-fixes':'AndroidTvRegressionTest','identity':'AndroidIdentityTest','recent-channel':'AndroidRecentChannelTest','voice':'AndroidVoiceTest','home-composition':'AndroidHomeCompositionTest','remote':'AndroidRemoteTest'}[a.test]
+cls={'shared':'AndroidRefinementTest','library':'AndroidLibraryDesignTest','uiux':'AndroidUiUxTest','navigation':'AndroidNavigationTest','tv-fixes':'AndroidTvRegressionTest','identity':'AndroidIdentityTest','recent-channel':'AndroidRecentChannelTest','voice':'AndroidVoiceTest','home-composition':'AndroidHomeCompositionTest','remote':'AndroidRemoteTest','hls-redirect':'AndroidHlsRedirectTest'}[a.test]
 if a.lite and a.test=='tv-fixes':cls='LiteTvRegressionTest'
 if a.lite and a.test=='recent-channel':cls='LiteRecentChannelTest'
 out=root/('out/refinement-'+a.test);(out/'classes').mkdir(parents=True,exist_ok=True)

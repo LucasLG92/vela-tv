@@ -3,17 +3,17 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "1.37.0-preview",
-      "code": 71,
-      "tag": "v1.37.0-preview",
-      "title": "Vela 1.37.0 Preview \u00b7 Your remote, your shortcuts",
-      "file": "Vela-1.37.0-preview.apk",
+      "version": "1.37.1-preview",
+      "code": 72,
+      "tag": "v1.37.1-preview",
+      "title": "Vela 1.37.1 Preview \u00b7 Reliable live pause startup",
+      "file": "Vela-1.37.1-preview.apk",
       "size": 4472479,
-      "sha256": "3090d52784b387e284508398acdcd06e588286bb0417c3c76933f832b0ba8cb8",
-      "blob_sha": "9fd367d97f3ecf5a08e73cc1a9af1bf437f8a429",
+      "sha256": "90c608be787f0ac5b88297aeff9030554caeb09d009a3655a5fbafa97ead0b72",
+      "blob_sha": "bfd623b94ea96d7fa5d072ef6f5da16e0bd8c72e",
       "chunks": [
         {
-          "sha": "af41f540fe283ac49132ace25680941f1fc8d13a",
+          "sha": "ec76ccc428bf47c9b3fe1ed84befcebf9c61e4f2",
           "size": 524288
         },
         {
@@ -25,31 +25,31 @@
           "size": 524288
         },
         {
-          "sha": "c442850f4798c0f7ea5db42c7c7a255eac1fa70f",
+          "sha": "c64135c0c00123b6d8373e1e00d5a88e75266504",
           "size": 524288
         },
         {
-          "sha": "dc43ba85e0b49890e00d5d81e7e50364b95b1d44",
+          "sha": "d6b879ed95e1c74df5c4d4af911cb062a45e8c6c",
           "size": 524288
         },
         {
-          "sha": "cc6681e9cfcd2d78815e7698cf5ed7dbfac27bac",
+          "sha": "f3f6a7f020a231c1342ddce2cc1e004e7afb3cc6",
           "size": 524288
         },
         {
-          "sha": "58e5107556ff2c2a18988e108247ea1919479b1d",
+          "sha": "3bbcd6af692c5d6755b6618f0f5df0c39bf499e9",
           "size": 524288
         },
         {
-          "sha": "48d5c96c9993d93f45c288f7d81e871074ce7274",
+          "sha": "cd92208a199aa5c1e60a0a38624f1c2173dab861",
           "size": 524288
         },
         {
-          "sha": "b8b29eaaf5f1d0471e8e12ac7100fe03461fab44",
+          "sha": "7790584638d7cd4132404be11b2dbaab4a558d8b",
           "size": 278175
         }
       ],
-      "notes": "guide/releases/1.37.0-preview.md"
+      "notes": "guide/releases/1.37.1-preview.md"
     },
     {
       "package": "tv.vela.launcher.lite",
