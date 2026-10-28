@@ -49,8 +49,8 @@ def verify_apk(path,item):
     found=re.search(r"^package: name='([^']+)' versionCode='(\d+)' versionName='([^']+)'",badging,re.M)
     require(found is not None and found.groups()==(item['package'],str(item['code']),item['version']),'Compiled APK identity/version mismatch')
 
-def gh(*args,missing=False):
-    done=subprocess.run(['gh',*args],capture_output=True)
+def gh(*args,missing=False,body=None):
+    done=subprocess.run(['gh',*args],capture_output=True,input=None if body is None else json.dumps(body).encode('utf-8'))
     if done.returncode:
         if missing and b'HTTP 404' in done.stderr:return None
         raise RuntimeError('GitHub command failed: '+done.stderr.decode('utf-8','replace')[:1200])
@@ -64,7 +64,21 @@ def find_release(tag):
     release=api('releases/tags/'+tag,missing=True)
     if release is None:
         # Draft releases need not have a Git tag yet; resolve them by release ID.
-        release=next((r for r in api('releases?per_page=100') if r['tag_name']==tag),None)
+        for page in range(1,21):
+            rows=api('releases?per_page=100'+('' if page==1 else '&page='+str(page)))
+            release=next((r for r in rows if r['tag_name']==tag),None)
+            if release is not None or len(rows)<100:break
+    return release
+
+def create_draft(item,source):
+    body={'tag_name':item['tag'],'target_commitish':source,'name':item['title'],
+          'body':(ROOT/item['notes']).read_text(encoding='utf-8'),
+          'draft':True,'prerelease':True,'make_latest':'false'}
+    release=json.loads(gh('api','--method','POST','-H','Accept: application/vnd.github+json',
+                          f'repos/{REPO}/releases','--input','-',body=body))
+    require(isinstance(release,dict) and isinstance(release.get('id'),int)
+            and release.get('tag_name')==item['tag'] and release.get('draft') is True,
+            'GitHub did not return the requested release draft')
     return release
 
 def asset_bytes(asset):
@@ -83,8 +97,8 @@ def publish(item,path,source):
     if release is not None and not release['draft']:
         verify_assets(release,item);print('Already published and verified:',release['html_url']);return release
     if release is None:
-        gh('release','create',item['tag'],'--repo',REPO,'--target',source,'--title',item['title'],'--notes-file',str(ROOT/item['notes']),'--draft','--prerelease','--latest=false')
-        release=find_release(item['tag'])
+        # Use the creation response, not an immediately repeated list/tag lookup.
+        release=create_draft(item,source)
     if release['target_commitish']!=source:
         require(not release['assets'],'An existing draft with assets belongs to a different source commit')
         gh('release','edit',item['tag'],'--repo',REPO,'--target',source)
