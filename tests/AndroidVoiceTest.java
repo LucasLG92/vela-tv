@@ -1,0 +1,79 @@
+package tv.vela.launcher;
+
+import android.app.*;import android.content.*;import android.graphics.Bitmap;import android.os.*;import android.speech.RecognizerIntent;import android.view.*;import android.widget.*;import java.io.*;import java.lang.reflect.*;import java.util.*;import java.util.concurrent.atomic.AtomicInteger;
+
+/** Shared production key/result routing, real Activity pause/resume and bounded themed voice results. */
+public final class AndroidVoiceTest extends Instrumentation {
+    /** An external recognizer result fixture, never part of either production APK. */
+    public static final class Recognizer extends Activity {
+        public void onCreate(Bundle state){super.onCreate(state);new Handler(Looper.getMainLooper()).postDelayed(()->{setResult(RESULT_OK,new Intent().putStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS,new ArrayList<>(Collections.singletonList(getIntent().getStringExtra("words")))));finish();},200);}
+    }
+    static Intent reply(String text){return new Intent().putStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS,new ArrayList<>(Collections.singletonList(text)));}
+    private Context context;private Activity activity;private String previous,profile,language,phase="setup";private boolean lite;private VelaHub fixture;private ActivityMonitor monitor,launch;
+    private final AtomicInteger calls=new AtomicInteger(),activated=new AtomicInteger(),discoveries=new AtomicInteger();private volatile List<VelaHub.Hit> values=Collections.emptyList();private volatile String searched="";private int mode,genre;
+    interface Ready{boolean ready()throws Exception;}
+    void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
+    Object field(Object o,String name)throws Exception{for(Class<?> t=o.getClass();t!=null;t=t.getSuperclass())try{Field f=t.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
+    void ui(Runnable job){Throwable[] error={null};runOnMainSync(()->{try{job.run();}catch(Throwable e){error[0]=e;}});waitForIdleSync();if(error[0]!=null)throw new AssertionError(error[0]);}
+    void await(Ready ready)throws Exception{long end=SystemClock.elapsedRealtime()+15000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(ready.ready())return;Thread.sleep(50);}throw new AssertionError("Timeout: "+phase);}
+    VelaHub actual()throws Exception{return (VelaHub)field(activity,"hub");}
+    void key(int code,int action){ui(()->activity.dispatchKeyEvent(new KeyEvent(action,code)));}
+    void parse(String words,String query,int target,boolean open){VelaVoice.Request r=VelaVoice.parse(words);check(r.query.equals(query)&&r.target==target&&r.open==open,"Wrong command: "+words+" -> "+r.query+" / "+r.target);}
+    LiveTvData.Channel channel(String id,String name)throws Exception{
+        Constructor<?> ctor=lite?LiveTvData.Channel.class.getDeclaredConstructor(long.class,String.class,String.class,String.class,boolean.class,boolean.class,boolean.class):LiveTvData.Channel.class.getDeclaredConstructor(String.class,String.class,String.class,String.class,List.class);ctor.setAccessible(true);
+        return (LiveTvData.Channel)(lite?ctor.newInstance(Long.parseLong(id),"owned-fixture","1",name,false,true,false):ctor.newInstance(id,name,"Demo","",Collections.singletonList("http://127.0.0.1:9/never-play.ts")));
+    }
+    void grammar()throws Exception{
+        parse("Por favor, pon el canal La Uno.","La 1",VelaVoice.CHANNEL,true);parse("Abre la aplicación YouTube, por favor","YouTube",VelaVoice.APP,true);parse("Cambia a HDMI dos","HDMI 2",VelaVoice.INPUT,true);parse("Busca la película Dune","Dune",VelaVoice.MEDIA,false);
+        parse("open the app Plex","Plex",VelaVoice.APP,true);parse("ouvre la chaîne La Uno","La 1",VelaVoice.CHANNEL,true);parse("öffne die App Plex","Plex",VelaVoice.APP,true);parse("apri il canale La Uno","La 1",VelaVoice.CHANNEL,true);parse("abrir o canal La Uno","La 1",VelaVoice.CHANNEL,true);
+        parse("Dune","Dune",VelaVoice.ANY,false);parse("busca YouTube","YouTube",VelaVoice.APP,false);VelaVoice.Request sports=VelaVoice.parse("Busca documentales esta noche");check(sports.target==VelaVoice.DISCOVERY&&sports.genre==3&&sports.tonight,"Tonight command lost its genre or time");
+        check(VelaVoice.result(Activity.RESULT_CANCELED,reply("Open Plex")).isEmpty(),"Cancellation executed speech");Intent empty=new Intent().putStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS,new ArrayList<>(Arrays.asList("",null,"Dune")));check(VelaVoice.result(Activity.RESULT_OK,empty).equals("Dune"),"Empty recognition alternative hid a valid result");
+    }
+    void session()throws Exception{
+        monitor=addMonitor(new IntentFilter(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),null,true);VelaVoice.Session s=new VelaVoice.Session();ui(()->{check(s.start(activity),"Recognizer launch failed");check(s.start(activity),"Duplicate press rejected its current request");});check(monitor.getHits()==1,"Repeated press opened multiple recognizers");Bundle state=new Bundle();s.save(state);VelaVoice.Session restored=new VelaVoice.Session();restored.restore(state);restored.result(context,Activity.RESULT_OK,reply("pon La Uno"));check(restored.take(context).query.equals("La 1")&&restored.take(context)==null,"Saved result was lost or replayed");
+        String other=VelaWorkspace.create(context,"Other voice demo");try{VelaWorkspace.select(context,other);s.result(context,Activity.RESULT_OK,reply("open Plex"));check(s.take(context)==null,"Voice crossed local profiles");}finally{VelaWorkspace.select(context,profile);VelaWorkspace.delete(context,other);}removeMonitor(monitor);monitor=null;
+        Intent intent=VelaVoice.recognizer(activity);check(!intent.hasExtra(RecognizerIntent.EXTRA_LANGUAGE)&&intent.getIntExtra(RecognizerIntent.EXTRA_MAX_RESULTS,0)==3,"Menu language overrides Google speech language or results are unbounded");
+    }
+    void productionKeys()throws Exception{
+        VelaRemote.assign(context,"voice_key",KeyEvent.KEYCODE_PROG_RED);check(VelaWorkspace.snapshot(context).getJSONObject("settings").getJSONObject("vela-remote").getInt("voice_key")==KeyEvent.KEYCODE_PROG_RED,"Voice shortcut was omitted from portable preferences");VelaRemote.assign(context,"profiles_key",KeyEvent.KEYCODE_PROG_RED);check(!VelaRemote.voice(context,KeyEvent.KEYCODE_PROG_RED),"Shortcut collision left voice bound to Profiles");VelaRemote.assign(context,"voice_key",KeyEvent.KEYCODE_PROG_RED);
+        for(int code:new int[]{KeyEvent.KEYCODE_SEARCH,KeyEvent.KEYCODE_VOICE_ASSIST,KeyEvent.KEYCODE_ASSIST,KeyEvent.KEYCODE_PROG_RED}){
+            monitor=addMonitor(new IntentFilter(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),new ActivityResult(Activity.RESULT_OK,reply("busca la película Dune")),true);
+            key(code,KeyEvent.ACTION_DOWN);check(monitor.getHits()==0,"Recognizer started before key release");key(code,KeyEvent.ACTION_UP);await(()->monitor.getHits()==1&&actual()!=null&&((EditText)field(actual(),"input")).getText().toString().equals("Dune"));removeMonitor(monitor);monitor=null;
+        }
+        monitor=addMonitor(new IntentFilter(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),null,true);KeyEvent canceled=new KeyEvent(0,0,KeyEvent.ACTION_UP,KeyEvent.KEYCODE_VOICE_ASSIST,0,0,0,0,KeyEvent.FLAG_CANCELED);ui(()->activity.dispatchKeyEvent(canceled));check(monitor.getHits()==0,"Cancelled key started recognition");removeMonitor(monitor);monitor=null;
+    }
+    void roundTrip()throws Exception{
+        monitor=addMonitor(new IntentFilter(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),null,true);key(KeyEvent.KEYCODE_VOICE_ASSIST,KeyEvent.ACTION_DOWN);key(KeyEvent.KEYCODE_VOICE_ASSIST,KeyEvent.ACTION_UP);check(monitor.getHits()==1,"Voice session was not armed");removeMonitor(monitor);monitor=null;
+        Intent external=new Intent().setClassName(getContext().getPackageName(),Recognizer.class.getName()).putExtra("words","busca la película Arrival");ui(()->activity.startActivityForResult(external,VelaVoice.REQUEST));
+        await(()->activity.hasWindowFocus()&&actual()!=null&&((EditText)field(actual(),"input")).getText().toString().equals("Arrival"));
+        Intent query=new Intent(Intent.ACTION_SEARCH).setClassName(context.getPackageName(),activity.getClass().getName()).putExtra(SearchManager.QUERY,"Open Water").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);getContext().startActivity(query);
+        await(()->actual()!=null&&((EditText)field(actual(),"input")).getText().toString().equals("Open Water"));check(activity.getIntent().getAction()==null,"Consumed Android search will replay after recreation");
+        SearchManager search=(SearchManager)activity.getSystemService(Context.SEARCH_SERVICE);check(search.getSearchableInfo(new ComponentName(activity,activity.getClass()))!=null,"Android cannot discover the searchable Activity");
+    }
+    void openInstalledApp()throws Exception{
+        String label=context.getPackageManager().getApplicationLabel(context.getPackageManager().getApplicationInfo("com.android.settings",0)).toString();
+        monitor=addMonitor(new IntentFilter(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),null,true);key(KeyEvent.KEYCODE_VOICE_ASSIST,KeyEvent.ACTION_DOWN);key(KeyEvent.KEYCODE_VOICE_ASSIST,KeyEvent.ACTION_UP);check(monitor.getHits()==1,"Open-app voice session was not armed");removeMonitor(monitor);monitor=null;
+        launch=addMonitor(new IntentFilter(Intent.ACTION_MAIN),new ActivityResult(Activity.RESULT_CANCELED,null),true);
+        Intent external=new Intent("tv.vela.tests.RECOGNIZE").setClassName(getContext().getPackageName(),Recognizer.class.getName()).putExtra("words","abre la aplicación "+label);ui(()->activity.startActivityForResult(external,VelaVoice.REQUEST));
+        await(()->launch.getHits()==1&&actual()==null&&activity.hasWindowFocus());check((Boolean)field(activity,lite?"visible":"foreground"),"Application command executed without restoring the launcher");removeMonitor(launch);launch=null;
+    }
+    void createFixture(){calls.set(0);activated.set(0);discoveries.set(0);ui(()->{fixture=new VelaHub(activity,new VelaHub.Host(){public List<VelaHub.Hit> search(String q,int p,CancellationSignal signal){signal.throwIfCanceled();searched=q;calls.incrementAndGet();return values;}public List<VelaShows.Airing> airings(String q,int p,CancellationSignal signal){return Collections.emptyList();}public List<VelaShows.Airing> discover(int m,int g,int p,CancellationSignal signal){mode=m;genre=g;discoveries.incrementAndGet();return Collections.emptyList();}public void activate(VelaHub.Hit hit){activated.incrementAndGet();}public String diagnosis(CancellationSignal s){return "";}public void repair(){}public void closed(boolean changed){}public String scope(){return "owned-voice-fixture";}},0);activity.addContentView(fixture,new android.view.ViewGroup.LayoutParams(-1,-1));});}
+    void submit(String words){ui(()->fixture.voiceResult(Activity.RESULT_OK,reply(words)));}
+    void fixtures()throws Exception{
+        if(actual()!=null)ui(()->{try{actual().close();}catch(Exception e){throw new RuntimeException(e);}});
+        VelaHub.Hit app=new VelaHub.Hit("App","YouTube","Demo",new Intent(Intent.ACTION_MAIN).setPackage("org.example.video")),tv=new VelaHub.Hit("Channel","YouTube","Demo",channel("41","YouTube"));values=Arrays.asList(app,tv);createFixture();submit("abre la aplicación YouTube");await(()->activated.get()==1);check(calls.get()==1,"Open command launched duplicate searches");
+        values=Arrays.asList(new VelaHub.Hit("Channel","La 1","Demo",channel("41","La 1")),new VelaHub.Hit("Channel","La 1","Demo",channel("42","La 1")));createFixture();submit("pon el canal La Uno");await(()->((List<?>)field(fixture,"controls")).size()>3);check(activated.get()==0&&calls.get()==1&&searched.equals("La 1"),"Ambiguous channel was guessed or voice query duplicated");
+        ui(fixture::close);values=Collections.singletonList(app);createFixture();submit("busca YouTube");await(()->((List<?>)field(fixture,"controls")).size()>3);check(activated.get()==0&&calls.get()==1,"Search command opened an app instead of showing results");
+        Bitmap b=getUiAutomation().takeScreenshot();if(b!=null){try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),"voice-results.png"))){b.compress(Bitmap.CompressFormat.PNG,100,out);}b.recycle();}ui(fixture::close);
+        values=Collections.emptyList();createFixture();submit("busca documentales esta noche");await(()->discoveries.get()==1);check(calls.get()==0&&mode==1&&genre==3&&fixture.page()==8,"Discovery wasted a text lookup or lost Tonight");ui(fixture::close);
+        TvInputs.Entry off=new TvInputs.Entry("demo","owned-fixture","HDMI 2","HDMI 2","hdmi",TvInputs.DISCONNECTED,false);check(!VelaVoice.exact(VelaVoice.parse("abre HDMI dos"),new VelaHub.Hit("HDMI","HDMI 2","",off)),"Disconnected HDMI auto-opened");
+    }
+    public void onCreate(Bundle b){super.onCreate(b);start();}
+    public void onStart(){Bundle result=new Bundle();context=getTargetContext();try{
+        try(ParcelFileDescriptor f=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(f)){check(in.read()=='1',"Owned emulator required");}RefinementHttp.install(url->null);lite=context.getPackageName().endsWith(".lite");previous=VelaWorkspace.active(context);language=L10n.choice();profile=VelaWorkspace.create(context,"Voice Demo");VelaWorkspace.select(context,profile);L10n.choose(context,"en");Ui.init(context);context.getSharedPreferences("personalization",0).edit().putBoolean("initialized",true).putBoolean("complete",true).commit();VelaWorkspace.prefs(context,lite?"lite_updates":"updates").edit().putBoolean("automatic",false).commit();
+        phase="grammar";grammar();activity=startActivitySync(new Intent().setClassName(context.getPackageName(),"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));phase="session";session();phase="production-keys";productionKeys();phase="real-recognizer-roundtrip";roundTrip();phase="actual-installed-app-command";openInstalledApp();phase="themed-results";fixtures();
+        result.putString("result","PASS six-language commands, Google language independence, three voice keys and cancelled release, single request, one-use saved results, profile isolation, actual external recognizer Activity pause/result/resume, literal Android ACTION_SEARCH, searchable manifest, one text lookup, ambiguous selection, app/channel intent separation, Tonight discovery and disconnected HDMI guard. Synthetic speech only; no physical microphone or account.");
+    }catch(Throwable error){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(error));try{VelaHub h=actual();result.putString("diagnosis","appLaunches="+(launch==null?-1:launch.getHits())+" window="+activity.hasWindowFocus()+" foreground="+field(activity,lite?"visible":"foreground")+" hub="+(h!=null)+(h==null?"":" query="+field(h,"query")+" status="+((TextView)field(h,"status")).getText()+" rows="+((List<?>)field(h,"controls")).size()));}catch(Exception ignored){}}finally{try{if(monitor!=null)removeMonitor(monitor);if(launch!=null)removeMonitor(launch);if(fixture!=null)ui(fixture::close);if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}if(language!=null)L10n.choose(context,language);}catch(Exception ignored){}}
+        finish(result.containsKey("error")?1:-1,result);
+    }
+}

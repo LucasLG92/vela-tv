@@ -15,9 +15,8 @@ abstract class FullToolsData extends VelaToolsData {
     public void pinCollection(VelaHub.Hit hit)throws Exception{new LibraryClient(activity).toggleCollection(LibraryCollection.read((org.json.JSONObject)hit.value));}
     List<VelaHub.Hit> channels(String query,int page,CancellationSignal signal)throws Exception{
         String mode=LiveTvData.mode(activity);TvCatalogCache.Page result;
-        if(mode.equals("antenna"))result=new AntennaClient(activity).page(query,null,page);
-        else if(mode.equals("xtream")){XtreamClient.Page p=new XtreamClient(activity).page("*","",page,query,false);result=new TvCatalogCache.Page(p.channels,p.page,p.total);}
-        else result=new TvCatalogCache(activity).page(M3uClient.identity(activity),null,query,null,page);
+        if(mode.equals("antenna"))result=new AntennaClient(activity).page(query,null,page,signal);
+        else result=new TvCatalogCache(activity).page(LiveTvData.source(activity),null,query,null,page,signal);
         VelaHub.Hits out=new VelaHub.Hits();if(result.page!=page||page*12>=result.total)return out;out.more=(page+1)*12<result.total;for(LiveTvData.Channel c:result.channels){signal.throwIfCanceled();out.add(new VelaHub.Hit(VelaWorkspace.t("Channel","Canal"),TvChannelNames.display(c.name),c.group,c));}return out;
     }
     List<VelaHub.Hit> media(String query,int page,CancellationSignal signal)throws Exception{

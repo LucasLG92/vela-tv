@@ -20,6 +20,28 @@ The scripts create `vela.keystore` locally on the first build. Keep it privately
 
 ## Checks
 
+### Recent channel shortcut
+
+After installing the relevant locally built APK on an owned disposable emulator, run:
+
+```sh
+python tests/run_refinement.py --serial <emulator-serial> --adb-port <port> --test recent-channel --art .
+python tests/run_refinement.py --serial <emulator-serial> --adb-port <port> --test recent-channel --lite --art .
+```
+
+These native tests press OK on the actual Apps Recent activity shortcut. Full covers a channel beyond the first thirty similarly named entries, legacy references without a history payload, changed quality IDs, hidden channels and source-scoped Xtream cache lookup. Lite uses a read-only tuner fixture with duplicate aliases and a hidden namesake. No physical TV, linked account or working stream is used; profiles and preferences are restored afterwards.
+
+### Voice and Android search
+
+```sh
+python tests/run_refinement.py --serial <emulator-serial> --adb-port <port> --test voice --art .
+python tests/run_refinement.py --serial <emulator-serial> --adb-port <port> --test voice --lite --art .
+```
+
+These owned-emulator checks cover six-language commands, all three injected foreground voice/search keys and an assigned voice shortcut, cancelled releases, recognition language independence, a single in-flight request, saved-result/profile isolation, an external recognizer Activity's real pause/result/resume lifecycle, actual installed-app launch routing, Android ACTION_SEARCH and searchable metadata. Themed fixture results cover search versus opening, ambiguity, Tonight discovery and disconnected HDMI. They do not certify a physical microphone or override a firmware-owned Google Assistant button.
+
+### Host checks
+
 ```sh
 python tests/test_home_mode.py
 python tests/test_plex_feed.py

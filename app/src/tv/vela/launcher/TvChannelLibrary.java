@@ -23,5 +23,16 @@ final class TvChannelLibrary {
     }}
     static List<LiveTvData.Channel> recent(Context c,String source){TvPersonalization state=new TvPersonalization(c,source);Set<String> hidden=state.hiddenKeys();List<LiveTvData.Channel> saved=saved(c,source),out=new ArrayList<>();for(TvPersonalization.Item item:state.recent())for(LiveTvData.Channel v:saved)if(key(v).equals(item.key)&&!hidden.contains(item.key)){out.add(v);break;}if(source.equals("antenna")){AntennaClient tuner=new AntennaClient(c);out.removeIf(ch->!tuner.matchesHistory(ch));}else try{return new TvCatalogCache(c).restoreHistory(source,out);}catch(Exception unavailable){}return out;}
     static TvCatalogCache.Page recentPage(Context c,String source){List<LiveTvData.Channel> values=recent(c,source);return new TvCatalogCache.Page(values,0,values.size());}
+    static LiveTvData.Channel resolveActivity(Context c,String source,String id,String title)throws Exception{
+        if(id.isEmpty()||!source.equals(LiveTvData.source(c)))return null;
+        TvPersonalization state=new TvPersonalization(c,source);
+        if(source.equals("antenna")){LiveTvData.Channel ch=state.hidden(id)?null:new AntennaClient(c).resolveHistory(id);return sameTitle(ch,title)?ch:null;}
+        LiveTvData.Channel saved=null;for(LiveTvData.Channel ch:saved(c,source))if(ch.id.equals(id)){saved=ch;break;}
+        String family=saved==null?"":key(saved);if(!family.isEmpty()&&state.hidden(family))return null;
+        LiveTvData.Channel found=new TvCatalogCache(c).resolveHistory(source,id,family);
+        // The encrypted twelve-item shortlist remains usable after cache eviction/offline.
+        return found!=null?(saved!=null||sameTitle(found,title)?found:null):saved;
+    }
+    private static boolean sameTitle(LiveTvData.Channel ch,String title){return ch!=null&&TvCatalogCache.normalize(VelaWorkspace.clean(TvChannelNames.display(ch.name),120)).equals(TvCatalogCache.normalize(title));}
     static void clearRecent(Context c,String source){synchronized(TvChannelLibrary.class){new TvPersonalization(c,source).clearRecent();history(c,source).edit().remove("channels").apply();}}
 }

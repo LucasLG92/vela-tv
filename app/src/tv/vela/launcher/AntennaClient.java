@@ -16,14 +16,18 @@ final class AntennaClient {
     Intent setup(){try{TvInputManager manager=(TvInputManager)context.getSystemService(Context.TV_INPUT_SERVICE);TvInputInfo info=manager.getTvInputInfo(HomeApps.tunerInput(context));return info==null?null:info.createSetupIntent();}catch(RuntimeException unavailable){return null;}}
     private static long order(String number,int position){try{String[] p=number.split("[.\\-]",2);long main=Long.parseLong(p[0]),sub=p.length>1?Long.parseLong(p[1]):0;if(main>=0&&main<100000&&sub>=0&&sub<1000)return ((main*1000+sub)<<16)|position;}catch(Exception ignored){}return (1_000_000_000L<<16)|position;}
     TvCatalogCache.Page page(String query,Set<String> favorites,int requested)throws Exception{
+        return page(query,favorites,requested,null);
+    }
+    TvCatalogCache.Page page(String query,Set<String> favorites,int requested,android.os.CancellationSignal signal)throws Exception{
         String input=HomeApps.tunerInput(context);if(input==null)return new TvCatalogCache.Page(new ArrayList<>(),0,0);
         String[] columns={"_id","display_number","display_name","browsable","locked","service_type","type"};
-        try(Cursor c=context.getContentResolver().query(TvContract.buildChannelsUriForInput(input),columns,null,null,null)){
+        try(Cursor c=context.getContentResolver().query(TvContract.buildChannelsUriForInput(input),columns,null,null,null,signal)){
             if(c==null)return new TvCatalogCache.Page(new ArrayList<>(),0,0);long[] order=new long[Math.min(MAX_CHANNELS,c.getCount())];int total=0;String normalized=TvCatalogCache.normalize(query);TvPersonalization state=new TvPersonalization(context,"antenna");Set<String> hidden=state.hiddenKeys();List<String> favoriteOrder=state.order();
             for(int scanned=0;c.moveToNext()&&scanned<MAX_CHANNELS;scanned++){
                 if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();String name=c.getString(2),id="ant-"+c.getLong(0);
-                if(hidden.contains(id)||c.getInt(3)!=1||c.getInt(4)!=0||TvContract.Channels.TYPE_PREVIEW.equals(c.getString(6))||name==null||!TvCatalogCache.normalize(name).contains(normalized)||favorites!=null&&!favorites.contains(id))continue;
-                int rank=favorites==null?-1:favoriteOrder.indexOf(id);long priority=favorites==null?0:(long)(rank<0?128:rank)<<48;order[total++]=priority|order(c.getString(1)==null?"":c.getString(1),c.getPosition());
+                boolean exact=name!=null&&!query.isEmpty()&&(TvChannelNames.match(name).equals(TvChannelNames.match(query))||query.equals(c.getString(1)));
+                if(hidden.contains(id)||c.getInt(3)!=1||c.getInt(4)!=0||TvContract.Channels.TYPE_PREVIEW.equals(c.getString(6))||name==null||!exact&&!TvCatalogCache.normalize(name).contains(normalized)||favorites!=null&&!favorites.contains(id))continue;
+                int rank=favorites==null?-1:favoriteOrder.indexOf(id);long priority=(favorites==null?0:(long)(rank<0?128:rank)<<48)|(!query.isEmpty()&&!exact?1L<<60:0);order[total++]=priority|order(c.getString(1)==null?"":c.getString(1),c.getPosition());
             }
             Arrays.sort(order,0,total);int page=Math.max(0,Math.min(requested,Math.max(0,(total-1)/LiveTvData.PAGE_SIZE)));List<LiveTvData.Channel> out=new ArrayList<>();
             for(int i=page*LiveTvData.PAGE_SIZE;i<Math.min(total,(page+1)*LiveTvData.PAGE_SIZE);i++){
@@ -33,6 +37,13 @@ final class AntennaClient {
         }
     }
     boolean matchesHistory(LiveTvData.Channel saved){try(Cursor c=context.getContentResolver().query(TvContract.buildChannelUri(Long.parseLong(saved.epgId)),new String[]{"input_id","display_name","browsable","locked"},null,null,null)){return c!=null&&c.moveToFirst()&&saved.inputId.equals(c.getString(0))&&TvCatalogCache.normalize(saved.name).equals(TvCatalogCache.normalize(c.getString(1)))&&c.getInt(2)==1&&c.getInt(3)==0;}catch(RuntimeException invalid){return false;}}
+    LiveTvData.Channel resolveHistory(String key){
+        if(!key.matches("ant-[0-9]{1,18}"))return null;String input=HomeApps.tunerInput(context);if(input==null)return null;
+        try{long id=Long.parseLong(key.substring(4));try(Cursor c=context.getContentResolver().query(TvContract.buildChannelUri(id),new String[]{"input_id","display_name","display_number","browsable","locked","type"},null,null,null)){
+            if(c==null||!c.moveToFirst()||!input.equals(c.getString(0))||c.getString(1)==null||c.getInt(3)!=1||c.getInt(4)!=0||TvContract.Channels.TYPE_PREVIEW.equals(c.getString(5)))return null;
+            return new LiveTvData.Channel(key,c.getString(1),Ui.tr("Antena","Antenna","Antena"),TvContract.buildChannelLogoUri(id).toString(),Collections.emptyList(),"","",input,c.getString(2)==null?"":c.getString(2),Long.toString(id));
+        }}catch(RuntimeException unavailable){return null;}
+    }
     static boolean localLogo(String value){try{Uri uri=Uri.parse(value);return "content".equals(uri.getScheme())&&"android.media.tv".equals(uri.getAuthority())&&uri.getPath()!=null&&uri.getPath().matches("/channel/[0-9]+/logo")&&uri.getQuery()==null;}catch(Exception bad){return false;}}
     Map<String,LiveTvData.Guide> guide(List<LiveTvData.Channel> channels){
         Map<String,LiveTvData.Guide> result=new HashMap<>();long now=System.currentTimeMillis()/1000;int count=0;

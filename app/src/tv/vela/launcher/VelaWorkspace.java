@@ -39,7 +39,7 @@ final class VelaWorkspace {
         if(n.equals("live-tv"))return k.matches("favorites-[a-f0-9]{64}");
         if(n.startsWith("tv-personal-"))return Arrays.asList("hidden","groups","order").contains(k);
         if(n.equals("vela-reading"))return Arrays.asList("text","density","margin","contrast").contains(k);
-        if(n.equals("vela-remote"))return Arrays.asList("search_key","profiles_key").contains(k);
+        if(n.equals("vela-remote"))return Arrays.asList("search_key","voice_key","profiles_key").contains(k);
         return n.equals("vela-programmes")&&k.equals("rules");
     }
     private static Object encode(Object v)throws JSONException{if(v instanceof Set)return new JSONArray(new TreeSet<>((Set<String>)v));return v;}

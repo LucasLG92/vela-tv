@@ -16,8 +16,10 @@ function Run([string]$tool,[string[]]$arguments){& $tool @arguments;if($LASTEXIT
 $out=[IO.Path]::GetFullPath((Join-Path $root 'out'))
 if($out -ne (Join-Path $root 'out')){throw 'Unexpected Lite output directory'}
 if(Test-Path -LiteralPath $out){Remove-Item -LiteralPath $out -Recurse -Force}
-New-Item -ItemType Directory -Path 'out/classes','out/gen','out/res/drawable','out/res/values','out/assets/licenses','out/assets/fonts','out/assets/symbols' -Force | Out-Null
+New-Item -ItemType Directory -Path 'out/classes','out/gen','out/res/drawable','out/res/values','out/res/xml','out/assets/licenses','out/assets/fonts','out/assets/symbols' -Force | Out-Null
 Copy-Item -LiteralPath 'res/values/styles.xml' -Destination 'out/res/values/styles.xml'
+Copy-Item -LiteralPath 'res/values/strings.xml' -Destination 'out/res/values/strings.xml'
+Copy-Item -LiteralPath (Join-Path $repo 'app/res/xml/searchable.xml') -Destination 'out/res/xml/searchable.xml'
 # Whitelist the shared resources. Full Vela assets, settings, clients and media never enter this APK.
 foreach($name in @('icon','banner','vela_mark')){Copy-Item -LiteralPath (Join-Path $repo "app/res/drawable/$name.xml") -Destination 'out/res/drawable'}
 Get-ChildItem -LiteralPath (Join-Path $repo 'app/res/drawable') -Filter 'device_*.xml' | Copy-Item -Destination 'out/res/drawable'

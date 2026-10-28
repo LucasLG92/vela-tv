@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.36.0-preview / Lite 0.15.0-preview — 2026-10-28
+
+- Full: compact the cinematic Home header and Continue watching cards. Keep original platform logos and remaining time inside the artwork, above progress, and expose Latest uploads on entry. Preserve remote row headings, artwork proportions, row-size choices and bounded image loading.
+
+- Both: route the remote voice/search keys and Android search intents into the integrated search page. Keep one recognizer request, preserve its profile through Activity recreation, and deliver accepted speech only after foreground restoration. Cancelled keys/results do not execute commands.
+- Both: assign an available remote button to Search by voice from Remote & diagnostics when firmware reserves the Google Assistant key. Keep shortcut capture, collision handling, backup and compatible preference sync in the existing theme.
+- Both: separate search from explicit open commands, understand common app/channel/input phrases and spoken HDMI numbers, keep ambiguous choices in the themed results, and route Tonight/genre requests directly to programme discovery. Let the installed speech service choose its spoken language independently of Vela's menu language.
+- Both: prioritise exact app/channel matches before partial names while keeping bounded, gap-free search pages. No resident microphone, new service, image cache or permission. Native tests use synthetic speech and an actual external Activity result round trip; physical Google Assistant interception remains device-dependent.
+- Both: explicit app/input/channel/library voice requests only query the requested domain. Full searches existing M3U/Xtream records without refreshing a playlist, including category-only caches; SQLite/tuner search cancellation lets a new request replace an expensive guide query on the existing worker.
+- Full: reopen channel Recent activity by its stored source and channel identity, rather than searching the first page of a display name. Reuse indexed M3U/Xtream records and the existing encrypted shortlist, preserving quality alternatives and hidden-channel rules.
+- Lite: resolve the recent antenna identity against the full tuner catalogue before applying visibility, so hiding an identically named channel cannot break the shortcut. Enter the TV destination when reopening playback.
+- Both: discard asynchronous shortcut results after leaving the originating screen, changing profile or losing the foreground. Native remote regressions reproduce the failures with the published APKs and pass with these corrections. No new cache or background service.
+
 ## Vela 1.35.1 Preview and Vela Lite 0.14.1 Preview · 2026-10-27
 
 - Move the profile-local Recent activity action into Apps, beside drawer controls, with original app/device artwork and explicit remote focus routes. Keep Home artwork and Lite HDMI cards clear.

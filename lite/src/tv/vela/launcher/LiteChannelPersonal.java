@@ -10,4 +10,9 @@ final class LiteChannelPersonal {
     static List<LiveTvData.Channel> visible(Context c,List<LiveTvData.Channel> all){Set<String> hidden=new TvPersonalization(c,"antenna").hiddenKeys();List<LiveTvData.Channel> out=new ArrayList<>();Map<String,String> keys=keys(all);for(LiveTvData.Channel v:all)if(!hidden.contains(keys.get(v.id)))out.add(v);return out;}
     static void sort(Context c,List<LiveTvData.Channel> values,List<LiveTvData.Channel> all){List<String> order=new TvPersonalization(c,"antenna").order();Map<String,Integer> ranks=new HashMap<>();for(int i=0;i<order.size();i++)ranks.put(order.get(i),i);Map<String,Integer> channelRanks=new HashMap<>();Map<String,String> keys=keys(all);for(LiveTvData.Channel v:values)channelRanks.put(v.id,ranks.getOrDefault(keys.get(v.id),128));values.sort(Comparator.comparingInt(v->channelRanks.get(v.id)));}
     static List<LiveTvData.Channel> recent(Context c,List<LiveTvData.Channel> all){TvPersonalization state=new TvPersonalization(c,"antenna");Set<String> hidden=state.hiddenKeys();Map<String,LiveTvData.Channel> byKey=new HashMap<>();Map<String,String> keys=keys(all);for(LiveTvData.Channel v:all)byKey.put(keys.get(v.id),v);List<LiveTvData.Channel> out=new ArrayList<>();for(TvPersonalization.Item item:state.recent())if(!hidden.contains(item.key)&&byKey.containsKey(item.key))out.add(byKey.get(item.key));return out;}
+    static LiveTvData.Channel resolveActivity(Context c,String wanted,List<LiveTvData.Channel> all){
+        if(new TvPersonalization(c,"antenna").hidden(wanted))return null;
+        // Determine aliases against the complete tuner list, including hidden namesakes.
+        Map<String,String> identities=keys(all);for(LiveTvData.Channel ch:all)if(!ch.locked&&wanted.equals(identities.get(ch.id)))return ch;return null;
+    }
 }

@@ -1,6 +1,6 @@
 # Vela in pictures
 
-Explore 61 native **4K screenshots**. The newest Home, navigation, Apps and Settings captures show **1.35.1-preview**; earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 63 native **4K screenshots**. The compact Home, Continue watching and navigation captures show **1.36.0-preview**. Apps, Settings and earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 
@@ -19,6 +19,18 @@ These are actual Android views captured in an owned emulator. Libraries, progres
 ## Pick up where you left off
 
 ![Pick up where you left off](04-continue-watching.webp)
+
+## Every story, its own platform
+
+Original platform logos and remaining time sit on the image, with a clear progress bar and consistent panoramic cards.
+
+![Mixed-platform Continue watching](82-home-platforms.webp)
+
+## Make room for something new
+
+Recently added is visible on arrival. Move down to explore your newest films and series.
+
+![Recently added with original posters](83-home-recently-added.webp)
 
 ## Explore your complete library
 

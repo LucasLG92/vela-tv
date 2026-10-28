@@ -81,6 +81,14 @@ Matching uses a normalised name independent of HD/FHD variants and Android row n
 
 What to watch explores Now, Tonight (18:00–04:00) and the next 48 hours. Movie, sports, documentary and kids filters use real EPG categories; absent metadata is not invented. Exact same-channel/title/time duplicates are grouped within a page. Cross-channel events are grouped only when the feed provides a trusted programme-level `dd_progid`; similar names alone are never treated as the same event.
 
+## Voice search
+
+Use Search by voice in Search, or assign an available button under Remote & diagnostics → Search by voice. The latter uses the same capture, collision handling and profile-local preferences as other shortcuts. Vela only listens when you ask; Android's installed recognizer handles the microphone and spoken language independently of Vela's menu language.
+
+Examples: “busca la película Dune” shows library results; “abre la aplicación YouTube” opens an exact installed app; “pon el canal La Uno” recognises La 1; “cambia a HDMI dos” targets HDMI 2 when connected; “busca documentales esta noche” opens Tonight discovery. Commands have equivalent forms in the six supported menu languages. Ambiguous targets stay in the results for selection.
+
+Android ACTION_SEARCH queries addressed to Vela enter the same integrated search page and retain their literal text. Android reserves ASSIST/VOICE_ASSIST for its global assistant and normally does not deliver those hardware keys to applications. This integration does not replace Google Assistant or make every TV forward its Google button. Use the configurable voice shortcut on those devices. See the [Android key definitions](https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_VOICE_ASSIST).
+
 ## Playback controls
 
 Left opens information, then controls over the current video; MENU toggles them directly. Controls include audio, supported text subtitles, picture format and safe signal details. Source/tuner capabilities decide which tracks exist. Audio delay stays in the television's sound settings because these player APIs do not expose it to Vela.

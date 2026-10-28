@@ -16,7 +16,7 @@ Connect **Plex, Jellyfin or both together** and let your own posters and artwork
 
 Save a film, episode or broadcast to your own **Watch later** list. Each local profile can link its own Plex and Jellyfin accounts.
 
-Recently added brings your newest films and series home. Open Movies or Series to browse the full library in small pages, with server-backed filters and newest additions first.
+Platform logos and remaining time stay inside each Continue watching image, leaving room for Recently added as soon as you arrive. Recently added brings your newest films and series home. Open Movies or Series to browse the full library in small pages, with server-backed filters and newest additions first.
 
 | Movies | Series |
 | --- | --- |
@@ -62,7 +62,7 @@ Configure apps, folders and favourites **from your phone** through a temporary l
 
 Every menu is available in **English, Spanish, Portuguese, French, German and Italian**. Choose a language in Appearance or follow your TV's system language. Channel names, account names and library titles keep their original text.
 
-Settings and personalisation stay within the main sidebar, with clear categories and the same remote navigation throughout. Use your remote’s search key for voice search when Android provides a recognizer, or open Search in Your Vela.
+Settings and personalisation stay within the main sidebar, with clear categories and the same remote navigation throughout. Use a supported remote search key for voice search, assign an available button in Remote & diagnostics, or open Search in Your Vela. Android may keep control of its Assistant button; Vela uses the recognizer installed on your television.
 
 [Personalisation, phone setup, profiles and sync](guide/YOUR-VELA.md) · [Integrated settings](guide/INTEGRATED-SETTINGS.md) · [Player controls](guide/PLAYER.md)
 

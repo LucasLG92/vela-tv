@@ -2,13 +2,13 @@
   {
     "file": "01-home.webp",
     "title": "Your library, centre stage",
-    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profile, location, library metadata and playback progress; authorised original Plex artwork, Dune trailer thumbnail and Reacher artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.35.1-preview",
-    "sha256": "3334ed75de3b4ace692513b0db68e4badc668dce3fb997bfbb36058466b0b0ef"
+    "version": "1.36.0-preview",
+    "sha256": "df948bdb5f659a56c5afa3d09ed7db38091ef562ac9f03fc70a9575c27a94c4c"
   },
   {
     "file": "02-mint-compact.webp",
@@ -35,13 +35,13 @@
   {
     "file": "04-continue-watching.webp",
     "title": "Pick up where you left off",
-    "source": "Native 3840×2160 production views on an owned clean emulator; authorised original artwork or public channel data; synthetic profiles, progress and HDMI/tuner fixtures. No personal accounts or private location.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profile, location, library metadata and playback progress; authorised original Plex artwork, Dune trailer thumbnail and Reacher artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.30.1-preview",
-    "sha256": "f3bf5d41a42a097d5b646ca1c13fb83d1bb43e56fabe603d76f89b9fbe772646"
+    "version": "1.36.0-preview",
+    "sha256": "d898adb1dc6ee243ae3994b3434a1979bfe99c9f4685b34e9559782076a00aac"
   },
   {
     "file": "05-library-pages.webp",
@@ -57,13 +57,13 @@
   {
     "file": "06-sidebar.webp",
     "title": "One home, familiar navigation",
-    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profile, location, library metadata and playback progress; authorised original Plex artwork, Dune trailer thumbnail and Reacher artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.35.1-preview",
-    "sha256": "121bf2d849a1956d47a61ccef2e328dc891c20478652f74d900e1f1fd67122f8"
+    "version": "1.36.0-preview",
+    "sha256": "2532b038bcb735338ba4e396d069795c4f6ec667aa8f48e2e91f2ff6ff7760e7"
   },
   {
     "file": "07-shortcut-actions.webp",
@@ -651,13 +651,13 @@
   {
     "file": "60-continuous-navigation.webp",
     "title": "A full-screen backdrop behind your navigation",
-    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profiles, location and library metadata; authorised original artwork. No personal account, token or provider credentials.",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profile, location, library metadata and playback progress; authorised original Plex artwork, Dune trailer thumbnail and Reacher artwork. No personal account, token or provider credentials.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.35.1-preview",
-    "sha256": "121bf2d849a1956d47a61ccef2e328dc891c20478652f74d900e1f1fd67122f8"
+    "version": "1.36.0-preview",
+    "sha256": "2532b038bcb735338ba4e396d069795c4f6ec667aa8f48e2e91f2ff6ff7760e7"
   },
   {
     "file": "61-continuous-settings.webp",
@@ -669,5 +669,27 @@
     "height": 2160,
     "version": "1.35.1-preview",
     "sha256": "71be56f38c4bd891ec99128d0e0bf01501e71e57c0b30c633ea25ff5297bc37b"
+  },
+  {
+    "file": "82-home-platforms.webp",
+    "title": "Every story, its own platform",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profile, location, library metadata and playback progress; authorised original Plex artwork, Dune trailer thumbnail and Reacher artwork. No personal account, token or provider credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.36.0-preview",
+    "sha256": "e52bc510361cee70f341f074800a75eadd660bd9b8d8ebe34802b536a6ce7c80"
+  },
+  {
+    "file": "83-home-recently-added.webp",
+    "title": "Make room for something new",
+    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profile, location, library metadata and playback progress; authorised original Plex artwork, Dune trailer thumbnail and Reacher artwork. No personal account, token or provider credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.36.0-preview",
+    "sha256": "bd4b169b63755af2a9b3184f6a3afb099a09f7d7e24116858c6c199700de72c7"
   }
 ]
