@@ -691,5 +691,27 @@
     "height": 2160,
     "version": "1.36.0-preview",
     "sha256": "bd4b169b63755af2a9b3184f6a3afb099a09f7d7e24116858c6c199700de72c7"
+  },
+  {
+    "file": "84-remote-list.webp",
+    "title": "Your remote, your shortcuts",
+    "source": "Native 3840×2160 production remote settings on an owned emulator. Demonstration profile and button mappings; optional weather is a synthetic Reykjavik fixture. No personal account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.37.0-preview",
+    "sha256": "437a0b646a6efb5e56bd038a61ddbaf4e544c9acc91f14eace99f82cc808b3b6"
+  },
+  {
+    "file": "85-remote-button.webp",
+    "title": "One button, two useful actions",
+    "source": "Native 3840×2160 production remote settings on an owned emulator. Demonstration profile and button mappings; optional weather is a synthetic Reykjavik fixture. No personal account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.37.0-preview",
+    "sha256": "26e86ea5175c0c103186716d61b80365bc4b4d52d1167237625f9b2da06f23a8"
   }
 ]

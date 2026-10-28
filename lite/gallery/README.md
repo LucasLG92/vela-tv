@@ -1,6 +1,6 @@
 # Vela Lite in pictures
 
-Explore 35 native **4K screenshots**. The newest Apps, Settings and personalisation captures show **0.14.1-preview**; earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 37 native **4K screenshots**. The remote shortcut captures show **0.16.0-preview**. The newest Apps, Settings and personalisation captures show **0.14.1-preview**; earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](../../gallery/CREDITS.md) · [Image manifest](index.json)
 
@@ -143,3 +143,13 @@ These are actual Android views captured in an owned emulator. Libraries, progres
 ## Personalisation that belongs to your home
 
 ![Personalisation that belongs to your home](35-continuous-tools.png)
+
+## Your remote, your shortcuts
+
+Teach Vela a button, then choose what a short press and a long press should open. Your mappings stay with your profile.
+
+![Your remote, your shortcuts](36-remote-list.png)
+
+## One button, two useful actions
+
+![One button, two useful actions](37-remote-button.png)

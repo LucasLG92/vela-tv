@@ -3,87 +3,87 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "1.36.0-preview",
-      "code": 70,
-      "tag": "v1.36.0-preview",
-      "title": "Vela 1.36.0 Preview · More of your home",
-      "file": "Vela-1.36.0-preview.apk",
-      "size": 4443807,
-      "sha256": "926c8e7e69d75d8582cdc72120bed9b738f22a673c0040de4c83461bd787167d",
-      "blob_sha": "9576f027a5bd7acf16af58037ad9392b66404579",
+      "version": "1.37.0-preview",
+      "code": 71,
+      "tag": "v1.37.0-preview",
+      "title": "Vela 1.37.0 Preview \u00b7 Your remote, your shortcuts",
+      "file": "Vela-1.37.0-preview.apk",
+      "size": 4472479,
+      "sha256": "3090d52784b387e284508398acdcd06e588286bb0417c3c76933f832b0ba8cb8",
+      "blob_sha": "9fd367d97f3ecf5a08e73cc1a9af1bf437f8a429",
       "chunks": [
         {
-          "sha": "87753219e6c3b61fe507465517854d729ca8f634",
+          "sha": "af41f540fe283ac49132ace25680941f1fc8d13a",
           "size": 524288
         },
         {
-          "sha": "7b98a25502298d3859c3ad7ecfca453eef5234ed",
+          "sha": "0d424f0b296d433a9014a0a3f486900d31f90a4c",
           "size": 524288
         },
         {
-          "sha": "718e217d87663a4853897d2cc7bab9645408abab",
+          "sha": "ab055acff69de6d08f324518ac267ae2e8382d58",
           "size": 524288
         },
         {
-          "sha": "ed6417b605b40aa6df17bc8efa3e2a6a76a41415",
+          "sha": "c442850f4798c0f7ea5db42c7c7a255eac1fa70f",
           "size": 524288
         },
         {
-          "sha": "ca2130d49363b99b341bc51cf6940c56230df7ec",
+          "sha": "dc43ba85e0b49890e00d5d81e7e50364b95b1d44",
           "size": 524288
         },
         {
-          "sha": "0f1af41a472b1e0d63a63af85af64ad95b897c73",
+          "sha": "cc6681e9cfcd2d78815e7698cf5ed7dbfac27bac",
           "size": 524288
         },
         {
-          "sha": "78ed303eb8ef72770fd5e9d543788655fd018ecd",
+          "sha": "58e5107556ff2c2a18988e108247ea1919479b1d",
           "size": 524288
         },
         {
-          "sha": "e8fa6da6801ba357917cc496f18764b736259c4e",
+          "sha": "48d5c96c9993d93f45c288f7d81e871074ce7274",
           "size": 524288
         },
         {
-          "sha": "54e122ad2802e6b1cab0c8efda2a9b66e26bd5d6",
-          "size": 249503
+          "sha": "b8b29eaaf5f1d0471e8e12ac7100fe03461fab44",
+          "size": 278175
         }
       ],
-      "notes": "guide/releases/1.36.0-preview.md"
+      "notes": "guide/releases/1.37.0-preview.md"
     },
     {
       "package": "tv.vela.launcher.lite",
-      "version": "0.15.0-preview",
-      "code": 29,
-      "tag": "lite-v0.15.0-preview",
-      "title": "Vela Lite 0.15.0 Preview · Find it with your remote",
-      "file": "Vela-Lite-0.15.0-preview.apk",
-      "size": 2287797,
-      "sha256": "4991fde1b4f829bb12de38c4bc860ebc8a3629620408af5674d9e858052f3151",
-      "blob_sha": "668d0e5c44d2beb6a56e0ca65627be78d2eba0f4",
+      "version": "0.16.0-preview",
+      "code": 30,
+      "tag": "lite-v0.16.0-preview",
+      "title": "Vela Lite 0.16.0 Preview \u00b7 Your remote, your shortcuts",
+      "file": "Vela-Lite-0.16.0-preview.apk",
+      "size": 2320565,
+      "sha256": "e29990af076cd71ed62fea78487e102a0b5282b79a8d6798526226e9ccecb38d",
+      "blob_sha": "fe9daab015775571d5a68c2bc0cf4d883b3464d9",
       "chunks": [
         {
-          "sha": "f77e2b902369ccd8f7e274d9b88b68828c5f2ee9",
+          "sha": "6d006bf3f488754978dae725df5f63c3ba2dcd11",
           "size": 524288
         },
         {
-          "sha": "f161bcaf1339960c5f458ff37390068785246145",
+          "sha": "394cb5756f6c3ea14e2792a7895f12631b4ba0d4",
           "size": 524288
         },
         {
-          "sha": "95967c195a85924444f9f6b04a3673c71cb156f3",
+          "sha": "3e3d3c108403f006b29d7f147b5d0cf85ee9b7c1",
           "size": 524288
         },
         {
-          "sha": "8f482e766333cb4bc5b02571863139ab8fb409eb",
+          "sha": "11cd96dd8ed1753ddfea436f2fd3cfe77a7a0c17",
           "size": 524288
         },
         {
-          "sha": "b6b64074e1435235b92faa404a7bc9646632e332",
-          "size": 190645
+          "sha": "e422d4c69365403d9329dc6a83f1b0f21064b38a",
+          "size": 223413
         }
       ],
-      "notes": "guide/releases/lite-0.15.0-preview.md"
+      "notes": "guide/releases/lite-0.16.0-preview.md"
     }
   ],
   "publication_revision": 2

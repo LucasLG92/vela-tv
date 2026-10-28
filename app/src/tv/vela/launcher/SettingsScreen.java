@@ -159,6 +159,7 @@ class SettingsScreen extends VelaScreen {
                 row(L10n.text("Home screen"),mode(),0,L10n.text("Your television, your way."),L10n.text("Choose Vela as your home screen or return to your TV's original home."),()->open(1,0));
                 row(L10n.text("TV settings"),"›",0,L10n.text("Your TV controls, close at hand."),L10n.text("Picture, sound, network, Bluetooth and television controls."),()->launch(new Intent(Settings.ACTION_SETTINGS)));
                 row(Ui.tr("Assistente de configuração","Setup guide","Asistente de configuración"),"›",0,L10n.text("Everything, your way."),L10n.text("Review accounts, apps and location without clearing your settings."),()->activity.startActivity(new Intent(activity,SetupActivity.class)));
+                row(L10n.text("Remote shortcuts"),"›",0,L10n.text("Remote shortcuts"),L10n.text("Teach Vela a button and choose its short and long press actions"),()->tools(VelaHub.REMOTE));
                 row(L10n.text("Your Vela"),"›",0,L10n.text("Your Vela."),L10n.text("Backups, profiles, search, programmes, reading and diagnostics."),()->tools(1));
                 note(L10n.text("Your original home screen and screensaver are kept so you can return whenever you like."),0);
             }else if(page==23){

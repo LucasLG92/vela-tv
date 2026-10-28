@@ -49,6 +49,12 @@ Open **Settings → Appearance → Customize appearance → Language** in Full V
 
 ## Remote controls
 
+Open **Settings → System → Remote shortcuts** in either edition. Choose **Add a button**, press the remote button, then assign a **Short press** and/or **Long press** action. You can open a Vela section, search by voice or launch an installed app. Remove one button or reset all mappings from the same screen; resetting asks for confirmation.
+
+Mappings work while Vela is in the foreground, including its integrated TV screen. They use the button code delivered by Android, rather than a remote-brand list or a changing Bluetooth device ID. Vendor buttons with a delivered scan code can also be learned. Other remotes sending the same code share that mapping. The app keeps navigation, Back, volume, power and channel controls available. Android/firmware may intercept Home, Assistant or branded app buttons before Vela receives them. These shortcuts do not remap keys globally inside other applications. No accessibility service or additional permission is required.
+
+If only the long press is assigned, a short press retains its original function. When only a short press is assigned, holding the button performs that shortcut once on release. Custom long presses run once after 650 ms. Mappings are private to each Vela profile, are included in credential-free backups and are limited to 24 actions. If a restored button does not match your new remote, learn it again on that television.
+
 | Where | Action |
 | --- | --- |
 | Sidebar app | OK opens it; hold OK opens shortcut management |

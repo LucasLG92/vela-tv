@@ -1,6 +1,6 @@
 # Vela in pictures
 
-Explore 63 native **4K screenshots**. The compact Home, Continue watching and navigation captures show **1.36.0-preview**. Apps, Settings and earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 65 native **4K screenshots**. The remote shortcut captures show **1.37.0-preview**. The compact Home, Continue watching and navigation captures show **1.36.0-preview**. Apps, Settings and earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 
@@ -259,3 +259,13 @@ Recently added is visible on arrival. Move down to explore your newest films and
 ## Settings with a continuous graphite canvas
 
 ![Settings with a continuous graphite canvas](61-continuous-settings.webp)
+
+## Your remote, your shortcuts
+
+Teach Vela a button, then choose what a short press and a long press should open. Your mappings stay with your profile.
+
+![Your remote, your shortcuts](84-remote-list.webp)
+
+## One button, two useful actions
+
+![One button, two useful actions](85-remote-button.webp)

@@ -10,6 +10,12 @@ A personal home screen for **Android TV and Google TV**. Bring your Plex or Jell
 
 ![Vela home with continue watching, original artwork and recently added titles](gallery/01-home.webp)
 
+## Your remote, your shortcuts
+
+Give available remote buttons a purpose: open TV, an app, HDMI, Search or Settings with a short press or a long press. Learn each button in the same calm settings interface. Your choices stay private to your profile.
+
+![Choose short and long press actions](gallery/85-remote-button.webp)
+
 ## Pick up your story
 
 Connect **Plex, Jellyfin or both together** and let your own posters and artwork fill the screen. Continue watching shows what you have started, how much time remains and the next available episode. Hold OK to mark one film or episode as watched on your connected server.

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.37.0-preview / Lite 0.16.0-preview — 2026-10-28
+
+- Learn a remote button in Settings → System → Remote shortcuts, then choose separate short and long press actions.
+- Open Home, Live TV, Apps, HDMI inputs, Search, voice search, Settings, Profiles or any installed app, in the existing Vela theme.
+- Keep mappings private to each profile and portable in validated, credential-free backups. Previous Search, Voice and Profiles shortcuts are preserved.
+- Retain the original short press when only a long press is customised. Repeated, cancelled and interrupted presses do not run duplicate actions; backgrounding clears the pending timer.
+- This uses buttons Android delivers while Vela is on screen. Navigation, Back, power, volume and channel controls stay available. Firmware-reserved buttons and global remapping inside other apps are not promised.
+- No new permission, accessibility service, background service or artwork cache. Available in all six menu languages.
+
+
 ## 1.36.0-preview / Lite 0.15.0-preview — 2026-10-28
 
 - Full: compact the cinematic Home header and Continue watching cards. Keep original platform logos and remaining time inside the artwork, above progress, and expose Latest uploads on entry. Preserve remote row headings, artwork proportions, row-size choices and bounded image loading.

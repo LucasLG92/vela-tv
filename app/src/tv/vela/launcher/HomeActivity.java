@@ -28,7 +28,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     @Override public void toolsLayout(){tools(6);if(hub!=null)hub.editHome();}
     @Override public void toolsGuide(String name){tools(9);if(hub!=null)hub.guideFix(name);}
     private boolean destroying;
-    private int toolsKey=-1;
+    private VelaRemote.Dispatcher remote;
     private final android.view.ViewTreeObserver.OnGlobalLayoutListener reading=()->{if(home!=null)VelaReading.apply(home);};
     private boolean foreground;
     private final VelaVoice.Session voice=new VelaVoice.Session();
@@ -79,7 +79,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     }
 
     @Override protected void onPause() {
-        foreground=false;stopSync();toolsMain.removeCallbacksAndMessages(null);if(programmes!=null)programmes.pause();
+        foreground=false;if(remote!=null)remote.cancel();stopSync();toolsMain.removeCallbacksAndMessages(null);if(programmes!=null)programmes.pause();
         if(hub!=null)hub.pause();
         if (home != null) home.pause();
         if(channelMenu!=null)channelMenu.close();super.onPause();
@@ -114,10 +114,15 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         super.onDestroy();
     }
 
+    private void remoteAction(String action){
+        if(action.equals("voice")){voiceSearch();return;}if(action.equals("search")){tools(0);return;}if(action.equals("profiles")){tools(4);return;}
+        if(action.startsWith("app:")){String pkg=action.substring(4);android.content.pm.PackageManager pm=getPackageManager();Intent intent=pm.getLeanbackLaunchIntentForPackage(pkg);if(intent==null)intent=pm.getLaunchIntentForPackage(pkg);if(intent!=null)try{startActivity(intent);return;}catch(android.content.ActivityNotFoundException|SecurityException unavailable){}android.widget.Toast.makeText(this,L10n.text("App unavailable"),android.widget.Toast.LENGTH_SHORT).show();return;}
+        afterTools(view->{if(action.equals("home"))view.reset();else if(action.equals("tv"))view.navigateSection(6);else if(action.equals("apps"))view.navigateSection(4);else if(action.equals("inputs"))view.navigateSection(5);else if(action.equals("settings"))view.settings();});
+    }
     @Override public boolean dispatchKeyEvent(KeyEvent event) {if(channelMenu!=null){if(channelHeld&&TvRemotePress.select(event.getKeyCode())){if(event.getAction()==KeyEvent.ACTION_UP){channelHeld=false;return true;}if(event.getRepeatCount()>0)return true;channelHeld=false;}return channelMenu.remote(event)||super.dispatchKeyEvent(event);}
-        if((VelaVoice.key(event.getKeyCode())||VelaRemote.voice(this,event.getKeyCode()))&&(hub==null||!hub.testingRemote())){if(event.getAction()==KeyEvent.ACTION_UP&&!event.isCanceled())voiceSearch();return true;}if(event.getKeyCode()==toolsKey){if(event.getAction()==KeyEvent.ACTION_UP)toolsKey=-1;return true;}
+        if(hub!=null&&hub.testingRemote()){if(remote!=null)remote.cancel();return hub.remote(event)||super.dispatchKeyEvent(event);}if(remote==null)remote=new VelaRemote.Dispatcher(this,new VelaRemote.Dispatcher.Host(){public void activate(String action){remoteAction(action);}public void replay(KeyEvent original){dispatchKeyEvent(original);}});if(remote.dispatch(event))return true;if(VelaVoice.key(event.getKeyCode())){if(event.getAction()==KeyEvent.ACTION_UP&&!event.isCanceled())voiceSearch();return true;}
         if(hub!=null){if(hub.remote(event))return true;KeyEvent mapped=VelaRemote.gamepad(event);if(mapped!=event&&hub.remote(mapped))return true;return super.dispatchKeyEvent(mapped);}
-        int target=VelaRemote.destination(this,event);if(target>=0){toolsKey=event.getKeyCode();tools(target);return true;}event=VelaRemote.gamepad(event);
+        event=VelaRemote.gamepad(event);
 
         if (home != null && home.onKey(event)) return true;
         return super.dispatchKeyEvent(event);

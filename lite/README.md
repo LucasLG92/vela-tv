@@ -10,6 +10,12 @@ Your **HDMI devices, antenna television and apps**, in a clean home screen made 
 
 ![Vela Lite HDMI home](gallery/01-inputs.png)
 
+## Your remote, your shortcuts
+
+Give available remote buttons a purpose: open TV, an app, HDMI, Search or Settings with a short press or a long press. Learn each button in the same calm settings interface. Your choices stay private to your profile.
+
+![Choose short and long press actions](gallery/37-remote-button.png)
+
 ## Put your devices first
 
 Open an HDMI input directly from Vela Lite. Connected consoles, TV boxes, PCs and Macs use brand icons and device profiles; unknown or inactive ports keep their HDMI number. Android supplies the connection state. Hold OK to choose a manual profile without inventing a signal.
