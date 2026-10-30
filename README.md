@@ -10,6 +10,8 @@ A personal home screen for **Android TV and Google TV**. Bring your Plex or Jell
 
 ![Vela home with continue watching, original artwork and recently added titles](gallery/01-home.webp)
 
+**[Watch Vela running on a real TCL →](media/tcl/README.md)**
+
 ## Useful at a glance
 
 Put a quiet clock, weather, date, your next followed programme or a useful shortcut in the top bar. Choose up to four widgets and arrange them in Appearance → Home widgets. Each profile keeps its own choices.

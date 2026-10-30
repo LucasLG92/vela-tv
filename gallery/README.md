@@ -294,3 +294,7 @@ Teach Vela a button, then choose what a short press and a long press should open
 
 ![Useful at a glance](91-home-widgets.webp)
 
+
+## Vela, on a real television
+
+[Watch the one-minute TCL demo](../media/tcl/README.md): a real library, the live guide, programme actions and What to watch. This separate video uses owner-authorised account display information.

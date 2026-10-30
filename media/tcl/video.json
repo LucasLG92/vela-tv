@@ -1,0 +1,30 @@
+{
+  "edition": "Vela Full",
+  "version": "1.38.2-preview",
+  "device": "TCL Android TV",
+  "capture": "Real-device recording, edited into three scenes and a closing card",
+  "language": "es",
+  "captions": "en",
+  "contains_owner_approved_profile_server_and_weather_location": true,
+  "account_and_source_configuration_forms_shown": false,
+  "credentials_shown": false,
+  "redacted": false,
+  "audio": false,
+  "sha256": "9969022627ca743d907be664e61ab746d26ce480c2016a59dc9b0d5c41f4130f",
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1280,
+        "height": 720,
+        "avg_frame_rate": "20/1"
+      }
+    ],
+    "format": {
+      "duration": "60.550000",
+      "size": "2011269"
+    }
+  }
+}
