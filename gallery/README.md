@@ -1,6 +1,6 @@
 # Vela in pictures
 
-Explore 71 native **4K screenshots**. The widgets, What to watch and automatic-switch captures show **1.38.2-preview**. The remote shortcut captures show **1.37.0-preview**. The compact Home, Continue watching and navigation captures show **1.36.0-preview**. Apps, Settings and earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 71 native **4K screenshots**. The widgets, What to watch and automatic-switch captures show **1.38.3-preview**. The remote shortcut captures show **1.37.0-preview**. The compact Home, Continue watching and navigation captures show **1.36.0-preview**. Apps, Settings and earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 

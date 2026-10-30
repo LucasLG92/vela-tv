@@ -2,29 +2,84 @@
   "edition": "Vela Full",
   "version": "1.38.2-preview",
   "device": "TCL Android TV",
-  "capture": "Real-device recording, edited into three scenes and a closing card",
+  "capture": "One continuous real-device screen recording; no cuts, slides or speed changes",
+  "duration_seconds": 307.3967,
   "language": "es",
-  "captions": "en",
+  "captions": null,
   "contains_owner_approved_profile_server_and_weather_location": true,
   "account_and_source_configuration_forms_shown": false,
   "credentials_shown": false,
   "redacted": false,
   "audio": false,
-  "sha256": "9969022627ca743d907be664e61ab746d26ce480c2016a59dc9b0d5c41f4130f",
+  "live_channel_picture_captured": false,
+  "sha256": "625d94b0683b1939aee73a22e2c7b259528cdc23d030d14eaaa4936d6061acb0",
   "video": {
-    "programs": [],
-    "stream_groups": [],
-    "streams": [
-      {
-        "codec_name": "h264",
-        "width": 1280,
-        "height": 720,
-        "avg_frame_rate": "20/1"
-      }
-    ],
-    "format": {
-      "duration": "60.550000",
-      "size": "2011269"
+    "codec": "h264",
+    "width": 1280,
+    "height": 720,
+    "size": 17312910
+  },
+  "chapters": [
+    {
+      "seconds": 0,
+      "title": "Inicio: seguir viendo y últimas subidas"
+    },
+    {
+      "seconds": 22,
+      "title": "Películas: carteles, filtros y ordenación"
+    },
+    {
+      "seconds": 63,
+      "title": "Series y biblioteca del servidor"
+    },
+    {
+      "seconds": 86,
+      "title": "Televisión: categorías y guía horizontal"
+    },
+    {
+      "seconds": 115,
+      "title": "Emisión: información y selector de canales; capa de vídeo no capturable"
+    },
+    {
+      "seconds": 139,
+      "title": "Organización de favoritos y canales"
+    },
+    {
+      "seconds": 165,
+      "title": "Qué ver: ahora, esta noche y géneros"
+    },
+    {
+      "seconds": 186,
+      "title": "Aplicaciones y accesos de la barra lateral"
+    },
+    {
+      "seconds": 208,
+      "title": "Entradas HDMI disponibles en la televisión"
+    },
+    {
+      "seconds": 222,
+      "title": "Diseño del inicio y estilos visuales"
+    },
+    {
+      "seconds": 234,
+      "title": "Widgets del inicio"
+    },
+    {
+      "seconds": 254,
+      "title": "Accesos rápidos del mando"
+    },
+    {
+      "seconds": 271,
+      "title": "Salvapantallas y preferencias"
+    },
+    {
+      "seconds": 287,
+      "title": "Actualizaciones integradas"
+    },
+    {
+      "seconds": 305,
+      "title": "Vuelta al inicio"
     }
-  }
+  ],
+  "file": "vela-continuous.mp4"
 }

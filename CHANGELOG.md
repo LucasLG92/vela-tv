@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.38.3-preview / Lite 0.17.2-preview — 2026-10-30
+
+- Both: shorten the empty programme widget to Upcoming, keeping followed programme titles when available. Centre the weather symbol on the left and align temperature and location in one column on the right, within the existing widget bounds and cache budget.
+
 ## 1.38.2-preview / Lite 0.17.1-preview — 2026-10-30
 
 - Both: show only the time in the clock widget, vertically centred in its existing card. Keep AM/PM on the same line when the 12-hour format is selected. No subtitle, extra worker or layout growth.

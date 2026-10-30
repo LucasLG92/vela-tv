@@ -4,17 +4,17 @@
 
 A personal home screen for **Android TV and Google TV**. Bring your Plex or Jellyfin library, live channels, apps and HDMI devices together in a calm interface made for your remote.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.38.2-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.38.3-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
 
 **Android 11+ · English / Español / Português / Français / Deutsch / Italiano · Preview · MIT**
 
 ![Vela home with continue watching, original artwork and recently added titles](gallery/01-home.webp)
 
-**[Watch Vela running on a real TCL →](media/tcl/README.md)**
+**[Watch the continuous 5-minute TCL walkthrough →](media/tcl/README.md)**
 
 ## Useful at a glance
 
-Put a quiet clock, weather, date, your next followed programme or a useful shortcut in the top bar. Choose up to four widgets and arrange them in Appearance → Home widgets. Each profile keeps its own choices.
+Put a quiet time-only clock, weather, date, your next followed programme or a useful shortcut in the top bar. Weather pairs its symbol with a compact temperature-and-location column. Choose up to four widgets and arrange them in Appearance → Home widgets. Each profile keeps its own choices.
 
 ![Choose and arrange your Home widgets](gallery/91-home-widgets.webp)
 

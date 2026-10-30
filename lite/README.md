@@ -4,15 +4,17 @@
 
 Your **HDMI devices, antenna television and apps**, in a clean home screen made for your remote. Vela Lite is for the television that sits alongside a TV box, console or computer.
 
-**[Download Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.17.1-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
+**[Download Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.17.2-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
 **Android TV / Google TV · Android 8.0+ · English / Español / Português / Français / Deutsch / Italiano · Preview**
 
 ![Vela Lite HDMI home](gallery/01-inputs.png)
 
+[Watch a real television walkthrough of Vela Full →](../media/tcl/README.md)
+
 ## Useful at a glance
 
-Put a quiet clock, weather, date, your next followed programme or a useful shortcut in the top bar. Choose up to four widgets and arrange them in Appearance → Home widgets. Each profile keeps its own choices.
+Put a quiet time-only clock, weather, date, your next followed programme or a useful shortcut in the top bar. Weather pairs its symbol with a compact temperature-and-location column. Choose up to four widgets and arrange them in Appearance → Home widgets. Each profile keeps its own choices.
 
 ![Choose and arrange your Home widgets](gallery/44-home-widgets.png)
 
