@@ -4,9 +4,9 @@ import argparse,os,subprocess,shutil,re
 
 p=argparse.ArgumentParser()
 p.add_argument('--serial',required=True);p.add_argument('--adb-port',default='5038')
-p.add_argument('--lite',action='store_true');p.add_argument('--test',choices=['shared','library','uiux','navigation','tv-fixes','identity','recent-channel','voice','home-composition','widgets','remote','hls-redirect','auto-tune','discovery'],default='shared')
+p.add_argument('--lite',action='store_true');p.add_argument('--test',choices=['shared','library','uiux','navigation','tv-fixes','identity','recent-channel','voice','home-composition','widgets','remote','hls-redirect','auto-tune','discovery','catalog'],default='shared')
 p.add_argument('--art',type=Path,required=True);p.add_argument('--fixture',default='');p.add_argument('--language',default='es')
-a=p.parse_args();assert not(a.lite and a.test in ('library','home-composition'))
+a=p.parse_args();assert not(a.lite and a.test in ('library','home-composition','catalog'))
 repo=Path(__file__).resolve().parents[1];root=repo/'lite' if a.lite else repo
 sdk=Path(os.environ['ANDROID_HOME']);jdk=Path(os.environ['JAVA_HOME'])
 bt=max((sdk/'build-tools').iterdir(),key=lambda d:tuple(map(int,d.name.split('.'))))
@@ -14,7 +14,7 @@ exe='.exe' if os.name=='nt' else '';bat='.bat' if os.name=='nt' else ''
 adb=[sdk/('platform-tools/adb'+exe),'-P',a.adb_port,'-s',a.serial]
 def run(args):return subprocess.run(list(map(str,args)),check=True)
 assert subprocess.check_output(list(map(str,adb+['shell','getprop','ro.kernel.qemu']))).strip()==b'1','Owned emulator required'
-cls={'shared':'AndroidRefinementTest','library':'AndroidLibraryDesignTest','uiux':'AndroidUiUxTest','navigation':'AndroidNavigationTest','tv-fixes':'AndroidTvRegressionTest','identity':'AndroidIdentityTest','recent-channel':'AndroidRecentChannelTest','voice':'AndroidVoiceTest','home-composition':'AndroidHomeCompositionTest','widgets':'AndroidWidgetsTest','remote':'AndroidRemoteTest','hls-redirect':'AndroidHlsRedirectTest','auto-tune':'AndroidAutoTuneTest','discovery':'AndroidDiscoveryUiTest'}[a.test]
+cls={'shared':'AndroidRefinementTest','library':'AndroidLibraryDesignTest','uiux':'AndroidUiUxTest','navigation':'AndroidNavigationTest','tv-fixes':'AndroidTvRegressionTest','identity':'AndroidIdentityTest','recent-channel':'AndroidRecentChannelTest','voice':'AndroidVoiceTest','home-composition':'AndroidHomeCompositionTest','widgets':'AndroidWidgetsTest','remote':'AndroidRemoteTest','hls-redirect':'AndroidHlsRedirectTest','auto-tune':'AndroidAutoTuneTest','discovery':'AndroidDiscoveryUiTest','catalog':'AndroidDiscoveryCatalogTest'}[a.test]
 if a.lite and a.test=='discovery':cls='LiteDiscoveryUiTest'
 if a.lite and a.test=='auto-tune':cls='LiteAutoTuneTest'
 if a.lite and a.test=='tv-fixes':cls='LiteTvRegressionTest'

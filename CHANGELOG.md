@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.38.1-preview — 2026-10-30
+
+- Full: resolve local channel aliases before programme rows in What to watch. Keep the indexed channel/start lookup with EPG offsets, encrypted payloads, genre filters, hidden channels and twenty-four-record pages. This avoids an expensive cross-product on large catalogues and older TV SQLite planners, without a new cache or worker.
+- Lite remains at 0.17.0.
+
 ## 1.38.0-preview / Lite 0.17.0-preview — 2026-10-30
 
 - Both: keep TV actions below the widget header and connect Up/Down navigation between the toolbar and widgets. What to watch now uses the TV canvas, direct time and genre filters, six programme cards per page, bounded 24-record batches and the shared programme sheet. Small thumbnails decode separately from large detail artwork, with one cancellable worker and no additional service. Lite omits the unused English asset catalogue; English continues to use the source fallback.

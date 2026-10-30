@@ -3,17 +3,17 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "1.38.0-preview",
-      "code": 73,
-      "tag": "v1.38.0-preview",
-      "title": "Vela 1.38.0 Preview \u00b7 A clearer view of television",
-      "file": "Vela-1.38.0-preview.apk",
+      "version": "1.38.1-preview",
+      "code": 74,
+      "tag": "v1.38.1-preview",
+      "title": "Vela 1.38.1 Preview \u00b7 Faster programme discovery",
+      "file": "Vela-1.38.1-preview.apk",
       "size": 4538015,
-      "sha256": "038700a4915eb6d90903d321c95d9403e418416048e8de3ac89dc3bdcdf09686",
-      "blob_sha": "8c6615d9e54130edfb2f00233d16a619a2a1026a",
+      "sha256": "eba99af70945d55651398a43e16e81a999f010caacce7c2daf2922f1f2ba3375",
+      "blob_sha": "a1bbe640aaad4c91fe7cc2d10e9de3d890b451ff",
       "chunks": [
         {
-          "sha": "ba98f59cd205efb9320e1b72fe0eace1cc81ca62",
+          "sha": "01d0ac21208978ba88187de6c4991574f2686e3c",
           "size": 524288
         },
         {
@@ -25,11 +25,11 @@
           "size": 524288
         },
         {
-          "sha": "fed22e867e8eb0e11c67c837f172ca1f4808ae51",
+          "sha": "ed9626d488da273b69e6d3f4f129a2f0e49a23f9",
           "size": 524288
         },
         {
-          "sha": "c2fcffc038f68b21fc6541c48a07c494325d53b1",
+          "sha": "98bb14b5d1c344476d1c3e1d8ccadd384bfd3b05",
           "size": 524288
         },
         {
@@ -37,19 +37,19 @@
           "size": 524288
         },
         {
-          "sha": "bc21fbb9d688ad0ef6e46fb75b7812ad0e6d3e20",
+          "sha": "3af378265de7ccd5c3fa4d40b965e745ae20c937",
           "size": 524288
         },
         {
-          "sha": "5c76da5cc6e45e845f5cc4781fa7f00ac53a8937",
+          "sha": "bb6c818148f273525f8c0f247ba16e632886bec8",
           "size": 524288
         },
         {
-          "sha": "6621e7a7a46415eba3e0843409b436b46c7b0add",
+          "sha": "33d06b897353376706aaf9d74f081cf210c97fb8",
           "size": 343711
         }
       ],
-      "notes": "guide/releases/1.38.0-preview.md"
+      "notes": "guide/releases/1.38.1-preview.md"
     },
     {
       "package": "tv.vela.launcher.lite",
