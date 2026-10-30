@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.38.2-preview / Lite 0.17.1-preview — 2026-10-30
+
+- Both: show only the time in the clock widget, vertically centred in its existing card. Keep AM/PM on the same line when the 12-hour format is selected. No subtitle, extra worker or layout growth.
+- Full includes the large-catalogue programme query fix from 1.38.1.
+
 ## 1.38.1-preview — 2026-10-30
 
 - Full: resolve local channel aliases before programme rows in What to watch. Keep the indexed channel/start lookup with EPG offsets, encrypted payloads, genre filters, hidden channels and twenty-four-record pages. This avoids an expensive cross-product on large catalogues and older TV SQLite planners, without a new cache or worker.

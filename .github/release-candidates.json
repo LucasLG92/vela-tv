@@ -3,17 +3,17 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "1.38.1-preview",
-      "code": 74,
-      "tag": "v1.38.1-preview",
-      "title": "Vela 1.38.1 Preview \u00b7 Faster programme discovery",
-      "file": "Vela-1.38.1-preview.apk",
+      "version": "1.38.2-preview",
+      "code": 75,
+      "tag": "v1.38.2-preview",
+      "title": "Vela 1.38.2 Preview \u00b7 Just the time",
+      "file": "Vela-1.38.2-preview.apk",
       "size": 4538015,
-      "sha256": "eba99af70945d55651398a43e16e81a999f010caacce7c2daf2922f1f2ba3375",
-      "blob_sha": "a1bbe640aaad4c91fe7cc2d10e9de3d890b451ff",
+      "sha256": "37bb316ed3753ac53f4653c3d508174ca438eeaac0159989295c3c0d4980e580",
+      "blob_sha": "36328e9a9e96221b1d75036c60d921a7b24dbc7f",
       "chunks": [
         {
-          "sha": "01d0ac21208978ba88187de6c4991574f2686e3c",
+          "sha": "717434d34dd8b776d5a7485c91de9ebae326d31d",
           "size": 524288
         },
         {
@@ -25,45 +25,45 @@
           "size": 524288
         },
         {
-          "sha": "ed9626d488da273b69e6d3f4f129a2f0e49a23f9",
+          "sha": "c6c5b10f9c06a1b5f90f722fc610495f36652fab",
           "size": 524288
         },
         {
-          "sha": "98bb14b5d1c344476d1c3e1d8ccadd384bfd3b05",
+          "sha": "8b0396631dd6197d3dde928eb8e8014a06431c72",
           "size": 524288
         },
         {
-          "sha": "2ee385fb8c606ad918596b0ed6a7b7bf9f99c00a",
+          "sha": "a4c5fcf33b658de349050810a303e921b8d31e48",
           "size": 524288
         },
         {
-          "sha": "3af378265de7ccd5c3fa4d40b965e745ae20c937",
+          "sha": "424560869268c9a8917aed981e05ffa57572e2c6",
           "size": 524288
         },
         {
-          "sha": "bb6c818148f273525f8c0f247ba16e632886bec8",
+          "sha": "ab2c4f5d39916511ce51b888c0e9f2dc57c830c8",
           "size": 524288
         },
         {
-          "sha": "33d06b897353376706aaf9d74f081cf210c97fb8",
+          "sha": "f28bc619f3d91fa72e93e2fce2209b82070c70a1",
           "size": 343711
         }
       ],
-      "notes": "guide/releases/1.38.1-preview.md"
+      "notes": "guide/releases/1.38.2-preview.md"
     },
     {
       "package": "tv.vela.launcher.lite",
-      "version": "0.17.0-preview",
-      "code": 31,
-      "tag": "lite-v0.17.0-preview",
-      "title": "Vela Lite 0.17.0 Preview \u00b7 A clearer view of television",
-      "file": "Vela-Lite-0.17.0-preview.apk",
+      "version": "0.17.1-preview",
+      "code": 32,
+      "tag": "lite-v0.17.1-preview",
+      "title": "Vela Lite 0.17.1 Preview \u00b7 Just the time",
+      "file": "Vela-Lite-0.17.1-preview.apk",
       "size": 2354010,
-      "sha256": "fc599e398c7a36c7338bbf65de0a9385417905ffe9302d1be2091cf4c39b3bd4",
-      "blob_sha": "7d7c2fbdd64ef67ff8aaf8a785f4c08e3c22f684",
+      "sha256": "db64e1db3c942a98cc2c11531102a0dc6200b3234a4e2a4215a2df65427abdeb",
+      "blob_sha": "77b5f3953c275a8e76010434b1acd806ea11d5d8",
       "chunks": [
         {
-          "sha": "50c48446d62c9f9a565a2633f656d4ec625e1bf9",
+          "sha": "fcfbbfc595e556e6c71d029346deddcaccc4c805",
           "size": 524288
         },
         {
@@ -75,15 +75,15 @@
           "size": 524288
         },
         {
-          "sha": "676fa08cf149aa139b8637233a3b864b884b8d25",
+          "sha": "d797020a993595eff5d646edf9de229b55ebf448",
           "size": 524288
         },
         {
-          "sha": "2b3d9281d2e73b504916aa21dca40e4daa5a2a06",
+          "sha": "11eabc31e5b033598f62f635a6ae1ae1eee61fed",
           "size": 256858
         }
       ],
-      "notes": "guide/releases/lite-0.17.0-preview.md"
+      "notes": "guide/releases/lite-0.17.1-preview.md"
     }
   ]
 }

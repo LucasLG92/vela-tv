@@ -722,8 +722,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.38.0-preview",
-    "sha256": "00604d40164e4742ff479ae3dc53d38e36d114645ac45c2b0ec67029f4c4b7d6"
+    "version": "1.38.2-preview",
+    "sha256": "90cc6e4ffa95ff4b34f5490466de27c25a5d7851b699029ea4ad7fae09d36ce6"
   },
   {
     "file": "87-tonight-sports.webp",
@@ -733,8 +733,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.38.0-preview",
-    "sha256": "e290c18bec1e1cd0b2a9f6d9f8d6063d6060b8e4ba9ca0d73ea7c9e61838e8bf"
+    "version": "1.38.2-preview",
+    "sha256": "df14d0780c48a0636e393bd0721362dfe329166f4159f3f62f16e1c656843b2f"
   },
   {
     "file": "88-programme-details.webp",
@@ -744,8 +744,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.38.0-preview",
-    "sha256": "85ebb88ab420141290b21e205018dc9cf98d1d1f5a85d956d8f3847d8459235c"
+    "version": "1.38.2-preview",
+    "sha256": "b8627bf7dd9d505fe0730f3c66c9ac60ef8549246c43ca01cb91999d750dc326"
   },
   {
     "file": "89-automatic-switch.webp",
@@ -755,8 +755,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.38.0-preview",
-    "sha256": "101cafebfc4d7c9cc557b33020c3a6702e3ac0707452a668621040a37e784e83"
+    "version": "1.38.2-preview",
+    "sha256": "d7f3817b7e5be5bf081bd106cdf8381074f3c2838e8ccfd6b25c278c50c8f802"
   },
   {
     "file": "90-scheduled-switch.webp",
@@ -766,8 +766,8 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.38.0-preview",
-    "sha256": "40765c40fdb92b96cdd0268af24334ad9b80167fc82b69d0c19d8b75733bcf2f"
+    "version": "1.38.2-preview",
+    "sha256": "0b55da70abd5109db7104d7c8f1fbcf4f33f23798543e907b37e92b6595f66da"
   },
   {
     "file": "91-home-widgets.webp",
@@ -777,7 +777,7 @@
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.38.0-preview",
-    "sha256": "e813a9dbafedf23f04043aa1db8968caac9ea08b2f2bc9bed5e42789ab5816a4"
+    "version": "1.38.2-preview",
+    "sha256": "aa85f4cf04166ea0f529b38ea87e5d9a29f0f72bb177654975846823e731861f"
   }
 ]
