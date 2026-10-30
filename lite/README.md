@@ -4,11 +4,17 @@
 
 Your **HDMI devices, antenna television and apps**, in a clean home screen made for your remote. Vela Lite is for the television that sits alongside a TV box, console or computer.
 
-**[Download Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.16.0-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
+**[Download Vela Lite](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.17.0-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
 **Android TV / Google TV · Android 8.0+ · English / Español / Português / Français / Deutsch / Italiano · Preview**
 
 ![Vela Lite HDMI home](gallery/01-inputs.png)
+
+## Useful at a glance
+
+Put a quiet clock, weather, date, your next followed programme or a useful shortcut in the top bar. Choose up to four widgets and arrange them in Appearance → Home widgets. Each profile keeps its own choices.
+
+![Choose and arrange your Home widgets](gallery/44-home-widgets.png)
 
 ## Your remote, your shortcuts
 
@@ -33,6 +39,16 @@ During a channel, press Right, Up or Down to explore without leaving playback. O
 The shared information strip shows the channel logo, clock, progress and **Up next**. Left first reveals it, then opens audio, supported subtitles, picture format and signal information; MENU is an alternative. A sleep timer can stop Vela playback after 30/60 minutes or at the known end of the programme. Pause is offered only if the television's tuner exposes it to Android.
 
 ![Current and next programme with channel logo and progress](gallery/33-live-player.png)
+
+## Find your next programme
+
+Open **What to watch** from Television. Browse **Now**, **Tonight** or **Next 48 hours**, then choose a genre from your guide. Clear programme cards bring the original artwork or channel logo, channel name, remaining time and progress together.
+
+![Programmes, time and channel in one view](gallery/39-what-to-watch.png)
+
+Pick a future programme in the guide and choose **Switch when it starts**. Vela changes channels at the scheduled time while it remains on screen. Cancel from the same card; programmes missed while Vela is closed or in standby are skipped.
+
+![Schedule a channel change from the programme card](gallery/42-automatic-switch.png)
 
 ## Your channels, your order
 

@@ -110,3 +110,12 @@ In Full, Settings → Home library → Plex + Jellyfin together keeps both libra
 Playback controls include a sleep timer: 30/60 minutes or the known end of the current live programme. One player-owned callback stops Vela playback and returns to the launcher. Leaving playback cancels it; it does not turn off the television or control another app.
 
 Remote & diagnostics → Compatibility assistant explains Home selection, HDMI state, antenna availability and installation permission. The local report contains no account credentials or network addresses. It does not silently alter firmware settings. [Player navigation](PLAYER.md).
+
+
+## Header widgets
+
+Open Settings → Appearance → Home widgets in either edition. Choose up to four modules, rearrange them in Widget order with Left/Right, choose the clock format and search for a weather city. Clock and weather use the same native cards as the optional date, next followed programme and quick access to Live TV, HDMI inputs or Apps. Clock and weather remain the Full defaults; Lite preserves its existing clock visibility until you choose widgets.
+
+On cinematic Home, press Up from the playback actions to reach the widgets. Press Down to return to the action you came from. Weather opens its city picker, the next programme opens its existing programme details, and the shortcut opens its chosen destination. The programme widget reads followed programmes already in the cached guide; it does not refresh a playlist or manufacture recommendations. With no upcoming programme it offers the Programmes page.
+
+Widgets share the existing foreground minute tick. Weather refreshes through the existing thirty-minute cache and stops when hidden or when Vela leaves the foreground. Lite can choose a city without adding a location permission. Widget selection, order and shortcut are per profile and included in compatible backups/sync; weather location is a device setting and is excluded from portable preferences.

@@ -29,15 +29,16 @@ Copy-Item -LiteralPath (Join-Path $repo 'app/assets/fonts/InterVariable.ttf') -D
 Copy-Item -LiteralPath (Join-Path $repo 'app/assets/fonts/OFL.txt') -Destination 'out/assets/licenses/Inter-OFL.txt'
 Copy-Item -LiteralPath 'assets/channel-logos' -Destination 'out/assets' -Recurse
 Copy-Item -LiteralPath 'assets/channel-logos/CREDITS.txt' -Destination 'out/assets/licenses/channel-logos.txt'
-foreach($name in @('hdmi','live_tv','apps','settings')){Copy-Item -LiteralPath (Join-Path $repo "app/assets/symbols/$name.png") -Destination 'out/assets/symbols'}
+foreach($name in @('hdmi','live_tv','apps','settings','bell','cloud','sunny','clear_night','partly_cloudy_day','partly_cloudy_night','foggy','snowflake','thunderstorm','rainy')){Copy-Item -LiteralPath (Join-Path $repo "app/assets/symbols/$name.png") -Destination 'out/assets/symbols'}
 Copy-Item -LiteralPath (Join-Path $repo 'app/assets/symbols/LICENSE-material-symbols.txt') -Destination 'out/assets/licenses'
 Run (Join-Path $bt 'aapt2.exe') @('compile','--dir','out/res','-o','out/res.zip')
-Copy-Item -LiteralPath (Join-Path $repo 'app/assets/i18n') -Destination 'out/assets' -Recurse
+New-Item -ItemType Directory -Path 'out/assets/i18n' -Force | Out-Null
+Get-ChildItem -LiteralPath (Join-Path $repo 'app/assets/i18n') -Filter '*.json' | Where-Object {$_.Name -ne 'en.json'} | Copy-Item -Destination 'out/assets/i18n'
 Copy-Item -LiteralPath (Join-Path $repo 'app/assets/connect.html') -Destination 'out/assets'
 Copy-Item -LiteralPath (Join-Path $repo 'app/assets/licenses/qr-generator-MIT.txt') -Destination 'out/assets/licenses'
 Run (Join-Path $bt 'aapt2.exe') @('link','-o','out/base.apk','-I',$android,'--manifest','AndroidManifest.xml','--java','out/gen','--custom-package','tv.vela.launcher','out/res.zip','--min-sdk-version','26','--target-sdk-version','33','-A','out/assets')
 $sources=@(Get-ChildItem -LiteralPath 'src','out/gen' -Filter '*.java' -Recurse | ForEach-Object {$_.FullName})
-foreach($name in @('VelaStyle','VelaFocus','VelaPerformance','VelaRecentActivity','VelaProgrammeArt','VelaContentDetails','VelaPlayerUi','VelaChannelMenu','VelaSessions','VelaSleepTimer','VelaWatchlist','VelaVoice','L10n','TvInputs','DeviceProfiles','DeviceIcons','VelaNavigation','VelaTheme','TvTimelineView','UpNextView','TvRemotePress','TvPersonalization','TvChannelOrganizer','VelaWorkspace','VelaReading','VelaShows','VelaReminderReceiver','VelaRemote','VelaPlaybackPanel','VelaDiscovery','VelaLayout','VelaGuideFix','VelaConnect','VelaSync','VelaQr','VelaHub','VelaToolsData','VelaGuideSearch','VelaProgrammeRefresh','VelaAntennaBackup')){$sources+=Join-Path $repo "app/src/tv/vela/launcher/$name.java"}
+foreach($name in @('VelaWidgets','VelaDiscoveryView','AmbientWeather','VelaStyle','VelaFocus','VelaPerformance','VelaRecentActivity','VelaProgrammeArt','VelaContentDetails','VelaPlayerUi','VelaChannelMenu','VelaSessions','VelaSleepTimer','VelaWatchlist','VelaVoice','L10n','TvInputs','DeviceProfiles','DeviceIcons','VelaNavigation','VelaTheme','TvTimelineView','UpNextView','TvRemotePress','TvPersonalization','TvChannelOrganizer','VelaWorkspace','VelaReading','VelaShows','VelaAutoTune','VelaReminderReceiver','VelaRemote','VelaPlaybackPanel','VelaDiscovery','VelaLayout','VelaGuideFix','VelaConnect','VelaSync','VelaQr','VelaHub','VelaToolsData','VelaGuideSearch','VelaProgrammeRefresh','VelaAntennaBackup')){$sources+=Join-Path $repo "app/src/tv/vela/launcher/$name.java"}
 $utf8=New-Object System.Text.UTF8Encoding($false)
 $sources+=@(Get-ChildItem -LiteralPath (Join-Path $repo 'app/src/io/nayuki/qrcodegen') -Filter '*.java' | ForEach-Object {$_.FullName})
 [IO.File]::WriteAllLines((Join-Path $out 'sources.txt'),@($sources | ForEach-Object {'"'+$_.Replace('\','/')+'"'}),$utf8)

@@ -4,7 +4,7 @@ import argparse,os,subprocess,shutil,re
 
 p=argparse.ArgumentParser()
 p.add_argument('--serial',required=True);p.add_argument('--adb-port',default='5038')
-p.add_argument('--lite',action='store_true');p.add_argument('--test',choices=['shared','library','uiux','navigation','tv-fixes','identity','recent-channel','voice','home-composition','remote','hls-redirect'],default='shared')
+p.add_argument('--lite',action='store_true');p.add_argument('--test',choices=['shared','library','uiux','navigation','tv-fixes','identity','recent-channel','voice','home-composition','widgets','remote','hls-redirect','auto-tune','discovery'],default='shared')
 p.add_argument('--art',type=Path,required=True);p.add_argument('--fixture',default='');p.add_argument('--language',default='es')
 a=p.parse_args();assert not(a.lite and a.test in ('library','home-composition'))
 repo=Path(__file__).resolve().parents[1];root=repo/'lite' if a.lite else repo
@@ -14,7 +14,9 @@ exe='.exe' if os.name=='nt' else '';bat='.bat' if os.name=='nt' else ''
 adb=[sdk/('platform-tools/adb'+exe),'-P',a.adb_port,'-s',a.serial]
 def run(args):return subprocess.run(list(map(str,args)),check=True)
 assert subprocess.check_output(list(map(str,adb+['shell','getprop','ro.kernel.qemu']))).strip()==b'1','Owned emulator required'
-cls={'shared':'AndroidRefinementTest','library':'AndroidLibraryDesignTest','uiux':'AndroidUiUxTest','navigation':'AndroidNavigationTest','tv-fixes':'AndroidTvRegressionTest','identity':'AndroidIdentityTest','recent-channel':'AndroidRecentChannelTest','voice':'AndroidVoiceTest','home-composition':'AndroidHomeCompositionTest','remote':'AndroidRemoteTest','hls-redirect':'AndroidHlsRedirectTest'}[a.test]
+cls={'shared':'AndroidRefinementTest','library':'AndroidLibraryDesignTest','uiux':'AndroidUiUxTest','navigation':'AndroidNavigationTest','tv-fixes':'AndroidTvRegressionTest','identity':'AndroidIdentityTest','recent-channel':'AndroidRecentChannelTest','voice':'AndroidVoiceTest','home-composition':'AndroidHomeCompositionTest','widgets':'AndroidWidgetsTest','remote':'AndroidRemoteTest','hls-redirect':'AndroidHlsRedirectTest','auto-tune':'AndroidAutoTuneTest','discovery':'AndroidDiscoveryUiTest'}[a.test]
+if a.lite and a.test=='discovery':cls='LiteDiscoveryUiTest'
+if a.lite and a.test=='auto-tune':cls='LiteAutoTuneTest'
 if a.lite and a.test=='tv-fixes':cls='LiteTvRegressionTest'
 if a.lite and a.test=='recent-channel':cls='LiteRecentChannelTest'
 out=root/('out/refinement-'+a.test);(out/'classes').mkdir(parents=True,exist_ok=True)
@@ -24,19 +26,23 @@ if a.art:
   if re.fullmatch(r'(?:poster-[0-9]+|backdrop-[0-9]+)\.jpg|catalog\.json',path.name) or a.test=='home-composition' and path.name in ('youtube-dune.jpg','youtube-moon.jpg','prime-reacher.jpg'):
    assert path.stat().st_size<16*1024*1024;shutil.copyfile(path,assets/path.name)
 
+if a.test=='discovery':
+ for logo in ['24h-es.png','antena-3-es.png','cuatro-es.png','lasexta-es.png','telecinco-es.png','real-madrid-tv-es.png']:
+  shutil.copyfile(repo/'lite/assets/channel-logos'/logo,assets/logo)
+
 pkg='tv.vela.launcher'+('.lite' if a.lite else '');testpkg=pkg+'.refinement.tests'
-provider='<provider android:name="tv.vela.launcher.'+cls+'$Provider" android:authorities="android.media.tv" android:exported="true"/>' if a.lite and a.test in ('tv-fixes','recent-channel') else ''
+provider='<provider android:name="tv.vela.launcher.'+cls+'$Provider" android:authorities="android.media.tv" android:exported="true"/>' if a.lite and a.test in ('tv-fixes','recent-channel','auto-tune','discovery') else ''
 recognizer='<activity android:name="tv.vela.launcher.AndroidVoiceTest$Recognizer" android:exported="true"/>' if a.test=='voice' else ''
 if a.test=='remote':recognizer='<activity android:name="tv.vela.launcher.AndroidRemoteTest$Target" android:label="Remote test target" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter></activity>'
 (out/'manifest.xml').write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="'+testpkg+'"><uses-permission android:name="android.permission.INTERNET"/><application'+(' android:label="Remote test target"' if a.test=='remote' else '')+'>'+provider+recognizer+'</application><instrumentation android:name="tv.vela.launcher.'+cls+'" android:targetPackage="'+pkg+'"'+('' if a.lite else ' android:targetProcesses="tv.vela.launcher:home"')+'/></manifest>',encoding='utf8')
 run([bt/('aapt2'+exe),'link','-o',out/'base.apk','-I',sdk/'platforms/android-34/android.jar','--manifest',out/'manifest.xml','-A',assets,'--min-sdk-version','26' if a.lite else '30','--target-sdk-version','33'])
-run([jdk/('bin/javac'+exe),'-encoding','UTF-8','-source','8','-target','8','-cp',os.pathsep.join([str(root/'out/classes'),str(sdk/'platforms/android-34/android.jar')]),'-d',out/'classes',(root if a.lite and a.test in ('tv-fixes','recent-channel') else repo)/('tests/'+cls+'.java'),repo/'tests/RefinementHttp.java'])
+run([jdk/('bin/javac'+exe),'-encoding','UTF-8','-source','8','-target','8','-cp',os.pathsep.join([str(root/'out/classes'),str(sdk/'platforms/android-34/android.jar')]),'-d',out/'classes',(root if a.lite and a.test in ('tv-fixes','recent-channel','auto-tune','discovery') else repo)/('tests/'+cls+'.java'),repo/'tests/RefinementHttp.java']+([repo/'tests/DiscoveryUiContract.java'] if a.test=='discovery' else []))
 run([jdk/('bin/jar'+exe),'cf',out/'classes.jar','-C',out/'classes','.'])
 run([bt/('d8'+bat),'--min-api','26' if a.lite else '30','--lib',sdk/'platforms/android-34/android.jar','--output',out,out/'classes.jar'])
 run([jdk/('bin/jar'+exe),'uf',out/'base.apk','-C',out,'classes.dex'])
 run([bt/('zipalign'+exe),'-f','4',out/'base.apk',out/'aligned.apk'])
 run([bt/('apksigner'+bat),'sign','--ks',repo/'vela.keystore','--ks-pass','pass:vela-local','--out',out/'tests.apk',out/'aligned.apk'])
-if a.lite and a.test in ('tv-fixes','recent-channel'):subprocess.run(list(map(str,adb+['uninstall','tv.vela.launcher.lite.tests'])),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+if a.lite and a.test in ('tv-fixes','recent-channel','auto-tune','discovery'):subprocess.run(list(map(str,adb+['uninstall','tv.vela.launcher.lite.tests'])),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 run(adb+['install','-r',out/'tests.apk'])
 try:
  args=adb+['shell','am','instrument','-w','-e','reuse','true','-e','language',a.language]+(['-e','fixture',a.fixture] if a.fixture else [])+[testpkg+'/tv.vela.launcher.'+cls]

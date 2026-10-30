@@ -713,5 +713,71 @@
     "height": 2160,
     "version": "1.37.0-preview",
     "sha256": "26e86ea5175c0c103186716d61b80365bc4b4d52d1167237625f9b2da06f23a8"
+  },
+  {
+    "file": "86-what-to-watch.webp",
+    "title": "Find your next programme",
+    "source": "Native 3840×2160 production Android views in an owned emulator. Synthetic EPG, viewing plans, weather, profiles and channel sources; original licensed channel logos. No personal account, private location or provider credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.38.0-preview",
+    "sha256": "00604d40164e4742ff479ae3dc53d38e36d114645ac45c2b0ec67029f4c4b7d6"
+  },
+  {
+    "file": "87-tonight-sports.webp",
+    "title": "Tonight, at a glance",
+    "source": "Native 3840×2160 production Android views in an owned emulator. Synthetic EPG, viewing plans, weather, profiles and channel sources; original licensed channel logos. No personal account, private location or provider credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.38.0-preview",
+    "sha256": "e290c18bec1e1cd0b2a9f6d9f8d6063d6060b8e4ba9ca0d73ea7c9e61838e8bf"
+  },
+  {
+    "file": "88-programme-details.webp",
+    "title": "A programme, clearly presented",
+    "source": "Native 3840×2160 production Android views in an owned emulator. Synthetic EPG, viewing plans, weather, profiles and channel sources; original licensed channel logos. No personal account, private location or provider credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.38.0-preview",
+    "sha256": "85ebb88ab420141290b21e205018dc9cf98d1d1f5a85d956d8f3847d8459235c"
+  },
+  {
+    "file": "89-automatic-switch.webp",
+    "title": "Be there when it starts",
+    "source": "Native 3840×2160 production Android views in an owned emulator. Synthetic EPG, viewing plans, weather, profiles and channel sources; original licensed channel logos. No personal account, private location or provider credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.38.0-preview",
+    "sha256": "101cafebfc4d7c9cc557b33020c3a6702e3ac0707452a668621040a37e784e83"
+  },
+  {
+    "file": "90-scheduled-switch.webp",
+    "title": "A clear plan for later",
+    "source": "Native 3840×2160 production Android views in an owned emulator. Synthetic EPG, viewing plans, weather, profiles and channel sources; original licensed channel logos. No personal account, private location or provider credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.38.0-preview",
+    "sha256": "40765c40fdb92b96cdd0268af24334ad9b80167fc82b69d0c19d8b75733bcf2f"
+  },
+  {
+    "file": "91-home-widgets.webp",
+    "title": "Useful at a glance",
+    "source": "Native 3840×2160 production Android views in an owned emulator. Synthetic EPG, viewing plans, weather, profiles and channel sources; original licensed channel logos. No personal account, private location or provider credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "1.38.0-preview",
+    "sha256": "e813a9dbafedf23f04043aa1db8968caac9ea08b2f2bc9bed5e42789ab5816a4"
   }
 ]

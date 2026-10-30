@@ -1,6 +1,6 @@
 # Vela in pictures
 
-Explore 65 native **4K screenshots**. The remote shortcut captures show **1.37.0-preview**. The compact Home, Continue watching and navigation captures show **1.36.0-preview**. Apps, Settings and earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 71 native **4K screenshots**. The widgets, What to watch and automatic-switch captures show **1.38.0-preview**. The remote shortcut captures show **1.37.0-preview**. The compact Home, Continue watching and navigation captures show **1.36.0-preview**. Apps, Settings and earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 
@@ -269,3 +269,28 @@ Teach Vela a button, then choose what a short press and a long press should open
 ## One button, two useful actions
 
 ![One button, two useful actions](85-remote-button.webp)
+
+## Find your next programme
+
+![Find your next programme](86-what-to-watch.webp)
+
+## Tonight, at a glance
+
+![Tonight, at a glance](87-tonight-sports.webp)
+
+## A programme, clearly presented
+
+![A programme, clearly presented](88-programme-details.webp)
+
+## Be there when it starts
+
+![Be there when it starts](89-automatic-switch.webp)
+
+## A clear plan for later
+
+![A clear plan for later](90-scheduled-switch.webp)
+
+## Useful at a glance
+
+![Useful at a glance](91-home-widgets.webp)
+

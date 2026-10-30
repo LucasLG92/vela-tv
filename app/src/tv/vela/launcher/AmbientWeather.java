@@ -9,7 +9,7 @@ import org.json.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.*;
 
 /** Weather only, approximate location, bounded HTTP and a private thirty-minute cache. */
 final class AmbientWeather {
@@ -31,7 +31,7 @@ final class AmbientWeather {
     private final Context context;
     private final Listener listener;
     private final Handler main=new Handler(Looper.getMainLooper());
-    private final ExecutorService io=Visuals.worker(1);
+    private final ExecutorService io=new ThreadPoolExecutor(0,1,5,TimeUnit.SECONDS,new ArrayBlockingQueue<>(2),r->{Thread t=new Thread(r,"vela-weather");t.setPriority(Thread.MIN_PRIORITY);return t;});
     private CancellationSignal location;
     private boolean closed,resolved;
     private Place selected;
@@ -51,7 +51,7 @@ final class AmbientWeather {
     static void select(Context c,Place place){prefs(c).edit().putString("mode","manual").putString("city",place.name).putString("lat",Double.toString(place.lat)).putString("lon",Double.toString(place.lon)).putString("zone",place.zone).remove("cache").apply();}
     static List<Place> search(String query)throws Exception{
         query=query.trim();if(query.length()<2||query.length()>100)return Collections.emptyList();
-        JSONObject body=new JSONObject(get("https://geocoding-api.open-meteo.com/v1/search?name="+URLEncoder.encode(query,"UTF-8")+"&count=5&language="+Ui.language+"&format=json"));
+        JSONObject body=new JSONObject(get("https://geocoding-api.open-meteo.com/v1/search?name="+URLEncoder.encode(query,"UTF-8")+"&count=5&language="+Ui.locale().getLanguage()+"&format=json"));
         JSONArray results=body.optJSONArray("results");List<Place> places=new ArrayList<>();
         for(int i=0;results!=null&&i<results.length();i++){
             JSONObject o=results.getJSONObject(i);String name=o.getString("name"),area=o.optString("admin1"),country=o.optString("country");
@@ -89,7 +89,7 @@ final class AmbientWeather {
         if(!"auto".equals(mode(context))){use(manual(context));return;}
         try{
             LocationManager manager=(LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
-            if(context.checkSelfPermission(PERMISSION)==PackageManager.PERMISSION_GRANTED&&manager!=null&&manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+            if(Build.VERSION.SDK_INT>=30&&context.checkSelfPermission(PERMISSION)==PackageManager.PERMISSION_GRANTED&&manager!=null&&manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
                 location=new CancellationSignal();main.postDelayed(()->fallback(),10_000);
                 manager.getCurrentLocation(LocationManager.NETWORK_PROVIDER,location,command->main.post(command),fix->{
                     if(closed||resolved)return;

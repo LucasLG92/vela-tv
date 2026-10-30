@@ -40,7 +40,7 @@ Left/Right explores programmes and shifts the window at an edge. Now returns to 
 
 The initial external XMLTV is [EPG dobleM](https://github.com/davidmuma/EPG_dobleM). It is streamed into a bounded private index, refreshed when used after four hours; a failed import keeps the previous index. Future listings cover up to 48 hours, with up to 24 previous hours for supported archives in Full. Per-block reads and decoded logos stay bounded. Channel IDs and normalised names are matched conservatively, and ambiguous aliases are refused. If an external current programme is missing, the source/native guide can fill it.
 
-Guide corrections lets you explicitly choose an identity and adjust its time offset. What to watch uses saved EPG genre data. [Tools, matching and limits](YOUR-VELA.md).
+Guide corrections lets you explicitly choose an identity and adjust its time offset. Open **What to watch** from the TV action row to browse **Now**, **Tonight** or **Next 48 hours**, then filter by the genres available in your saved EPG. Programme cards show the channel, time and live progress. Open a card to watch, follow it or save it for later; use **Back to guide** to return to the channel schedule. The view shares Vela's TV canvas and sidebar in Full and Lite. [Tools, matching and limits](YOUR-VELA.md).
 
 ## While watching
 
@@ -68,3 +68,13 @@ Antenna pause works only when the OEM tuner advertises time-shift support. Audio
 M3U archives require an explicit supported `catchup` mode and `catchup-source`; channel or header defaults can declare `catchup-days`. Supported default/append templates use known time/duration placeholders. Xtream archives require `tv_archive` and a valid duration, account identity and server time zone. Select an ended programme from the available past-day guide only when it is within that source's archive range. Formats not declared by a provider are not guessed.
 
 No accounts, passwords, playlist URLs or recordings are published with Vela. [Privacy](PRIVACY.md) · [Compatibility](COMPATIBILITY.md).
+
+## Switch to an upcoming programme
+
+Select a future programme in the guide and choose **Switch when it starts**. The same programme card offers **Cancel switch**. The choice is for that airing, not every episode of a series.
+
+Vela changes channel when the guide says the programme starts, while Vela is on screen (including during another live channel). Both Full and Lite support it. Full keeps the chosen M3U, Xtream or antenna source; Lite uses the tuner’s stable channel identity where available. Hidden, removed or unavailable channels are not opened.
+
+These are local, per-profile viewing plans: up to 16 starts over the next 48 hours, with one channel per start minute. They survive reopening Vela before the start. An airing that starts while Vela is closed, behind another app or in standby is skipped; it does not unexpectedly launch later or turn on the television. Timing follows the EPG, so broadcaster delays or later guide corrections may affect the actual programme.
+
+There is one main-loop timer only while Vela is visible, no resident service or new permission, and no parallel player. Plans contain channel references and times, not stream URLs, tokens or artwork, and are excluded from backups and preference sync.

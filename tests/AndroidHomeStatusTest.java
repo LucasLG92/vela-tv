@@ -33,11 +33,11 @@ public class AndroidHomeStatusTest extends Instrumentation {
             check(actual.city.equals(location),"Home did not reuse the user's weather city");
             check(((TextView)field(header,"temperature")).getText().toString().equals(actual.degrees()),"Real temperature missing");
             check(((TextView)field(header,"city")).getText().toString().equals(location),"Weather city missing");
-            check(((TextView)field(header,"clock")).getText().toString().matches("[0-2][0-9]:[0-5][0-9]"),"Invalid clock");
+            check(((TextView)field(header,"clock")).getText().toString().matches("[0-2]?[0-9]:[0-5][0-9]"),"Invalid clock");
             float clockSize=((TextView)field(header,"clock")).getTextSize();check(clockSize>=28&&clockSize<=34,"Clock must be readable and compact");
-            check(header.getBackground()==null&&header.getLayoutParams().width<=340&&header.getLayoutParams().height<=72,"Compact status became a large panel");
+            check(header.getBackground()==null&&header.getRight()<=((View)header.getParent()).getWidth()&&header.getLayoutParams().height<=72,"Header exceeds its bounded canvas");
             check(((ImageView)field(header,"icon")).getDrawable()!=null,"Weather icon missing");
-            check(!header.isFocusable()&&header.getDescendantFocusability()==ViewGroup.FOCUS_BLOCK_DESCENDANTS,"Informational header steals remote focus");
+            check(!header.isFocusable()&&!header.hasFocus(),"Widget group stole initial remote focus");
             AmbientWeather first=(AmbientWeather)field(header,"weather");ui(()->{current.resume();current.resume();});check(field(header,"weather")==first,"Repeated resume duplicated weather clients");
             // Check stale/expired presentation in memory; never write invented values into the weather cache.
             ui(()->{try{set(view,"snapshot",new AmbientWeather.Snapshot(actual.city,actual.zone,actual.temperature,actual.code,actual.day,System.currentTimeMillis()-AmbientWeather.FRESH-1000));view.updateClock();check(((TextView)field(view,"city")).getText().toString().contains(Ui.tr("Últimos dados","Last update","Últimos datos")),"Stale reading not identified visibly");set(view,"snapshot",new AmbientWeather.Snapshot(actual.city,actual.zone,actual.temperature,actual.code,actual.day,System.currentTimeMillis()-AmbientWeather.MAX_AGE-1000));view.updateClock();check(((TextView)field(view,"temperature")).getText().toString().equals("—"),"Expired temperature displayed as real");set(view,"snapshot",actual);view.updateClock();}catch(Exception e){throw new RuntimeException(e);}});

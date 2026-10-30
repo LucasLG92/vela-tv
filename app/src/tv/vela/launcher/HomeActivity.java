@@ -16,6 +16,8 @@ import android.widget.TextView;
  */
 public class HomeActivity extends Activity implements VelaHub.Owner {
     private CinemaHomeView home;
+    private VelaAutoTune.Session autoTune;
+    private void resumeAutoTune(){if(autoTune==null)autoTune=new VelaAutoTune.Session(this,new VelaAutoTune.Host(){public String source(){return LiveTvData.source(HomeActivity.this);}public boolean allowed(){return foreground&&home!=null;}public void tune(VelaAutoTune.Plan plan){if(channelMenu!=null)channelMenu.close();afterTools(view->{try{view.resumeActivity(plan.activity(VelaWorkspace.active(HomeActivity.this)));}catch(org.json.JSONException unavailable){}});}});autoTune.resume();}
     private boolean channelHeld;private VelaPlaybackPanel channelMenu;private VelaHub hub;private String toolsProfile;private int toolsDestination;private Bundle toolsPanels;private android.view.View toolsReturnFocus;private VelaProgrammeRefresh programmes;private final android.os.Handler toolsMain=new android.os.Handler(android.os.Looper.getMainLooper());
     private final Runnable programmeTick=new Runnable(){public void run(){if(!foreground)return;scanProgrammes();toolsMain.postDelayed(this,60000);}};
     private void scanProgrammes(){if(hub!=null)return;if(programmes==null)programmes=new VelaProgrammeRefresh(this);programmes.check(new FullToolsData(this){public void activate(VelaHub.Hit hit){}public void closed(boolean changed){}});}
@@ -75,11 +77,11 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         super.onResume();
         foreground=true;toolsMain.removeCallbacks(programmeTick);programmeTick.run();
         if(home!=null&&hub==null){home.resume();if(!home.showingUpdates())Updates.resumeInstallation(this);}else if(home!=null)home.resumeTools();VelaShows.schedule(this);startSync();
-        if(!deliverVoice()&&hub!=null)hub.resumeSearch();
+        if(!deliverVoice()&&hub!=null)hub.resumeSearch();resumeAutoTune();
     }
 
     @Override protected void onPause() {
-        foreground=false;if(remote!=null)remote.cancel();stopSync();toolsMain.removeCallbacksAndMessages(null);if(programmes!=null)programmes.pause();
+        foreground=false;if(autoTune!=null)autoTune.pause();if(remote!=null)remote.cancel();stopSync();toolsMain.removeCallbacksAndMessages(null);if(programmes!=null)programmes.pause();
         if(hub!=null)hub.pause();
         if (home != null) home.pause();
         if(channelMenu!=null)channelMenu.close();super.onPause();
@@ -109,13 +111,13 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     }
 
     @Override protected void onDestroy() {
-        destroying=true;if(programmes!=null)programmes.close();toolsMain.removeCallbacksAndMessages(null);if(hub!=null)hub.close();if(home!=null&&home.getViewTreeObserver().isAlive())home.getViewTreeObserver().removeOnGlobalLayoutListener(reading);
+        destroying=true;if(autoTune!=null)autoTune.close();if(programmes!=null)programmes.close();toolsMain.removeCallbacksAndMessages(null);if(hub!=null)hub.close();if(home!=null&&home.getViewTreeObserver().isAlive())home.getViewTreeObserver().removeOnGlobalLayoutListener(reading);
         if (home != null) home.destroy();
         super.onDestroy();
     }
 
     private void remoteAction(String action){
-        if(action.equals("voice")){voiceSearch();return;}if(action.equals("search")){tools(0);return;}if(action.equals("profiles")){tools(4);return;}
+        if(action.equals("voice")){voiceSearch();return;}if(action.equals("search")){tools(0);return;}if(action.equals("profiles")){tools(4);return;}if(action.equals("widgets")){tools(VelaHub.WIDGETS);return;}
         if(action.startsWith("app:")){String pkg=action.substring(4);android.content.pm.PackageManager pm=getPackageManager();Intent intent=pm.getLeanbackLaunchIntentForPackage(pkg);if(intent==null)intent=pm.getLaunchIntentForPackage(pkg);if(intent!=null)try{startActivity(intent);return;}catch(android.content.ActivityNotFoundException|SecurityException unavailable){}android.widget.Toast.makeText(this,L10n.text("App unavailable"),android.widget.Toast.LENGTH_SHORT).show();return;}
         afterTools(view->{if(action.equals("home"))view.reset();else if(action.equals("tv"))view.navigateSection(6);else if(action.equals("apps"))view.navigateSection(4);else if(action.equals("inputs"))view.navigateSection(5);else if(action.equals("settings"))view.settings();});
     }
@@ -147,6 +149,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
 
     void afterTools(java.util.function.Consumer<CinemaHomeView> action){if(hub!=null)hub.close();if(!destroying&&home!=null)action.accept(home);}
     void reopenActivity(org.json.JSONObject item){if(home!=null)home.resumeActivity(item);}
+    @Override public void widgetProgramme(){tools(3);if(hub!=null&&hub.page()==3)hub.upcoming();}
     @Override public void tools(int page){
         if(VelaSessions.blocked(this)&&page!=0&&page!=3&&page!=8)page=4;
         stopSync();
@@ -154,6 +157,8 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         hub=new VelaHub(this,new FullToolsData(this){
             public void activate(VelaHub.Hit hit){try{if(hit.value instanceof Intent)startActivity((Intent)hit.value);else if(hit.value instanceof TvInputs.Entry){TvInputs.Entry e=(TvInputs.Entry)hit.value;startActivity(new Intent(Intent.ACTION_VIEW,android.media.tv.TvContract.buildChannelUriForPassthroughInput(e.inputId)));}else if(hit.value instanceof LiveTvData.Channel)home.searchChannel((LiveTvData.Channel)hit.value);else if(hit.value instanceof PlexClient.Film){Intent i=new LibraryClient(HomeActivity.this).open((PlexClient.Film)hit.value);if(i!=null)startActivity(i);}}catch(RuntimeException unavailable){android.widget.Toast.makeText(HomeActivity.this,"No se puede abrir en este dispositivo.",android.widget.Toast.LENGTH_SHORT).show();}}
             public boolean navigation(){home.toolsNavigation();return true;}
+            public boolean header(android.view.View from){return home.focusHeader(from);}
+            public void title(String label){home.toolsTitle(label);}
             public void contentFocused(){home.toolsContent();}
             public void closed(boolean changed){hub=null;home.unmountTools();android.view.View restore=toolsReturnFocus;toolsReturnFocus=null;if(destroying)return;if(changed){if(home.getViewTreeObserver().isAlive())home.getViewTreeObserver().removeOnGlobalLayoutListener(reading);home.destroy();home=new CinemaHomeView(HomeActivity.this);setContentView(home);home.getViewTreeObserver().addOnGlobalLayoutListener(reading);if(toolsProfile!=null&&toolsProfile.equals(VelaWorkspace.active(HomeActivity.this))){if(toolsPanels!=null)home.restorePanels(toolsPanels);else if(toolsDestination!=0)home.navigateSection(toolsDestination);}}home.setVisibility(android.view.View.VISIBLE);if(foreground&&home!=null)home.resume();if(!changed&&restore!=null&&restore.isAttachedToWindow()&&restore.isShown())restore.requestFocus();scanProgrammes();startSync();}
         },page,true);home.mountTools(hub);

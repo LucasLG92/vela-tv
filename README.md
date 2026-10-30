@@ -4,11 +4,17 @@
 
 A personal home screen for **Android TV and Google TV**. Bring your Plex or Jellyfin library, live channels, apps and HDMI devices together in a calm interface made for your remote.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.37.1-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.38.0-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
 
 **Android 11+ · English / Español / Português / Français / Deutsch / Italiano · Preview · MIT**
 
 ![Vela home with continue watching, original artwork and recently added titles](gallery/01-home.webp)
+
+## Useful at a glance
+
+Put a quiet clock, weather, date, your next followed programme or a useful shortcut in the top bar. Choose up to four widgets and arrange them in Appearance → Home widgets. Each profile keeps its own choices.
+
+![Choose and arrange your Home widgets](gallery/91-home-widgets.webp)
 
 ## Your remote, your shortcuts
 
@@ -45,6 +51,16 @@ For supported clear HLS streams, enable optional **local pause and rewind**. The
 ![Channel information and next programme over live playback](gallery/45-live-player.webp)
 
 [Live TV setup and controls](guide/IPTV.md) · [Compatibility and limits](guide/COMPATIBILITY.md)
+
+## Find your next programme
+
+Open **What to watch** from Television. Browse **Now**, **Tonight** or **Next 48 hours**, then choose a genre from your guide. Clear programme cards bring the original artwork or channel logo, channel name, remaining time and progress together.
+
+![Programmes, time and channel in one view](gallery/86-what-to-watch.webp)
+
+Pick a future programme in the guide and choose **Switch when it starts**. Vela changes channels at the scheduled time while it remains on screen. Cancel from the same card; programmes missed while Vela is closed or in standby are skipped.
+
+![Schedule a channel change from the programme card](gallery/89-automatic-switch.webp)
 
 ## Recognise every app
 

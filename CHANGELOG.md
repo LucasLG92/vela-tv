@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.38.0-preview / Lite 0.17.0-preview — 2026-10-30
+
+- Both: keep TV actions below the widget header and connect Up/Down navigation between the toolbar and widgets. What to watch now uses the TV canvas, direct time and genre filters, six programme cards per page, bounded 24-record batches and the shared programme sheet. Small thumbnails decode separately from large detail artwork, with one cancellable worker and no additional service. Lite omits the unused English asset catalogue; English continues to use the source fallback.
+
+- Both: integrate automatic channel switching into a compact programme sheet, with grouped controls, an inline scheduled-time badge and stable remote focus. Toggle in place without restarting artwork requests or showing system toasts; keep the guide visible beneath one shared graphite treatment and omit empty artwork wells.
+
+- Both: choose Switch when it starts on a future guide programme, cancel it from the same card, and change to its channel automatically while Vela is visible. Save at most sixteen one-shot choices per local profile, keep source/channel identity checks, skip missed starts and stop the single timer on pause. No service, alarm, new permission, URL storage, backup or sync of viewing plans.
+
+- Both: native header widgets for clock, optional weather, date, next followed programme and a TV/HDMI/Apps shortcut. Select and order up to four in Appearance → Home widgets. Clock format, city search and per-profile portable choices stay in the integrated theme.
+- Both: reuse the foreground minute tick and existing cached guide/weather data. Hidden weather closes its worker; no new service, alarm, permission, background widget provider or artwork cache. Lite includes only the shared weather client and neutral defaults.
+- Full: keep the clock updating across integrated settings and tools, and fit update hints below the page title without overlapping the library badge.
+
 ## 1.37.1-preview — 2026-10-28
 
 - Full: fix local live pause startup for redirected HLS sources. Follow bounded media redirects and resolve all relative media addresses against the final playlist location. Preserve account transport, normal TLS validation, disk limits and one-player behaviour.

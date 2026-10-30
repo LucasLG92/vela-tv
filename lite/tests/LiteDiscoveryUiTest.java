@@ -1,0 +1,17 @@
+package tv.vela.launcher;
+import android.app.*;import android.content.*;import android.database.*;import android.os.*;import android.view.*;import android.widget.*;import java.util.*;
+public final class LiteDiscoveryUiTest extends DiscoveryUiContract {
+    public static final class Provider extends ContentProvider {public boolean onCreate(){return true;}public Cursor query(android.net.Uri u,String[] p,String s,String[] a,String o){return new MatrixCursor(new String[]{"_id"});}public String getType(android.net.Uri u){return "vnd.android.cursor.dir/channel";}public android.net.Uri insert(android.net.Uri u,ContentValues v){throw new UnsupportedOperationException();}public int update(android.net.Uri u,ContentValues v,String s,String[] a){throw new UnsupportedOperationException();}public int delete(android.net.Uri u,String s,String[] a){throw new UnsupportedOperationException();}}
+    static final class Data extends LiteAntennaData {final List<LiveTvData.Channel> values=new ArrayList<>();Data(Context c){super(c);for(int i=0;i<CHANNELS.length;i++)values.add(new LiveTvData.Channel(101+i,"owned-input",""+(i+1),CHANNELS[i],false,true,false));}boolean permitted(){return true;}List<LiveTvData.Channel> channels(CancellationSignal s){return values;}boolean refreshGuide(List<LiveTvData.Channel> all,CancellationSignal s){return false;}Map<String,List<LiveTvData.Programme>> programmes(List<LiveTvData.Channel> page,long from,long to,CancellationSignal s){return Collections.emptyMap();}}
+    public static final class Home extends LiteHomeActivity {Data data;protected boolean allowAutomaticChecks(){return false;}protected LiteAntennaData createAntennaData(){if(data==null)data=new Data(this);return data;}}
+    public Activity newActivity(ClassLoader l,String n,Intent i)throws InstantiationException,IllegalAccessException,ClassNotFoundException{return n.equals(LiteHomeActivity.class.getName())?new Home():super.newActivity(l,n,i);}
+    private Home home;protected Activity launch(){home=(Home)startActivitySync(new Intent(context,LiteHomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));return home;}
+    protected void television(){call(home,"show",new Class[]{int.class,boolean.class},1,false);}
+    protected View discoverButton()throws Exception{Object g=field(home,"guide");return g==null||((Boolean)field(g,"loading"))?null:text((View)g,L10n.text("What to watch"));}
+    protected View timeline()throws Exception{return (View)field(field(home,"guide"),"timeline");}
+    protected VelaWidgets.Strip widgets()throws Exception{return (VelaWidgets.Strip)field(home,"headerWidgets");}
+    protected VelaHub currentHub()throws Exception{return (VelaHub)field(home,"hub");}
+    protected void installFixture(VelaHub hub){call(home,"closeTelevision",new Class[]{});set(home,"hub",hub);try{((View)field(home,"content")).setVisibility(View.INVISIBLE);FrameLayout shell=(FrameLayout)field(home,"shell");FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(1790,940);p.leftMargin=112;p.topMargin=116;shell.addView(hub,p);((View)field(home,"rail")).bringToFront();call(home,"styleNavigation",new Class[]{});}catch(Exception e){throw new RuntimeException(e);}}
+    protected void removeFixture(){set(home,"hub",null);television();}
+    protected List<VelaHub.Hit> channels(String query){List<VelaHub.Hit> out=new ArrayList<>();for(LiveTvData.Channel c:home.data.values)if(c.name.equals(query))out.add(new VelaHub.Hit("Channel",c.name,"Demo",c));return out;}
+}
