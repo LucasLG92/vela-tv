@@ -21,7 +21,7 @@ final class VelaStyle {
             try{VelaLayout.save(c,before);}catch(Exception unavailable){}
             throw new IllegalStateException("Could not save style");
         }
-        if(c.getPackageName().endsWith(".lite"))VelaWorkspace.prefs(c,"lite_home").edit().remove("black_background").apply();
+        if(VelaEdition.lite(c))VelaWorkspace.prefs(c,"lite_home").edit().remove("black_background").apply();
         VelaWorkspace.registry(c).edit().putLong("revision",System.nanoTime()).apply();
     }
     static final class Preview extends View {

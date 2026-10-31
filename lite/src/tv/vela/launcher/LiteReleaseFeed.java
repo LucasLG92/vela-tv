@@ -15,16 +15,19 @@ final class LiteReleaseFeed {
         final String tag,version,url,sha256;final long size;final boolean preview;
         Release(String tag,String version,String url,String sha256,long size,boolean preview){this.tag=tag;this.version=version;this.url=url;this.sha256=sha256;this.size=size;this.preview=preview;}
         String page(){return REPO+"/releases/tag/"+tag;}
-        JSONObject json()throws JSONException{return new JSONObject().put("tag_name",tag).put("prerelease",preview).put("draft",false).put("assets",new JSONArray().put(new JSONObject().put("name","Vela-Lite-"+version+".apk").put("browser_download_url",url).put("digest","sha256:"+sha256).put("size",size).put("state","uploaded")));}
+        JSONObject json()throws JSONException{return new JSONObject().put("tag_name",tag).put("prerelease",preview).put("draft",false).put("assets",new JSONArray().put(new JSONObject().put("name",(tag.startsWith("lite-v")?"Vela-Lite-":"Vela-")+version+".apk").put("browser_download_url",url).put("digest","sha256:"+sha256).put("size",size).put("state","uploaded")));}
     }
     static Release newest(JSONArray releases,String installed,boolean previews){
+        return newest(releases,installed,previews,false);
+    }
+    static Release newest(JSONArray releases,String installed,boolean previews,boolean unified){
         if(!validVersion(installed))return null;Release best=null;
         for(int i=0;i<Math.min(30,releases.length());i++){
             JSONObject item=releases.optJSONObject(i);if(item==null||item.optBoolean("draft",true))continue;
-            String tag=item.optString("tag_name");if(!tag.startsWith("lite-v"))continue;String version=tag.substring(6);
+            String tag=item.optString("tag_name");if(unified?!tag.startsWith("v"):!tag.startsWith("lite-v"))continue;String version=tag.substring(unified?1:6);
             if(!validVersion(version)||compare(version,installed)<=0)continue;
             boolean preview=item.optBoolean("prerelease")||version.contains("-");if(preview&&!previews)continue;
-            String filename="Vela-Lite-"+version+".apk",expected=REPO+"/releases/download/"+tag+"/"+filename;JSONArray assets=item.optJSONArray("assets");
+            String filename=(unified?"Vela-":"Vela-Lite-")+version+".apk",expected=REPO+"/releases/download/"+tag+"/"+filename;JSONArray assets=item.optJSONArray("assets");
             for(int a=0;assets!=null&&a<Math.min(32,assets.length());a++){
                 JSONObject asset=assets.optJSONObject(a);if(asset==null||!filename.equals(asset.optString("name"))||!expected.equals(asset.optString("browser_download_url"))||!asset.optString("state").equals("uploaded"))continue;
                 String digest=asset.optString("digest").toLowerCase(Locale.ROOT);long size=asset.optLong("size");

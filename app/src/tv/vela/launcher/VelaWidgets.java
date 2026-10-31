@@ -23,7 +23,7 @@ final class VelaWidgets {
     }
     static State read(Context c){
         State state=new State();String raw=prefs(c).getString("document","");
-        if(raw.isEmpty()){if(!c.getPackageName().endsWith(".lite")||VelaWorkspace.prefs(c,"lite_home").getBoolean("show_clock",true))state.items.add("clock");if(!c.getPackageName().endsWith(".lite"))state.items.add("weather");return state;}
+        if(raw.isEmpty()){if(!VelaEdition.lite(c)||VelaWorkspace.prefs(c,"lite_home").getBoolean("show_clock",true))state.items.add("clock");if(!VelaEdition.lite(c))state.items.add("weather");return state;}
         try{if(raw.length()>2048)throw new JSONException("Widget settings too large");JSONObject j=new JSONObject(raw);JSONArray a=j.optJSONArray("items");for(int i=0;a!=null&&i<Math.min(16,a.length())&&state.items.size()<LIMIT;i++){String id=a.optString(i);if(TYPES.contains(id)&&!state.has(id))state.items.add(id);}state.format=Math.max(0,Math.min(2,j.optInt("format")));String shortcut=j.optString("shortcut");if(Arrays.asList("apps","inputs","tv").contains(shortcut))state.shortcut=shortcut;}catch(JSONException|ClassCastException invalid){state.items.clear();state.items.add("clock");}return state;
     }
     static void validate(JSONObject j)throws JSONException{

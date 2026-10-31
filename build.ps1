@@ -59,7 +59,7 @@ foreach ($coordinate in @('latitude', 'longitude')) {
 $outPath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'out'))
 if ($outPath -ne (Join-Path $PSScriptRoot 'out')) { throw 'Unexpected output directory' }
 if (Test-Path -LiteralPath $outPath) { Remove-Item -LiteralPath $outPath -Recurse -Force }
-New-Item -ItemType Directory -Path 'out\gen\tv\vela\launcher','out\classes' -Force | Out-Null
+New-Item -ItemType Directory -Path 'out\gen\tv\vela\launcher','out\classes','out\lite-assets','out\lite-assets\licenses' -Force | Out-Null
 $fields = [ordered]@{
     TMDB_KEY = (Property 'tmdb_key' ''); TMDB_REGION = (Property 'tmdb_region' 'US')
     LATITUDE = (Property 'latitude' '0'); LONGITUDE = (Property 'longitude' '0')
@@ -75,17 +75,21 @@ foreach ($field in @(@('DISABLE_ASSISTANT','disable_assistant'), @('DISABLE_APPS
 $generated += '}'
 [IO.File]::WriteAllLines((Join-Path $outPath 'gen\tv\vela\launcher\Config.java'), $generated, $utf8)
 
+Copy-Item -LiteralPath 'lite/assets/channel-logos' -Destination 'out/lite-assets' -Recurse -Force
+Copy-Item -LiteralPath 'lite/assets/channel-logos/CREDITS.txt' -Destination 'out/lite-assets/licenses/channel-logos.txt'
 Run-Native $PythonPath @('tools/prepare_media3.py')
 Run-Native (Join-Path $bt 'aapt2.exe') @('compile','--dir','out/media3/res','-o','out/media3/res.zip')
 Run-Native (Join-Path $bt 'aapt2.exe') @('compile','--dir','app/res','-o','out/res.zip')
 Run-Native (Join-Path $bt 'aapt2.exe') @('link','-o','out/base.apk','-I',$androidJar,'--manifest','app/AndroidManifest.xml',
-    '--java','out/gen','out/media3/res.zip','out/res.zip','--auto-add-overlay','--min-sdk-version','30','--target-sdk-version','33','-A','app/assets','-0','ttf')
+    '--java','out/gen','out/media3/res.zip','out/res.zip','--auto-add-overlay','--min-sdk-version','26','--target-sdk-version','33','-A','app/assets','-A','out/lite-assets','-0','ttf')
+$liteControllers = @(Get-ChildItem -LiteralPath 'lite/src/tv/vela/launcher' -Filter '*.java' | Where-Object { $_.Name -notin @('LiteSupport.java','Config.java','LiteExportActivity.java','LiteMigrationProvider.java') } | ForEach-Object { '"' + $_.FullName.Replace('\','/') + '"' })
 $sources = @(Get-ChildItem -LiteralPath 'app\src','out\gen' -Filter '*.java' -Recurse | ForEach-Object { '"' + $_.FullName.Replace('\','/') + '"' })
+$sources += $liteControllers
 [IO.File]::WriteAllLines((Join-Path $outPath 'sources.txt'), $sources, $utf8)
 Run-Native (Join-Path $env:JAVA_HOME 'bin\javac.exe') @('-encoding','UTF-8','-nowarn','-Xlint:-options','-source','8','-target','8',
     '-bootclasspath',($androidJar + ';' + (Join-Path $bt 'core-lambda-stubs.jar')),'-classpath',($androidJar + ';' + ((Get-ChildItem -LiteralPath 'out/media3/libs' -Filter '*.jar' | ForEach-Object { $_.FullName }) -join ';')),'-d','out/classes','@out/sources.txt')
 Run-Native (Join-Path $env:JAVA_HOME 'bin\jar.exe') @('cf','out/classes.jar','-C','out/classes','.')
-$r8args = @('-cp',(Join-Path $bt 'lib/d8.jar'),'com.android.tools.r8.R8','--release','--min-api','30','--lib',$androidJar,'--lib',(Join-Path $bt 'core-lambda-stubs.jar'),'--pg-conf','out/media3/rules.pro','--output','out','out/classes.jar') + @(Get-ChildItem -LiteralPath 'out/media3/libs' -Filter '*.jar' | ForEach-Object { $_.FullName })
+$r8args = @('-cp',(Join-Path $bt 'lib/d8.jar'),'com.android.tools.r8.R8','--release','--min-api','26','--lib',$androidJar,'--lib',(Join-Path $bt 'core-lambda-stubs.jar'),'--pg-conf','out/media3/rules.pro','--output','out','out/classes.jar') + @(Get-ChildItem -LiteralPath 'out/media3/libs' -Filter '*.jar' | ForEach-Object { $_.FullName })
 Run-Native (Join-Path $env:JAVA_HOME 'bin/java.exe') $r8args
 # Windows aapt2 can emit backslashes in asset names; Android requires ZIP paths with '/'.
 Add-Type -AssemblyName System.IO.Compression.FileSystem

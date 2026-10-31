@@ -20,7 +20,7 @@ Antenna organisation uses a DVB service identity or an unambiguous channel-name 
 
 Search installed apps, HDMI inputs, channels and programmes from the saved EPG. Full Vela also searches the active Plex/Jellyfin library, in bounded pages and groups of library sections. Open an app, input or channel from its result, or follow a programme title.
 
-Use Search by voice, or the search key when Android forwards it to Vela. Exact, unambiguous app/channel/input commands can open a destination. Recognition depends on the installed Android recognizer, which handles its own permissions and processing. Vela adds no permanent microphone listener.
+Use Search by voice, or the search key when Android forwards it to Vela. Exact, unambiguous app/channel/input commands can open a destination. Vela requests microphone permission on first use and displays its own listening interface. Recognition depends on Android’s installed speech service. Vela adds no permanent microphone listener.
 
 This does not search every streaming app's private catalogue or import its accounts. Local results can remain available when a connected library is offline.
 
@@ -83,7 +83,7 @@ What to watch explores Now, Tonight (18:00–04:00) and the next 48 hours. Movie
 
 ## Voice search
 
-Use Search by voice in Search, or assign an available button under Remote & diagnostics → Search by voice. The latter uses the same capture, collision handling and profile-local preferences as other shortcuts. Vela only listens when you ask; Android's installed recognizer handles the microphone and spoken language independently of Vela's menu language.
+Use voice search in Search, or assign an available remote or keyboard button under System → Remote shortcuts → Vela voice search. The latter uses the same collision handling and profile-local preferences as other shortcuts. Vela displays partial words, a sidebar microphone and a soft glow that responds to speech and follows the selected accent. It requests microphone permission on first use, prefers Android’s on-device recognizer when available and otherwise uses the installed speech service, which may process audio online. Leaving the foreground closes the microphone. See [Home and voice setup](HOME-AND-VOICE.md).
 
 Examples: “busca la película Dune” shows library results; “abre la aplicación YouTube” opens an exact installed app; “pon el canal La Uno” recognises La 1; “cambia a HDMI dos” targets HDMI 2 when connected; “busca documentales esta noche” opens Tonight discovery. Commands have equivalent forms in the six supported menu languages. Ambiguous targets stay in the results for selection.
 

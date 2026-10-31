@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tv.vela.launcher"
-    android:versionCode="76"
-    android:versionName="1.38.3-preview">
+    android:versionCode="77"
+    android:versionName="2.0.0-preview">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -17,6 +18,8 @@
          returns null). The shelf and streaming apps, the live TV apps and, through the <intent>, every TV app
          (for "All Apps"). -->
     <queries>
+        <package android:name="tv.vela.launcher.lite" />
+        <intent><action android:name="android.speech.RecognitionService" /></intent>
         <package android:name="com.plexapp.android" />
         <package android:name="org.jellyfin.androidtv" />
         <package android:name="com.netflix.ninja" />
@@ -58,6 +61,10 @@
         android:banner="@drawable/banner"
         android:allowBackup="false"
         android:usesCleartextTraffic="true">
+
+        <activity android:name=".EditionActivity" android:process=":home" android:exported="true" android:screenOrientation="landscape" android:theme="@style/Vela.Home" />
+        <activity android:name=".LiteHomeActivity" android:process=":home" android:exported="false" android:launchMode="singleTask" android:screenOrientation="landscape" android:theme="@style/Vela.Home" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"><meta-data android:name="android.app.searchable" android:resource="@xml/searchable" /><intent-filter><action android:name="android.intent.action.SEARCH" /><category android:name="android.intent.category.DEFAULT" /></intent-filter></activity>
+        <provider android:name=".LiteUpdateProvider" android:authorities="tv.vela.launcher.lite-updates" android:exported="false" android:grantUriPermissions="true" />
 
         <!-- The icon routes to integrated Home settings; the component also retains standalone recovery access. -->
         <activity
@@ -147,7 +154,7 @@
         </activity>
 
         <service
-            android:name=".Screensaver"
+            android:name=".Screensaver" android:enabled="false"
             android:process=":home"
             android:exported="true"
             android:label="Vela"

@@ -1,8 +1,40 @@
 # Vela in pictures
 
-Explore 71 native **4K screenshots**. The widgets, What to watch and automatic-switch captures show **1.38.3-preview**. The remote shortcut captures show **1.37.0-preview**. The compact Home, Continue watching and navigation captures show **1.36.0-preview**. Apps, Settings and earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+Explore 78 native **4K screenshots**. The unified mode selector, Lite, mode settings, personalised Home and voice captures show **2.0.0-preview**; the explicit old-Lite import prompt shows the **0.18.0-preview** transition app. Earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original app/channel names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
+
+## One app. Choose your experience.
+
+Full brings your libraries and live sources home. Lite keeps HDMI, antenna and apps close. Both use the same APK and update channel.
+
+![Choose Full or Lite](95-unified-choice.webp)
+
+| Lite, with only the essentials active | Change modes in Settings |
+| --- | --- |
+| ![Unified Lite HDMI view](96-unified-lite.webp) | ![Launcher mode in System settings](97-unified-system.webp) |
+
+[Mode and migration guide](../guide/UNIFIED.md)
+
+## A Home for every profile
+
+Arrange shelves, choose their size and source, and add latest movies, series, unwatched or top-rated films. Optional rows only load when enabled.
+
+![Edit your Home sections](99-home-editor.webp)
+
+![Choose a Home library independently of catalogue browsing](101-home-library.webp)
+
+## A little light when Vela listens
+
+A compact microphone and an accent-coloured glow respond to your voice. Assign your own shortcut; Android supplies speech recognition. This capture uses synthetic speech input.
+
+![Integrated Vela voice search](100-voice-glow.webp)
+
+## Move your old Lite profile with confidence
+
+The old app asks before sharing a temporary, one-use settings export. Accounts and passwords remain private.
+
+![Standalone Lite migration confirmation](98-lite-migration.webp)
 
 ## Your library, centre stage
 

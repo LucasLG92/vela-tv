@@ -1,5 +1,11 @@
 # Vela Lite in pictures
 
+**Lite now lives inside the unified Vela APK.** These new 2.0 captures show the same native Lite interface and the new mode setting. Older standalone captures remain below with their recorded versions. [Choose a mode or move your existing profile](../../guide/UNIFIED.md).
+
+![Lite inside unified Vela](../../gallery/96-unified-lite.webp)
+
+![Launcher mode in System settings](../../gallery/97-unified-system.webp)
+
 Explore 43 native **4K screenshots**. The widgets, What to watch and automatic-switch captures show **0.17.2-preview**. The remote shortcut captures show **0.16.0-preview**. The newest Apps, Settings and personalisation captures show **0.14.1-preview**; earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](../../gallery/CREDITS.md) · [Image manifest](index.json)

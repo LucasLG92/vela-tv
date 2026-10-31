@@ -1,6 +1,6 @@
 # Compatibility and limits
 
-Full Vela needs Android TV/Google TV on Android 11+. Lite needs Android 8.0+. Televisions with another operating system need an external Android TV device for Full Vela; installing Lite on a box cannot expose the screen's own antenna or HDMI ports.
+The unified Vela APK supports Android TV/Google TV from Android 8.0. Choose Lite on Android 8–10; Full requires Android 11+. Televisions with another operating system need an external Android TV device for Full Vela; installing Lite on a box cannot expose the screen's own antenna or HDMI ports.
 
 ## Libraries and service apps
 

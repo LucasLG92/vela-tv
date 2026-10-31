@@ -1,33 +1,16 @@
 # Install Vela
 
-Full Vela needs **Android TV or Google TV, Android 11 or later**. Samsung and LG televisions running their own operating system need an external Android TV device over HDMI. For an Android television used mainly with an HDMI box or console, consider [Vela Lite](../lite/README.md), Android 8.0+.
+**One APK supports Android TV and Google TV from Android 8.0.** Choose **Lite** for HDMI, antenna and apps, or **Full** for Plex, Jellyfin and IPTV as well. Full requires Android 11+. Non-Android Samsung/LG televisions still need an external Android TV device.
 
 ## Install or update
 
-1. Download the APK for your edition from [Releases](https://github.com/LucasLG92/vela-tv/releases).
-2. Transfer it to the television and open it with your usual file manager. Allow that manager to install apps if Android asks.
-3. Open Vela. The optional setup guide covers accounts, apps and weather location.
-4. Test navigation, apps, artwork and playback before changing your default home.
+1. Download **Vela-2.0.0-preview.apk** from [Vela Releases](https://github.com/LucasLG92/vela-tv/releases/tag/v2.0.0-preview).
+2. Transfer it to the television and open it with your usual file manager. Allow installation from that manager if Android asks.
+3. Open Vela and choose Full or Lite. Android 8–10 offers Lite. You can change the choice in **Settings → System → Launcher mode**; profiles and accounts remain saved.
+4. Existing Full users can install over their current signed app or use its updater. Their configured Full mode is preserved automatically.
+5. If you use the old separate Lite app, follow the [one-time migration steps](UNIFIED.md#moving-from-the-old-standalone-lite-app). Android cannot replace both old package identities with one APK in a normal update.
 
-An existing installation keeps its data when updated with the same signing identity. Do not uninstall Vela or clear its data to update it.
-
-If you already use ADB:
-
-```sh
-adb -s <TV_IP>:5555 install -r Vela.apk
-```
-
-## Update from the television
-
-Open **Settings → Updates**. Automatic checking and downloading are enabled by default; explicit previous choices are preserved. Vela checks GitHub at most daily when opened, or when you choose Check now.
-
-The APK stays in private cache and is checked for SHA-256, package, version and signer. Android may ask you to allow Vela to install apps. Return to Vela afterwards; the pending install resumes, then Android asks for installation confirmation. If you cancel, choose Install again.
-
-After Android confirms that the downloaded version is installed, Vela cleans its updater APK. It also checks on the next opening, including offline or with automatic checks disabled. Pending/cancelled installations keep their APK for retry. Abandoned temporary updater files are cleaned without touching a current download, account data or APKs you saved in Downloads.
-
-Preview builds can receive subsequent previews. The Full edition filters out Lite releases; Lite filters out Full releases and has an auxiliary public feed if GitHub's API is unavailable. Builds signed with a different key cannot update the official APK.
-
-Versions older than Full 1.12 need one manual APK update to gain the updater. Older versions that do not resume after granting installation permission can return to Vela and choose Install again.
+Both modes then check and download the same official Vela release. Android's installer still asks for installation permission and confirmation when required. APK size, package, version and signing identity are verified before installation; completed downloads are cleaned after an update.
 
 ## Choose your Home screen
 

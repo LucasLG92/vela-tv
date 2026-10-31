@@ -61,6 +61,13 @@ final class JellyfinClient {
         return out;
     }
     PlexClient.LibraryPage page(PlexClient.Section section,int offset)throws Exception{return page(section,offset,new CatalogFilters.Query());}
+    List<PlexClient.Film> homeRow(String row)throws Exception{
+        Session scope=stored();String type=VelaHomeRows.type(row);
+        String path="/Items?userId="+scope.userId+"&recursive=true&includeItemTypes="+(type.equals("show")?"Series":"Movie")+CatalogFilters.jellyfinQuery(VelaHomeRows.query(row,true))+"&startIndex=0&limit="+VelaHomeRows.LIMIT+"&fields="+FIELDS+"&enableImages=true&imageTypeLimit=1&enableUserData=true";
+        JSONObject result=authenticated(scope,path);JSONArray items=result.optJSONArray("Items");
+        if(items!=null&&items.length()>VelaHomeRows.LIMIT||result.optInt("StartIndex",0)!=0)throw new IOException("Home page limit");
+        return VelaHomeRows.merge(row,parse(items,false,false,VelaHomeRows.LIMIT),Collections.emptyList());
+    }
     PlexClient.LibraryPage page(PlexClient.Section section,int offset,CatalogFilters.Query query)throws Exception{
         Session scope=stored();String[] key=section.key.split("\\.");if(offset<0||key.length!=2||id(key[0]).isEmpty()||!(key[1].equals("movie")||key[1].equals("show")))throw new IOException("Invalid library page");
         String path="/Items?userId="+scope.userId+"&parentId="+key[0]+"&recursive=true&includeItemTypes="+(key[1].equals("movie")?"Movie":"Series")+CatalogFilters.jellyfinQuery(query)+"&startIndex="+offset+"&limit="+PlexClient.PAGE_SIZE+"&fields="+FIELDS+"&enableImages=true&imageTypeLimit=1&enableUserData=true";
@@ -109,7 +116,7 @@ final class JellyfinClient {
         f.art=backdrop.isEmpty()||backdropId.isEmpty()?f.thumb:imagePath(backdropId,"Backdrop",backdrop);String logo=tags==null?"":tags.optString("Logo");if(!logo.isEmpty())f.logo=imagePath(key,"Logo",logo);else if(!item.optString("ParentLogoImageTag").isEmpty())f.logo=imagePath(id(item.optString("ParentLogoItemId")),"Logo",item.optString("ParentLogoImageTag"));
         JSONObject data=item.optJSONObject("UserData");f.durationMs=Math.max(0,item.optLong("RunTimeTicks"))/10000;f.positionMs=data!=null&&data.has("PlaybackPositionTicks")?Math.max(0,data.optLong("PlaybackPositionTicks"))/10000:-1;
         if(resume&&(f.positionMs<=0||(f.durationMs>0&&f.positionMs>=f.durationMs)||(data!=null&&data.optBoolean("Played"))))return null;
-        f.lastPlayedMs=data==null?0:time(data.optString("LastPlayedDate"));f.addedAtMs=time(item.optString("DateCreated"));f.continuing=resume;f.recentlyAdded=recent;f.progress=f.durationMs>0&&f.positionMs>0?Math.min(1,(float)f.positionMs/f.durationMs):-1;
+        f.lastPlayedMs=data==null?0:time(data.optString("LastPlayedDate"));f.addedAtMs=time(item.optString("DateCreated"));f.homeRating=VelaHomeRows.rating(item.optDouble("CommunityRating",0));f.continuing=resume;f.recentlyAdded=recent;f.progress=f.durationMs>0&&f.positionMs>0?Math.min(1,(float)f.positionMs/f.durationMs):-1;
         if(episode&&item.has("ParentIndexNumber")&&item.has("IndexNumber"))f.episodeLabel="T"+item.optInt("ParentIndexNumber")+" · E"+item.optInt("IndexNumber");int year=item.optInt("ProductionYear");f.meta="Jellyfin"+(year>0?" · "+year:"")+(f.episodeLabel.isEmpty()?f.durationMs>0?" · "+f.durationMs/60000+" min":"":" · "+f.episodeLabel);f.section="Jellyfin";return f;
     }
     static String imagePath(String item,String type,String tag){return id(item).isEmpty()||!tag.matches("[A-Za-z0-9_-]{1,128}")?"":"/Items/"+id(item)+"/Images/"+type+"?tag="+tag;}

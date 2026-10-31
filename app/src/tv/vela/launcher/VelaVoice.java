@@ -7,7 +7,7 @@ import android.speech.RecognizerIntent;
 import java.util.*;
 import java.util.regex.*;
 
-/** Starts Android's recognizer only on request. No microphone permission or resident recognizer. */
+/** Voice-command parser and legacy external-intent compatibility. Integrated capture uses VelaVoiceSearch. */
 final class VelaVoice {
     static final int REQUEST=8340,ANY=0,APP=1,CHANNEL=2,INPUT=3,MEDIA=4,DISCOVERY=5;
     private static final Pattern VERB=Pattern.compile("(?iu)^(busca(?:r)?|search(?: for)?|find|cherche|suche|cerca|pesquisa|procura|pon(?:me)?|abre|abrir|reproduce|quiero ver|quiero escuchar|cambia a|play|open|watch|switch to|mets|ouvre|regarde|öffne|spiele|apri|riproduci|metti|reproduz|coloca)\\s+(.+)$");
@@ -16,7 +16,7 @@ final class VelaVoice {
         final String spoken,query;final int target,genre;final boolean open,tonight;
         Request(String s,String q,int t,boolean o,int g,boolean n){spoken=s;query=q;target=t;open=o;genre=g;tonight=n;}
     }
-    static boolean key(int code){return code==android.view.KeyEvent.KEYCODE_SEARCH||code==android.view.KeyEvent.KEYCODE_VOICE_ASSIST||code==android.view.KeyEvent.KEYCODE_ASSIST;}
+    static boolean key(int code){return code==android.view.KeyEvent.KEYCODE_SEARCH;}
     static Intent recognizer(Activity a){
         // The speech service owns its spoken language, independently of Vela's menu language.
         return new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)

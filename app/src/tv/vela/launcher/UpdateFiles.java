@@ -29,6 +29,7 @@ final class UpdateFiles {
             if(lock==null){file.close();released();return null;}return new Lease(file,lock);
         }catch(IOException|RuntimeException failed){try{if(file!=null)file.close();}finally{released();}throw failed;}
     }
+    private static long version(PackageInfo p){return android.os.Build.VERSION.SDK_INT>=28?p.getLongVersionCode():p.versionCode;}
     static synchronized boolean cleanupOnce(Context c){if(cleaned)return true;if(!cleanup(c))return false;cleaned=true;return true;}
     /** PackageManager confirms completion; pressing Install or cancelling never deletes a pending APK. */
     static boolean cleanup(Context c){
@@ -38,7 +39,7 @@ final class UpdateFiles {
             if(part.exists()&&!part.delete())return false;
             if(apk.isFile()){
                 PackageManager pm=c.getPackageManager();PackageInfo candidate=pm.getPackageArchiveInfo(apk.getPath(),0),installed=pm.getPackageInfo(c.getPackageName(),0);
-                if(candidate!=null&&c.getPackageName().equals(candidate.packageName)&&candidate.getLongVersionCode()<=installed.getLongVersionCode()&&!apk.delete())return false;
+                if(candidate!=null&&c.getPackageName().equals(candidate.packageName)&&version(candidate)<=version(installed)&&!apk.delete())return false;
             }
             return true;
         }catch(IOException|PackageManager.NameNotFoundException|RuntimeException unavailable){return false;}

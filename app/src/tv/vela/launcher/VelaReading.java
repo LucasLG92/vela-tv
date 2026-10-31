@@ -14,7 +14,7 @@ final class VelaReading {
     static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"vela-reading");}
     static int choice(Context c,String key,int max){int n=prefs(c).getInt(key,0);return Math.max(0,Math.min(max,n));}
     static float scale(Context c){return Math.max(new float[]{1,1.15f,1.3f}[choice(c,"text",2)],Math.min(1.3f,c.getResources().getConfiguration().fontScale));}
-    static int rows(Context c){return new int[]{6,5,4}[Math.max(c.getPackageName().endsWith(".lite")&&VelaLayout.size(c,"tv",1)!=1?(VelaLayout.size(c,"tv",1)==0?0:2):choice(c,"density",2),scale(c)>=1.25f?2:scale(c)>=1.1f?1:0)];}
+    static int rows(Context c){return new int[]{6,5,4}[Math.max(VelaEdition.lite(c)&&VelaLayout.size(c,"tv",1)!=1?(VelaLayout.size(c,"tv",1)==0?0:2):choice(c,"density",2),scale(c)>=1.25f?2:scale(c)>=1.1f?1:0)];}
     static float margin(Context c){return choice(c,"margin",3)*.015f;}
     static int accent(Context c){return Appearance.accent(c);}
     static void cycle(Context c,String key,int count){SharedPreferences p=prefs(c);p.edit().putInt(key,(choice(c,key,count-1)+1)%count).commit();VelaWorkspace.registry(c).edit().putLong("revision",System.nanoTime()).commit();}

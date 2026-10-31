@@ -9,7 +9,7 @@ Available in **Vela 1.35.1-preview** and **Vela Lite 0.14.1-preview**.
 | Visual styles | Your Vela → Home design → Visual styles | Preview Cinema, Compact or Minimal, then Save or Cancel. Previewing does not write settings. |
 | Shared focus | Home cards, apps and HDMI inputs | A short, consistent lift and shadow inside reserved card space. Reduced motion and Android's animation preference are respected. |
 | Content information | Full: Details, INFO or hold OK on a library card. Both: future broadcasts and Programme details in channel actions. | Native information and actions use Vela's graphite surfaces. Guide information closes back to the same programme position. |
-| Home collections | Full: Your Vela → Home design → Home collections | Browse connected Plex libraries or Jellyfin collections in pages of twelve. Pin at most three collections; each Home row loads at most eight titles. |
+| Home collections | Full: Your Vela → Home design → Home collections | Browse connected Plex libraries or Jellyfin collections in pages of twelve. Pin at most six collections; each Home row loads at most eight titles. |
 | Programme artwork | Your Vela → What to watch; programme information | Use actual EPG artwork when supplied, otherwise the channel logo or a text fallback. No generated programme images. |
 | Expanded guide selection | Television → Guide | The selected programme uses more of its reserved row space, can wrap its title and shows current progress. Channel positions stay fixed. |
 | Last activity | Full Home; Lite HDMI home | Return to the last app, connected HDMI input or successful channel opened through Vela. A missing app/input is not offered. |

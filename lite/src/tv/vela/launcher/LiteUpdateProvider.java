@@ -11,7 +11,7 @@ import java.io.*;
 public final class LiteUpdateProvider extends ContentProvider {
     @Override public boolean onCreate(){return true;}
     private File file(Uri uri)throws FileNotFoundException{
-        if(!"content".equals(uri.getScheme())||!(getContext().getPackageName()+".updates").equals(uri.getAuthority())||!"/update.apk".equals(uri.getPath())||uri.getQuery()!=null||uri.getFragment()!=null)throw new FileNotFoundException();
+        if(!"content".equals(uri.getScheme())||!(LiteUpdateManager.authority(getContext())).equals(uri.getAuthority())||!"/update.apk".equals(uri.getPath())||uri.getQuery()!=null||uri.getFragment()!=null)throw new FileNotFoundException();
         File file=LiteUpdateManager.apk(getContext());if(!file.isFile())throw new FileNotFoundException();return file;
     }
     @Override public String getType(Uri uri){try{file(uri);return "application/vnd.android.package-archive";}catch(FileNotFoundException absent){return null;}}

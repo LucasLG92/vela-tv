@@ -20,6 +20,8 @@ public class ModeJob extends JobService {
         final String action = extras.getString("action", "");
         final String mode = extras.getString("mode", "");
         final Context app = getApplicationContext();
+        // Lite keeps recovery available, while old Full activation/measurement jobs stay dormant.
+        if(VelaEdition.lite(app)&&!REVERT.equals(action)&&!(APPLY.equals(action)&&HomeMode.ORIGINAL.equals(mode)))return false;
         new Thread(() -> {
             try {
                 switch (action) {

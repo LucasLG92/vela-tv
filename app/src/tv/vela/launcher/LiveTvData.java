@@ -26,12 +26,20 @@ final class LiveTvData {
     static boolean httpUrl(String value){try{if(value==null||value.length()>8192||value.indexOf('\\')>=0||value.matches("(?s).*[\\x00-\\x20\\x7f].*"))return false;URI u=new URI(value);return ("https".equalsIgnoreCase(u.getScheme())||"http".equalsIgnoreCase(u.getScheme()))&&u.getUserInfo()==null&&u.getHost()!=null&&u.getFragment()==null&&u.getPort()!=0&&u.getPort()<=65535;}catch(Exception e){return false;}}
     static final class Channel {
         final String id,name,group,logo,xtreamId,xtreamAccount,inputId,number,epgId;
+        long providerId;String identity="",alias="";boolean radio,hd,locked;
         final List<String> streams;
         int archiveDays;String replayTemplate="",replayMode="";
         List<Channel> variants=Collections.emptyList();
         Channel(String id,String name,String group,String logo,List<String> streams){this(id,name,group,logo,streams,"","","","",id);}
         Channel(String id,String name,String group,String logo,List<String> streams,String xc,String account){this(id,name,group,logo,streams,xc,account,"","",id);}
         Channel(String id,String name,String group,String logo,List<String> streams,String xc,String account,String input,String number,String epg){this.id=id.isEmpty()?hash(name+"|"+group):id;this.name=name;this.group=group;this.logo=logo;this.streams=Collections.unmodifiableList(new ArrayList<>(streams));xtreamId=xc;xtreamAccount=account;inputId=input;this.number=number;epgId=epg;}
+        Channel(long providerId,String inputId,String number,String name,boolean radio,boolean hd,boolean locked){this(providerId,inputId,number,name,radio,hd,locked,"");}
+        Channel(long providerId,String inputId,String number,String name,boolean radio,boolean hd,boolean locked,String service){
+            this("ant-"+providerId,name,"Antenna",android.media.tv.TvContract.buildChannelLogoUri(providerId).toString(),Collections.emptyList(),"","",inputId,number,"");
+            this.providerId=providerId;this.radio=radio;this.hd=hd;this.locked=locked;
+            alias="name:"+hash((radio?"r:":"t:")+java.text.Normalizer.normalize(name,java.text.Normalizer.Form.NFKC).toLowerCase(Locale.ROOT).replaceAll("\\s+"," ").trim());
+            identity=service.isEmpty()?"local:"+hash(inputId+":"+providerId+":"+alias):"dvb:"+hash((radio?"r:":"t:")+service);
+        }
         boolean antenna(){return !inputId.isEmpty();}
         boolean playable(){return !streams.isEmpty()||!xtreamId.isEmpty()||antenna();}
     }
@@ -42,6 +50,7 @@ final class LiveTvData {
     static final class Programme {
         final long start,end;final String title,description,image;
         Programme(long start,long end,String title){this(start,end,title,"","");}
+        Programme(long start,long end,String title,String description){this(start,end,title,description,"");}
         Programme(long start,long end,String title,String description,String image){this.start=start;this.end=end;this.title=title;this.description=description;this.image=VelaProgrammeArt.url(image);}
         boolean current(long now){return start<=now&&end>now;}
         long remainingMinutes(long now){return current(now)?1+(end-now-1)/60:0;}

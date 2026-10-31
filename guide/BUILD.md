@@ -1,6 +1,6 @@
 # Build and test
 
-Requirements: JDK 17+, Android SDK platform **36**, build-tools 36.1+, Python 3.10+ and platform-tools. The app uses Java 8, minSdk 30 and targetSdk 33. There is no Gradle daemon. The Full build fetches checksum-pinned AndroidX Media3 1.11.1 dependencies from official Google Maven/Maven Central, caches them under ignored `.build-deps/` and strips unused code with R8. Only optional HLS pause or content frame-rate matching instantiates this decoder. Lite continues to compile against platform 34 without Media3.
+Requirements: JDK 17+, Android SDK platform **36**, build-tools 36.1+, Python 3.10+ and platform-tools. The unified app uses Java 8, minSdk 26 and targetSdk 33. Lite runs on Android 8–10; Full requires Android 11+. Both controllers share one signed APK, with only the chosen mode initialized. There is no Gradle daemon. The Full build fetches checksum-pinned AndroidX Media3 1.11.1 dependencies from official Google Maven/Maven Central, caches them under ignored `.build-deps/` and strips unused code with R8. Only optional HLS pause or content frame-rate matching instantiates this decoder. The final standalone Lite migration build continues to compile against platform 34 without Media3. New Lite installations use the unified build.
 
 ```sh
 export JAVA_HOME=/path/to/jdk-17
@@ -181,3 +181,17 @@ See [frame-rate matching](FRAME-RATE.md) and [the optimisation pass](OPTIMIZATIO
 See [the design preview](DESIGN-UPDATE.md) for visual styles, content information, server collections, programme artwork, last activity, temporary measurements and the owned-emulator fixture commands.
 
 See [interface refinement](INTERFACE.md) for the shared UI, scroll-safe settings, focus restoration and native remote-layout checks.
+
+
+## Unified modes and legacy import
+
+The production `Vela.apk` includes both controllers. Android 8–10 exposes Lite only; Android 11+ offers Full or Lite. Test both Android versions before publishing. The standalone `lite/Vela-Lite.apk` is a transition package for existing Lite installations, not a second option for new users. [Mode and migration contract](UNIFIED.md).
+
+```sh
+python tests/run_refinement.py --serial emulator-5560 --adb-port 5038 --art /path/to/test-art --test unified --language en
+python tests/run_refinement.py --serial emulator-5560 --adb-port 5038 --art /path/to/test-art --test migration-seed --lite --language en
+python tests/run_refinement.py --serial emulator-5560 --adb-port 5038 --art /path/to/test-art --test migration --language en
+python tests/run_refinement.py --serial emulator-5560 --adb-port 5038 --art /path/to/test-art --test voice --fixture unified-lite --language en
+```
+
+Use owned emulators with both matching signed packages and synthetic profiles. The migration test checks actual remote consent, account exclusion, an ungranted URI, a consumed grant, and preservation of existing profiles. The mode test checks first launch, Settings, HOME routing, profile/account retention and strict update-package selection. Voice tests use a synthetic recognizer; they do not certify a physical microphone or service.

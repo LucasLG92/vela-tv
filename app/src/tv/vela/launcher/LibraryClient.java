@@ -5,16 +5,17 @@ import java.io.*;
 import java.util.*;
 import org.json.*;
 
-/** Profile-bound clients share the existing worker and artwork cache. Home remains bounded to 24 cards. */
+/** Profile-bound clients share the existing worker and artwork cache. Each Home feed is bounded; optional rows reuse the same artwork budget. */
 final class LibraryClient {
-    private final Context context;private final PlexClient plex;private final JellyfinClient jellyfin;
+    private final Context context;private final PlexClient plex;private final JellyfinClient jellyfin;private String homeChoice;
     LibraryClient(Context c){this(c,new PlexClient(c));}
     LibraryClient(Context c,PlexClient p){context=VelaAccountScope.freeze(c);plex=p;jellyfin=new JellyfinClient(context);}
     static void activate(Context c,String provider){if(!Arrays.asList("Plex","Jellyfin","Both").contains(provider))throw new IllegalArgumentException();VelaAccountScope.prefs(c,"library").edit().putString("provider",provider).commit();}
-    private String chosen(){return VelaAccountScope.prefs(context,"library").getString("provider","Plex");}
+    private String chosen(){return homeChoice==null?VelaAccountScope.prefs(context,"library").getString("provider","Plex"):homeChoice;}
+    LibraryClient home(String source){LibraryClient c=new LibraryClient(context,plex);c.homeChoice=source.equals("plex")?"Plex":source.equals("jellyfin")?"Jellyfin":source.equals("both")?"Both":null;return c;}
     boolean both(){return chosen().equals("Both")&&plex.connected()&&jellyfin.connected();}
-    boolean isJellyfin(){return jellyfin.connected()&&(chosen().equals("Jellyfin")||!plex.connected());}
-    boolean connected(){return both()||isJellyfin()?jellyfin.connected():plex.connected();}
+    boolean isJellyfin(){if(homeChoice!=null&&homeChoice.equals("Jellyfin"))return true;return homeChoice!=null&&homeChoice.equals("Plex")?false:jellyfin.connected()&&(chosen().equals("Jellyfin")||!plex.connected());}
+    boolean connected(){if(homeChoice!=null&&homeChoice.equals("Jellyfin"))return jellyfin.connected();return both()||isJellyfin()?jellyfin.connected():plex.connected();}
     String provider(){return both()?"Plex + Jellyfin":isJellyfin()?"Jellyfin":"Plex";}
     String name(){return both()?plex.name()+" · "+jellyfin.name():isJellyfin()?jellyfin.name():plex.name();}
     String packageName(){return isJellyfin()?JellyfinClient.PACKAGE:"com.plexapp.android";}
@@ -46,8 +47,18 @@ final class LibraryClient {
     List<LibraryCollection> collections(String source,int page)throws Exception{if(page<0||page>100000)throw new IOException("Invalid page");if(source.equals("jellyfin:root")&&jellyfin.connected())return jellyfin.collections(page*12);if(!source.matches("plex:[0-9]{1,20}")||!plex.connected())throw new IOException("Invalid collection source");String section=source.substring(5);for(PlexClient.Section s:plex.sections())if(s.key.equals(section))return plex.collections(s,page*12);throw new IOException("Collection source unavailable");}
     void toggleCollection(LibraryCollection item)throws Exception{if(!collectionAccountValid(item))throw new IOException("Library account changed");List<LibraryCollection> before=LibraryCollection.pinned(context),valid=new ArrayList<>();for(LibraryCollection p:before)if(collectionAccountValid(p))valid.add(p);if(before.size()!=valid.size()){JSONArray saved=new JSONArray();for(LibraryCollection p:valid)saved.put(p.json());VelaAccountScope.prefs(context,"vela-collections").edit().putString("pins",saved.toString()).commit();}LibraryCollection.toggle(context,item);}
     List<PlexClient.Film> collectionHome(LibraryCollection item)throws Exception{if(!validCollection(item))return Collections.emptyList();PlexClient.LibraryPage p=item.provider.equals("Jellyfin")?jellyfin.collectionItems(item.key,0,8,"Movie,Series"):plex.collectionItems(item.key,0,8);return decorate(p.films);}
+    List<PlexClient.Film> homeRow(String row)throws Exception{
+        VelaHomeRows.type(row);
+        if(!connected())return Collections.emptyList();
+        if(!both())return decorate(isJellyfin()?jellyfin.homeRow(row):plex.homeRow(row));
+        List<PlexClient.Film> a=Collections.emptyList(),b=Collections.emptyList();Exception failure=null;
+        try{a=plex.homeRow(row);}catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;failure=e;}
+        try{b=jellyfin.homeRow(row);}catch(Exception e){if(Thread.currentThread().isInterrupted()||failure!=null&&a.isEmpty())throw e;}
+        return decorate(VelaHomeRows.merge(row,a,b));
+    }
     PlexClient.Film detail(PlexClient.Film item)throws Exception{String identity=identity();PlexClient.Film fresh=jf(item)?jellyfin.item(item.key):plex.item(item.key);if(!identity.equals(identity()))throw new IOException("Library account changed");if(fresh!=null)decorate(Arrays.asList(fresh));return fresh;}
     PlexClient.LibraryPage children(PlexClient.Film parent,int offset)throws Exception{String identity=identity();PlexClient.LibraryPage page=jf(parent)?jellyfin.children(parent,offset):plex.children(parent,offset);if(!identity.equals(identity()))throw new IOException("Library account changed");return new PlexClient.LibraryPage(decorate(page.films),page.offset,page.total,page.received);}
+    String imageIdentity(String path){boolean jf=path.startsWith("vela-jellyfin:")||!path.startsWith("vela-plex:")&&isJellyfin();return jf?"Jellyfin|"+jellyfin.identity():"Plex|"+plex.identity();}
     byte[] image(String path,int w,int h)throws IOException{return image(path,w,h,false);}
     byte[] image(String path,int w,int h,boolean transparent)throws IOException{if(path.startsWith("vela-jellyfin:"))return jellyfin.image(path.substring(14),w,h,transparent);if(path.startsWith("vela-plex:"))return plex.image(path.substring(10),w,h,transparent);return isJellyfin()?jellyfin.image(path,w,h,transparent):plex.image(path,w,h,transparent);}
     byte[] avatar()throws Exception{return isJellyfin()?jellyfin.avatar():plex.avatarImage(plex.prefs.getString("accountToken",""));}

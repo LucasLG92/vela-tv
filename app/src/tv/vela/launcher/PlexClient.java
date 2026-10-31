@@ -119,7 +119,7 @@ class PlexClient {
         String packageName = "com.plexapp.android", episodeLabel = "";
         String section = "Tu biblioteca";
         float progress = -1,thumbAspect;
-        long durationMs,positionMs=-1,lastPlayedMs,addedAtMs;
+        long durationMs,positionMs=-1,lastPlayedMs,addedAtMs;double homeRating;
         boolean continuing,tvSource,landscape,recentlyAdded,nextEpisode;
         String seriesKey="",externalId="";Film alternative;
         long remainingMs(){return durationMs>0&&positionMs>=0&&positionMs<durationMs?durationMs-positionMs:-1;}
@@ -154,6 +154,12 @@ class PlexClient {
     }
     LibraryPage page(Section section,int offset)throws Exception{return page(section,offset,new CatalogFilters.Query());}
     LibraryPage page(Section section,int offset,CatalogFilters.Query query)throws Exception{return parsePage(catalogJson(CatalogFilters.plexPath(section,offset,query),4*1024*1024),offset);}
+    List<Film> homeRow(String row)throws Exception{
+        String path=CatalogFilters.plexPath(new Section("0","",VelaHomeRows.type(row)),0,VelaHomeRows.query(row,false));
+        path="/library/all"+path.substring(path.indexOf('?'));
+        path=path.replace("X-Plex-Container-Size="+PAGE_SIZE,"X-Plex-Container-Size="+VelaHomeRows.LIMIT);
+        return VelaHomeRows.merge(row,parseChildren(catalogJson(path,1024*1024),0,VelaHomeRows.LIMIT).films,Collections.emptyList());
+    }
     private JSONObject catalogJson(String path,int limit)throws Exception{Map<String,?> values=prefs.getAll();String base=(String)values.get("serverUri"),token=(String)values.get("serverToken");if(base==null||token==null||token.isEmpty())throw new IOException("Plex not linked");return new JSONObject(new String(bytes(base+path,token,null,12000,limit),StandardCharsets.UTF_8));}
     CatalogFilters.Options filters(Section section)throws Exception{if(!section.key.matches("[0-9]+"))throw new IOException("Invalid section");return CatalogFilters.plexOptions(catalogJson("/library/sections/"+section.key+"/all?includeMeta=1&includeAdvanced=1&X-Plex-Container-Start=0&X-Plex-Container-Size=0",1024*1024),section);}
     CatalogFilters.Choices choices(Section section,CatalogFilters.Facet facet,int offset,String search)throws Exception{
@@ -278,7 +284,7 @@ class PlexClient {
         film.durationMs=Math.max(0,duration);film.positionMs=item.has("viewOffset")&&!item.isNull("viewOffset")?Math.max(-1,offset):-1;
         film.seriesKey=type.equals("episode")?item.optString("grandparentRatingKey"):"";film.nextEpisode=resume&&type.equals("episode")&&offset<=0&&item.optInt("viewCount")==0;if(film.nextEpisode){film.positionMs=0;if(duration>0)film.progress=0;}
         long last=item.optLong("lastViewedAt");if(last>0&&last<=Long.MAX_VALUE/1000)film.lastPlayedMs=last*1000;
-        long added=item.optLong("addedAt");if(added>0&&added<=Long.MAX_VALUE/1000)film.addedAtMs=added*1000;
+        long added=item.optLong("addedAt");if(added>0&&added<=Long.MAX_VALUE/1000)film.addedAtMs=added*1000;film.homeRating=VelaHomeRows.rating(item.optDouble("audienceRating",item.optDouble("rating",0)));
         if(type.equals("episode"))film.episodeLabel="T"+item.optInt("parentIndex")+" · E"+item.optInt("index");
         if(duration>0&&offset>0)film.progress=Math.min(1f,(float)offset/duration);
         film.section=resume?Ui.problem("Continue watching","Seguir viendo"):L10n.text("In your library");

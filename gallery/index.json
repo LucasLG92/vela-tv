@@ -2,13 +2,13 @@
   {
     "file": "01-home.webp",
     "title": "Your library, centre stage",
-    "source": "Native 3840×2160 production views on an owned clean emulator; demonstration profile, location, library metadata and playback progress; authorised original Plex artwork, Dune trailer thumbnail and Reacher artwork. No personal account, token or provider credentials.",
+    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "1.36.0-preview",
-    "sha256": "df948bdb5f659a56c5afa3d09ed7db38091ef562ac9f03fc70a9575c27a94c4c"
+    "version": "2.0.0-preview",
+    "sha256": "ab0030493b9c68389d5839bcba8a33ff51ed8e31d8a9bfd77d0e670c33305b1e"
   },
   {
     "file": "02-mint-compact.webp",
@@ -779,5 +779,82 @@
     "height": 2160,
     "version": "1.38.3-preview",
     "sha256": "18a7ef0c12ef138b13e323356c0bb01beb7c8c6b67654b9957214ad3ed7d6103"
+  },
+  {
+    "file": "95-unified-choice.webp",
+    "title": "One Vela, two modes",
+    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.0.0-preview",
+    "sha256": "3eb8c3aba21f61e63266fa3f594c1274938732c9f364f0319e44d5293b66e34f"
+  },
+  {
+    "file": "96-unified-lite.webp",
+    "title": "Lite, inside the unified app",
+    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.0.0-preview",
+    "sha256": "e2341218f7fd0dc70acf28b24284e6b95cf31e9c18cb505ba4ccdf54079895e5"
+  },
+  {
+    "file": "97-unified-system.webp",
+    "title": "Change mode in Settings",
+    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.0.0-preview",
+    "sha256": "331067517e989a0207c592a95218fab0ca24cddf5d3b54d567f2343953c73009"
+  },
+  {
+    "file": "98-lite-migration.webp",
+    "title": "A private move from standalone Lite",
+    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "0.18.0-preview",
+    "sha256": "9b517b73af498ce905e512a6cd57721fee0a6749c5a2cdbd3f80ecd7eb5e5f56"
+  },
+  {
+    "file": "99-home-editor.webp",
+    "title": "A Home for each profile",
+    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.0.0-preview",
+    "sha256": "dae31b8df80dcc420a953b339edbff216122a2138ae322f8e4778918f236b6e1"
+  },
+  {
+    "file": "100-voice-glow.webp",
+    "title": "A little light when Vela listens",
+    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.0.0-preview",
+    "sha256": "5e390ce90cddccd4152d4fe098fdf073fd1a0438b332818a0665d39ac36c6faf"
+  },
+  {
+    "file": "101-home-library.webp",
+    "title": "Choose the library on your Home",
+    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.0.0-preview",
+    "sha256": "2846d4503174241863f7c52e486a2105b0656210b602dad88ecc7b50393dd537"
   }
 ]

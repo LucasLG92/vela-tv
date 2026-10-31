@@ -4,13 +4,21 @@
 
 A personal home screen for **Android TV and Google TV**. Bring your Plex or Jellyfin library, live channels, apps and HDMI devices together in a calm interface made for your remote.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v1.38.3-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.0.0-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
 
-**Android 11+ · English / Español / Português / Français / Deutsch / Italiano · Preview · MIT**
+**One APK · Lite: Android 8+ · Full: Android 11+ · Six languages · Preview · MIT**
 
 ![Vela home with continue watching, original artwork and recently added titles](gallery/01-home.webp)
 
 **[Watch the continuous 5-minute TCL walkthrough →](media/tcl/README.md)**
+
+## One Vela. Two ways to make it yours.
+
+Choose **Full** for Plex, Jellyfin, IPTV and a cinema Home, or **Lite** for HDMI, antenna and apps. Change modes in Settings → System → Launcher mode. Profiles and accounts stay saved; Lite starts the essentials.
+
+New users download one APK. Existing Full installations keep their mode. Old standalone Lite users have a private, explicit migration path. [Choose a mode or move from Lite](guide/UNIFIED.md).
+
+![Choose Full or Lite in the same Vela app](gallery/95-unified-choice.webp)
 
 ## Useful at a glance
 
@@ -78,7 +86,7 @@ The sidebar opens over a continuous full-screen backdrop, with clear labels and 
 
 ![Expanded navigation over a continuous full-screen backdrop](gallery/60-continuous-navigation.webp)
 
-Choose your accent, poster size and background intensity. Arrange, resize or hide home rows. Create local profiles with separate layouts, favourites and library accounts. Add a settings PIN and a separate guest space, adjust reading size and guide density, or set screen margins for your television.
+Choose your accent, poster size and background intensity. Arrange, resize or hide home rows. Choose Plex, Jellyfin or both for Home; add separate rows for new movies, new series, unwatched films and top-rated films, with up to six pinned collections. Extra rows stay off until you enable them, and a brief transition keeps navigation clear as you move down. Create local profiles with separate layouts, favourites and library accounts. Add a settings PIN and a separate guest space, adjust reading size and guide density, or set screen margins for your television.
 
 Configure apps, folders and favourites **from your phone** through a temporary local HTTPS session. Explicitly pair another Vela to receive compatible preferences when it opens. Accounts and provider credentials stay on each television, and conflicting local edits are kept for review.
 
@@ -86,9 +94,9 @@ Configure apps, folders and favourites **from your phone** through a temporary l
 
 Every menu is available in **English, Spanish, Portuguese, French, German and Italian**. Choose a language in Appearance or follow your TV's system language. Channel names, account names and library titles keep their original text.
 
-Settings and personalisation stay within the main sidebar, with clear categories and the same remote navigation throughout. Use a supported remote search key for voice search, assign an available button in Remote & diagnostics, or open Search in Your Vela. Android may keep control of its Assistant button; Vela uses the recognizer installed on your television.
+Settings and personalisation stay within the main sidebar, with clear categories and the same remote navigation throughout. Assign an available remote or keyboard button to **Vela voice search**. A microphone symbol and a soft, voice-responsive sidebar glow show when the TV is listening, with partial words inside Vela. Vela asks for microphone permission on first use and releases the recognizer when you leave. It uses Android’s on-device recognizer when available, otherwise the installed speech service. Unassigned Google Assistant keys keep their normal role.
 
-[Personalisation, phone setup, profiles and sync](guide/YOUR-VELA.md) · [Integrated settings](guide/INTEGRATED-SETTINGS.md) · [Player controls](guide/PLAYER.md)
+[Home rows and integrated voice search](guide/HOME-AND-VOICE.md) · [Personalisation, phone setup, profiles and sync](guide/YOUR-VELA.md) · [Integrated settings](guide/INTEGRATED-SETTINGS.md) · [Player controls](guide/PLAYER.md)
 
 | Settings that stay in Vela | A list for later |
 | --- | --- |

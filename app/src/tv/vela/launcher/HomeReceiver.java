@@ -7,6 +7,7 @@ import android.content.Intent;
 /** System notices for the main process: the TV booted, or this app was updated. Not exported. */
 public class HomeReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context, Intent intent) {
+        if(!VelaEdition.mode(context).equals("full"))return;
         String action = intent.getAction();
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             HomeMode.bootCheck(context);

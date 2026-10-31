@@ -3,87 +3,91 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "1.38.3-preview",
-      "code": 76,
-      "tag": "v1.38.3-preview",
-      "title": "Vela 1.38.3 Preview \u00b7 A calmer widget bar",
-      "file": "Vela-1.38.3-preview.apk",
-      "size": 4538015,
-      "sha256": "6f143aaa6ada523388e500704832a77dd8e229795c6b0d14ce9bf79e16bacc8f",
-      "blob_sha": "6a481530c060e7d28443dc82639ec36cef000bb1",
+      "version": "2.0.0-preview",
+      "code": 77,
+      "tag": "v2.0.0-preview",
+      "title": "Vela 2.0 Preview · One app, your choice",
+      "file": "Vela-2.0.0-preview.apk",
+      "size": 4921115,
+      "sha256": "465fec1931a5199ee0730d3d065875f6156aa18800d37ccba1cb5181788290e7",
+      "blob_sha": "2ac0bdd42ef9463cd9b72efad9a943c975a6f63a",
       "chunks": [
         {
-          "sha": "c295d9d986ddcda42c8328c69ac8b6000e8ea13d",
+          "sha": "b403dfed9c48e5457ce77b90e19b0e61caf777d2",
           "size": 524288
         },
         {
-          "sha": "7b98a25502298d3859c3ad7ecfca453eef5234ed",
+          "sha": "d0412d7cd54f74437f8961666e84bcaba5c4e812",
           "size": 524288
         },
         {
-          "sha": "6080e2f70e8cb1fdc9acd5536de19e3704544fc4",
+          "sha": "44ca3299f60309c528966ea8a5965eebf6038305",
           "size": 524288
         },
         {
-          "sha": "726f8d8ee50fdb82f7a3fa38622d6f75733a0dbf",
+          "sha": "34288512c3fa261e9d83c836f0c93fad2a06878f",
           "size": 524288
         },
         {
-          "sha": "d9e14d5b16f7b328d951788d67e409697f6c0425",
+          "sha": "96421ef220e3a5c41653d4e3ebf7635cdd78f4da",
           "size": 524288
         },
         {
-          "sha": "84621844ab1e0fdd6d933e5a0c0410cd92d2d2b2",
+          "sha": "0d71dbd476232efbd3de684ee177a20b22555296",
           "size": 524288
         },
         {
-          "sha": "5be7e27f53d79700da62e745d265f70d4da2dd63",
+          "sha": "3a333af3d3c948d9abcb1ce62a68a8e804ad28bd",
           "size": 524288
         },
         {
-          "sha": "2661b68fedfe14d18628e9b3b2ab391b8b89c5eb",
+          "sha": "85f4ea37003197f74a5a0bbc2ea79e6bd84d4e4c",
           "size": 524288
         },
         {
-          "sha": "0f772c8cf1d16c6e2866f841e9d36e6334234c1d",
-          "size": 343711
+          "sha": "620b069f5b1722150b34c950de5ff6117dc11e15",
+          "size": 524288
+        },
+        {
+          "sha": "564b02d549695995c932fcdea5d7f35d0ac7e462",
+          "size": 202523
         }
       ],
-      "notes": "guide/releases/1.38.3-preview.md"
+      "notes": "guide/releases/2.0.0-preview.md"
     },
     {
       "package": "tv.vela.launcher.lite",
-      "version": "0.17.2-preview",
-      "code": 33,
-      "tag": "lite-v0.17.2-preview",
-      "title": "Vela Lite 0.17.2 Preview \u00b7 A calmer widget bar",
-      "file": "Vela-Lite-0.17.2-preview.apk",
-      "size": 2354010,
-      "sha256": "8d687219c324445062e7a25002da60b3b0469f4390db3df7ac2a229bbcd370d4",
-      "blob_sha": "4274b0b7ac032b786eb152546db00e58cc978f4f",
+      "version": "0.18.0-preview",
+      "code": 34,
+      "tag": "lite-v0.18.0-preview",
+      "title": "Vela Lite 0.18 Preview · Move to unified Vela",
+      "file": "Vela-Lite-0.18.0-preview.apk",
+      "size": 2399066,
+      "sha256": "cda3ba34eae63b082b280c88e0387091f8a6036846ce1c3e742e5c51bc647ee3",
+      "blob_sha": "f27ac05340680c178fbfc98901741e12423bd0a1",
       "chunks": [
         {
-          "sha": "7146bf2fe99cf7735965bb934bae7b352f77dfee",
+          "sha": "a93f20083254cfafb60c79bb27c5427fe9fa3eca",
           "size": 524288
         },
         {
-          "sha": "3ba8b0bd2b3f9a6778f38ab60eda1d555fcbc284",
+          "sha": "35698684def0ac6d0bd5730bb10736f7c7dc7eeb",
           "size": 524288
         },
         {
-          "sha": "0cc484b1b3a873ecdb62651c2afbdff51db5e964",
+          "sha": "4e322f4d494ed3200e7c74fceeed2e445bf2d4cf",
           "size": 524288
         },
         {
-          "sha": "9bd577ddca93bbe3b99c73fdc8f898c8c4e583ec",
+          "sha": "9bb6837d0eaf1921400025a2605cf27bb0e2e7ee",
           "size": 524288
         },
         {
-          "sha": "d9254b2c77d5e1f04b591fa7e88f570665aaea9f",
-          "size": 256858
+          "sha": "34a020ce91a94ff9c1e1899591de336f52e93272",
+          "size": 301914
         }
       ],
-      "notes": "guide/releases/lite-0.17.2-preview.md"
+      "notes": "guide/releases/lite-0.18.0-preview.md"
     }
   ]
 }

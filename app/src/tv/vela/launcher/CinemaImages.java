@@ -42,12 +42,12 @@ final class CinemaImages {
     }
     Request load(String path,int width,int height,Ready ready) {
         if(path==null||path.isEmpty())return new Request(null);
-        return enqueue(plex.identity()+path+":"+width+"x"+height,
+        return enqueue(plex.imageIdentity(path)+path+":"+width+"x"+height,
             width,height,()->plex.image(path,width,height),ready);
     }
     Request loadLogo(String path,Ready ready) {
         if(path==null||path.isEmpty())return new Request(null);
-        return enqueue(plex.identity()+path+":logo:650x182",650,182,
+        return enqueue(plex.imageIdentity(path)+path+":logo:650x182",650,182,
             ()->plex.image(path,650,182,true),ready);
     }
     Request loadAvatar(Ready ready) {

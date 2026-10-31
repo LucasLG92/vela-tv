@@ -27,13 +27,16 @@ final class Ui {
     static String language = language();
     static boolean en = language.equals("en"), es = language.equals("es");
     static Typeface thin, light, displayMedium, displaySemibold, regular, medium, semibold;
-    private static boolean loaded;
+    private static boolean loaded,fullFonts;
     private static final Rect BOUNDS = new Rect();
     private static final RectF OVAL = new RectF();
 
     static synchronized void init(Context c) {
         L10n.init(c,Config.LANGUAGE);language=L10n.language();en=language.equals("en");es=language.equals("es");
-        if (loaded) return;
+        boolean full=VelaEdition.mode(c).equals("full");
+        if(loaded&&full==fullFonts)return;
+        fullFonts=full;
+        if(!full){AssetManager fonts=c.getAssets();regular=font(fonts,14,400);medium=font(fonts,14,500);displaySemibold=font(fonts,32,600);thin=light=displayMedium=semibold=null;loaded=true;return;}
         loaded = true;
         AssetManager a = c.getAssets();
         thin = font(a, 32, 200);
@@ -55,7 +58,7 @@ final class Ui {
             } catch (RuntimeException ignored) {
             }
         }
-        return Typeface.create(Typeface.DEFAULT, weight, false);
+        return android.os.Build.VERSION.SDK_INT>=28?Typeface.create(Typeface.DEFAULT,weight,false):Typeface.create("sans-serif",weight>=600?Typeface.BOLD:Typeface.NORMAL);
     }
 
     private static final String FONT = "fonts/InterVariable.ttf";

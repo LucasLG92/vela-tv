@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.0-preview / Lite transition 0.18.0-preview
+
+- One unified APK: first-run Full/Lite choice and reversible, PIN-protected mode selection in System settings. Preserve configured Full installs. Android 8–10 runs Lite; Full remains Android 11+.
+- Reuse the native Lite HDMI, antenna and apps controllers with shared models; keep multimedia construction, extra font variants, Full screensaver and activation jobs inactive in Lite. Both modes update from the unified release channel.
+- Final standalone Lite transition release: explicit same-signer consent and a temporary, one-use private profile grant. Preserve existing profiles, retain portable antenna/EPG and remote preferences, and exclude account/PIN/pairing material.
+- Add native Android 8/16 mode, HOME, PIN and cross-package migration regressions and fresh English screenshots.
+
+
+- Full: per-profile Home library selection, optional external Continue watching, separate latest-film/latest-series rows, unwatched and top-rated films, and up to six pinned collections. Preserve existing layouts; additional feeds are opt-in, bounded to twelve titles and use the existing cancellable worker and artwork cache.
+- Full: a short, cancellable vertical scroll and text transition between Home rows. Respect reduced motion and retain row size choices and lazy poster loading.
+- Both: integrated Vela voice search for assigned remote/keyboard buttons and the Search key. Show microphone readiness, partial text and an accent-coloured microphone halo and voice-responsive sidebar/panel glow in the existing theme; leave unassigned Google Assistant keys alone.
+- Both: request microphone permission only on use, prefer an available on-device recognizer and otherwise use the installed speech service. Destroy the one-shot recognizer on completion, cancellation, profile change or leaving the foreground. No stored audio/transcript or background microphone service.
+
 ## 1.38.3-preview / Lite 0.17.2-preview — 2026-10-30
 
 - Both: shorten the empty programme widget to Upcoming, keeping followed programme titles when available. Centre the weather symbol on the left and align temperature and location in one column on the right, within the existing widget bounds and cache budget.
