@@ -836,17 +836,6 @@
     "sha256": "dae31b8df80dcc420a953b339edbff216122a2138ae322f8e4778918f236b6e1"
   },
   {
-    "file": "100-voice-glow.webp",
-    "title": "A little light when Vela listens",
-    "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
-    "language": "en",
-    "personal_data": false,
-    "width": 3840,
-    "height": 2160,
-    "version": "2.0.0-preview",
-    "sha256": "5e390ce90cddccd4152d4fe098fdf073fd1a0438b332818a0665d39ac36c6faf"
-  },
-  {
     "file": "101-home-library.webp",
     "title": "Choose the library on your Home",
     "source": "Native 3840×2160 Android production views on an owned Android 16 emulator. Demonstration profiles, library metadata, playback progress and connected HDMI inputs; original film artwork and device symbols with the gallery credits. Voice input and speech levels are synthetic. No private account, credentials or device identifiers.",
@@ -856,5 +845,49 @@
     "height": 2160,
     "version": "2.0.0-preview",
     "sha256": "2846d4503174241863f7c52e486a2105b0656210b602dad88ecc7b50393dd537"
+  },
+  {
+    "file": "100-voice-glow.webp",
+    "title": "A fluid light when Vela listens",
+    "source": "Native Android production views on an owned Android 16 emulator. Demonstration profiles and film metadata; voice input and audio levels are synthetic. Original artwork credited in the gallery. No personal account, location or credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.1.0-preview",
+    "sha256": "73de045c1750ee36493bae9ac9e88ba0844f41fa582c26b6c2fce754e5ca7ad5"
+  },
+  {
+    "file": "102-voice-expanded.webp",
+    "title": "Voice light follows the expanded sidebar",
+    "source": "Native Android production views on an owned Android 16 emulator. Demonstration profiles and film metadata; voice input and audio levels are synthetic. Original artwork credited in the gallery. No personal account, location or credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.1.0-preview",
+    "sha256": "aa3cd55dfd8f6e7afa66a7a2f56f901ecdec28a4f6667f0071bd4ae123f1a315"
+  },
+  {
+    "file": "103-search-results.webp",
+    "title": "Find a film with a calm result grid",
+    "source": "Native Android production views on an owned Android 16 emulator. Demonstration profiles and film metadata; voice input and audio levels are synthetic. Original artwork credited in the gallery. No personal account, location or credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.1.0-preview",
+    "sha256": "894e1f88598217a35728c3ef5ec1cf16e10874afb4cc24fe105434eac95dd490"
+  },
+  {
+    "file": "104-voice-preferences.webp",
+    "title": "Choose how voice results open",
+    "source": "Native Android production views on an owned Android 16 emulator. Demonstration profiles and film metadata; voice input and audio levels are synthetic. Original artwork credited in the gallery. No personal account, location or credentials.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.1.0-preview",
+    "sha256": "da27dfaf52d5044f722ec4b637c9764febff2d6bc167aef03d02b6b6ad12119e"
   }
 ]

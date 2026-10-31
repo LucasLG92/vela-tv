@@ -4,7 +4,7 @@
 
 ## Install or update
 
-1. Download **Vela-2.0.0-preview.apk** from [Vela Releases](https://github.com/LucasLG92/vela-tv/releases/tag/v2.0.0-preview).
+1. Download **Vela-2.0.0-preview.apk** from [Vela Releases](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.0-preview).
 2. Transfer it to the television and open it with your usual file manager. Allow installation from that manager if Android asks.
 3. Open Vela and choose Full or Lite. Android 8–10 offers Lite. You can change the choice in **Settings → System → Launcher mode**; profiles and accounts remain saved.
 4. Existing Full users can install over their current signed app or use its updater. Their configured Full mode is preserved automatically.

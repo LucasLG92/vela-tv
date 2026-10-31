@@ -1439,5 +1439,22 @@
   "Could not export settings.": "Could not export settings.",
   "Open GitHub on another device to install unified Vela.": "Open GitHub on another device to install unified Vela.",
   "Unlock the old Lite app before importing.": "Unlock the old Lite app before importing.",
-  "No newer Vela release has been published.": "No newer Vela release has been published."
+  "No newer Vela release has been published.": "No newer Vela release has been published.",
+  "Voice and search": "Voice and search",
+  "Show results or open the first voice match": "Show results or open the first voice match",
+  "Choose what happens after Vela recognises your voice. Keyboard searches always show results.": "Choose what happens after Vela recognises your voice. Keyboard searches always show results.",
+  "Show results": "Show results",
+  "Choose from matching films, channels, apps and inputs.": "Choose from matching films, channels, apps and inputs.",
+  "Open first match": "Open first match",
+  "Open the top available result automatically. No match keeps the results on screen.": "Open the top available result automatically. No match keeps the results on screen.",
+  "Assign a button to Vela voice search": "Assign a button to Vela voice search",
+  "Back to search": "Back to search",
+  "Speak": "Speak",
+  "Search your library, channels, apps and inputs.": "Search your library, channels, apps and inputs.",
+  "Could not search. Try again.": "Could not search. Try again.",
+  "No matches. Try another name.": "No matches. Try another name.",
+  "No matches in this category.": "No matches in this category.",
+  "Results": "Results",
+  "All results": "All results",
+  "Some sources are unavailable. Try again.": "Some sources are unavailable. Try again."
 }

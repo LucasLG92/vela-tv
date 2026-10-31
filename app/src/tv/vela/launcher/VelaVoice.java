@@ -10,11 +10,13 @@ import java.util.regex.*;
 /** Voice-command parser and legacy external-intent compatibility. Integrated capture uses VelaVoiceSearch. */
 final class VelaVoice {
     static final int REQUEST=8340,ANY=0,APP=1,CHANNEL=2,INPUT=3,MEDIA=4,DISCOVERY=5;
-    private static final Pattern VERB=Pattern.compile("(?iu)^(busca(?:r)?|search(?: for)?|find|cherche|suche|cerca|pesquisa|procura|pon(?:me)?|abre|abrir|reproduce|quiero ver|quiero escuchar|cambia a|play|open|watch|switch to|mets|ouvre|regarde|öffne|spiele|apri|riproduci|metti|reproduz|coloca)\\s+(.+)$");
+    private static final Pattern VERB=Pattern.compile("(?iu)^(busca(?:r|me)?|búscame|encuentra|search(?: for)?|find|cherche|suche|cerca|pesquisa|procura|pon(?:me)?|abre|abrir|reproduce|quiero ver|quiero escuchar|cambia a|play|open|watch|switch to|mets|ouvre|regarde|öffne|spiele|apri|riproduci|metti|reproduz|coloca)\\s+(.+)$");
     private static final Pattern SUBJECT=Pattern.compile("(?iu)^(?:(?:el|la|los|las|the|a|o|le|les|der|die|das|il|lo)\\s+)?(aplicaci[oó]n|app(?:lication)?|canal|channel|cha[iî]ne|sender|canale|entrada|input|entr[eé]e|eingang|ingresso|pel[ií]cula|movie|film|filme|serie|series)\\s+(.+)$");
     static final class Request {
-        final String spoken,query;final int target,genre;final boolean open,tonight;
-        Request(String s,String q,int t,boolean o,int g,boolean n){spoken=s;query=q;target=t;open=o;genre=g;tonight=n;}
+        final String spoken,query,provider;final int target,genre;final boolean open,tonight,voice;
+        Request(String s,String q,int t,boolean o,int g,boolean n){this(s,q,t,o,g,n,true);}
+        Request(String s,String q,int t,boolean o,int g,boolean n,boolean v){this(s,q,t,o,g,n,v,"");}
+        Request(String s,String q,int t,boolean o,int g,boolean n,boolean v,String p){spoken=s;query=q;target=t;open=o;genre=g;tonight=n;voice=v;provider=p;}
     }
     static boolean key(int code){return code==android.view.KeyEvent.KEYCODE_SEARCH;}
     static Intent recognizer(Activity a){
@@ -36,14 +38,17 @@ final class VelaVoice {
         q=q.replaceFirst("(?iu)^(?:por favor[, ]+|please[, ]+|s['’]il vous pla[iî]t[, ]+|bitte[, ]+|per favore[, ]+)","")
             .replaceFirst("(?iu)[, ]+(?:por favor|please|s['’]il vous pla[iî]t|bitte|per favore)$","").trim();
         boolean open=false;int target=ANY;Matcher verb=VERB.matcher(q);
-        if(verb.matches()){open=!verb.group(1).matches("(?iu)busca(?:r)?|search(?: for)?|find|cherche|suche|cerca|pesquisa|procura");q=verb.group(2).trim();Matcher noun=SUBJECT.matcher(q);if(noun.matches()){String kind=VelaWorkspace.normal(noun.group(1));target=kind.matches("aplicacion|app|application")?APP:kind.matches("canal|channel|chaine|sender|canale")?CHANNEL:kind.matches("entrada|input|entree|eingang|ingresso")?INPUT:MEDIA;q=noun.group(2).trim();}}
+        if(verb.matches()){open=!verb.group(1).matches("(?iu)busca(?:r|me)?|búscame|encuentra|search(?: for)?|find|cherche|suche|cerca|pesquisa|procura");q=verb.group(2).trim();Matcher noun=SUBJECT.matcher(q);if(noun.matches()){String kind=VelaWorkspace.normal(noun.group(1));target=kind.matches("aplicacion|app|application")?APP:kind.matches("canal|channel|chaine|sender|canale")?CHANNEL:kind.matches("entrada|input|entree|eingang|ingresso")?INPUT:MEDIA;q=noun.group(2).trim();}}
+        String provider="";Matcher service=Pattern.compile("(?iu)^(.+?)\\s+(?:en|on|in|sur|auf|su|no|na)\\s+(plex|jellyfin)$").matcher(q);
+        if(service.matches()){q=service.group(1).trim();provider=service.group(2).toLowerCase(Locale.ROOT);target=MEDIA;}
+        if(q.length()>1&&((q.startsWith("\"")&&q.endsWith("\""))||(q.startsWith("“")&&q.endsWith("”"))))q=q.substring(1,q.length()-1).trim();
         int genre=genre(q);boolean night=tonight(q);String normalized=VelaWorkspace.normal(q);
         if(genre>0&&!open||normalized.matches("que (?:hay|ver) esta noche|what(?: is|'s) on tonight|ce soir|heute abend|stasera|esta noite"))return new Request(spoken,q,DISCOVERY,false,genre,night);
         if(target==INPUT||q.matches("(?iu)^hdmi\\s*.*")){target=INPUT;q=inputQuery(q);}
         else if(target==CHANNEL||target==ANY&&open)q=channelQuery(q);
         if(target==APP||target==ANY)if(keyText(q).equals("youtube"))q="YouTube";
         if(target==ANY){String key=appKey(q);if(key.matches("youtube|plex|jellyfin|primevideo|netflix|disneyplus|spotify|kodi"))target=APP;else if(open&&keyText(q).matches("la1|la2|antena3|telecinco|lasexta|cuatro"))target=CHANNEL;}
-        return new Request(spoken,q,target,open,0,false);
+        return new Request(spoken,q,target,open,0,false,true,provider);
     }
     static String query(String text){return parse(text).query;}
     static String keyText(String text){return VelaWorkspace.normal(text).replaceAll("[^\\p{L}\\p{N}]+","");}
@@ -62,8 +67,16 @@ final class VelaVoice {
         if(channel){LiveTvData.Channel ch=(LiveTvData.Channel)value;return TvChannelNames.match(ch.name).equals(TvChannelNames.match(r.query))||!ch.number.isEmpty()&&q.equals(keyText(ch.number));}
         return false;
     }
+    static boolean firstResult(Context c){return VelaWorkspace.prefs(c,"vela-search").getBoolean("voice_first",false);}
+    static void firstResult(Context c,boolean first){VelaWorkspace.prefs(c,"vela-search").edit().putBoolean("voice_first",first).commit();}
+    static List<VelaHub.Hit> ordered(String query,Request request,List<VelaHub.Hit> values){
+        List<VelaHub.Hit> out=new ArrayList<>();for(VelaHub.Hit hit:values){if(out.size()>=96)break;if(hit.value==null||hit.value instanceof TvInputs.Entry&&((TvInputs.Entry)hit.value).state!=TvInputs.CONNECTED)continue;
+            int kind=VelaSearchView.kind(hit),target=request==null?ANY:request.target;if(target==APP&&kind!=3||target==INPUT&&kind!=4||target==CHANNEL&&!(hit.value instanceof LiveTvData.Channel)||target==MEDIA&&kind!=1)continue;out.add(hit);}
+        Map<VelaHub.Hit,Integer> scores=new IdentityHashMap<>();for(VelaHub.Hit hit:out)scores.put(hit,score(query,hit)+(request!=null&&request.target!=ANY&&exact(request,hit)?2000:0));out.sort(Comparator.comparingInt((VelaHub.Hit h)->scores.get(h)).reversed());return out;
+    }
+    private static int score(String query,VelaHub.Hit hit){String q=keyText(query),title=keyText(hit.title);if(q.isEmpty())return 0;return title.equals(q)?1000:appKey(query).equals(appKey(hit.title))?950:title.startsWith(q)?700:title.contains(q)?500:300;}
     static int genre(String text){String q=VelaWorkspace.normal(text).replaceFirst(" (?:tonight|esta noche|ce soir|heute abend|stasera|esta noite|ahora|now|maintenant|jetzt|ora|agora)$","");String[][] words={{},{"movies","peliculas","filmes","films","filme","film"},{"sports","deportes","desporto","sport","sportivi"},{"documentaries","documentales","documentarios","documentaires","dokumentationen","documentari"},{"kids","infantiles","infantis","enfants","kinder","bambini"}};for(int i=1;i<words.length;i++)for(String w:words[i])if(q.equals(w))return i;return 0;}
-    static boolean searches(String text){Matcher m=VERB.matcher(VelaWorkspace.clean(text,80));return m.matches()&&m.group(1).matches("(?iu)busca(?:r)?|search(?: for)?|find|cherche|suche|cerca|pesquisa|procura");}
+    static boolean searches(String text){Matcher m=VERB.matcher(VelaWorkspace.clean(text,80));return m.matches()&&m.group(1).matches("(?iu)busca(?:r|me)?|búscame|encuentra|search(?: for)?|find|cherche|suche|cerca|pesquisa|procura");}
     static boolean tonight(String text){return VelaWorkspace.normal(text).matches(".*(?:tonight|esta noche|ce soir|heute abend|stasera|esta noite)$");}
     /** One Activity-owned request, delivered only after foreground restoration. */
     static final class Session {
@@ -71,7 +84,7 @@ final class VelaVoice {
         boolean start(Activity activity){if(listening)return true;profile=VelaWorkspace.active(activity);listening=true;if(VelaVoice.start(activity))return true;listening=false;profile="";return false;}
         void result(Context c,int code,Intent data){String text=VelaVoice.result(code,data);listening=false;if(!profile.isEmpty()&&profile.equals(VelaWorkspace.active(c))&&!text.isEmpty()){pending=text;pendingProfile=profile;searchOnly=false;}profile="";}
         boolean intent(Context c,Intent intent){if(intent==null||!Intent.ACTION_SEARCH.equals(intent.getAction()))return false;listening=false;profile="";String text="";try{text=VelaWorkspace.clean(intent.getStringExtra(android.app.SearchManager.QUERY),80);}catch(RuntimeException invalid){}if(!text.isEmpty()){pending=text;pendingProfile=VelaWorkspace.active(c);searchOnly=true;}return true;}
-        Request take(Context c){String text=pending,owner=pendingProfile;boolean search=searchOnly;pending="";pendingProfile="";searchOnly=false;if(text.isEmpty()||!owner.equals(VelaWorkspace.active(c)))return null;return search?new Request(text,text,ANY,false,0,false):parse(text);}
+        Request take(Context c){String text=pending,owner=pendingProfile;boolean search=searchOnly;pending="";pendingProfile="";searchOnly=false;if(text.isEmpty()||!owner.equals(VelaWorkspace.active(c)))return null;return search?new Request(text,text,ANY,false,0,false,false):parse(text);}
         void save(Bundle state){state.putBoolean("vela-voice-listening",listening);state.putString("vela-voice-profile",profile);state.putString("vela-voice-pending",pending);state.putString("vela-voice-owner",pendingProfile);state.putBoolean("vela-voice-search-only",searchOnly);}
         void restore(Bundle state){if(state==null)return;listening=state.getBoolean("vela-voice-listening");profile=VelaWorkspace.clean(state.getString("vela-voice-profile",""),32);pending=VelaWorkspace.clean(state.getString("vela-voice-pending",""),80);pendingProfile=VelaWorkspace.clean(state.getString("vela-voice-owner",""),32);searchOnly=state.getBoolean("vela-voice-search-only");}
     }

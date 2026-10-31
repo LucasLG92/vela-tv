@@ -100,9 +100,9 @@ final class XtreamClient {
         if(force||!cache.fresh(source,15*60_000)){
             try{Map<String,String> names=new HashMap<>();if(category.equals("*"))for(Category item:categories())names.put(item.id,item.name);
                 try(Response response=new Response(endpoint(a,"get_live_streams",category.equals("*")?"":"&category_id="+enc(category)),16*1024*1024);TvCatalogCache.Writer writer=cache.writer(source,response.connection.getContentLengthLong())){
-                    JsonReader r=response.reader;r.beginArray();int count=0;
+                    JsonReader r=response.reader;r.beginArray();int count=0;long importDeadline=System.nanoTime()+120_000_000_000L;
                     while(r.hasNext()){
-                        if(++count>MAX_STREAMS)throw new IOException("Channel limit");String id="",title="",logo="",group=category,type="live",archive="",archiveDays="";
+                        if(Thread.currentThread().isInterrupted()||System.nanoTime()>importDeadline)throw new InterruptedIOException("Import cancelled or timed out");if(++count>MAX_STREAMS)throw new IOException("Channel limit");String id="",title="",logo="",group=category,type="live",archive="",archiveDays="";
                         r.beginObject();while(r.hasNext()){String k=r.nextName();if(k.equals("stream_id"))id=string(r);else if(k.equals("name"))title=limited(string(r),160);else if(k.equals("stream_icon"))logo=limited(string(r),4096);else if(k.equals("category_id"))group=string(r);else if(k.equals("stream_type"))type=string(r);else if(k.equals("tv_archive"))archive=string(r);else if(k.equals("tv_archive_duration"))archiveDays=string(r);else r.skipValue();}r.endObject();
                         if(id(id)&&!title.trim().isEmpty()&&type.equals("live")){LiveTvData.Channel ch=channel(a,id,title,category.equals("*")?names.getOrDefault(group,name):name,safeLogo(a,logo));try{if(archive.equals("1"))ch.archiveDays=Math.max(0,Math.min(7,Integer.parseInt(archiveDays)));}catch(NumberFormatException absent){}writer.add(ch,false);}
                     }r.endArray();writer.commit("{}");
@@ -153,11 +153,22 @@ final class XtreamClient {
         final HttpURLConnection connection;final InputStream in;final JsonReader reader;
         Response(String url,int limit)throws Exception{
             connection=(HttpURLConnection)new URL(url).openConnection();connection.setInstanceFollowRedirects(false);connection.setConnectTimeout(5000);connection.setReadTimeout(6000);connection.setRequestProperty("User-Agent","Vela");
-            try{if(connection.getResponseCode()!=200||connection.getContentLengthLong()>limit)throw new IOException("Provider unavailable");long deadline=System.nanoTime()+25_000_000_000L;
-                in=new FilterInputStream(connection.getInputStream()){int bytes;private void check(int n)throws IOException{if(Thread.currentThread().isInterrupted()||System.nanoTime()>deadline)throw new InterruptedIOException();if(n>0&&(bytes+=n)>limit)throw new IOException("Response limit");}public int read()throws IOException{check(0);int n=super.read();check(n<0?0:1);return n;}public int read(byte[] b,int o,int l)throws IOException{check(0);int n=super.read(b,o,l);check(n);return n;}};reader=new JsonReader(new InputStreamReader(in,StandardCharsets.UTF_8));
+            try{if(connection.getResponseCode()!=200||connection.getContentLengthLong()>limit)throw new IOException("Provider unavailable");
+                in=new NetworkBudget(connection.getInputStream(),limit,25_000_000_000L,System::nanoTime);reader=new JsonReader(new InputStreamReader(in,StandardCharsets.UTF_8));
             }catch(Exception failure){connection.disconnect();throw new IOException("Provider unavailable");}
         }
         public void close(){try{in.close();}catch(Exception ignored){}connection.disconnect();}
+    }
+    /** Bound wire time independently of the CPU time spent encrypting and indexing each channel. */
+    static final class NetworkBudget extends FilterInputStream {
+        interface Clock {long now();}
+        final Clock clock;final int limit;final long budget;private long spent,bytes;
+        NetworkBudget(InputStream input,int limit,long budget,Clock clock){super(input);this.limit=limit;this.budget=budget;this.clock=clock;}
+        private void check()throws IOException{if(Thread.currentThread().isInterrupted()||spent>=budget)throw new InterruptedIOException("Network budget exceeded");}
+        private void finish(long start,int count)throws IOException{spent+=Math.max(0,clock.now()-start);if(count>0)bytes+=count;if(bytes>limit)throw new IOException("Response limit");check();}
+        public int read()throws IOException{check();long start=clock.now();int n=in.read();finish(start,n<0?0:1);return n;}
+        public int read(byte[] b,int offset,int length)throws IOException{check();long start=clock.now();int n=in.read(b,offset,length);finish(start,n);return n;}
+        public long skip(long count)throws IOException{throw new IOException("Skipping provider data is unsupported");}
     }
     static void logo(String url,File file)throws Exception{
         // No account headers; redirects are deliberately not followed for private provider artwork.

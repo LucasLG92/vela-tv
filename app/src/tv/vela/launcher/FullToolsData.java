@@ -7,7 +7,6 @@ import java.util.*;
 
 /** Full edition adapter. Credentials stay inside the existing service clients. */
 abstract class FullToolsData extends VelaToolsData {
-    private String mediaQuery="";private final Map<String,Boolean> mediaMore=new HashMap<>();
     FullToolsData(Activity a){super(a);}
     public boolean hasCollections(){return new LibraryClient(activity).connected();}
     public List<VelaHub.Hit> collections(String source,int page,CancellationSignal signal)throws Exception{LibraryClient client=new LibraryClient(activity);VelaHub.Hits out=new VelaHub.Hits();if(source.isEmpty()){List<LibraryClient.SectionSource> roots=client.collectionSources();for(int i=page*12;i<Math.min(roots.size(),page*12+12);i++){LibraryClient.SectionSource root=roots.get(i);out.add(new VelaHub.Hit("collection-source",root.title,L10n.text("Choose a library"),root.key));}out.more=(page+1)*12<roots.size();}else for(LibraryCollection item:client.collections(source,page)){signal.throwIfCanceled();out.add(new VelaHub.Hit("collection",item.title,item.provider,item.json()));}return out;}
@@ -19,11 +18,11 @@ abstract class FullToolsData extends VelaToolsData {
         else result=new TvCatalogCache(activity).page(LiveTvData.source(activity),null,query,null,page,signal);
         VelaHub.Hits out=new VelaHub.Hits();if(result.page!=page||page*12>=result.total)return out;out.more=(page+1)*12<result.total;for(LiveTvData.Channel c:result.channels){signal.throwIfCanceled();out.add(new VelaHub.Hit(VelaWorkspace.t("Channel","Canal"),TvChannelNames.display(c.name),c.group,c));}return out;
     }
-    List<VelaHub.Hit> media(String query,int page,CancellationSignal signal)throws Exception{
-        LibraryClient library=new LibraryClient(activity);VelaHub.Hits out=new VelaHub.Hits();if(!library.connected())return out;if(page==0||!query.equals(mediaQuery)){mediaQuery=query;mediaMore.clear();}
-        List<PlexClient.Section> sections=library.sections();int groups=Math.max(1,(sections.size()+5)/6),group=page%groups,offset=(page/groups)*4;CatalogFilters.Query q=new CatalogFilters.Query();q.search=query;
-        for(int i=group*6;i<Math.min(sections.size(),group*6+6);i++){signal.throwIfCanceled();PlexClient.Section section=sections.get(i);if(offset>0&&Boolean.FALSE.equals(mediaMore.get(section.key)))continue;PlexClient.LibraryPage result=library.page(section,offset,q);int taken=0;for(PlexClient.Film film:result.films){if(taken++>=4)break;out.add(new VelaHub.Hit(library.provider(),film.title,section.title,film));}mediaMore.put(section.key,result.total<0?result.received>4:offset+4<result.total);}
-        for(PlexClient.Section section:sections)if(!Boolean.FALSE.equals(mediaMore.get(section.key))){out.more=true;break;}return out;
+    List<VelaHub.Hit> media(String query,int page,CancellationSignal signal)throws Exception{return media(query,page,signal,"");}
+    List<VelaHub.Hit> media(String query,int page,CancellationSignal signal,String provider)throws Exception{
+        LibraryClient library=new LibraryClient(activity);if(!provider.isEmpty())library=library.home(provider);VelaHub.Hits out=new VelaHub.Hits();if(!library.connected())return out;
+        LibraryClient.Search result=library.search(query,page,signal);out.more=result.more;out.partial=result.partial;
+        for(PlexClient.Film film:result.films){signal.throwIfCanceled();out.add(new VelaHub.Hit(LibraryClient.jf(film)?"Jellyfin":"Plex",film.title,film.meta,film));}return out;
     }
     public List<VelaShows.Airing> airings(String query,int page,CancellationSignal signal)throws Exception{
         if(LiveTvData.mode(activity).equals("antenna")){String tuner=HomeApps.tunerInput(activity);if(tuner==null)return Collections.emptyList();Map<Long,String> names=VelaToolsData.nativeNames(activity,tuner,signal);Set<String> hidden=new TvPersonalization(activity,"antenna").hiddenKeys();names.entrySet().removeIf(e->hidden.contains("ant-"+e.getKey()));return VelaToolsData.merge(VelaToolsData.nativeAirings(activity,names,query,page,signal),new XmlTvGuide(activity).antennaAirings(names,query,page,signal));}
@@ -37,6 +36,6 @@ abstract class FullToolsData extends VelaToolsData {
     public org.json.JSONObject reference(VelaHub.Hit hit)throws Exception{if(hit.value instanceof PlexClient.Film)return new LibraryClient(activity).reference((PlexClient.Film)hit.value);if(hit.value instanceof VelaShows.Airing)return VelaWatchlist.airing((VelaShows.Airing)hit.value);return null;}
     public VelaHub.Hit resolve(org.json.JSONObject item,CancellationSignal signal)throws Exception{signal.throwIfCanceled();PlexClient.Film film=new LibraryClient(activity).resolve(item);signal.throwIfCanceled();return film==null?null:new VelaHub.Hit(film.provider,film.title,film.meta,film);}
     public void repair(){new XmlTvGuide(activity).invalidate();}
-    public String scope(){return LiveTvData.hash(VelaGuideFix.all(activity).toString())+"|"+LiveTvData.source(activity)+"|"+activity.getSharedPreferences("xmltv",0).getBoolean("native",false)+"|"+LiveTvData.hash(activity.getSharedPreferences("xmltv",0).getString("url","default"));}
+    public String scope(){return new LibraryClient(activity).home("both").identity()+"|"+LiveTvData.hash(VelaGuideFix.all(activity).toString())+"|"+LiveTvData.source(activity)+"|"+activity.getSharedPreferences("xmltv",0).getBoolean("native",false)+"|"+LiveTvData.hash(activity.getSharedPreferences("xmltv",0).getString("url","default"));}
     public void prepareBackup()throws Exception{XtreamClient client=new XtreamClient(activity);if(client.connected()){client.account();client.favoriteIds();new TvPersonalization(activity,client.source());}}
 }

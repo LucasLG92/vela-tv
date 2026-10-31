@@ -154,6 +154,11 @@ class PlexClient {
     }
     LibraryPage page(Section section,int offset)throws Exception{return page(section,offset,new CatalogFilters.Query());}
     LibraryPage page(Section section,int offset,CatalogFilters.Query query)throws Exception{return parsePage(catalogJson(CatalogFilters.plexPath(section,offset,query),4*1024*1024),offset);}
+    LibraryPage search(String query,String type,int offset)throws Exception{
+        if(query.isEmpty()||query.length()>80||offset<0||offset>24000||!(type.equals("movie")||type.equals("show")))throw new IOException("Invalid search");
+        String path="/library/all?type="+(type.equals("show")?2:1)+"&title="+CatalogFilters.encode(query)+"&sort=titleSort:asc&includeExternalMetadata=0&X-Plex-Container-Start="+offset+"&X-Plex-Container-Size="+PAGE_SIZE;
+        return parsePage(catalogJson(path,2*1024*1024),offset);
+    }
     List<Film> homeRow(String row)throws Exception{
         String path=CatalogFilters.plexPath(new Section("0","",VelaHomeRows.type(row)),0,VelaHomeRows.query(row,false));
         path="/library/all"+path.substring(path.indexOf('?'));

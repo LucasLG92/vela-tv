@@ -61,6 +61,12 @@ final class JellyfinClient {
         return out;
     }
     PlexClient.LibraryPage page(PlexClient.Section section,int offset)throws Exception{return page(section,offset,new CatalogFilters.Query());}
+    PlexClient.LibraryPage search(String query,int offset)throws Exception{
+        if(query.isEmpty()||query.length()>80||offset<0||offset>24000)throw new IOException("Invalid search");Session scope=stored();
+        JSONObject root=authenticated(scope,"/Items?userId="+scope.userId+"&recursive=true&includeItemTypes=Movie,Series&searchTerm="+CatalogFilters.encode(query)+"&sortBy=SortName&sortOrder=Ascending&startIndex="+offset+"&limit="+PlexClient.PAGE_SIZE+"&fields="+FIELDS+"&enableImages=true&imageTypeLimit=1&enableUserData=true");
+        JSONArray items=root.optJSONArray("Items");int count=items==null?0:items.length();if(count>PlexClient.PAGE_SIZE||root.optInt("StartIndex",offset)!=offset)throw new IOException("Search page limit");
+        return new PlexClient.LibraryPage(parse(items,false,false,PlexClient.PAGE_SIZE),offset,root.has("TotalRecordCount")?Math.max(0,root.optInt("TotalRecordCount")):-1,count);
+    }
     List<PlexClient.Film> homeRow(String row)throws Exception{
         Session scope=stored();String type=VelaHomeRows.type(row);
         String path="/Items?userId="+scope.userId+"&recursive=true&includeItemTypes="+(type.equals("show")?"Series":"Movie")+CatalogFilters.jellyfinQuery(VelaHomeRows.query(row,true))+"&startIndex=0&limit="+VelaHomeRows.LIMIT+"&fields="+FIELDS+"&enableImages=true&imageTypeLimit=1&enableUserData=true";

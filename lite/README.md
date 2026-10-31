@@ -4,11 +4,11 @@
 
 **Lite is now a mode inside the unified Vela APK.** Choose it on first launch or in Settings → System → Launcher mode. It keeps the existing HDMI, antenna and apps interface while leaving the multimedia Home and library clients inactive. [One app and migration guide](../guide/UNIFIED.md).
 
-Already using the old standalone Lite app? Its final [0.18.0 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.0-preview) enables an explicit import of your current settings profile into unified Vela.
+Already using the old standalone Lite app? Its final [0.18.0 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.1-preview) enables an explicit import of your current settings profile into unified Vela.
 
 Your **HDMI devices, antenna television and apps**, in a clean home screen made for your remote. Vela Lite is for the television that sits alongside a TV box, console or computer.
 
-**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.0.0-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
+**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.0-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
 **Android TV / Google TV · Android 8.0+ · English / Español / Português / Français / Deutsch / Italiano · Preview**
 
@@ -72,7 +72,7 @@ Choose a black or graphite background, clock visibility, reduced focus motion an
 
 Create app folders and separate local profiles. Keep a **Watch later** list of broadcasts, protect settings with a local PIN and offer visitors a separate guest space. Back up your preferences, configure them from your phone through a temporary local HTTPS session, or explicitly pair another Vela for compatible preference sync. Credentials remain on each television.
 
-Every menu is available in **English, Spanish, Portuguese, French, German and Italian**, with a manual selector or automatic system language. The same graphite panels, Inter typeface and focus style run through both editions. Tools remain inside the main sidebar. Assign a remote or keyboard button to **Vela voice search**: partial words appear inside Vela, while a microphone symbol and a soft, voice-responsive sidebar glow indicate active listening. Microphone permission is requested on first use. Android supplies recognition; Vela releases it when you leave and preserves unassigned Google Assistant keys. The compatibility assistant explains the capabilities your TV exposes. [Voice setup and limits](../guide/HOME-AND-VOICE.md#give-a-remote-or-keyboard-button-to-vela-voice-search).
+Every menu is available in **English, Spanish, Portuguese, French, German and Italian**, with a manual selector or automatic system language. The same graphite panels, Inter typeface and focus style run through both editions. Tools remain inside the main sidebar. Assign a remote or keyboard button to **Vela voice search**: a small microphone and a voice-responsive sidebar glow indicate active listening, keeping the screen visible. Permission and error controls appear only when needed. Microphone permission is requested on first use. Android supplies recognition; Vela releases it when you leave and preserves unassigned Google Assistant keys. The compatibility assistant explains the capabilities your TV exposes. [Voice setup and limits](../guide/HOME-AND-VOICE.md#give-a-remote-or-keyboard-button-to-vela-voice-search).
 
 ![Vela Lite settings and language selection](gallery/03-settings.png)
 

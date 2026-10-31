@@ -80,14 +80,15 @@ public final class AndroidHomePersonalizationTest extends Instrumentation {
         phase="home-editor";ui(()->activity.toolsLayout());await(()->field(activity,"hub")!=null);shot("03-editor");View sourceOption=activity.findViewById(android.R.id.content).findViewWithTag("@source");check(sourceOption!=null,"Home source is not accessible in the draft editor");ui(sourceOption::requestFocus);shot("03b-home-source");
         phase="voice-in-home";Visuals.prefs(context).edit().putBoolean("reducedMotion",false).commit();ui(()->((VelaHub)unchecked(activity,"hub")).close());getUiAutomation().grantRuntimePermission(context.getPackageName(),"android.permission.RECORD_AUDIO");
         final RecognitionListener[] callback={null};final int[] destroyed={0};VelaVoiceSearch voice=new VelaVoiceSearch(activity,new VelaVoiceSearch.Host(){public void phrase(String s){}public void keyboard(){}},a->new VelaVoiceSearch.Engine(){public void start(Intent i,RecognitionListener l){callback[0]=l;}public void stop(){}public void cancel(){}public void destroy(){destroyed[0]++;}});
-        ui(voice::start);runOnMainSync(()->{callback[0].onReadyForSpeech(new Bundle());Bundle partial=new Bundle();partial.putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION,new ArrayList<>(Arrays.asList(args.getString("language","es").equals("en")?"Find science fiction films":"Busca películas de ciencia ficción")));callback[0].onPartialResults(partial);callback[0].onRmsChanged(5);});shot("04-listening");
+        if(args.getString("fixture","").endsWith("-expanded"))ui(()->{try{java.lang.reflect.Method open=home.getClass().getDeclaredMethod("setSidebar",boolean.class);open.setAccessible(true);open.invoke(home,true);}catch(Exception e){throw new RuntimeException(e);}});
+        ui(voice::start);runOnMainSync(()->{callback[0].onReadyForSpeech(new Bundle());Bundle partial=new Bundle();partial.putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION,new ArrayList<>(Arrays.asList(args.getString("language","es").equals("en")?"Find science fiction films":"Busca películas de ciencia ficción")));callback[0].onPartialResults(partial);callback[0].onRmsChanged(8);});shot("04-listening");
         // Optional native recording fixture: simulate RMS only, never open a physical microphone.
-        String clip=args.getString("fixture","");if(clip.matches("voice-glow-[0-9]+")){
+        String clip=args.getString("fixture","");if(clip.matches("voice-glow-[0-9]+(?:-expanded)?")){
             try(OutputStream marker=new FileOutputStream(new File(context.getExternalFilesDir(null),clip+".ready"))){marker.write(1);}
             for(int i=0;i<130;i++){final float rms=(i/28)%2==0?(float)(3+6*Math.sin(i*.3)): -3;runOnMainSync(()->callback[0].onRmsChanged(rms));if(i==45)shot("05-voice-glow");Thread.sleep(90);}
         }
         ui(voice::cancel);check(destroyed[0]==1&&!voice.active(),"Voice UI retained the recognizer after closing");
-        if(clip.matches("voice-glow-[0-9]+")){
+        if(clip.matches("voice-glow-[0-9]+(?:-expanded)?")){
             Visuals.prefs(context).edit().putBoolean("reducedMotion",true).commit();ui(voice::start);ui(()->callback[0].onReadyForSpeech(new Bundle()));shot("06-static-glow");ui(voice::cancel);check(destroyed[0]==2&&!voice.active(),"Reduced-motion voice kept its recognizer after closing");
         }
         phase="home-provider-isolation";ui(activity::finish);check(!new LibraryClient(context).home("jellyfin").connected(),"Explicit disconnected Home source silently fell back to Plex");

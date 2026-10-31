@@ -161,6 +161,7 @@ class SettingsScreen extends VelaScreen {
                 row(Ui.tr("Assistente de configuração","Setup guide","Asistente de configuración"),"›",0,L10n.text("Everything, your way."),L10n.text("Review accounts, apps and location without clearing your settings."),()->activity.startActivity(new Intent(activity,SetupActivity.class)));
                 row(L10n.text("Launcher mode"),L10n.text("Full"),0,L10n.text("Choose your Vela"),L10n.text("Switch modes without deleting your profiles or accounts."),()->VelaEdition.chooser(activity.owner));
                 row(L10n.text("Remote shortcuts"),"›",0,L10n.text("Remote shortcuts"),L10n.text("Teach Vela a button and choose its short and long press actions"),()->tools(VelaHub.REMOTE));
+                row(L10n.text("Voice and search"),"›",0,L10n.text("Voice and search"),L10n.text("Show results or open the first voice match"),()->tools(VelaHub.SEARCH_SETTINGS));
                 row(L10n.text("Your Vela"),"›",0,L10n.text("Your Vela."),L10n.text("Backups, profiles, search, programmes, reading and diagnostics."),()->tools(1));
                 note(L10n.text("Your original home screen and screensaver are kept so you can return whenever you like."),0);
             }else if(page==23){

@@ -1,6 +1,6 @@
 # Vela in pictures
 
-Explore 78 native **4K screenshots**. The unified mode selector, Lite, mode settings, personalised Home and voice captures show **2.0.0-preview**; the explicit old-Lite import prompt shows the **0.18.0-preview** transition app. Earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original app/channel names retain their source language.
+Explore 81 native **4K screenshots**. The new voice and search captures show **2.1.0-preview**. The unified mode selector, Lite, mode settings and personalised Home captures show **2.0.0-preview**; the explicit old-Lite import prompt shows the **0.18.0-preview** transition app. Earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original app/channel names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 
@@ -29,6 +29,16 @@ Arrange shelves, choose their size and source, and add latest movies, series, un
 A compact microphone and an accent-coloured glow respond to your voice. Assign your own shortcut; Android supplies speech recognition. This capture uses synthetic speech input.
 
 ![Integrated Vela voice search](100-voice-glow.webp)
+
+![The voice light follows an expanded sidebar](102-voice-expanded.webp)
+
+## Find it in a moment
+
+Search your libraries, channels, apps and inputs in a remote-friendly grid. Open the chooser or the first ranked voice match: each profile decides.
+
+![Search results](103-search-results.webp)
+
+![Voice result preference](104-voice-preferences.webp)
 
 ## Move your old Lite profile with confidence
 

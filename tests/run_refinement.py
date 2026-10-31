@@ -4,7 +4,7 @@ import argparse,os,subprocess,shutil,re
 
 p=argparse.ArgumentParser()
 p.add_argument('--serial',required=True);p.add_argument('--adb-port',default='5038')
-p.add_argument('--lite',action='store_true');p.add_argument('--test',choices=['shared','library','uiux','navigation','tv-fixes','identity','recent-channel','voice','home-composition','widgets','remote','hls-redirect','auto-tune','discovery','catalog','home-personalization','unified','migration','migration-seed'],default='shared')
+p.add_argument('--lite',action='store_true');p.add_argument('--test',choices=['shared','library','uiux','navigation','tv-fixes','identity','recent-channel','voice','home-composition','widgets','remote','hls-redirect','auto-tune','discovery','catalog','home-personalization','unified','migration','migration-seed','search-ux'],default='shared')
 p.add_argument('--art',type=Path,required=True);p.add_argument('--fixture',default='');p.add_argument('--language',default='es')
 a=p.parse_args();assert not(a.lite and a.test in ('library','home-composition','catalog','home-personalization'))
 repo=Path(__file__).resolve().parents[1];root=repo/'lite' if a.lite else repo
@@ -14,7 +14,7 @@ exe='.exe' if os.name=='nt' else '';bat='.bat' if os.name=='nt' else ''
 adb=[sdk/('platform-tools/adb'+exe),'-P',a.adb_port,'-s',a.serial]
 def run(args):return subprocess.run(list(map(str,args)),check=True)
 assert subprocess.check_output(list(map(str,adb+['shell','getprop','ro.kernel.qemu']))).strip()==b'1','Owned emulator required'
-cls={'shared':'AndroidRefinementTest','library':'AndroidLibraryDesignTest','uiux':'AndroidUiUxTest','navigation':'AndroidNavigationTest','tv-fixes':'AndroidTvRegressionTest','identity':'AndroidIdentityTest','recent-channel':'AndroidRecentChannelTest','voice':'AndroidVoiceTest','home-composition':'AndroidHomeCompositionTest','widgets':'AndroidWidgetsTest','remote':'AndroidRemoteTest','hls-redirect':'AndroidHlsRedirectTest','auto-tune':'AndroidAutoTuneTest','discovery':'AndroidDiscoveryUiTest','catalog':'AndroidDiscoveryCatalogTest','home-personalization':'AndroidHomePersonalizationTest','unified':'AndroidUnifiedTest','migration':'AndroidMigrationTest','migration-seed':'LiteMigrationSeedTest'}[a.test]
+cls={'shared':'AndroidRefinementTest','library':'AndroidLibraryDesignTest','uiux':'AndroidUiUxTest','navigation':'AndroidNavigationTest','tv-fixes':'AndroidTvRegressionTest','identity':'AndroidIdentityTest','recent-channel':'AndroidRecentChannelTest','voice':'AndroidVoiceTest','home-composition':'AndroidHomeCompositionTest','widgets':'AndroidWidgetsTest','remote':'AndroidRemoteTest','hls-redirect':'AndroidHlsRedirectTest','auto-tune':'AndroidAutoTuneTest','discovery':'AndroidDiscoveryUiTest','catalog':'AndroidDiscoveryCatalogTest','home-personalization':'AndroidHomePersonalizationTest','unified':'AndroidUnifiedTest','migration':'AndroidMigrationTest','migration-seed':'LiteMigrationSeedTest','search-ux':'AndroidSearchUxTest'}[a.test]
 if a.lite and a.test=='discovery':cls='LiteDiscoveryUiTest'
 if a.lite and a.test=='auto-tune':cls='LiteAutoTuneTest'
 if a.lite and a.test=='tv-fixes':cls='LiteTvRegressionTest'
@@ -35,10 +35,10 @@ provider='<provider android:name="tv.vela.launcher.'+cls+'$Provider" android:aut
 recognizer='<activity android:name="tv.vela.launcher.AndroidVoiceTest$Recognizer" android:exported="true"/>' if a.test=='voice' else ''
 if a.test=='remote':recognizer='<activity android:name="tv.vela.launcher.AndroidRemoteTest$Target" android:label="Remote test target" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter></activity>'
 (out/'manifest.xml').write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="'+testpkg+'"><uses-permission android:name="android.permission.INTERNET"/><application'+(' android:label="Remote test target"' if a.test=='remote' else '')+'>'+provider+recognizer+'</application><instrumentation android:name="tv.vela.launcher.'+cls+'" android:targetPackage="'+pkg+'"'+('' if a.lite else ' android:targetProcesses="tv.vela.launcher:home"')+'/></manifest>',encoding='utf8')
-run([bt/('aapt2'+exe),'link','-o',out/'base.apk','-I',sdk/'platforms/android-34/android.jar','--manifest',out/'manifest.xml','-A',assets,'--min-sdk-version','26' if a.lite or a.test in ('unified','migration') or a.fixture=='unified-lite' else '30','--target-sdk-version','33'])
+run([bt/('aapt2'+exe),'link','-o',out/'base.apk','-I',sdk/'platforms/android-34/android.jar','--manifest',out/'manifest.xml','-A',assets,'--min-sdk-version','26' if a.lite or a.test in ('unified','migration','search-ux') or a.fixture=='unified-lite' else '30','--target-sdk-version','33'])
 run([jdk/('bin/javac'+exe),'-encoding','UTF-8','-source','8','-target','8','-cp',os.pathsep.join([str(root/'out/classes'),str(sdk/'platforms/android-34/android.jar')]),'-d',out/'classes',(root if a.lite and a.test in ('tv-fixes','recent-channel','auto-tune','discovery') else repo)/('tests/'+cls+'.java'),repo/'tests/RefinementHttp.java']+([repo/'tests/DiscoveryUiContract.java'] if a.test=='discovery' else []))
 run([jdk/('bin/jar'+exe),'cf',out/'classes.jar','-C',out/'classes','.'])
-run([bt/('d8'+bat),'--min-api','26' if a.lite or a.test in ('unified','migration') or a.fixture=='unified-lite' else '30','--lib',sdk/'platforms/android-34/android.jar','--output',out,out/'classes.jar'])
+run([bt/('d8'+bat),'--min-api','26' if a.lite or a.test in ('unified','migration','search-ux') or a.fixture=='unified-lite' else '30','--lib',sdk/'platforms/android-34/android.jar','--output',out,out/'classes.jar'])
 run([jdk/('bin/jar'+exe),'uf',out/'base.apk','-C',out,'classes.dex'])
 run([bt/('zipalign'+exe),'-f','4',out/'base.apk',out/'aligned.apk'])
 run([bt/('apksigner'+bat),'sign','--ks',repo/'vela.keystore','--ks-pass','pass:vela-local','--out',out/'tests.apk',out/'aligned.apk'])

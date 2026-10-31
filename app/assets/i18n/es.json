@@ -1439,5 +1439,22 @@
   "Could not export settings.": "No se han podido exportar los ajustes.",
   "Open GitHub on another device to install unified Vela.": "Abre GitHub en otro dispositivo para instalar Vela unificada.",
   "Unlock the old Lite app before importing.": "Desbloquea la antigua app Lite antes de importar.",
-  "No newer Vela release has been published.": "No hay una versión de Vela más reciente publicada."
+  "No newer Vela release has been published.": "No hay una versión de Vela más reciente publicada.",
+  "Voice and search": "Voz y búsqueda",
+  "Show results or open the first voice match": "Mostrar resultados o abrir la primera coincidencia de voz",
+  "Choose what happens after Vela recognises your voice. Keyboard searches always show results.": "Elige qué ocurre al reconocer tu voz. Las búsquedas con teclado siempre muestran resultados.",
+  "Show results": "Mostrar resultados",
+  "Choose from matching films, channels, apps and inputs.": "Elige entre películas, canales, aplicaciones y entradas coincidentes.",
+  "Open first match": "Abrir primera coincidencia",
+  "Open the top available result automatically. No match keeps the results on screen.": "Abre automáticamente el primer resultado disponible. Si no hay coincidencias, permanece en la búsqueda.",
+  "Assign a button to Vela voice search": "Asigna un botón a la búsqueda por voz de Vela",
+  "Back to search": "Volver a la búsqueda",
+  "Speak": "Hablar",
+  "Search your library, channels, apps and inputs.": "Busca en tu biblioteca, canales, aplicaciones y entradas.",
+  "Could not search. Try again.": "No se pudo buscar. Inténtalo de nuevo.",
+  "No matches. Try another name.": "Sin coincidencias. Prueba con otro nombre.",
+  "No matches in this category.": "Sin coincidencias en esta categoría.",
+  "Results": "Resultados",
+  "All results": "Todos",
+  "Some sources are unavailable. Try again.": "Algunas fuentes no están disponibles. Inténtalo de nuevo."
 }

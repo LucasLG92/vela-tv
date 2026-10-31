@@ -36,6 +36,16 @@ final class LibraryClient {
     private boolean sectionJf(PlexClient.Section s){return s.key.startsWith("jellyfin:")||!s.key.startsWith("plex:")&&isJellyfin();}
     private PlexClient.Section plain(PlexClient.Section s){int at=s.key.indexOf(':');return at<0?s:new PlexClient.Section(s.key.substring(at+1),s.title,s.type);}
     PlexClient.LibraryPage page(PlexClient.Section s,int offset)throws Exception{return page(s,offset,new CatalogFilters.Query());}
+    static final class Search {final List<PlexClient.Film> films=new ArrayList<>();boolean more,partial;}
+    Search search(String query,int page,android.os.CancellationSignal cancel)throws Exception{
+        if(page<0||page>1000)throw new IOException("Invalid search page");Search out=new Search();String owner=identity();Exception failure=null;int successes=0,offset=page*PlexClient.PAGE_SIZE;
+        for(int source=0;source<3;source++){
+            boolean jf=source==2;if(jf?!(both()||isJellyfin()):!(!isJellyfin()||both()))continue;cancel.throwIfCanceled();
+            try{PlexClient.LibraryPage result=jf?jellyfin.search(query,offset):plex.search(query,source==0?"movie":"show",offset);cancel.throwIfCanceled();out.films.addAll(result.films);out.more|=result.hasNext();successes++;}
+            catch(Exception error){cancel.throwIfCanceled();if(Thread.currentThread().isInterrupted())throw error;failure=error;out.partial=true;}
+        }
+        if(!owner.equals(identity()))throw new IOException("Library account changed");if(successes==0&&failure!=null)throw failure;decorate(out.films);return out;
+    }
     PlexClient.LibraryPage page(PlexClient.Section s,int offset,CatalogFilters.Query q)throws Exception{PlexClient.LibraryPage p=sectionJf(s)?jellyfin.page(plain(s),offset,q):plex.page(plain(s),offset,q);return new PlexClient.LibraryPage(decorate(p.films),p.offset,p.total,p.received);}
     CatalogFilters.Options filters(PlexClient.Section s)throws Exception{return sectionJf(s)?jellyfin.filters(plain(s)):plex.filters(plain(s));}
     CatalogFilters.Choices choices(PlexClient.Section s,CatalogFilters.Facet f,int offset,String search)throws Exception{return sectionJf(s)?jellyfin.choices(plain(s),f,offset,search):plex.choices(plain(s),f,offset,search);}

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0-preview / Lite transition 0.18.1-preview
+
+- A dedicated, paged Search view keeps results in Vela’s sidebar and removes the secondary settings menu. Filter by result type and use a two-column remote layout, with a larger-text variant.
+- Each profile can show voice results or open the first ranked match, with typed searches always selectable. Scoped commands, cancellation and source guards remain enforced.
+- Voice feedback stays on the sidebar, with soft flowing fields inside its actual collapsed or expanded bounds. The listening panel and background dimming are removed; permission and error controls appear only when needed. One foreground 30 fps clock respects reduced motion.
+
+- Full: search every accessible movie/series library with bounded global Plex/Jellyfin queries. Keep other results when the guide or a provider fails; support explicit spoken provider names without including them in the title.
+- Full: separate Xtream wire-read budget from encrypted indexing time, retain strict response/disk/record limits and cancellable imports, and show categories before a large first import completes. Confirmed the full catalogue and first video frame on a physical Android 14 box.
+
 ## 2.0.0-preview / Lite transition 0.18.0-preview
 
 - One unified APK: first-run Full/Lite choice and reversible, PIN-protected mode selection in System settings. Preserve configured Full installs. Android 8–10 runs Lite; Full remains Android 11+.
