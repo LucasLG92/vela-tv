@@ -176,17 +176,15 @@ final class VelaVoiceSearch {
             else{first=accent;hsv[0]=(hsv[0]+22)%360;second=Color.HSVToColor(hsv);hsv[0]=(hsv[0]+316)%360;third=Color.HSVToColor(hsv);}
         }
         int[] rim(){return new int[]{first,second,third,first};}
-        static RadialGradient bloom(int color){return new RadialGradient(0,0,1,new int[]{color,(color&0xFFFFFF)|0x65000000,color&0xFFFFFF},new float[]{0,.48f,1},Shader.TileMode.CLAMP);}
     }
-    /** A clipped, fluid light field follows the actual navigation surface. No full-screen render layer. */
+    /** A feathered contour follows the real sidebar; its interior is excluded from every light pass. */
     private final class Signal extends View {
         private final Paint paint=new Paint(3);private final RectF rect=new RectF(),bar=new RectF();private final Matrix matrix=new Matrix();
-        private final Path clip=new Path(),ribbon=new Path();private final float[] centers=new float[17],widths=new float[17];
-        private final RadialGradient blue,violet,pearl;private final LinearGradient sheet;private ValueAnimator pulse;
+        private final Path clip=new Path();
+        private final LinearGradient edge;private ValueAnimator pulse;
         private float phase,flow,energy,target,processMix,intro,noise=-2,peak=8;private boolean ready,reduced,processing;private long started,lastFrame,lastVoice;
         Signal(VoiceColors colors){
-            super(activity);setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);blue=VoiceColors.bloom(colors.first);violet=VoiceColors.bloom(colors.second);pearl=VoiceColors.bloom(0xFFE8F3FF);
-            sheet=new LinearGradient(0,0,1,1,new int[]{colors.first,colors.third,colors.second},null,Shader.TileMode.CLAMP);
+            super(activity);setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);edge=new LinearGradient(0,0,0,1,colors.rim(),new float[]{0,.34f,.68f,1},Shader.TileMode.MIRROR);
         }
         protected void onSizeChanged(int w,int h,int ow,int oh){bar.set(14,14,w-14,h-14);clip.rewind();clip.addRoundRect(bar,32,32,Path.Direction.CW);}
         void level(float rms){if(!ready||reduced||Float.isNaN(rms)||Float.isInfinite(rms))return;float value=Math.max(-12,Math.min(30,rms));noise=Math.min(noise,value);peak=Math.max(8,Math.max(value,peak*.995f));target=(float)Math.pow(Math.max(0,Math.min(1,(value-noise)/Math.max(6,peak-noise))),.8);lastVoice=SystemClock.uptimeMillis();}
@@ -203,23 +201,20 @@ final class VelaVoiceSearch {
             frame();
         }
         protected void onDetachedFromWindow(){freeze();ready=processing=false;super.onDetachedFromWindow();}
-        private void field(Canvas c,RadialGradient shader,float x,float y,float w,float h,float rotation,int alpha){matrix.setScale(w,h);matrix.postRotate(rotation);matrix.postTranslate(x,y);shader.setLocalMatrix(matrix);paint.setShader(shader);paint.setStyle(Paint.Style.FILL);paint.setAlpha(Math.max(0,Math.min(255,alpha)));c.drawRect(bar,paint);}
-        private void sheet(Canvas c,float offset,float amplitude,int alpha){
-            float w=bar.width(),h=bar.height();for(int i=0;i<=16;i++){float y=i/16f,envelope=(float)Math.sin(y*Math.PI);centers[i]=bar.left+w*(.5f+.22f*(float)Math.sin(y*7.2f+flow*1.2f+offset)+.1f*(float)Math.sin(y*13.4f-flow*.63f));widths[i]=w*(.075f+.07f*amplitude)*envelope;}
-            ribbon.rewind();ribbon.moveTo(centers[0],bar.top);for(int i=1;i<=16;i++){float y0=bar.top+(i-1)*h/16f,y1=bar.top+i*h/16f;ribbon.cubicTo(centers[i-1]-widths[i-1],y0+h/32,centers[i]-widths[i],y1-h/32,centers[i]-widths[i],y1);}for(int i=15;i>=0;i--){float y0=bar.top+(i+1)*h/16f,y1=bar.top+i*h/16f;ribbon.cubicTo(centers[i+1]+widths[i+1],y0-h/32,centers[i]+widths[i],y1+h/32,centers[i]+widths[i],y1);}ribbon.close();
-            matrix.setScale(w,h);matrix.postTranslate(bar.left,bar.top);sheet.setLocalMatrix(matrix);paint.setShader(sheet);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(12);paint.setAlpha(alpha/8);c.drawPath(ribbon,paint);paint.setStrokeWidth(5);paint.setAlpha(alpha/5);c.drawPath(ribbon,paint);paint.setStyle(Paint.Style.FILL);paint.setAlpha(alpha);c.drawPath(ribbon,paint);
+        private void contour(Canvas canvas,float width,int alpha,float strength){
+            paint.setStrokeWidth(width);paint.setAlpha(Math.round(alpha*strength));canvas.drawRoundRect(bar,32,32,paint);
         }
         protected void onDraw(Canvas c){
-            boolean lit=ready||processing;float w=bar.width(),h=bar.height(),strength=intro*(1-.55f*processMix),t=flow;
-            if(lit&&w>0&&h>0){int save=c.save();c.clipPath(clip);
-                field(c,blue,bar.left+w*(.22f+.24f*(float)Math.sin(t*.71f)),bar.top+h*(.3f+.18f*(float)Math.sin(t*.53f)),w*.88f,h*(.29f+.06f*energy),12+12*(float)Math.sin(t*.3f),(int)((100+75*energy)*strength));
-                field(c,violet,bar.left+w*(.78f+.13f*(float)Math.cos(t*.59f)),bar.top+h*(.7f+.17f*(float)Math.cos(t*.43f)),w*.95f,h*.3f,-15,(int)((100+60*energy)*strength));
-                field(c,pearl,bar.left+w*.5f,bar.top+h*(.47f+.2f*(float)Math.sin(t*.67f)),w*.85f,h*.22f,8,(int)((25+34*energy)*strength));
-                sheet(c,.3f,energy,(int)((32+35*energy)*strength));sheet(c,2.7f,energy*.7f,(int)((22+24*energy)*strength));c.restoreToCount(save);
+            boolean lit=ready||processing;float h=bar.height(),strength=intro*(.72f+.28f*energy)*(1-.4f*processMix);
+            if(lit&&bar.width()>0&&h>0){
+                matrix.setScale(1,h*1.18f);matrix.postTranslate(0,bar.top-h*.28f+h*.24f*(float)Math.sin(flow*.58f));edge.setLocalMatrix(matrix);
+                int save=c.save();c.clipOutPath(clip);paint.setShader(edge);paint.setStyle(Paint.Style.STROKE);
+                // Overlapping native strokes soften outwards; no blur, layer or full-screen bitmap.
+                contour(c,28,7,strength);contour(c,22,10,strength);contour(c,16,15,strength);contour(c,10,23,strength);contour(c,5,40,strength);contour(c,2.4f,170,strength);
+                c.restoreToCount(save);
             }
-            // The original profile icon keeps its position in both rail and expanded drawer.
+            // A small neutral microphone is the only replacement for the profile avatar.
             float cx=bar.left+38,cy=bar.top+64;paint.setShader(null);paint.setStyle(Paint.Style.FILL);paint.setColor(0xFF1B1E27);paint.setAlpha(255);c.drawCircle(cx,cy,22,paint);
-            if(lit){int save=c.save();c.clipRect(cx-42,cy-42,cx+42,cy+42);rect.set(bar);bar.set(cx-42,cy-42,cx+42,cy+42);field(c,blue,cx-9+5*(float)Math.sin(t),cy-5,33+energy*7,32,0,(int)(170*intro));field(c,violet,cx+9,cy+9+4*(float)Math.cos(t*.83f),30,28,0,(int)(145*intro));field(c,pearl,cx-7,cy-10,16,13,0,(int)(120*intro));bar.set(rect);c.restoreToCount(save);}
             paint.setShader(null);paint.setStyle(Paint.Style.FILL);paint.setColor(VelaTheme.WHITE);paint.setAlpha(lit?255:175);int badge=c.save();c.translate(cx,cy);c.scale(.82f,.82f);rect.set(-7,-16,7,5);c.drawRoundRect(rect,7,7,paint);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(2.8f);paint.setStrokeCap(Paint.Cap.ROUND);rect.set(-13,-14,13,12);c.drawArc(rect,0,180,false,paint);c.drawLine(0,12,0,20,paint);c.drawLine(-6,20,6,20,paint);c.restoreToCount(badge);
         }
     }

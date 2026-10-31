@@ -26,7 +26,7 @@ Lite keeps its HDMI, antenna and app sections. It shares the editor and voice in
 
 Open **System → Remote shortcuts**, add an available button and choose **Vela voice search** for its short or long press. Keyboard function keys such as F6 can be assigned when Android delivers them. No function key is taken over automatically.
 
-Press the assigned button while Vela is on screen. A small microphone replaces the sidebar profile picture; a soft, flowing light stays inside the actual sidebar bounds and responds to speech levels. Home stays fully visible, without a listening panel, transcript or dimmed background. A quieter sidebar animation indicates processing, then fades before results open; Reduce motion keeps the light static. The active listening indication starts only after Android reports that the microphone is ready. Accessibility services still receive status descriptions.
+Press the assigned button while Vela is on screen. A small, neutral microphone replaces the sidebar profile picture; a soft light follows only the exterior contour of the actual sidebar and responds to speech levels. Home stays fully visible, without a listening panel, transcript or dimmed background. A quieter sidebar animation indicates processing, then fades before results open; Reduce motion keeps the light static. The active listening indication starts only after Android reports that the microphone is ready. Accessibility services still receive status descriptions.
 
 Back cancels; OK or the voice shortcut finishes listening. A themed message with Retry, Keyboard and Cancel controls appears only when permission or error recovery needs your attention. Retrying hides it again. Successful speech follows your saved search-result preference.
 

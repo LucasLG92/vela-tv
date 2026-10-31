@@ -76,5 +76,17 @@ final class LibraryClient {
     void markWatched(PlexClient.Film f,String expected)throws Exception{if(!canMarkWatched(f)||!expected.equals(identity()))throw new IOException("Library account changed");if(jf(f))jellyfin.markWatched(f.key,jellyfin.identity());else plex.markWatched(f.key,plex.identity());}
     JSONObject reference(PlexClient.Film f)throws Exception{if(f.tvSource||!Arrays.asList("com.plexapp.android",JellyfinClient.PACKAGE).contains(f.packageName))return null;String account=PlexClient.profileKey(jf(f)?jellyfin.identity():plex.identity());return new JSONObject().put("id","media:"+PlexClient.profileKey(f.packageName+"|"+account+"|"+f.key)).put("kind","media").put("provider",jf(f)?"Jellyfin":"Plex").put("key",f.key).put("account",account).put("title",VelaWorkspace.clean(f.title,320));}
     PlexClient.Film resolve(JSONObject ref)throws Exception{boolean jf=ref.optString("provider").equals("Jellyfin");String expected=PlexClient.profileKey(jf?jellyfin.identity():plex.identity());if(!ref.optString("account").equals(expected))return null;PlexClient.Film f=jf?jellyfin.item(ref.optString("key")):plex.item(ref.optString("key"));if(f!=null)decorate(Arrays.asList(f));return f;}
-    Intent open(PlexClient.Film f){if(jf(f)){String id=JellyfinClient.guid(f.key);Intent i=HomeApps.launchIntent(context.getPackageManager(),JellyfinClient.PACKAGE);return id.isEmpty()||i==null?null:i.putExtra("ItemId",id).putExtra("HideSplash",true);}return new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(plex.openUri(f))).setPackage("com.plexapp.android");}
+    Intent open(PlexClient.Film f){
+        if(f==null)return null;if(jf(f)){String id=JellyfinClient.guid(f.key);Intent i=HomeApps.launchIntent(context.getPackageManager(),JellyfinClient.PACKAGE);return id.isEmpty()||i==null?null:i.putExtra("ItemId",id).putExtra("HideSplash",true);}
+        if(!f.packageName.equals("com.plexapp.android"))return null;
+        boolean modern=true;try{modern=PlexClient.modernLinks(context.getPackageManager().getPackageInfo("com.plexapp.android",0).versionName);}catch(android.content.pm.PackageManager.NameNotFoundException unavailable){}
+        String uri=plex.openUri(f,modern);if(uri==null)return null;Intent preferred=plexIntent(uri,f.continuing);
+        if(preferred.resolveActivity(context.getPackageManager())!=null)return preferred;
+        String server=plex.prefs.getString("serverId","");for(boolean family:new boolean[]{modern,!modern}){
+            String route=PlexClient.detailUri(server,f,family);if(route==null||route.equals(uri))continue;Intent alternate=plexIntent(route,f.continuing);if(alternate.resolveActivity(context.getPackageManager())!=null)return alternate;
+        }
+        // Starting the specific intent reports a real failure; never silently replace it with Plex Home.
+        return preferred;
+    }
+    private static Intent plexIntent(String uri,boolean resume){Intent i=new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(uri)).setPackage("com.plexapp.android");if(!resume)i.putExtra("android.intent.extra.START_PLAYBACK",false);return i;}
 }

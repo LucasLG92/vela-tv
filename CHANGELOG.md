@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1-preview / Lite transition 0.18.2-preview
+
+- Full: use item-specific Plex catalogue handoffs for current and legacy Android clients, separate series routes, retain a season’s parent series, preserve resume links and report launch failures instead of silently opening Plex Home. Native fixture tests cover the actual Home cards; physical Plex validation is pending.
+
+- Both: restrict voice feedback to a feathered exterior sidebar contour, with no interior ribbons or microphone bloom. Keep actual collapsed/expanded bounds, speech response, reduced motion and foreground-only lifetime.
+
 ## 2.1.0-preview / Lite transition 0.18.1-preview
 
 - A dedicated, paged Search view keeps results in Vela’s sidebar and removes the secondary settings menu. Filter by result type and use a two-column remote layout, with a larger-text variant.

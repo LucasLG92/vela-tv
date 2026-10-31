@@ -1,6 +1,6 @@
 # Vela in pictures
 
-Explore 81 native **4K screenshots**. The new voice and search captures show **2.1.0-preview**. The unified mode selector, Lite, mode settings and personalised Home captures show **2.0.0-preview**; the explicit old-Lite import prompt shows the **0.18.0-preview** transition app. Earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original app/channel names retain their source language.
+Explore 81 native **4K screenshots**. The exterior voice-halo captures show the renderer released in **2.1.1-preview**, recorded during its development. The search captures show **2.1.0-preview**. The unified mode selector, Lite, mode settings and personalised Home captures show **2.0.0-preview**; the explicit old-Lite import prompt shows the **0.18.0-preview** transition app. Earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original app/channel names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
 
@@ -26,7 +26,7 @@ Arrange shelves, choose their size and source, and add latest movies, series, un
 
 ## A little light when Vela listens
 
-A compact microphone and an accent-coloured glow respond to your voice. Assign your own shortcut; Android supplies speech recognition. This capture uses synthetic speech input.
+A small neutral microphone and a soft exterior halo respond to your voice. The sidebar interior remains clear, both collapsed and expanded. Assign your own shortcut; Android supplies speech recognition. This capture uses synthetic speech input.
 
 ![Integrated Vela voice search](100-voice-glow.webp)
 

@@ -4,6 +4,7 @@ import java.util.*;
 
 public class PlexFeedTest {
     public static void main(String[] args) throws Exception {
+        links();
         require(PlexClient.avatarAllowed("https://plex.tv/users/example/avatar")&&PlexClient.avatarAllowed("https://secure.gravatar.com/avatar/example"),"Plex avatar sources");
         for(String url:new String[]{"http://plex.tv/users/example/avatar","https://plex.tv.attacker.invalid/avatar","https://user@plex.tv/avatar","https://plex.tv:8080/avatar","file:///avatar.png","https://127.0.0.1/avatar"})require(!PlexClient.avatarAllowed(url),"Unsafe avatar source accepted");
         require(PlexClient.profileKey("").isEmpty(),"Unlinked account must not share a previous avatar");
@@ -84,6 +85,19 @@ public class PlexFeedTest {
         JSONObject finished=new JSONObject(episode.toString()).put("viewOffset",100);PlexClient.mergeContinue(nextHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray().put(finished).put(upcoming))));require(PlexClient.parseHubs(nextHome).size()==1&&PlexClient.parseHubs(nextHome).get(0).key.equals("102"),"finished metadata hid the next pending episode");
         require(PlexClient.watchedPath("102").equals("/:/scrobble?identifier=com.plexapp.plugins.library&key=102"),"watched endpoint");for(String bad:new String[]{"", "../42", "42&key=other", "movie", "999999999999999999999"}){rejected=false;try{PlexClient.watchedPath(bad);}catch(Exception expected){rejected=true;}require(rejected,"unsafe Plex watched item accepted");}
         System.out.println("PASS Plex feed and catalog: real artwork, hub-based continue watching, sections, bounded pages, offset validation, deduplication, unknown totals and empty/last pages");
+    }
+    private static void links()throws Exception{
+        PlexClient.Film film=new PlexClient.Film();film.key="123";film.type="movie";film.title="Never placed in the URI";String prefix="plex://libraries/demo-server/unmatched/";
+        require(PlexClient.detailUri("demo-server",film,true).equals(prefix+"%2Flibrary%2Fmetadata%2F123"),"movie must target one encoded metadata route, not Plex Home");
+        film.type="show";require(PlexClient.detailUri("demo-server",film,true).equals(prefix+"tv/%2Flibrary%2Fmetadata%2F123"),"series must use the TV detail route");
+        film.type="season";film.seriesKey="42";require(PlexClient.detailUri("demo-server",film,true).equals(prefix+"tv/%2Flibrary%2Fmetadata%2F42"),"season handoff lost its series");
+        JSONObject season=new JSONObject().put("ratingKey","55").put("type","season").put("title","Season 1").put("parentRatingKey","42");PlexClient.Film parsedSeason=PlexClient.parseChildren(page(new JSONArray().put(season),0,1),0,24).films.get(0);require(parsedSeason.seriesKey.equals("42")&&PlexClient.detailUri("demo-server",parsedSeason,true).equals(prefix+"tv/%2Flibrary%2Fmetadata%2F42"),"Parsed season lost its parent-series destination");
+        film.type="episode";require(PlexClient.detailUri("demo-server",film,true).equals(prefix+"%2Flibrary%2Fmetadata%2F123"),"episode was replaced by the series key");
+        require(PlexClient.detailUri("other-server",film,false).equals("plex://server://other-server/com.plexapp.plugins.library/library/metadata/123?autoPlay=0"),"legacy Android route lost server or selected item");
+        require(PlexClient.modernLinks("2026.20.0")&&PlexClient.modernLinks("2025.10.1")&&!PlexClient.modernLinks("10.30.8.4222")&&!PlexClient.modernLinks("9.23.0")&&PlexClient.modernLinks(null),"Plex app generation selection");
+        for(String key:new String[]{"","../123","123?token=private","123&key=456","/library/metadata/123","999999999999999999999"}){film.key=key;require(PlexClient.detailUri("demo-server",film,true)==null,"unsafe item handoff");}film.key="123";
+        for(String server:new String[]{"","../server","server?X-Plex-Token=private","server/path","server#fragment","https://host.invalid"})require(PlexClient.detailUri(server,film,true)==null,"unsafe server handoff");
+        film.type="track";require(PlexClient.detailUri("demo-server",film,true)==null,"unsupported item handoff");
     }
     private static JSONObject page(JSONArray items,int offset,int total)throws Exception{return new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",items).put("offset",offset).put("totalSize",total));}
     private static void require(boolean value,String message) { if(!value)throw new AssertionError(message); }

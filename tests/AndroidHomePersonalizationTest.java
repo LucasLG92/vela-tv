@@ -53,6 +53,17 @@ public final class AndroidHomePersonalizationTest extends Instrumentation {
     }
     List<View> cards()throws Exception{return (List<View>)field(home,"cards");}
     List<?> shelves()throws Exception{return (List<?>)field(home,"shelves");}
+    void itemHandoffs()throws Exception{
+        final Intent[] opened={null};ActivityMonitor monitor=new ActivityMonitor(){public ActivityResult onStartActivity(Intent intent){if("com.plexapp.android".equals(intent.getPackage())){opened[0]=new Intent(intent);return new ActivityResult(Activity.RESULT_OK,null);}return null;}};addMonitor(monitor);
+        try{final List<PlexClient.Film> samples=new ArrayList<>();ui(()->{try{List<PlexClient.Film> values=(List<PlexClient.Film>)field(home,"posterFilms");List<View> all=cards();for(Object row:shelves()){List<View> items=(List<View>)field(row,"items");if(!items.isEmpty())for(View card:Arrays.asList(items.get(0),items.get(items.size()-1)))samples.add(values.get(all.indexOf(card)));}}catch(Exception e){throw new RuntimeException(e);}});int checked=0,series=0;
+            for(PlexClient.Film expected:samples){opened[0]=null;ui(()->{try{List<PlexClient.Film> current=(List<PlexClient.Film>)field(home,"posterFilms");int at=-1;for(int i=0;i<current.size();i++)if(current.get(i).key.equals(expected.key)&&current.get(i).continuing==expected.continuing){at=i;break;}check(at>=0,"Fixture title disappeared before click");cards().get(at).performClick();}catch(Exception e){throw new RuntimeException(e);}});Intent intent=opened[0];check(intent!=null&&Intent.ACTION_VIEW.equals(intent.getAction()),"A title opened only the Plex launcher");android.net.Uri uri=intent.getData();String server=new PlexClient(context).prefs.getString("serverId","");
+                if(expected.continuing){check("preplay".equals(uri.getHost())&&("/library/metadata/"+expected.key).equals(uri.getQueryParameter("metadataKey"))&&server.equals(uri.getQueryParameter("server")),"Resume handoff changed");}
+                else{check("libraries".equals(uri.getHost()),"Fresh title used a generic/old preplay link");List<String> parts=uri.getPathSegments();check(parts.get(0).equals(server)&&parts.get(parts.size()-1).equals("/library/metadata/"+expected.key),"Clicked card lost server or item identity");check(parts.contains("tv")==expected.type.equals("show"),"Series and movie routes were confused");check(!intent.getBooleanExtra("android.intent.extra.START_PLAYBACK",true),"A fresh title unexpectedly starts playback");if(expected.type.equals("show"))series++;}
+                check(!uri.toString().contains("fixture-session")&&!uri.toString().contains("vela-fixture.invalid"),"Account credentials or server address escaped in a handoff");checked++;
+            }check(checked>=12&&series>0,"Not all configured Home rows were checked");
+            PlexClient.Film invalid=new PlexClient.Film();invalid.packageName="com.plexapp.android";invalid.type="movie";invalid.key="../bad";check(new LibraryClient(context).open(invalid)==null,"Malformed item should not become a generic Plex launch");
+        }finally{removeMonitor(monitor);}
+    }
     void launch()throws Exception{activity=(HomeActivity)startActivitySync(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));home=(CinemaHomeView)field(activity,"home");await(()->!cards().isEmpty()&&field(home,"heroBitmap")!=null);}
     public void onCreate(Bundle b){super.onCreate(b);args=b;start();}
     public void onStart(){context=getTargetContext();try{
@@ -71,6 +82,7 @@ public final class AndroidHomePersonalizationTest extends Instrumentation {
         phase="home-feeds";launch();await(()->((Map<?,?>)field(home,"homeRows")).size()==4);check(rowRequests.get()==4,"A row made redundant feed requests");check(shelves().size()==6,"The configured Home rows are missing");
         List<PlexClient.Film> films=(List<PlexClient.Film>)field(home,"posterFilms");check(films.size()<=72,"Home retained an entire catalogue");
         for(String row:VelaLayout.EXTRA_ROWS){List<?> values=((Map<String,List<?>>)field(home,"homeRows")).get(row);check(values.size()==12,"Home row exceeded twelve titles");}
+        phase="home-card-item-handoffs";itemHandoffs();
         overrun=true;boolean refused=false;try{new LibraryClient(context).homeRow("recent_movies");}catch(IOException expected){refused=true;}overrun=false;check(refused,"The server ignored the Home response limit");
         await(()->{for(ImageView v:(List<ImageView>)field(home,"posterImages"))if(v.getGlobalVisibleRect(new Rect())&&v.getDrawable()==null)return false;return true;});shot("01-home");
         phase="scroll-motion";ScrollView scroll=(ScrollView)field(home,"shelvesScroll");Object next=shelves().get(1);View nextCard=((List<View>)field(next,"items")).get(0);int target=((View)field(next,"root")).getTop();int initial=scroll.getScrollY();

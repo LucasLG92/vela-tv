@@ -760,7 +760,7 @@ final class CinemaHomeView extends FrameLayout {
         if(selected==null){LibraryClient shown=filter==0?homeLibrary:plex;if(filter==3)openPackage(TvSuggestions.YOUTUBE,"YouTube");else if(!shown.connected()){if(filter==0&&!VelaLayout.source(activity).equals("current"))activity.startActivity(new Intent(activity,shown.linkActivity()));else manageLibrary();}else openPackage(shown.packageName(),shown.provider());return;}
         refreshedAt=0;
         if(selected.tvSource){Intent intent=ContinueWatching.launch(activity,selected);if(intent!=null)launch(intent);else openPackage(selected.packageName,selected.provider);return;}
-        Intent intent=plex.open(selected);if(intent!=null&&intent.resolveActivity(activity.getPackageManager())!=null)launch(intent);else openPackage(selected.packageName,selected.provider);
+        Intent intent=plex.open(selected);if(intent!=null)launch(intent);else note(L10n.text("Could not open this option."));
     }
     private void manageLibrary(){if(toolsLayer!=null){((HomeActivity)activity).afterTools(v->v.manageLibrary());return;}activity.startActivity(plex.both()?new Intent(activity,SettingsActivity.class).putExtra("page",21):plex.connected()?new Intent(activity,plex.linkActivity()):new Intent(activity,SettingsActivity.class).putExtra("page",14));}
     private void openPackage(String pkg,String name){if(toolsLayer!=null){((HomeActivity)activity).afterTools(v->v.openPackage(pkg,name));return;}Intent intent=HomeApps.launchIntent(activity.getPackageManager(),pkg);if(intent==null){note(name+L10n.text(" is not installed."));return;}launch(intent);}

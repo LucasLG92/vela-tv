@@ -4,11 +4,11 @@
 
 **Lite is now a mode inside the unified Vela APK.** Choose it on first launch or in Settings → System → Launcher mode. It keeps the existing HDMI, antenna and apps interface while leaving the multimedia Home and library clients inactive. [One app and migration guide](../guide/UNIFIED.md).
 
-Already using the old standalone Lite app? Its final [0.18.0 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.1-preview) enables an explicit import of your current settings profile into unified Vela.
+Already using the old standalone Lite app? Its final [0.18.2 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.2-preview) enables an explicit import of your current settings profile into unified Vela.
 
 Your **HDMI devices, antenna television and apps**, in a clean home screen made for your remote. Vela Lite is for the television that sits alongside a TV box, console or computer.
 
-**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.0-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
+**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.1-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
 **Android TV / Google TV · Android 8.0+ · English / Español / Português / Français / Deutsch / Italiano · Preview**
 
@@ -80,7 +80,7 @@ Every menu is available in **English, Spanish, Portuguese, French, German and It
 
 Lite contains **no Plex, Jellyfin, M3U, Xtream or Media3 runtime**. The tuner handles antenna playback. Small paged lists, recycled rows, local icons and disposable workers keep the launcher focused on its job. It has no background service.
 
-Both modes check and download the same unified Vela release. Downloads are verified before Android asks you to install, and completed APKs are cleaned from the private cache. Only the old standalone Lite package uses the final 0.18.0 transition release; new users choose Lite inside the unified app.
+Both modes check and download the same unified Vela release. Downloads are verified before Android asks you to install, and completed APKs are cleaned from the private cache. Only the old standalone Lite package uses the final 0.18.2 transition release; new users choose Lite inside the unified app.
 
 [Player controls](../guide/PLAYER.md) · [All personalisation tools](../guide/YOUR-VELA.md) · [HDMI detection](../guide/HDMI.md) · [Privacy](../guide/PRIVACY.md) · [Development and compatibility](DEVELOPMENT.md)
 

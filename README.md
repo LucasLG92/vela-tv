@@ -4,7 +4,7 @@
 
 A personal home screen for **Android TV and Google TV**. Bring your Plex or Jellyfin library, live channels, apps and HDMI devices together in a calm interface made for your remote.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.0-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.1-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
 
 **One APK · Lite: Android 8+ · Full: Android 11+ · Six languages · Preview · MIT**
 
@@ -96,7 +96,7 @@ Every menu is available in **English, Spanish, Portuguese, French, German and It
 
 Settings and personalisation stay within the main sidebar, with clear categories and the same remote navigation throughout. Assign an available remote or keyboard button to **Vela voice search**. A small microphone and a voice-responsive sidebar glow show when Vela is listening, keeping Home visible. Permission and error controls appear only when needed. Vela asks for microphone permission on first use and releases the recognizer when you leave. It uses Android’s on-device recognizer when available, otherwise the installed speech service. Unassigned Google Assistant keys keep their normal role.
 
-Search across your connected Plex or Jellyfin libraries without opening each section. Choose a calm result grid or open the first ranked voice match, independently for each profile. Light flows inside the sidebar while you speak, adapting to its expanded shape and your reduced-motion preference.
+Search across your connected Plex or Jellyfin libraries without opening each section. Choose a calm result grid or open the first ranked voice match, independently for each profile. A soft light follows the outside of the sidebar while you speak, adapting to its expanded shape and your reduced-motion preference.
 
 ![Search results inside Vela](gallery/103-search-results.webp)
 

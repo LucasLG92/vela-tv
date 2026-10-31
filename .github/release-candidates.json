@@ -3,17 +3,17 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "2.1.0-preview",
-      "code": 78,
-      "tag": "v2.1.0-preview",
-      "title": "Vela 2.1 Preview · Find it, then settle in",
-      "file": "Vela-2.1.0-preview.apk",
-      "size": 4949787,
-      "sha256": "6de1fbe85fd3be76886308cf6c23d12100aa01be4db97c938019fccf0692f5b2",
-      "blob_sha": "84c7af2ca14eb184483d3a1577f209f04df1514e",
+      "version": "2.1.1-preview",
+      "code": 79,
+      "tag": "v2.1.1-preview",
+      "title": "Vela 2.1.1 Preview · Exterior halo and Plex titles",
+      "file": "Vela-2.1.1-preview.apk",
+      "size": 4941595,
+      "sha256": "bfe6dac8dc503b3c4042a125a7f8bb1a3e90b436a6f17172d00b97f6ad67572e",
+      "blob_sha": "81efc80e7fd3b462c77d4721c3ea86c7a5a94cc2",
       "chunks": [
         {
-          "sha": "b43c2e1e625754ed220d30e7d0206d3e8a05867a",
+          "sha": "827ee64f2ca8d573d36d11b0f523af2261c26a76",
           "size": 262144
         },
         {
@@ -29,81 +29,81 @@
           "size": 262144
         },
         {
-          "sha": "3d48296d2abb18de0420b6a7658d0ef687e8a9c2",
+          "sha": "696fba59ad240b841cf28c845309bd921c950854",
           "size": 262144
         },
         {
-          "sha": "669b906d2f7953f6ead96913d17183651a783cef",
+          "sha": "1782bcb7997e4c5677318a5b8ae60aace7c6c4d4",
           "size": 262144
         },
         {
-          "sha": "359ee9aa6b7ee872cf172cc28c91d795cdf63a55",
+          "sha": "2a27aba962e6d3f753c0d02d3868a4b389e359ae",
           "size": 262144
         },
         {
-          "sha": "30d8e0a1c5e24a80c4eddfaada74573334e63807",
+          "sha": "6e199ba0263251626c7a3435ceaf283c2a7b52ec",
           "size": 262144
         },
         {
-          "sha": "a0c1bbb1f6dba9a2283cd0c553472c86fdeea6d6",
+          "sha": "868dfb2d8524110eae3281f51f46379c61936241",
           "size": 262144
         },
         {
-          "sha": "f1fe059c383278ee21d0466bb8c833fdcb9cfed9",
+          "sha": "cddb482a957d4e421e6a2b665cdbbe65e5772e84",
           "size": 262144
         },
         {
-          "sha": "e98a98f804153a8947ed7ad6bdc5bf97290805de",
+          "sha": "7d12ff4de8c6f2d4431b823f33177f0d75935458",
           "size": 262144
         },
         {
-          "sha": "d9e3c73d1f8fd67ee07683e13d46f28553f38643",
+          "sha": "9c11307ea583648064279be8906768d61eef03f7",
           "size": 262144
         },
         {
-          "sha": "4852f4a212e98ee20cb81eba71959781f47beada",
+          "sha": "7dfcdb60b5dc6ec2a75eda8d98b595b18f7a42c5",
           "size": 262144
         },
         {
-          "sha": "bd5885022881991aadbdabb1cdbadb45cd0d21f8",
+          "sha": "52dd9deaf6f357c857101848da3a9286ac880dfa",
           "size": 262144
         },
         {
-          "sha": "903ca5f848c12821e24dfcef8822758a33b3eef1",
+          "sha": "417d0245fb739a39cceb883b2ed84ae918b03b83",
           "size": 262144
         },
         {
-          "sha": "f9b424c048f76a2bad2235fdf7479dfd3699cdfe",
+          "sha": "5c911cb9de2588239bdcf83a64030157e47ccd15",
           "size": 262144
         },
         {
-          "sha": "71b007955ae87948b4c99eaa6cc05c48f2035f7c",
+          "sha": "709b0ed5a090fe44897a39b5a5ba1301607d7fdc",
           "size": 262144
         },
         {
-          "sha": "179ac79b213d42d3f7cd461d9e6e64cf6c9c6a5d",
+          "sha": "8589307f586033f894cb542650dcacf632e1081c",
           "size": 262144
         },
         {
-          "sha": "c6b2907b341b2ad6b82d0c3265c48d57f87d7292",
-          "size": 231195
+          "sha": "d531073be6992d297a8992b2fd385e4755f9c948",
+          "size": 223003
         }
       ],
-      "notes": "guide/releases/2.1.0-preview.md"
+      "notes": "guide/releases/2.1.1-preview.md"
     },
     {
       "package": "tv.vela.launcher.lite",
-      "version": "0.18.1-preview",
-      "code": 35,
-      "tag": "lite-v0.18.1-preview",
-      "title": "Vela Lite 0.18.1 Preview · Fluid voice and search",
-      "file": "Vela-Lite-0.18.1-preview.apk",
-      "size": 2427738,
-      "sha256": "738f7367eb0c53c5dd89898585fa7b4692589799478e320117b8a9443b218a5f",
-      "blob_sha": "37fd57ae2473c5fad1f731fe9c5818ca459ab1fc",
+      "version": "0.18.2-preview",
+      "code": 36,
+      "tag": "lite-v0.18.2-preview",
+      "title": "Vela Lite 0.18.2 Preview · Exterior voice halo",
+      "file": "Vela-Lite-0.18.2-preview.apk",
+      "size": 2419546,
+      "sha256": "0296a9642065a4e36e3edde227daf76bbb95bcf029c4f51972ccfc2501d14ad5",
+      "blob_sha": "3815ffe130a23e8f67a7e620ad63f6e68f5fe490",
       "chunks": [
         {
-          "sha": "6a1be407258752818af7b60a998bdd0130565252",
+          "sha": "654ca4f90f92647bdb27fecc9a15f94aafd630e6",
           "size": 262144
         },
         {
@@ -115,35 +115,35 @@
           "size": 262144
         },
         {
-          "sha": "4c6c94ed9364ca428d792d5c1d375f8108d8b005",
+          "sha": "2dcf75c2e428632df1186ab6eb46f2e1ad346719",
           "size": 262144
         },
         {
-          "sha": "7c406a0063a705da9d89efa08fc6eb1abafb2b20",
+          "sha": "b105ad927d760454f39605f1a80e9b53153e0eb6",
           "size": 262144
         },
         {
-          "sha": "7e2151a1d47bfcabfd9a11ef2657c8e644646cb1",
+          "sha": "2c564ae0952b709a87819de37a3a88c34c0e2574",
           "size": 262144
         },
         {
-          "sha": "0e3a64e90985683604209358dcdcd42583344af5",
+          "sha": "01afa9a210c39552f2daa8367e81e6aaf8671db1",
           "size": 262144
         },
         {
-          "sha": "bd80e76dc13063bc51db17ce286b7f696002ef47",
+          "sha": "3c2fffe45a8054e6f298eb2a20c2b84fa167afd7",
           "size": 262144
         },
         {
-          "sha": "018f5bf22501239b032c2310397cfc994a347ee7",
+          "sha": "4f89770e6ba3c950c5f718be777c745558ecad00",
           "size": 262144
         },
         {
-          "sha": "304ef354494bdd8cff58dcc04948777bd9efbe2c",
-          "size": 68442
+          "sha": "13981d916040518ac711f66be66c63585c2a49ea",
+          "size": 60250
         }
       ],
-      "notes": "guide/releases/lite-0.18.1-preview.md"
+      "notes": "guide/releases/lite-0.18.2-preview.md"
     }
   ]
 }

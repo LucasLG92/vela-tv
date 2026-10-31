@@ -287,7 +287,7 @@ class PlexClient {
         if(type.equals("episode"))film.meta+="  ·  T"+item.optInt("parentIndex")+" E"+item.optInt("index");
         long duration=item.optLong("duration"),offset=item.optLong("viewOffset");
         film.durationMs=Math.max(0,duration);film.positionMs=item.has("viewOffset")&&!item.isNull("viewOffset")?Math.max(-1,offset):-1;
-        film.seriesKey=type.equals("episode")?item.optString("grandparentRatingKey"):"";film.nextEpisode=resume&&type.equals("episode")&&offset<=0&&item.optInt("viewCount")==0;if(film.nextEpisode){film.positionMs=0;if(duration>0)film.progress=0;}
+        film.seriesKey=type.equals("episode")?item.optString("grandparentRatingKey"):type.equals("season")?item.optString("parentRatingKey"):"";film.nextEpisode=resume&&type.equals("episode")&&offset<=0&&item.optInt("viewCount")==0;if(film.nextEpisode){film.positionMs=0;if(duration>0)film.progress=0;}
         long last=item.optLong("lastViewedAt");if(last>0&&last<=Long.MAX_VALUE/1000)film.lastPlayedMs=last*1000;
         long added=item.optLong("addedAt");if(added>0&&added<=Long.MAX_VALUE/1000)film.addedAtMs=added*1000;film.homeRating=VelaHomeRows.rating(item.optDouble("audienceRating",item.optDouble("rating",0)));
         if(type.equals("episode"))film.episodeLabel="T"+item.optInt("parentIndex")+" · E"+item.optInt("index");
@@ -301,9 +301,26 @@ class PlexClient {
         if(base==null||token==null||token.isEmpty()||id==null||!expectedIdentity.equals(id+":"+profileKey(token)))throw new IOException("Plex account changed");
         bytes(base+path,token,null,8000,64*1024,"PUT");if(expectedIdentity.equals(identity()))prefs.edit().remove("libraryCache").remove("libraryAt").commit();
     }
-    String openUri(Film film) {
-        return "plex://preplay/?metadataKey=" + encode("/library/metadata/" + film.key)
-                + "&server=" + encode(prefs.getString("serverId", ""));
+    String openUri(Film film){return openUri(film,true);}
+    String openUri(Film film,boolean modern){
+        String server=prefs.getString("serverId","");
+        if(!validLink(server,film))return null;
+        // Preserve the existing resume handoff. Fresh catalogue items need a library-detail route.
+        return film.continuing?"plex://preplay/?metadataKey=%2Flibrary%2Fmetadata%2F"+film.key+"&server="+server:detailUri(server,film,modern);
+    }
+    private static boolean validLink(String server,Film film){return server!=null&&server.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,127}")&&film!=null&&film.key!=null&&film.key.matches("[0-9]{1,20}")&&Arrays.asList("movie","show","season","episode").contains(film.type);}
+    /** Local metadata only: never place account tokens, addresses or titles in an app handoff. */
+    static String detailUri(String server,Film film,boolean modern){
+        if(!validLink(server,film))return null;
+        if(!modern)return "plex://server://"+server+"/com.plexapp.plugins.library/library/metadata/"+film.key+"?autoPlay=0";
+        boolean series=film.type.equals("show")||film.type.equals("season");String key=film.key;
+        if(film.type.equals("season")&&film.seriesKey!=null&&film.seriesKey.matches("[0-9]{1,20}"))key=film.seriesKey;
+        // Plex expects the complete metadata path encoded once as a single route segment.
+        return "plex://libraries/"+server+"/unmatched/"+(series?"tv/":"")+"%2Flibrary%2Fmetadata%2F"+key;
+    }
+    static boolean modernLinks(String version){
+        if(version==null)return true;java.util.regex.Matcher year=java.util.regex.Pattern.compile("^([0-9]{4})\\.").matcher(version);
+        return year.find()?Integer.parseInt(year.group(1))>=2025:!version.matches("^[0-9]{1,2}\\..*");
     }
     byte[] image(String path, int width, int height) throws IOException {
         return image(path,width,height,false);
