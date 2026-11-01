@@ -8,7 +8,7 @@ Plex authorises a device code and supplies the selected server's titles, artwork
 
 Jellyfin supports Quick Connect or username/password, including URL prefixes. Remote HTTPS requires a certificate trusted by Android; only local-network HTTP is accepted. Resume and Next Up supply watch progress and available pending episodes. Install Jellyfin for Android TV with the same server/user to open title details. Vela passes the item ID, never its token.
 
-Only one personal library is active at once, while both authorisations can be kept. Home rows retain at most twelve titles; the catalogue uses pages of up to 24. Series represented by recent seasons use the parent series artwork. Missing durations or positions are not invented.
+Plex and Jellyfin can be connected together. Choose either or a combined library, set sources per Home row, and choose Continue watching services independently. Home rows retain at most twelve titles; the catalogue uses pages of up to 24. Series represented by recent seasons use the parent series artwork. Missing durations or positions are not invented.
 
 YouTube, Prime Video and other apps manage their own accounts. Shared Android TV rows and Watch Next are best-effort, permission-dependent sources. They do not guarantee access to private recommendations, subscriptions or Watch Later, and Vela does not implement a YouTube OAuth account/history integration.
 
@@ -34,7 +34,7 @@ Home artwork cache is bounded at 6 MiB, or 3 MiB in light mode. App icons use bo
 
 The guide draws programmes in a single canvas and reads a bounded visible block from disk. Large text/density settings can reduce the normal six visible rows. Playback uses one decoder or tuner session and releases it on exit.
 
-Optional HLS history is stored on disk, capped at 15 minutes, 256 MiB and 240 segments. Media3's 4 MiB queue target does not cap codecs, graphics or total process memory. Lite contains no Media3 or IPTV/library clients and declares no background service.
+Optional HLS history is stored on disk, capped at 15 minutes, 256 MiB and 240 segments. Media3's 4 MiB queue target does not cap codecs, graphics or total process memory. In the unified APK, Lite does not construct Full’s library Home or start its IPTV/Media3 playback path. The separate legacy Lite migration build excludes those clients from its binary. Lite has no resident background service.
 
 The selected language catalogue alone is loaded. English uses source strings. Phone sessions and preference sync stop outside their intended foreground lifecycle; alerts use one cached approximate system alarm rather than a resident guide service.
 

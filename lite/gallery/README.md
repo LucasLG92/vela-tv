@@ -1,192 +1,45 @@
-# Vela Lite in pictures
+# Vela Lite, in pictures
 
-**Lite now lives inside the unified Vela APK.** The 2.0 captures show the same native Lite interface and the new mode setting. Older standalone captures remain below with their recorded versions. [Choose a mode or move your existing profile](../../guide/UNIFIED.md).
+**Eight new native 4K captures from Lite mode in Vela 2.2.0 Preview.** The same APK and design as Full, focused on HDMI, antenna television and apps.
 
-![Lite inside unified Vela](../../gallery/96-unified-lite.webp)
+**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.0-preview)** · [About Lite](../README.md) · [Install](../INSTALL.md) · [Full gallery](../../gallery/README.md)
 
-![Launcher mode in System settings](../../gallery/97-unified-system.webp)
+These are production Android views in an owned emulator. HDMI connections, tuner channels and programmes are demonstration fixtures, with original device and channel symbols. They illustrate the interface, not a physical signal or a broadcaster's actual schedule. All menus are in English. [Credits](../../gallery/CREDITS.md) · [Current capture records](../../gallery/index.json).
 
-Explore 44 native **4K screenshots**. The new Home editor capture shows Lite mode in **2.2.0-preview**; the shared standalone editor is also validated in **0.18.3-preview** on Android 8. The widgets, What to watch and automatic-switch captures show **0.17.2-preview**. The remote shortcut captures show **0.16.0-preview**. The newest Apps, Settings and personalisation captures show **0.14.1-preview**; earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original channel/programme names retain their source language.
+## Put your devices first
 
-These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](../../gallery/CREDITS.md) · [Image manifest](index.json)
+Open your box, console or computer from a calm HDMI Home. Connection state still comes from the television; manual profiles do not create a signal.
 
-## Your own destinations
+[![Lite HDMI Home](../../gallery/previews/127-lite-home.webp)](../../gallery/127-lite-home.webp)
 
-Rename, resize, hide and reorder HDMI, antenna and Apps destinations in the same Vela canvas. Hold OK to move a section, then save or cancel the complete draft. Each profile keeps its own layout. This capture uses Lite mode in unified Vela 2.2.
+## Give your tuned channels a proper guide
 
-![Your own Lite Home layout](45-home-editor.png)
+Channel logos, programmes, remaining time, progress and upcoming broadcasts in one place. The television's tuner provides playback.
 
-## Your HDMI devices, front and centre
+[![Lite antenna programme guide](../../gallery/previews/128-lite-guide.webp)](../../gallery/128-lite-guide.webp)
 
-![Your HDMI devices, front and centre](01-inputs.png)
+| Keep channels in your order | Find a programme |
+| --- | --- |
+| [![Lite channel organisation with demo favourites](../../gallery/previews/131-lite-organizer.webp)](../../gallery/131-lite-organizer.webp) | [![Lite programme discovery](../../gallery/previews/132-lite-discovery.webp)](../../gallery/132-lite-discovery.webp) |
 
-## A complete view of antenna TV
+Select a future programme to follow it, save it or ask Vela to switch when it starts while Vela is open.
 
-![A complete view of antenna TV](02-guide.png)
+[![Future programme actions in Lite](../../gallery/previews/133-lite-programme.webp)](../../gallery/133-lite-programme.webp)
 
-## Every Lite setting, together
+## Keep Home personal
 
-![Every Lite setting, together](03-settings.png)
+Rename, size, reorder or hide Inputs, Television and Apps. Save applies your choices; Cancel keeps your current setup. Settings stays accessible.
 
-## Your channels, your order
+[![Lite Home editor](../../gallery/previews/142-lite-home-editor.webp)](../../gallery/142-lite-home-editor.webp)
 
-![Your channels, your order](04-organise.png)
+| Apps you recognise | Settings in the same theme |
+| --- | --- |
+| [![Lite app drawer with original icons](../../gallery/previews/130-lite-apps.webp)](../../gallery/130-lite-apps.webp) | [![Integrated Lite settings](../../gallery/previews/129-lite-settings.webp)](../../gallery/129-lite-settings.webp) |
 
-## Your installed apps, within reach
+Widgets, remote shortcuts, profiles, phone setup, backups and compatible preference sync use Vela's shared tools. [Explore personalisation](../../guide/YOUR-VELA.md).
 
-![Your installed apps, within reach](05-apps.png)
+---
 
-## Lite stays up to date
+[Previous standalone Lite gallery](ARCHIVE.md) and its [legacy manifest](index.json) remain available as a record of earlier releases. New users install unified Vela and choose Lite. [Migration from the old package](../../guide/UNIFIED.md#moving-from-the-old-standalone-lite-app).
 
-![Lite stays up to date](06-updates.png)
-
-## Vela Lite in your style
-
-![Vela Lite in your style](07-appearance.png)
-
-## Keep system controls close
-
-![Keep system controls close](08-system.png)
-
-## Small by design
-
-![Small by design](09-about.png)
-
-## Explore antenna channels
-
-![Explore antenna channels](10-channel-cards.png)
-
-## See what is on while you browse
-
-![See what is on while you browse](11-channel-drawer.png)
-
-## Choose your language
-
-![Choose your language](12-language.png)
-
-## Choose your Lite home
-
-![Choose your Lite home](13-home-layout.png)
-
-## A place for your apps
-
-![A place for your apps](14-folders.png)
-
-## A little help from your phone
-
-![A little help from your phone](15-phone-and-sync.png)
-
-## Match your programme guide
-
-![Match your programme guide](16-guide-corrections.png)
-
-## Discover your next programme
-
-![Discover your next programme](17-discovery.png)
-
-## Read comfortably from the sofa
-
-![Read comfortably from the sofa](18-reading.png)
-
-## Save your personal layout
-
-![Save your personal layout](19-backups.png)
-
-## One television, different spaces
-
-![One television, different spaces](20-profiles.png)
-
-## A remote that feels familiar
-
-![A remote that feels familiar](21-remote.png)
-
-## Keep up with your programmes
-
-![Keep up with your programmes](22-programmes.png)
-
-## Bonjour, Vela
-
-![Bonjour, Vela](23-language-fr.png)
-
-## Hallo, Vela
-
-![Hallo, Vela](24-language-de.png)
-
-## Ciao, Vela
-
-![Ciao, Vela](25-language-it.png)
-
-## Arrange your home, then save
-
-![Arrange your home, then save](26-home-editor.png)
-
-## Keep something for later
-
-![Keep something for later](27-watch-later.png)
-
-## Get to know your television
-
-![Get to know your television](28-compatibility.png)
-
-## One channel, useful actions
-
-![One channel, useful actions](29-channel-actions.png)
-
-## Let the evening wind down
-
-![Let the evening wind down](30-sleep-timer.png)
-
-## A welcoming space for guests
-
-![A welcoming space for guests](31-guest-space.png)
-
-## Keep control of your broadcast
-
-![Keep control of your broadcast](32-playback-controls.png)
-
-## Now and next, beautifully clear
-
-![Now and next, beautifully clear](33-live-player.png)
-
-## Settings in one continuous canvas
-
-![Settings in one continuous canvas](34-continuous-settings.png)
-
-## Personalisation that belongs to your home
-
-![Personalisation that belongs to your home](35-continuous-tools.png)
-
-## Your remote, your shortcuts
-
-Teach Vela a button, then choose what a short press and a long press should open. Your mappings stay with your profile.
-
-![Your remote, your shortcuts](36-remote-list.png)
-
-## One button, two useful actions
-
-![One button, two useful actions](37-remote-button.png)
-
-## Find your next programme
-
-![Find your next programme](39-what-to-watch.png)
-
-## Tonight, at a glance
-
-![Tonight, at a glance](40-tonight-sports.png)
-
-## A programme, clearly presented
-
-![A programme, clearly presented](41-programme-details.png)
-
-## Be there when it starts
-
-![Be there when it starts](42-automatic-switch.png)
-
-## A clear plan for later
-
-![A clear plan for later](43-scheduled-switch.png)
-
-## Useful at a glance
-
-![Useful at a glance](44-home-widgets.png)
-
+[Back to Lite](../README.md) · [Hardware limits](../../guide/COMPATIBILITY.md) · [Full gallery](../../gallery/README.md)

@@ -1,5 +1,13 @@
 # Images and credits
 
+## Current 2.2 showcase
+
+The current tour contains 36 new captures from unified Vela **2.2.0-preview**, taken on **1 November 2026**. All are native 3840×2160 screenshots, re-encoded as lossless WebP without EXIF/XMP. Separate 1600×900 WebP previews keep the documentation light; every preview links to its native 4K original. The production APK and its Android views are unchanged for this documentation refresh. Current Lite captures live in the main manifest; the separate Lite PNG manifest is retained with its previous gallery.
+
+Account sessions, viewing progress, schedules, channel favourites, HDMI connections and tuner records are synthetic. Channel/device identities illustrate the UI and do not certify real reception or a broadcaster's schedule. App inventory fixtures use original app marks and labels; they do not demonstrate signed-in streaming sessions. The voice light uses synthetic recognizer callbacks, with no physical microphone recording. Movie artwork is original, authorised for these interface illustrations; posters retain their original lettering. No generated movie art, private avatar, personal server, provider credential or personal weather location is used.
+
+## Previous gallery and artwork sources
+
 The English gallery contains native Vela and Vela Lite views captured at 3840×2160 on an owned emulator. The latest Home focus, editor, service and presentation captures show Vela 2.2.0-preview, including its Lite mode. Earlier unified mode selector, Lite, Home editor and voice captures show Vela 2.0.0-preview; the explicit old-Lite import prompt shows 0.18.0-preview. Voice recognition, speech levels and connected HDMI states are synthetic test fixtures; each image records its version in the gallery manifest. Movie posters and backdrops were retrieved from Plex with the user's permission to publish interface screenshots. Profiles, library names, progress, pagination, connected-device states and Lite tuner programmes are demonstrations. The weather city is Reykjavík, explicitly labelled Demo.
 
 Movie artwork and trademarks belong to their respective owners. Their appearance illustrates Vela and does not imply sponsorship or affiliation. The code's MIT licence **does not apply to that artwork**. Original Plex assets, private paths, credentials and library video files are not redistributed in this repository or the production APKs. Some original posters retain Spanish lettering; the main interface gallery and demonstration metadata are English. Additional language previews show French, German and Italian.

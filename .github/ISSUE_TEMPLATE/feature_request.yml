@@ -1,0 +1,28 @@
+name: Suggest an improvement
+description: Tell us what would make everyday TV use better.
+title: "[Idea] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe a real situation and what makes it difficult today.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Main area
+      options:
+        - Home and library
+        - Television and guide
+        - Apps and HDMI
+        - Personalisation and accessibility
+        - Setup, updates or another area
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Your suggestion
+      description: Explain the result you would like. A sketch or a short example is welcome.
+    validations:
+      required: true

@@ -966,5 +966,842 @@
     "height": 2160,
     "version": "2.2.0-preview",
     "sha256": "61722b4205da6b345940bae5bea9147ac6ad6745f25599221ac52c0a4a052337"
+  },
+  {
+    "file": "112-home.webp",
+    "title": "Your collection, at Home",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "62bfc935e8fc20b8db0109f0568a23086353d5c8813f920e156ff36e0c79af3f",
+    "preview": {
+      "file": "previews/112-home.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "6d4f680ad9614c53d2ae12ad6e651225010b9a6bc6e15e7093b4b16714cd08b8"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "113-home-editor.webp",
+    "title": "Your own Home shelves",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "003acc30073881906bdd59b1c0b6b1b089a0b30c88c42f5d9298a5000737cf94",
+    "preview": {
+      "file": "previews/113-home-editor.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "481eec74d626b345ecf068108c07192ed52f792cba38458a0cf36a18da545db7"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "114-resume-services.webp",
+    "title": "Choose Continue watching services",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "6f2ee45c8cabfcb2fadb57fe57323ee936a7483da394a2b990c58ee41e038643",
+    "preview": {
+      "file": "previews/114-resume-services.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "ddb6e6a493d3a17c1c159ace5e449c142270231aedcd8f9b4302d85bc7116111"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "115-compact-home.webp",
+    "title": "A compact Home",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "9e526a76de9ed980980c3efe4ac12c4e87fa3525786d002f35400262159bdb33",
+    "preview": {
+      "file": "previews/115-compact-home.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "5fcfb640a81da8f2e70eaa3cc26d4c27b9fc0e81bcb30a6e6ac74662a0882bb1"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "116-rows-home.webp",
+    "title": "Give the screen to your rows",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "e3c6a5543c99cc0ca02616eef2ea3adb79a8c90993aec648005488222d87551d",
+    "preview": {
+      "file": "previews/116-rows-home.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "f22bac661b041a056d886336ed904004bd1026dfe7ffe0cbd0b380ee31fb51fc"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "117-apps.webp",
+    "title": "Original app icons",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "8669940c1f5154f0965d8e49db1aedbd145897f0eaa84a950ace955c39fb28a0",
+    "preview": {
+      "file": "previews/117-apps.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "65f585a0034277846555ac8bb75f8f1814af9020d6da522d561a1fd7fd74acfc"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "118-settings.webp",
+    "title": "Settings inside Vela",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "955dd4f4045232a3becdacf572ecbb6d2c3d1522afc1af4e503a4fd2d4d06691",
+    "preview": {
+      "file": "previews/118-settings.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "79edf096c4a9a216a13eeb0234dd8d0e0b64495b43446888156865fde11d7982"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "119-navigation.webp",
+    "title": "Navigation with context",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "8402ad5b984b413101a49f799b58d77343d374e609a60fd36e86c13103b8e0cb",
+    "preview": {
+      "file": "previews/119-navigation.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "285a9637582763761d8b828d5451aad71f6c5080daaf80c254dd582e892adade"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "120-library.webp",
+    "title": "Explore the library",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "6331964bc46e9440c76a9c6cd31d5da92ca758e8749804ddde983f5d00c46e8d",
+    "preview": {
+      "file": "previews/120-library.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "869bb4eaac5a5a4d512316670a0690794d877b987bcd8a8a757dca0be4da32de"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "121-movie-details.webp",
+    "title": "A title, clearly presented",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "1c871ba4204fcdead2a19bf2af4071c273b56d0b736015a3d517daa533853c89",
+    "preview": {
+      "file": "previews/121-movie-details.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "a95a8ad23d47e867bc0da051af27ade00513dc9d23ac3e64c150daa7e06cc628"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "122-inputs.webp",
+    "title": "Connected devices in view",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "cf831cca6659f74f4665c2238b36adfd776e1db0b9031b09209628671e1be9c5",
+    "preview": {
+      "file": "previews/122-inputs.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "ddeaa987948308764c718f3bb819b591d1ed1410fee079f770c713e868a8d25b"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "123-tv-guide.webp",
+    "title": "Television, integrated",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "17b9d95a7351010f53b04a7d7c89cbb8e01cb722a4b5ad583a7d993b800a509c",
+    "preview": {
+      "file": "previews/123-tv-guide.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "d2768e75e7647a42a227b5de43565abfd0940d4df2d201ae0c3eac005abf30e0"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "124-channel-organizer.webp",
+    "title": "Channels in your order",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "a5255ba1d97f2cef6c4189ff6a26e47ee9ad07bfb1191142b78f2fbf09bb6430",
+    "preview": {
+      "file": "previews/124-channel-organizer.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "38e743d77871b5ec97ebe685ace61a72041c2cf16a56b4084578e960337d2c52"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "125-what-to-watch.webp",
+    "title": "What to watch now",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "76bf6e803082cd9964b31dfebfbb91832a839c24f8406bd5aa2e33b2c8d23484",
+    "preview": {
+      "file": "previews/125-what-to-watch.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "6383377701ee601204e66b59d7146ad00318c3cd73b8a8b89556eedda85c5b07"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "126-programme-actions.webp",
+    "title": "Be there when it starts",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "1c7bb2837443c14590e59ff1c87838c386794c11fb7dba48faf6fdcf89a6d857",
+    "preview": {
+      "file": "previews/126-programme-actions.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "bbbd7bd74e228dd6e0d4b206ba7778e65b47208b860944044b0ad83549c23701"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "127-lite-home.webp",
+    "title": "Lite: your devices first",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "lite",
+    "sha256": "e7fc151ec4a86fbdc8e7eb95b8d5f67c98c4f7fb9d34e417375fcff22dc2cccf",
+    "preview": {
+      "file": "previews/127-lite-home.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "00b6c196cb63d8f8eb2a09f0b04cd18967a6093cc07a87c825ca136edf4c5fd2"
+    },
+    "available_in": [
+      "lite"
+    ]
+  },
+  {
+    "file": "128-lite-guide.webp",
+    "title": "Lite: the antenna guide",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "lite",
+    "sha256": "0245b09f03969a308d4d90c6e6152b446b757d387e6231a14a8330596943789c",
+    "preview": {
+      "file": "previews/128-lite-guide.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "39db4a1de3a8918df6110dc8bd1b10200f0f66c25673ae7192153f3613eddc8d"
+    },
+    "available_in": [
+      "lite"
+    ]
+  },
+  {
+    "file": "129-lite-settings.webp",
+    "title": "Lite: integrated settings",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "lite",
+    "sha256": "6bf710d2b08de94d68168ae7c6f7f8570b2521f4b594b9a21bfdca1f7dc04091",
+    "preview": {
+      "file": "previews/129-lite-settings.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "e9eedd9dca61e4b511ff8e763e92c09de9ee11e19bdb51360cf49ffd6aeb806e"
+    },
+    "available_in": [
+      "lite"
+    ]
+  },
+  {
+    "file": "130-lite-apps.webp",
+    "title": "Lite: your apps",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "lite",
+    "sha256": "a72ea90b1361a45cfacba8a2ea498c88854f4c3207d432a06a77e627c67be676",
+    "preview": {
+      "file": "previews/130-lite-apps.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "07cd58ea094eefa52023fdc047932384a6679fce7687e994bae9a2f146b8aa21"
+    },
+    "available_in": [
+      "lite"
+    ]
+  },
+  {
+    "file": "131-lite-organizer.webp",
+    "title": "Lite: channel organisation",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "lite",
+    "sha256": "990f0ec2c4f45e9198631a960596f50f12e236c7e049b355c49f28d038963e29",
+    "preview": {
+      "file": "previews/131-lite-organizer.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "42b6ea80e1182549db34603d4ede3fbea63e05873c288ac90684bad5c4081456"
+    },
+    "available_in": [
+      "lite"
+    ]
+  },
+  {
+    "file": "132-lite-discovery.webp",
+    "title": "Lite: programme discovery",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "lite",
+    "sha256": "4e514249cc28246ce758d42cd3d279e0e49356f0760bbed117ff5369a509334f",
+    "preview": {
+      "file": "previews/132-lite-discovery.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "2025d936956a66fd22bf0f2b6214733b251e9f5deb3d33c86a8c7b62ea865acf"
+    },
+    "available_in": [
+      "lite"
+    ]
+  },
+  {
+    "file": "133-lite-programme.webp",
+    "title": "Lite: future programmes",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "lite",
+    "sha256": "5e8ef3b7abc46ecc6cbd2de152dbf46936aac89307c5396dca6fe4113e091823",
+    "preview": {
+      "file": "previews/133-lite-programme.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "d8ec434c8a4497f94b02f59ba84f6aa6631f70e808b52a2cc5211c243d8c3a43"
+    },
+    "available_in": [
+      "lite"
+    ]
+  },
+  {
+    "file": "134-widgets.webp",
+    "title": "Choose your widgets",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "169d7217ccf6743f10831d2dffb50b30c4ffeed85d31e563428291271e1343b2",
+    "preview": {
+      "file": "previews/134-widgets.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "26df353011e8340722c753f47e05d729e445237ec4b140faa8fff7e8d855f22a"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "135-remote-shortcuts.webp",
+    "title": "Your remote, your shortcuts",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "d0b884690266020b150ff4412e92b847b94e549b7624cfce91b01ccdce26cd3e",
+    "preview": {
+      "file": "previews/135-remote-shortcuts.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "fcb77eb86a5be0fd7c885207e12537b0b5e0a2c6e6fe77313aba7156733f9c5e"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "136-voice.webp",
+    "title": "Voice, without leaving Home",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "087bc9c3b1cf3de52ff1d70c85ef64afcbe8a2feab641da6f5b3ceca58fa0248",
+    "preview": {
+      "file": "previews/136-voice.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "27444a7dccce83a2d76364e7e03237cda7ee31537ead03175891837c2de5b0af"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "137-search.webp",
+    "title": "Search inside Vela",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "d5058ea3452a46b6b41c130893834566353003669a843efa1df1e455e2fc518a",
+    "preview": {
+      "file": "previews/137-search.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "c911606151f80b8d19b3aa819f92c5e84e116b197b6d84c78538b0217f03bcc1"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "138-accounts.webp",
+    "title": "Connect your own accounts",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "ef109f6f2633008556f9fd58db2a626fd0ab5f6ed76e1828b9dd808747fa85bb",
+    "preview": {
+      "file": "previews/138-accounts.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "d7abbac2c2d94e29a4c0112cdf4d983eee532600d8ac35420108b991ab3fe90a"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "139-updates.webp",
+    "title": "Updates from your remote",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "e1bf24a02d0258c209294d52b438507f548cd453e145394bc20dd48bda9be5cf",
+    "preview": {
+      "file": "previews/139-updates.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "7a04b468908b524197ad34a1410d3b96636ef26d8d5dda62aa09453ddff53bf6"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "140-screensaver-settings.webp",
+    "title": "Choose a screensaver",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "a6a5065ef4df38f769dc31790a06fdee0893e17d02174d8b0b048f3786e4416f",
+    "preview": {
+      "file": "previews/140-screensaver-settings.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "bf3138560362b38813a8569af44dbf30803d7406d343791f9d80d112f03a0b6f"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "141-choose-mode.webp",
+    "title": "One app, Full or Lite",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "chooser",
+    "sha256": "8edb50be4070a9383004a84ceaba9e25e28958f709e232fdc6ae5423bbb99ac8",
+    "preview": {
+      "file": "previews/141-choose-mode.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "2e3b1edd6b596d5b54dd78058ed5f7fb4fdb781ac5ab09bc9d9b646e8c5a4bc9"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "142-lite-home-editor.webp",
+    "title": "Lite: your own destinations",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "lite",
+    "sha256": "998b02236dc91fe19a816e82491170ba6b3e1161294cbe0dfbe2ef665409f073",
+    "preview": {
+      "file": "previews/142-lite-home-editor.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "d23d1a92417de4ffeca4a658d0e05b182701ee42ce53a2f137b45529da7c3c1f"
+    },
+    "available_in": [
+      "lite"
+    ]
+  },
+  {
+    "file": "143-appearance.webp",
+    "title": "Appearance in one place",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "f88f3076d9b7869d236481492a13d2ba6532425c06ccbbccf27589285aca8503",
+    "preview": {
+      "file": "previews/143-appearance.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "55471f4eacb87b1aa92c1603d2aa7c8baf092b3eff026ddfef474084edb6752f"
+    },
+    "available_in": [
+      "full",
+      "lite"
+    ]
+  },
+  {
+    "file": "144-library-screensaver.webp",
+    "title": "Let the screen take a breath",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "a9391d8e6a6d06bacd0ce93c5a28fcd37ae79fb23828192f2f0419a60999cb20",
+    "preview": {
+      "file": "previews/144-library-screensaver.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "054766197bec7d3fea83b51b53e2122b47bbc572645a8a45eafc3a4647096534"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "145-series-seasons.webp",
+    "title": "Explore a series",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "4658bde232053352edabf17022cd29365b77f331b5705e52a92c9e42b246ef0a",
+    "preview": {
+      "file": "previews/145-series-seasons.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "310983617599c926616187f50fda0b57a5e4d1d58ce3ca96de402f409cb33590"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "146-series-episodes.webp",
+    "title": "Episodes within reach",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "8e3c5742560d7beb9d6d5b600e9ff6607e9ee9a779986991adc8e452544ac895",
+    "preview": {
+      "file": "previews/146-series-episodes.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "c88e12f2ef32c3ce157935291a7d839baa5ee508a40e3b85f8f617d15cd8c394"
+    },
+    "available_in": [
+      "full"
+    ]
+  },
+  {
+    "file": "147-continue-watching.webp",
+    "title": "Pick up your story",
+    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "captured": "2026-11-01",
+    "showcase": true,
+    "mode": "full",
+    "sha256": "fb6afc320be5d0ee13ef554f57495b245259b02d44d1d1f3f718e8a9f4d77115",
+    "preview": {
+      "file": "previews/147-continue-watching.webp",
+      "width": 1600,
+      "height": 900,
+      "sha256": "cadba30f65cb1bce9ab587f8ddc337859866dc00c1ebd08b36856be1377eb1cc"
+    },
+    "available_in": [
+      "full"
+    ]
   }
 ]

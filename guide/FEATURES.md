@@ -29,7 +29,7 @@
 ## Personalisation
 
 - Shared graphite design, accent colours, poster sizes and background intensity.
-- Full Home-row order/visibility/size; Lite Inputs/TV/Apps navigation order and visibility.
+- Full Home-row order, names, visibility, size and library source; independent Continue watching services; Cinema, Compact and Rows-only presentation. Lite Inputs/TV/Apps destination order, names, visibility and size.
 - Text size, guide density, higher contrast, screen margins and reduced motion.
 - Up to six local profiles; Full Plex/Jellyfin accounts are independent per profile.
 - Settings PIN and guest space, own Watch later list, voice search through Android and a compatibility assistant.
@@ -42,10 +42,10 @@
 
 Full Vela offers aerial videos or original library artwork, with optional clock/weather and a demonstration preview. Lite keeps the television's own screensaver.
 
-Both editions check their own GitHub releases, can download automatically, verify APK identity/integrity/signature and resume after installation permission. Android asks for confirmation; completed updater files are cleaned.
+Both modes check the same unified GitHub release feed; only the separate legacy Lite migration package uses its own feed. They can download automatically, verify APK identity/integrity/signature and resume after installation permission. Android asks for confirmation; completed updater files are cleaned.
 
 ## Resource care
 
-Paged catalogues, indexed EPG, bounded image caches, one player/tuner session and disposable screen workers. Home has no background video. Only one language catalogue is retained. Optional HLS history uses bounded disk storage. Lite has no Full library/IPTV/Media3 clients and no service.
+Paged catalogues, indexed EPG, bounded image caches, one player/tuner session and disposable screen workers. Home has no background video. Only one language catalogue is retained. Optional HLS history uses bounded disk storage. Lite mode leaves Full library/IPTV/Media3 paths inactive and has no resident service; only the separate legacy Lite binary excludes those clients entirely.
 
 [Full gallery](../gallery/README.md) · [Lite gallery](../lite/gallery/README.md) · [Tools and limits](YOUR-VELA.md) · [Compatibility](COMPATIBILITY.md)

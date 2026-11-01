@@ -1,6 +1,6 @@
 # Vela Lite: development and compatibility
 
-Package `tv.vela.launcher.lite`, Android 8.0/API 26+. Lite can coexist with Full Vela. It deliberately excludes Plex, Jellyfin, M3U, Xtream, Media3 and the Full screensaver.
+New users install package `tv.vela.launcher` and choose Lite, supported from Android 8.0/API 26. The unified APK contains both controllers, but Lite leaves the Plex/Jellyfin Home, IPTV playback and Full screensaver inactive. The separate legacy package `tv.vela.launcher.lite` remains only as a migration build; that binary excludes the Full clients. [Unified architecture and migration](../guide/UNIFIED.md).
 
 ## Native television and HDMI
 
@@ -28,9 +28,13 @@ English, Spanish, Portuguese, French, German and Italian catalogues are shared w
 
 ## Updates
 
-Visible opening can trigger a daily check and automatic download; there is no resident update service or polling alarm. Lite filters out Full releases and verifies HTTPS origin, size, SHA-256, package, version, minimum Android and signer. A requested install survives Android's permission flow and resumes on return. Android confirms installation; the next opening cleans the installed APK.
+Visible opening can trigger a daily check and automatic download; there is no resident update service or polling alarm. Unified Lite checks the same Vela releases as Full and verifies HTTPS origin, size, SHA-256, package, version, minimum Android and signer. A requested install survives Android's permission flow and resumes on return. Android confirms installation; the next opening cleans the installed APK.
 
-Publish a new matching version with a tag such as `lite-v0.10.1-preview` and an uploaded `Vela-Lite-0.10.1-preview.apk` asset with GitHub's SHA-256 digest. Then update the auxiliary feed from the published release metadata:
+### Legacy standalone migration build
+
+The separate `tv.vela.launcher.lite` package uses the Lite-only feed. Its current transition release is 0.18.3; it must never install a unified APK as a normal same-package update. The following commands apply only to that legacy build.
+
+Publish a matching legacy version with a tag such as `lite-v0.10.1-preview` and an uploaded `Vela-Lite-0.10.1-preview.apk` asset with GitHub's SHA-256 digest. Then update the auxiliary feed from the published release metadata:
 
 ```sh
 python lite/tools/update_feed.py --release release.json --apk Vela-Lite-0.10.1-preview.apk

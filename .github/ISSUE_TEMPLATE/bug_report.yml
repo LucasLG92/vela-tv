@@ -1,0 +1,50 @@
+name: Report a bug
+description: Help us reproduce a problem with Vela.
+title: "[Bug] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing Vela. Share the smallest example that reproduces the problem. Leave passwords, tokens and private playlist/server links out of this public report.
+  - type: input
+    id: version
+    attributes:
+      label: Vela version
+      placeholder: "Example: 2.2.0-preview"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Launcher mode
+      options:
+        - Full
+        - Lite in unified Vela
+        - Old standalone Lite
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: "TV or box model; Android version from Settings"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: What happened?
+      description: Include the steps, expected result and actual result. Name the affected feature or app, without private account details.
+      placeholder: |
+        1. Open…
+        2. Press…
+        Expected:
+        Actual:
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or extra context
+      description: Optional. Check images and logs for private information before attaching them.

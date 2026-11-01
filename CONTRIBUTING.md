@@ -1,6 +1,6 @@
 # Contributing to Vela
 
-Use Java 8 and native Android APIs. Full Vela requires Android 11; Lite requires Android 8.0. Guard newer APIs and keep Full-only clients out of Lite's build whitelist.
+Use Java 8 and native Android APIs. The unified APK supports Lite from Android 8.0 and Full from Android 11. Guard newer APIs and keep Full-only clients inactive in Lite mode. The separate legacy Lite migration build also has a build whitelist that excludes those clients.
 
 ## Keep it light
 
@@ -10,7 +10,7 @@ Keep new menus inside Vela's existing graphite surfaces and Activity. Preserve r
 
 ## Localisation
 
-Owned UI text belongs in `app/assets/i18n/en.json`, `es.json` and `pt.json`. Use `L10n.text("English source text")`; existing `Ui.tr` calls also use the selected catalogue. Update every catalogue and preserve formatting placeholders. Never translate server names, channel names, programme titles, user-created folders or provider protocol values.
+Owned UI text belongs in all six `app/assets/i18n/` catalogues: `en.json`, `es.json`, `pt.json`, `fr.json`, `de.json` and `it.json`. Use `L10n.text("English source text")`; existing `Ui.tr` calls also use the selected catalogue. Update every catalogue and preserve formatting placeholders. Never translate server names, channel names, programme titles, user-created folders or provider protocol values.
 
 Run `python tools/check_localization.py`. Language selection is installation-local, supports System language and uses a tiny atomic record so Home and screensaver processes see the same choice. Only the selected translation catalogue is retained in memory.
 
