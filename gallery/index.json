@@ -889,5 +889,82 @@
     "height": 2160,
     "version": "2.1.0-preview",
     "sha256": "da27dfaf52d5044f722ec4b637c9764febff2d6bc167aef03d02b6b6ad12119e"
+  },
+  {
+    "file": "105-home-focus.webp",
+    "title": "A clear place in your Home",
+    "source": "Native 3840×2160 production Android views on an owned Android 16 emulator, Vela 2.2.0-preview. Synthetic profiles, linked-server fixtures, progress and demonstration weather. Original authorised artwork credited in the gallery. No personal account, private location, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "sha256": "af230a9ff1ac076b383b4877d1bba305453db737b8535ac58a347b7bac6b608d"
+  },
+  {
+    "file": "106-home-editor.webp",
+    "title": "Make Home yours",
+    "source": "Native 3840×2160 production Android views on an owned Android 16 emulator, Vela 2.2.0-preview. Synthetic profiles, linked-server fixtures, progress and demonstration weather. Original authorised artwork credited in the gallery. No personal account, private location, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "sha256": "b03a56afa3cd4b2b1bbdb8f0fd301f1f4efa7d2e3f03fef8ead59d6d2a7a8ca5"
+  },
+  {
+    "file": "107-resume-services.webp",
+    "title": "Choose your Continue watching services",
+    "source": "Native 3840×2160 production Android views on an owned Android 16 emulator, Vela 2.2.0-preview. Synthetic profiles, linked-server fixtures, progress and demonstration weather. Original authorised artwork credited in the gallery. No personal account, private location, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "sha256": "64dd0f87778090232b3afde04aac835f7cf7e3f0e48711fbbbbef984c4e11a74"
+  },
+  {
+    "file": "108-home-compact.webp",
+    "title": "More room for your favourites",
+    "source": "Native 3840×2160 production Android views on an owned Android 16 emulator, Vela 2.2.0-preview. Synthetic profiles, linked-server fixtures, progress and demonstration weather. Original authorised artwork credited in the gallery. No personal account, private location, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "sha256": "e35c68a83da5f49846d65a7b170a70adb7a9528c1a6a4641339d4e1203772631"
+  },
+  {
+    "file": "109-home-rows.webp",
+    "title": "Let your rows take the stage",
+    "source": "Native 3840×2160 production Android views on an owned Android 16 emulator, Vela 2.2.0-preview. Synthetic profiles, linked-server fixtures, progress and demonstration weather. Original authorised artwork credited in the gallery. No personal account, private location, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "sha256": "4732163f031950578e62ca3cd90ba9780ea5db4143f0dde2de516468c07a8544"
+  },
+  {
+    "file": "110-home-appearance.webp",
+    "title": "Choose how Home feels",
+    "source": "Native 3840×2160 production Android views on an owned Android 16 emulator, Vela 2.2.0-preview. Synthetic profiles, linked-server fixtures, progress and demonstration weather. Original authorised artwork credited in the gallery. No personal account, private location, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "sha256": "42f59c2c99fe06e45eb9f82cef68c6a4ec5711adf560eb4f070382fe61e8533a"
+  },
+  {
+    "file": "111-lite-home-editor.webp",
+    "title": "The same editor, made for Lite",
+    "source": "Native 3840×2160 production Android views on an owned Android 16 emulator, Vela 2.2.0-preview. Synthetic profiles, linked-server fixtures, progress and demonstration weather. Original authorised artwork credited in the gallery. No personal account, private location, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "sha256": "61722b4205da6b345940bae5bea9147ac6ad6745f25599221ac52c0a4a052337"
   }
 ]

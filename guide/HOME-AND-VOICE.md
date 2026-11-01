@@ -2,7 +2,9 @@
 
 ## Choose what belongs on Home
 
-In Full Vela, hold OK on **Home** in the sidebar, or open **Appearance → Edit home sections**. Each local profile has its own draft. Arrange rows, show or hide them and change card sizes, then **Save layout** or **Cancel**.
+Hold OK on **Home** in the sidebar, or open **Appearance → Edit home sections**. The editor stays inside Vela's sidebar. Each local profile has its own draft; **Save layout** applies it and **Cancel** discards it.
+
+In **Sections**, arrange rows, show or hide them, rename them and change their card size. Hold OK on a row and use up/down to move it; OK places it, while Back undoes that move. Move up/down buttons are available too. Full Vela also lets each media row follow the Home library, the current catalogue library, Plex, Jellyfin or both. An empty chosen source stays empty instead of showing another service's titles.
 
 | Row | Content |
 | --- | --- |
@@ -14,13 +16,17 @@ In Full Vela, hold OK on **Home** in the sidebar, or open **Appearance → Edit 
 | Top-rated movies | Films ordered by the server's audience/community rating |
 | Library | Your pinned collections and the existing library fallback |
 
-Choose **Home library** to follow your current library selection, or use Plex, Jellyfin or both on Home. This choice does not change Movies or Series browsing. The selected accounts must already be linked. You can separately hide Continue watching from other apps.
+In **Continue watching services**, choose Plex, Jellyfin and individual installed apps independently of the Home library. Use automatic selection to return to the previous provider and external-app defaults. An explicit empty selection shows no Continue watching items. Plex and Jellyfin must already be linked. Other apps supply only the Watch Next content they actually share with Android TV: enabling YouTube or Prime Video cannot give Vela access to private histories that those apps do not expose.
+
+In **Appearance**, choose the Home library and a **Cinema**, **Compact** or **Rows only** presentation. Rows only removes the hero image and gives the rows more space. Choose a soft outline or high-contrast focus. Moving between posters slightly enlarges the selected card with a single fine accent outline and a small dark separator. Neighbouring pictures in that row receive a light native tint. A short underline marks the active heading; the item count keeps Vela's graphite surface. Leaving the posters restores the row instead of retaining a false selection. Reduce motion keeps these contrast cues without the movement. Clock, weather and shortcuts remain configurable in **Appearance → Home widgets**.
+
+These choices leave Movies, Series and account settings unchanged. Home preferences travel with credential-free profile backups and settings sync. If every row is hidden, Home retains an **Edit home sections** button.
 
 Existing profiles retain their current rows. The four additional feeds start hidden and make no requests until enabled. Each keeps at most twelve titles. Plex uses bounded `/library/all` queries; Jellyfin uses bounded user-scoped `/Items` queries. With both providers, Vela merges and deduplicates the small results. Up to six pinned collections retain eight titles each.
 
 Metadata refreshes share the existing cancellable library worker and a five-minute foreground freshness window. Artwork still uses the existing cache and loads only near the viewport. Moving between rows uses a short native scroll/text transition; Reduce motion disables it. No new background service, catalogue cache or artwork bitmap is created for these transitions.
 
-Lite keeps its HDMI, antenna and app sections. It shares the editor and voice interface while leaving media-server clients inactive.
+Lite keeps its HDMI, antenna and app sections. Its shared editor offers order, visibility, names and sizes for those destinations, without media-service controls. Media-server clients remain inactive.
 
 ## Give a remote or keyboard button to Vela voice search
 

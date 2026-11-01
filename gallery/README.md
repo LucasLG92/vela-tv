@@ -1,8 +1,30 @@
 # Vela in pictures
 
-Explore 81 native **4K screenshots**. The exterior voice-halo captures show the renderer released in **2.1.1-preview**, recorded during its development. The search captures show **2.1.0-preview**. The unified mode selector, Lite, mode settings and personalised Home captures show **2.0.0-preview**; the explicit old-Lite import prompt shows the **0.18.0-preview** transition app. Earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original app/channel names retain their source language.
+Explore 88 native **4K screenshots**. The latest Home focus, editor, service selection and layout captures show **2.2.0-preview**. The exterior voice-halo captures show the renderer released in **2.1.1-preview**, recorded during its development. The search captures show **2.1.0-preview**. The unified mode selector, Lite, mode settings and earlier personalised Home captures show **2.0.0-preview**; the explicit old-Lite import prompt shows the **0.18.0-preview** transition app. Earlier feature captures retain their version in the image manifest. The main gallery is in English; language previews show French, German and Italian. Film artwork and original app/channel names retain their source language.
 
 These are actual Android views captured in an owned emulator. Libraries, progress, profiles, HDMI connections and Lite tuner information use demonstration fixtures; no personal account or private location is shown. Public live-TV captures use TDTChannels and dobleM guide data. [Image credits](CREDITS.md) · [Image manifest](index.json)
+
+## Make Home yours
+
+Choose the rows, their order, names, sizes and library sources. Pick Continue watching services independently, then keep Cinema, Compact or Rows only for each profile. Save applies the draft; Cancel leaves your current Home in place.
+
+![Clear focus, in the Vela theme](105-home-focus.webp)
+
+| Your own sections | Your Continue watching services |
+| --- | --- |
+| ![Edit Home sections](106-home-editor.webp) | ![Select Continue watching services](107-resume-services.webp) |
+
+Other apps supply only the history they share with Android TV. Linked Plex and Jellyfin accounts also provide their own bounded library feeds.
+
+| Compact | Rows only |
+| --- | --- |
+| ![Compact Home](108-home-compact.webp) | ![Rows-only Home](109-home-rows.webp) |
+
+![Choose your Home presentation](110-home-appearance.webp)
+
+![The integrated Home editor in Lite](111-lite-home-editor.webp)
+
+[Home setup and service limits](../guide/HOME-AND-VOICE.md)
 
 ## One app. Choose your experience.
 

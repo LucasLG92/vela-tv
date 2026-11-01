@@ -4,7 +4,7 @@
 
 ## Install or update
 
-1. Download **Vela-2.1.1-preview.apk** from [Vela Releases](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.1-preview).
+1. Download **Vela-2.2.0-preview.apk** from [Vela Releases](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.0-preview).
 2. Transfer it to the television and open it with your usual file manager. Allow installation from that manager if Android asks.
 3. Open Vela and choose Full or Lite. Android 8–10 offers Lite. You can change the choice in **Settings → System → Launcher mode**; profiles and accounts remain saved.
 4. Existing Full users can install over their current signed app or use its updater. Their configured Full mode is preserved automatically.
@@ -20,7 +20,7 @@ Public builds do not disable packages. The change does not automatically alter p
 
 ## Choose your language
 
-Open **Settings → Appearance → Customize appearance → Language** in Full Vela, or **Settings → Appearance → Language** in Lite. Choose English, Español, Português or System language. This changes Vela's menus, not Android or another app. Unsupported system languages use English. Accounts, channel names and library titles keep their original text.
+Open **Settings → Appearance → Customize appearance → Language** in Full Vela, or **Settings → Appearance → Language** in Lite. Choose English, Español, Português, Français, Deutsch, Italiano or System language. This changes Vela's menus, not Android or another app. Unsupported system languages use English. Accounts, channel names and library titles keep their original text.
 
 ## Connect your sources
 

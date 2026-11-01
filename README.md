@@ -4,11 +4,11 @@
 
 A personal home screen for **Android TV and Google TV**. Bring your Plex or Jellyfin library, live channels, apps and HDMI devices together in a calm interface made for your remote.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.1-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.0-preview)** · [Explore the gallery](gallery/README.md) · [Installation](guide/INSTALL.md) · **[Vela Lite](lite/README.md)**
 
 **One APK · Lite: Android 8+ · Full: Android 11+ · Six languages · Preview · MIT**
 
-![Vela home with continue watching, original artwork and recently added titles](gallery/01-home.webp)
+![Your Home, with clear selection and original library artwork](gallery/105-home-focus.webp)
 
 **[Watch the continuous 5-minute TCL walkthrough →](media/tcl/README.md)**
 
@@ -86,11 +86,13 @@ The sidebar opens over a continuous full-screen backdrop, with clear labels and 
 
 ![Expanded navigation over a continuous full-screen backdrop](gallery/60-continuous-navigation.webp)
 
-Choose your accent, poster size and background intensity. Arrange, resize or hide home rows. Choose Plex, Jellyfin or both for Home; add separate rows for new movies, new series, unwatched films and top-rated films, with up to six pinned collections. Extra rows stay off until you enable them, and a brief transition keeps navigation clear as you move down. Create local profiles with separate layouts, favourites and library accounts. Add a settings PIN and a separate guest space, adjust reading size and guide density, or set screen margins for your television.
+Choose your accent, poster size and background intensity. Arrange, rename, resize or hide Home rows, and choose their library sources. Pick which services appear in Continue watching independently of the rest of Home. Choose a cinema, compact or rows-only presentation; a short focus transition and a fine outline keep the selected poster clear. Keep separate rows for new movies, new series, unwatched films and top-rated films, with up to six pinned collections. Extra rows stay off until enabled. Each local profile keeps its own layout, favourites and library accounts. Add a settings PIN and a separate guest space, adjust reading size and guide density, or set screen margins for your television. [Home setup and service limits](guide/HOME-AND-VOICE.md#choose-what-belongs-on-home).
 
 Configure apps, folders and favourites **from your phone** through a temporary local HTTPS session. Explicitly pair another Vela to receive compatible preferences when it opens. Accounts and provider credentials stay on each television, and conflicting local edits are kept for review.
 
-![Home layout, folders and personalisation tools](gallery/55-home-layout.webp)
+| Your own Home layout | Your Continue watching services |
+| --- | --- |
+| ![Integrated Home editor](gallery/106-home-editor.webp) | ![Choose Continue watching services](gallery/107-resume-services.webp) |
 
 Every menu is available in **English, Spanish, Portuguese, French, German and Italian**. Choose a language in Appearance or follow your TV's system language. Channel names, account names and library titles keep their original text.
 

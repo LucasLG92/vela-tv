@@ -16,7 +16,7 @@ final class RefinementHttp {
     static void install(Reply reply,java.util.Set<String> fixtureHosts){URL.setURLStreamHandlerFactory(protocol->protocol.equals("https")?new URLStreamHandler(){protected URLConnection openConnection(URL u){return new HttpsURLConnection(u){byte[] body;boolean read;
         public void connect(){}public void disconnect(){}public boolean usingProxy(){return false;}public String getCipherSuite(){return "fixture";}public Certificate[] getLocalCertificates(){return null;}public Certificate[] getServerCertificates(){return null;}
         public int getResponseCode()throws IOException{if(!fixtureHosts.contains(url.getHost()))throw new IOException("External network disabled");if(!read){read=true;try{body=reply.get(url);}catch(Exception e){throw new IOException(e);}}return body==null?404:200;}
-        public String getContentType(){return url.getPath().contains("image")||url.getPath().contains("photo")?"image/jpeg":"application/json";}
+        public String getContentType(){return url.getPath().toLowerCase(java.util.Locale.ROOT).contains("image")||url.getPath().contains("photo")?"image/jpeg":"application/json";}
         public InputStream getInputStream()throws IOException{if(getResponseCode()!=200)throw new FileNotFoundException();return new ByteArrayInputStream(body);}
     };}}:null);}
 }

@@ -4,11 +4,11 @@
 
 **Lite is now a mode inside the unified Vela APK.** Choose it on first launch or in Settings → System → Launcher mode. It keeps the existing HDMI, antenna and apps interface while leaving the multimedia Home and library clients inactive. [One app and migration guide](../guide/UNIFIED.md).
 
-Already using the old standalone Lite app? Its final [0.18.2 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.2-preview) enables an explicit import of your current settings profile into unified Vela.
+Already using the old standalone Lite app? Its latest [0.18.3 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.3-preview) enables an explicit import of your current settings profile into unified Vela.
 
 Your **HDMI devices, antenna television and apps**, in a clean home screen made for your remote. Vela Lite is for the television that sits alongside a TV box, console or computer.
 
-**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.1.1-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
+**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.0-preview)** · [Gallery](gallery/README.md) · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
 **Android TV / Google TV · Android 8.0+ · English / Español / Português / Français / Deutsch / Italiano · Preview**
 
@@ -68,7 +68,9 @@ Settings and tools share the home screen's continuous background, including when
 
 ![Integrated settings with continuous background](gallery/34-continuous-settings.png)
 
-Choose a black or graphite background, clock visibility, reduced focus motion and your Home destination. Adjust reading size, guide density, contrast and screen margins. Reorder or hide the Inputs, Television and Apps destinations; Settings stays accessible.
+Choose a black or graphite background, clock visibility, reduced focus motion and your Home destination. Adjust reading size, guide density, contrast and screen margins. The integrated Home editor lets each profile rename, resize, reorder or hide the Inputs, Television and Apps destinations, with Save and Cancel. Settings stays accessible.
+
+![Arrange and rename your Lite destinations](gallery/45-home-editor.png)
 
 Create app folders and separate local profiles. Keep a **Watch later** list of broadcasts, protect settings with a local PIN and offer visitors a separate guest space. Back up your preferences, configure them from your phone through a temporary local HTTPS session, or explicitly pair another Vela for compatible preference sync. Credentials remain on each television.
 

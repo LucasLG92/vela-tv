@@ -195,3 +195,13 @@ python tests/run_refinement.py --serial emulator-5560 --adb-port 5038 --art /pat
 ```
 
 Use owned emulators with both matching signed packages and synthetic profiles. The migration test checks actual remote consent, account exclusion, an ungranted URI, a consumed grant, and preservation of existing profiles. The mode test checks first launch, Settings, HOME routing, profile/account retention and strict update-package selection. Voice tests use a synthetic recognizer; they do not certify a physical microphone or service.
+
+## Home editing and focus
+
+```sh
+python tests/run_refinement.py --serial <owned-modern-emulator> --adb-port 5038 --art <authorised-test-art> --test home-personalization --language es
+python tests/run_refinement.py --serial <owned-modern-emulator> --adb-port 5038 --art . --test home-editor --language es
+python tests/run_refinement.py --serial <owned-android-8-emulator> --adb-port 5038 --art . --test home-editor --lite --language es
+```
+
+The Full test needs the same authorised `catalog.json`, `poster-N.jpg` and `backdrop-N.jpg` fixtures as the Home gallery checks. It intercepts transport on the reserved test host and refuses connected personal accounts. It exercises actual Home cards, source limits, profile drafts, explicit and automatic service selection, independent Jellyfin resume, account-change guards, cinema/compact/rows-only presentations, reduced motion and an empty Home without feed requests. The shared Lite editor test needs no artwork and checks real D-pad navigation through the final Save button, moving/undo, Cancel, saved sidebar names and profile isolation. Test assets, accounts and instrumentation remain outside production APKs.

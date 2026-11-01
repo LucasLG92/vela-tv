@@ -7,6 +7,8 @@ import java.util.*;
 
 /** Small per-profile layout document. No images, device URLs or account data. */
 final class VelaLayout {
+    static final String PLEX="com.plexapp.android",JELLYFIN="org.jellyfin.androidtv";
+    static final class Service {final String key,title,detail;final boolean selected,linked;Service(String k,String t,String d,boolean s){this(k,t,d,s,s);}Service(String k,String t,String d,boolean s,boolean l){key=k;title=t;detail=d;selected=s;linked=l;}}
     static final List<String> EXTRA_ROWS=Arrays.asList("recent_movies","recent_series","unwatched","top_rated");
     static final List<String> ROWS=Arrays.asList("resume","recent","recent_movies","recent_series","unwatched","top_rated","library","inputs","tv","apps");
     static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"vela-layout");}
@@ -20,9 +22,19 @@ final class VelaLayout {
     static String source(JSONObject j){return j.optString("librarySource","current");}
     static String source(Context c){return source(read(c));}
     static String sourceLabel(String source){return source.equals("plex")?"Plex":source.equals("jellyfin")?"Jellyfin":source.equals("both")?"Plex + Jellyfin":L10n.text("Current library");}
-    static boolean appResume(Context c){return read(c).optBoolean("appResume",true);}
+    static boolean appResume(Context c){JSONObject j=read(c);JSONArray a=j.optJSONArray("resumeServices");if(a==null)return j.optBoolean("appResume",true);for(int i=0;i<a.length();i++)if(!Arrays.asList(PLEX,JELLYFIN).contains(a.optString(i)))return true;return false;}
+    static boolean service(JSONObject j,String key,boolean fallback){JSONArray a=j.optJSONArray("resumeServices");return a==null?fallback:contains(a,key);}
+    static boolean service(Context c,String key,boolean fallback){return service(read(c),key,fallback);}
+    static String title(Context c,String key){return title(read(c),key);}
+    static String title(JSONObject j,String key){JSONObject titles=j.optJSONObject("titles");return titles==null?label(key):titles.optString(key,label(key));}
+    static String rowSource(Context c,String key){JSONObject sources=read(c).optJSONObject("sources");String choice=sources==null?"home":sources.optString(key,"home");return choice.equals("home")?source(c):choice;}
+    static String hero(Context c){return read(c).optString("hero","cinema");}
+    static boolean clearFocus(Context c){return read(c).optString("focus","soft").equals("clear");}
     static JSONObject validate(JSONObject j)throws IOException,JSONException{
-        for(Iterator<String> it=j.keys();it.hasNext();)if(!Arrays.asList("order","hidden","sizes","folders","appsOrder","extraRowsConfigured","librarySource","appResume").contains(it.next()))throw new IOException("Unknown layout field");
+        for(Iterator<String> it=j.keys();it.hasNext();)if(!Arrays.asList("order","hidden","sizes","folders","appsOrder","extraRowsConfigured","librarySource","appResume","resumeServices","titles","sources","hero","focus").contains(it.next()))throw new IOException("Unknown layout field");
+        if(j.has("hero")&&(!(j.get("hero") instanceof String)||!Arrays.asList("cinema","compact","rows").contains(j.getString("hero")))||j.has("focus")&&(!(j.get("focus") instanceof String)||!Arrays.asList("soft","clear").contains(j.getString("focus"))))throw new IOException("Invalid home appearance");
+        JSONArray services=j.optJSONArray("resumeServices");if(j.has("resumeServices")&&services==null||services!=null&&services.length()>128)throw new IOException("Invalid resume services");Set<String> serviceKeys=new HashSet<>();for(int i=0;services!=null&&i<services.length();i++){String key=services.getString(i);if(key.length()>256||!key.matches("[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+")||!serviceKeys.add(key))throw new IOException("Invalid service");}
+        for(String field:Arrays.asList("titles","sources")){JSONObject values=j.optJSONObject(field);if(j.has(field)&&values==null)throw new IOException("Invalid section preferences");if(values!=null)for(Iterator<String> it=values.keys();it.hasNext();){String key=it.next();if(!ROWS.contains(key)||!(values.get(key) instanceof String))throw new IOException("Invalid section preference");String value=values.getString(key);if(field.equals("titles")?(value.isEmpty()||value.length()>40||!value.equals(VelaWorkspace.clean(value,40))||value.contains("://")):!Arrays.asList("home","current","plex","jellyfin","both").contains(value))throw new IOException("Invalid section preference");}}
         if(j.has("librarySource")&&(!(j.get("librarySource") instanceof String)||!Arrays.asList("current","plex","jellyfin","both").contains(j.getString("librarySource"))))throw new IOException("Invalid home library");
         for(String key:Arrays.asList("extraRowsConfigured","appResume"))if(j.has(key)&&!(j.get(key) instanceof Boolean))throw new IOException("Invalid home choice");
         if(j.toString().length()>64*1024)throw new IOException("Layout size limit");JSONArray appOrder=j.optJSONArray("appsOrder");if(j.has("appsOrder")&&appOrder==null||appOrder!=null&&appOrder.length()>256)throw new IOException("App order limit");Set<String> ordered=new HashSet<>();for(int i=0;appOrder!=null&&i<appOrder.length();i++){String pkg=appOrder.getString(i);if(pkg.length()>256||!pkg.matches("[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+")||!ordered.add(pkg))throw new IOException("Invalid app order");}

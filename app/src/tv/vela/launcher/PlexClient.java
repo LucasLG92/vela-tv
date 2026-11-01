@@ -204,6 +204,7 @@ class PlexClient {
         if(server.equals(identity()))prefs.edit().putString("libraryCache", body).putLong("libraryAt", System.currentTimeMillis()).apply();
         return films;
     }
+    List<Film> resume()throws Exception{JSONObject root=new JSONObject().put("MediaContainer",new JSONObject());mergeContinue(root,catalogJson("/hubs/continueWatching?count=12&includeGuids=1",2*1024*1024));return parseHubs(root);}
     static void mergeContinue(JSONObject root,JSONObject response) throws Exception {
         JSONObject container=response.optJSONObject("MediaContainer"),home=root.optJSONObject("MediaContainer");
         if(container==null||home==null)return;

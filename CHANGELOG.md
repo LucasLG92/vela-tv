@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.0-preview / Lite transition 0.18.3-preview
+
+- Full: integrate poster selection with a restrained focus transition, single fine accent outline, short active-heading underline and graphite item counter. Lightly tint neighbouring pictures with a native paint and restore them when focus leaves the row. Respect reduced motion and high contrast without extra artwork, view-alpha layers, blur layers or a persistent animation clock.
+- Full: cancel a pending backdrop when a quick direction change returns to the title whose artwork is already displayed, so a late image cannot replace the selected title's background.
+- Both modes: replace the long Home layout form with an integrated draft editor, recycled section list and fixed Save/Cancel controls. Rename, reorder, hide and resize the available rows within each profile; preserve older layouts and credential-free backup/sync compatibility.
+- Full: choose individual Continue watching services independently of Home's library, choose a library source per media row, and select cinema, compact or rows-only presentations. Fetch only enabled feeds in bounded pages using the existing workers. Other apps still depend on the Watch Next metadata they share with Android TV.
+
 ## 2.1.1-preview / Lite transition 0.18.2-preview
 
 - Full: use item-specific Plex catalogue handoffs for current and legacy Android clients, separate series routes, retain a season’s parent series, preserve resume links and report launch failures instead of silently opening Plex Home. Native fixture tests cover the actual Home cards; physical Plex validation is pending.

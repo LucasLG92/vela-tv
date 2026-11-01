@@ -471,5 +471,16 @@
     "height": 2160,
     "version": "0.17.2-preview",
     "sha256": "e43e086537bf597984bcedc071359354286ca54c2bab66e485e384190cf91327"
+  },
+  {
+    "file": "45-home-editor.png",
+    "title": "Your own Lite destinations",
+    "source": "Native 3840×2160 production Android views on an owned Android 16 emulator, Vela 2.2.0-preview. Synthetic profiles, linked-server fixtures, progress and demonstration weather. Original authorised artwork credited in the gallery. No personal account, private location, credentials or device identifiers. This capture uses Lite mode in the unified app; the standalone 0.18.3 editor is checked separately on Android 8.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.0-preview",
+    "sha256": "b3730fe808d58a9d70f21441a1314407050ebab3a0ff6d635fb16208474250cf"
   }
 ]

@@ -14,13 +14,16 @@ final class ContinueWatching {
     private ContinueWatching(){}
     static List<PlexClient.Film> read(Context context,boolean plexConnected){return read(context,plexConnected?"com.plexapp.android":"");}
     static List<PlexClient.Film> read(Context context,String linkedPackage){
+        return read(context,linkedPackage.isEmpty()?Collections.emptySet():Collections.singleton(linkedPackage));
+    }
+    static List<PlexClient.Film> read(Context context,Set<String> linkedPackages){
         List<PlexClient.Film> result=new ArrayList<>();
         if(context.checkSelfPermission(TvSuggestions.PERMISSION)!=PackageManager.PERMISSION_GRANTED)return result;
         try(Cursor cursor=context.getContentResolver().query(TvContract.WatchNextPrograms.CONTENT_URI,COLUMNS,null,null,"last_engagement_time_utc_millis DESC")){
             if(cursor==null)return result;Map<String,String> names=new HashMap<>();Set<String> seen=new HashSet<>();int scanned=0;
             while(cursor.moveToNext()&&scanned++<240){
                 PlexClient.Film film=parse(cursor);if(film==null||film.packageName.equals(context.getPackageName()))continue;
-                String pkg=film.packageName;if(pkg.equals(linkedPackage))continue;
+                String pkg=film.packageName;if(linkedPackages.contains(pkg)||!VelaLayout.service(context,pkg,VelaLayout.appResume(context)))continue;
                 if(!names.containsKey(pkg))names.put(pkg,SidebarApps.launchable(context,pkg)?SidebarApps.label(context,pkg):"");
                 if(names.get(pkg).isEmpty()||!seen.add(pkg+"|"+film.intent))continue;
                 film.provider=names.get(pkg);film.meta=film.provider+(film.episodeLabel.isEmpty()?"":" · "+film.episodeLabel);result.add(film);
@@ -64,6 +67,11 @@ final class ContinueWatching {
         List<PlexClient.Film> result=new ArrayList<>(plex);Set<String> seen=new HashSet<>();for(PlexClient.Film film:plex)seen.add(film.packageName+"|"+film.key);
         for(PlexClient.Film film:shared){if(film.packageName.equals(linkedPackage))continue;if(seen.add(film.packageName+"|"+film.key))result.add(film);}
         return result;
+    }
+    static List<PlexClient.Film> personalized(Context c,List<PlexClient.Film> base,List<PlexClient.Film> extra,List<PlexClient.Film> shared){
+        org.json.JSONObject settings=VelaLayout.read(c);List<PlexClient.Film> out=new ArrayList<>(),resume=new ArrayList<>();Set<String> found=new HashSet<>();
+        for(List<PlexClient.Film> group:Arrays.asList(base,extra,shared))for(PlexClient.Film original:group){PlexClient.Film f=original;if(!f.continuing){if(group==base)out.add(f);continue;}boolean fallback=!f.tvSource||settings.optBoolean("appResume",true);if(!VelaLayout.service(settings,f.packageName,fallback)){if(f.alternative==null||!VelaLayout.service(settings,f.alternative.packageName,true))continue;f=f.alternative;}String id=f.externalId.isEmpty()?f.packageName+"|"+f.key:f.type+"|"+f.externalId;if(found.add(id))resume.add(f);}
+        resume.sort((a,b)->Long.compare(b.lastPlayedMs,a.lastPlayedMs));out.addAll(0,resume.subList(0,Math.min(12,resume.size())));return out;
     }
     static String remaining(PlexClient.Film film){
         long ms=film.remainingMs();if(film.nextEpisode){String label=Ui.tr("Próximo episódio","Next episode","Siguiente episodio");return ms>0?label+" · "+duration(ms):label;}if(ms<=0)return Ui.tr("Continuar","Resume","Continuar");
