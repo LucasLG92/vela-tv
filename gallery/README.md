@@ -2,7 +2,7 @@
 
 A complete tour of **Vela 2.3**, with **39 native 4K captures** across Full, Lite and shared tools, including the new 2.2.1 search and voice views. Open an image for its full 3840 × 2160 view.
 
-**[Download](https://github.com/LucasLG92/vela-tv/releases/tag/v2.3.0-preview)** · [Home](#your-own-home) · [Library](#your-library) · [Television](#television-in-the-same-home) · [Personalisation](#the-details-that-make-it-yours) · **[Lite gallery](../lite/gallery/README.md)**
+**[Download](https://github.com/LucasLG92/vela-tv/releases/tag/v2.3.1-preview)** · [Home](#your-own-home) · [Library](#your-library) · [Television](#television-in-the-same-home) · [Personalisation](#the-details-that-make-it-yours) · **[Lite gallery](../lite/gallery/README.md)**
 
 These are real production Android views captured in an owned emulator, with original artwork and demonstration profiles, progress, schedules, HDMI/tuner connections and weather. Menus are in English; original artwork and service-supplied titles keep their own language. No private account, provider credential or personal location is shown. [Credits](CREDITS.md) · [Capture manifest](index.json).
 

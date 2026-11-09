@@ -2,7 +2,7 @@
 
 **Eight new native 4K captures from Lite mode in Vela 2.2.0 Preview.** The same APK and design as Full, focused on HDMI, antenna television and apps.
 
-**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.3.0-preview)** · [About Lite](../README.md) · [Install](../INSTALL.md) · [Full gallery](../../gallery/README.md)
+**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.3.1-preview)** · [About Lite](../README.md) · [Install](../INSTALL.md) · [Full gallery](../../gallery/README.md)
 
 These are production Android views in an owned emulator. HDMI connections, tuner channels and programmes are demonstration fixtures, with original device and channel symbols. They illustrate the interface, not a physical signal or a broadcaster's actual schedule. All menus are in English. [Credits](../../gallery/CREDITS.md) · [Current capture records](../../gallery/index.json).
 
