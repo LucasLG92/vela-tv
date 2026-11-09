@@ -2,13 +2,15 @@ package tv.vela.launcher;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.LruCache;
 import java.io.*;
 import java.security.MessageDigest;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -18,8 +20,19 @@ final class CinemaImages {
     private interface Download { byte[] get() throws Exception; }
     final class Request {
         private Ready ready;
+        private Work owner;
         private Request(Ready ready) { this.ready=ready; }
-        void cancel() { synchronized(pending) { ready=null; } }
+        void cancel() {
+            synchronized(pending) {
+                ready=null;
+                Work work=owner;owner=null;
+                if(work==null)return;
+                work.requests.remove(this);
+                if(!work.requests.isEmpty())return;
+                if(pending.get(work.key)==work)pending.remove(work.key);
+                if(work.future!=null){work.future.cancel(true);if(work.future instanceof Runnable)io.remove((Runnable)work.future);}
+            }
+        }
         boolean pending() { synchronized(pending) { return ready!=null; } }
     }
     private final LibraryClient plex;
@@ -91,10 +104,10 @@ final class CinemaImages {
             Bitmap cached=images.get(key);
             if(cached!=null){ready.accept(cached);ticket.ready=null;return ticket;}
             Work work=pending.get(key);
-            if(work!=null){work.requests.add(ticket);return ticket;}
-            work=new Work(key,width,height,download,generation);work.requests.add(ticket);pending.put(key,work);
+            if(work!=null){ticket.owner=work;work.requests.add(ticket);return ticket;}
+            work=new Work(key,width,height,download,generation);ticket.owner=work;work.requests.add(ticket);pending.put(key,work);
             try { work.future=io.submit(work); }
-            catch(RejectedExecutionException ignored){pending.remove(key);ticket.ready=null;}
+            catch(RejectedExecutionException ignored){pending.remove(key);ticket.ready=null;ticket.owner=null;work.requests.clear();}
         }
         return ticket;
     }
@@ -104,54 +117,67 @@ final class CinemaImages {
         Work(String key,int w,int h,Download download,int epoch){this.key=key;width=w;height=h;this.download=download;this.epoch=epoch;}
         private boolean wanted() {
             synchronized(pending) {
-                if(closed||epoch!=generation||Thread.currentThread().isInterrupted())return false;
+                if(closed||epoch!=generation||pending.get(key)!=this||Thread.currentThread().isInterrupted())return false;
                 for(Request r:requests)if(r.ready!=null)return true;
                 return false;
             }
         }
         @Override public void run() {
             boolean delivering=false;
+            Bitmap decoded=null;
+            File temporary=null;
             try {
                 if(!wanted())return;
                 byte[] hash=MessageDigest.getInstance("SHA-256").digest(key.getBytes("UTF-8"));
                 char[] hex="0123456789abcdef".toCharArray(),name=new char[hash.length*2];
                 for(int i=0;i<hash.length;i++){name[i*2]=hex[(hash[i]&255)>>>4];name[i*2+1]=hex[hash[i]&15];}
                 File file=new File(folder,new String(name)+".img");
-                if(!file.exists()||System.currentTimeMillis()-file.lastModified()>86400_000L) {
-                    byte[] data=download.get();if(!wanted())return;
-                    File temporary=new File(folder,new String(name)+"."+epoch+".part");
-                    try(FileOutputStream out=new FileOutputStream(temporary)){out.write(data);}
-                    if(file.exists())file.delete();
-                    if(!temporary.renameTo(file)){temporary.delete();return;}
+                if(file.exists()&&System.currentTimeMillis()-file.lastModified()<=86400_000L) {
+                    try{decoded=decode(file,width,height);}catch(IOException|IllegalArgumentException badCache){file.delete();}
+                }
+                if(decoded==null) {
+                    if(!wanted())return;
+                    temporary=File.createTempFile(new String(name)+"-",".part",folder);
+                    try(FileOutputStream out=new FileOutputStream(temporary)){out.write(download.get());}
+                    if(!wanted())return;
+                    // Validate before replacing a cache entry; independent loaders never share a temporary file.
+                    decoded=decode(temporary,width,height);
+                    if(!wanted())return;
+                    try{Files.move(temporary.toPath(),file.toPath(),StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);}
+                    catch(AtomicMoveNotSupportedException unsupported){Files.move(temporary.toPath(),file.toPath(),StandardCopyOption.REPLACE_EXISTING);}
                     prune();
                 }
                 if(!wanted())return;
-                BitmapFactory.Options bounds=new BitmapFactory.Options();bounds.inJustDecodeBounds=true;
-                BitmapFactory.decodeFile(file.getPath(),bounds);
-                BitmapFactory.Options options=new BitmapFactory.Options();options.inSampleSize=1;
-                while(bounds.outWidth/(options.inSampleSize*2)>=width&&bounds.outHeight/(options.inSampleSize*2)>=height)options.inSampleSize*=2;
-                // Immutable pixels stay on the GPU; logos retain their original alpha channel.
-                options.inPreferredConfig=Bitmap.Config.HARDWARE;
-                Bitmap bitmap;
-                if(key.startsWith("library-avatar:"))bitmap=ImageDecoder.decodeBitmap(ImageDecoder.createSource(file),(decoder,info,source)->{
-                    int w=info.getSize().getWidth(),h=info.getSize().getHeight();float scale=Math.min(1f,96f/Math.max(w,h));
-                    decoder.setTargetSize(Math.max(1,Math.round(w*scale)),Math.max(1,Math.round(h*scale)));decoder.setAllocator(ImageDecoder.ALLOCATOR_HARDWARE);
-                });
-                else bitmap=BitmapFactory.decodeFile(file.getPath(),options);
-                if(bitmap==null)return;
-                delivering=true;
-                main.post(()->{
+                Bitmap bitmap=decoded;
+                delivering=main.post(()->{
                     synchronized(pending) {
                         try {
-                            if(!wanted())return;
+                            if(!wanted()){bitmap.recycle();return;}
                             if(bitmap.getAllocationByteCount()/1024<=images.maxSize()/2)images.put(key,bitmap);
-                            for(Request r:requests)if(r.ready!=null){Ready callback=r.ready;r.ready=null;callback.accept(bitmap);}
+                            // Detach before callbacks: a callback may clear/reload the same uncached image.
+                            pending.remove(key);
+                            List<Request> recipients=new ArrayList<>(requests);requests.clear();
+                            for(Request r:recipients)r.owner=null;
+                            for(Request r:recipients){Ready callback=r.ready;r.ready=null;if(callback!=null&&!closed&&epoch==generation)callback.accept(bitmap);}
                         } finally { if(pending.get(key)==this)pending.remove(key); }
                     }
                 });
             } catch(Exception ignored) { /* A missing image never blocks navigation. */ }
-            finally { if(!delivering)synchronized(pending){for(Request r:requests)r.ready=null;if(pending.get(key)==this)pending.remove(key);} }
+            finally {
+                if(temporary!=null)temporary.delete();
+                if(!delivering){if(decoded!=null)decoded.recycle();synchronized(pending){for(Request r:requests){r.ready=null;r.owner=null;}requests.clear();if(pending.get(key)==this)pending.remove(key);}}
+            }
         }
+    }
+    private static Bitmap decode(File file,int width,int height)throws IOException {
+        return ImageDecoder.decodeBitmap(ImageDecoder.createSource(file),(decoder,info,source)->{
+            int w=info.getSize().getWidth(),h=info.getSize().getHeight();
+            if(w<=0||h<=0||w>16384||h>16384)throw new IllegalArgumentException("Image bounds");
+            // Fit without stretching or cropping, including transparent logos and landscape episode art.
+            float scale=Math.min(1f,Math.min(Math.max(1,width)/(float)w,Math.max(1,height)/(float)h));
+            decoder.setTargetSize(Math.max(1,Math.round(w*scale)),Math.max(1,Math.round(h*scale)));
+            decoder.setAllocator(ImageDecoder.ALLOCATOR_HARDWARE);
+        });
     }
     private synchronized void prune() {
         File[] files=folder.listFiles((dir,name)->name.endsWith(".img"));if(files==null)return;
@@ -168,8 +194,9 @@ final class CinemaImages {
     void clear() {
         synchronized(pending) {
             generation++;
-            for(Work work:pending.values()){for(Request r:work.requests)r.ready=null;if(work.future!=null)work.future.cancel(true);}
-            pending.clear();io.getQueue().clear();main.removeCallbacksAndMessages(null);images.evictAll();images.resize(Visuals.cacheKb(context));
+            for(Work work:pending.values()){for(Request r:work.requests){r.ready=null;r.owner=null;}work.requests.clear();if(work.future!=null)work.future.cancel(true);}
+            // Posted deliveries run once to release their unpublished bitmap; no view callback survives the epoch.
+            pending.clear();io.getQueue().clear();images.evictAll();images.resize(Visuals.cacheKb(context));
         }
     }
     void close(){synchronized(pending){closed=true;clear();io.shutdownNow();}}

@@ -237,6 +237,13 @@ final class CinemaHomeView extends FrameLayout {
     void mountTools(VelaHub tools){sharedChrome();toolsLayer=tools;toolsHeading=pageTitle.getText();toolsHidden.clear();for(View view:new View[]{surface,panels,liveTv,overlay})if(view!=null){toolsHidden.put(view,view.getVisibility());view.setVisibility(INVISIBLE);}pageTitle.setText(L10n.text(tools.page()==0?"Search":tools.page()==VelaHub.SEARCH_SETTINGS?"Settings":tools.page()==8?"Live TV":"Personalisation"));updateHint.setVisibility(GONE);LayoutParams bounds=new LayoutParams(1790,940);bounds.leftMargin=112;bounds.topMargin=116;stage.addView(tools,stage.indexOfChild(scrim),bounds);sidebar.setVisibility(VISIBLE);setSidebar(false);startHeader();styleSidebar();}
     void unmountTools(){toolsLayer=null;for(Map.Entry<View,Integer> item:toolsHidden.entrySet())item.getKey().setVisibility(item.getValue());toolsHidden.clear();if(toolsHeading!=null)pageTitle.setText(toolsHeading);toolsHeading=null;styleSidebar();}
     void resumeTools(){if(toolsLayer!=null)startHeader();}
+    /** Search shares Home's bounded loader; cancelling a result releases only that consumer. */
+    Runnable searchArtwork(VelaHub.Hit hit,ImageView target,int width,int height){
+        if(closed||!(hit.value instanceof PlexClient.Film))return null;
+        PlexClient.Film film=(PlexClient.Film)hit.value;if(film.thumb==null||film.thumb.isEmpty())return null;
+        CinemaImages.Request request=film.tvSource?images.loadTv(film.thumb,width,height,target::setImageBitmap):images.load(film.thumb,width,height,target::setImageBitmap);
+        return request::cancel;
+    }
     void toolsContent(){setSidebar(false);}
     boolean focusHeader(View from){headerStatus.returnTo(from);return headerStatus.focusFirst();}
     void toolsTitle(String title){if(toolsLayer!=null){pageTitle.setText(title);styleSidebar();}}

@@ -167,6 +167,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         stopSync();
         if(hub!=null){hub.close();if(destroying)return;}if(home==null)return;if(programmes!=null)programmes.pause();toolsReturnFocus=getCurrentFocus();toolsProfile=VelaWorkspace.active(this);toolsDestination=home.navigationDestination();toolsPanels=home.savePanels();home.pause();home.releaseImages();
         hub=new VelaHub(this,new FullToolsData(this){
+            public Runnable artwork(VelaHub.Hit hit,android.widget.ImageView target,int width,int height){return home.searchArtwork(hit,target,width,height);}
             public void activate(VelaHub.Hit hit){try{if(hit.value instanceof Intent)startActivity((Intent)hit.value);else if(hit.value instanceof TvInputs.Entry){TvInputs.Entry e=(TvInputs.Entry)hit.value;startActivity(new Intent(Intent.ACTION_VIEW,android.media.tv.TvContract.buildChannelUriForPassthroughInput(e.inputId)));}else if(hit.value instanceof LiveTvData.Channel)home.searchChannel((LiveTvData.Channel)hit.value);else if(hit.value instanceof PlexClient.Film){Intent i=new LibraryClient(HomeActivity.this).open((PlexClient.Film)hit.value);if(i!=null)startActivity(i);}}catch(RuntimeException unavailable){android.widget.Toast.makeText(HomeActivity.this,"No se puede abrir en este dispositivo.",android.widget.Toast.LENGTH_SHORT).show();}}
             public boolean navigation(){home.toolsNavigation();return true;}
             public boolean header(android.view.View from){return home.focusHeader(from);}

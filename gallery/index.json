@@ -1803,5 +1803,27 @@
     "available_in": [
       "full"
     ]
+  },
+  {
+    "file": "145-search-artwork.webp",
+    "title": "Search with real posters and channel artwork",
+    "source": "Native 3840×2160 production Android views from Vela 2.2.1-preview on an owned API 36 emulator, captured 9 November 2026. Demonstration Plex/Jellyfin accounts, library metadata, channel and programme records; original authorised artwork. Voice callbacks and levels are synthetic. No private account, credentials, personal location or recorded microphone audio.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.1-preview",
+    "sha256": "a877af6194be7c649a331ecb9783dec37d03500783080a1f36c1bf8a5d89a047"
+  },
+  {
+    "file": "146-voice-no-sidebar.webp",
+    "title": "Voice search without a detached navigation outline",
+    "source": "Native 3840×2160 production Android views from Vela 2.2.1-preview on an owned API 36 emulator, captured 9 November 2026. Demonstration Plex/Jellyfin accounts, library metadata, channel and programme records; original authorised artwork. Voice callbacks and levels are synthetic. No private account, credentials, personal location or recorded microphone audio.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.2.1-preview",
+    "sha256": "5505a71832bdfc0c7458b291d2265509dc6fe84bbe491b03c86769147f63bca1"
   }
 ]

@@ -34,7 +34,7 @@ Lite reads your television's tuning database without rewriting it. It adds no IP
 | --- | --- |
 | [![Lite's integrated graphite settings](../gallery/previews/129-lite-settings.webp)](../gallery/129-lite-settings.webp) | [![Lite's app drawer with original app icons](../gallery/previews/130-lite-apps.webp)](../gallery/130-lite-apps.webp) |
 
-Choose up to four widgets for time, weather, date, upcoming programmes or shortcuts. Adjust text size, contrast, guide density, screen margins and reduced motion. Give available remote buttons short-press and long-press actions, including Vela's own voice search.
+Choose up to four widgets for time, weather, date, upcoming programmes or shortcuts. Adjust text size, contrast, guide density, screen margins and reduced motion. Give available remote buttons short-press and long-press actions, including Vela's own voice search. Channel and programme searches show the images supplied by your antenna/guide source. When navigation is hidden, voice uses a compact microphone capsule instead of leaving a detached sidebar outline.
 
 App folders, local profiles, a settings PIN and a guest space help organise a shared television. Use the remote or a temporary local phone session, save a preference backup, or explicitly pair another Vela for compatible preference sync. Accounts and credentials are excluded from those transfers.
 

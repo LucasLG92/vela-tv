@@ -64,6 +64,14 @@ Arrange, rename, resize or hide your Home shelves. Pick the source for each libr
 
 [Explore personalisation](guide/YOUR-VELA.md) · [Home and voice search](guide/HOME-AND-VOICE.md)
 
+## Find it by sight or voice
+
+Recognise films by their posters and channels by their logos. Search Plex, Jellyfin, TV, apps and HDMI in one remote-friendly view, with artwork loaded only for the page you see. Voice feedback follows the sidebar, or becomes a compact microphone capsule on screens without it.
+
+[![Real posters and channel artwork in Vela search](gallery/previews/145-search-artwork.webp)](gallery/145-search-artwork.webp)
+
+[See voice search without the sidebar](gallery/146-voice-no-sidebar.webp) · [What changed in 2.2.1](guide/releases/2.2.1-preview.md) · [Artwork efficiency measurements](guide/OPTIMIZATION.md)
+
 ## Apps and devices, instantly familiar
 
 Large original app icons, useful folders and a sidebar that opens when you need it. Press OK on a pinned app to launch it; hold OK to rearrange your shortcuts without uninstalling anything.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.1-preview / Lite transition 0.18.4-preview
+
+- Both modes: replace the detached voice outline with a compact microphone capsule when navigation is hidden or unavailable behind a modal. Track actual collapsed/expanded rail bounds, including reduced motion, and release window observers, animations and recognition on close.
+- Search: display real channel logos and programme images. Full also shows Plex/Jellyfin posters through Home's existing authenticated artwork loader. Load only the displayed page; cancel subscriptions and release TV artwork on query/filter/page changes or pause.
+- Full: fit decoded artwork to requested bounds, preserving aspect ratio and alpha. Remove abandoned requests from the bounded queue, retain surviving coalesced consumers and prevent old deliveries from replacing a new request.
+- Full: recover corrupt disk artwork with one bounded download, validate before atomic replacement, and isolate concurrent writers with disposable temporary files.
+- Both modes: clear stale programme art when rebinding cards, reuse unchanged bindings, coalesce visibility checks and fit localised 12-hour clock suffixes inside the existing widget.
+- Verification: native Full search/artwork and voice-surface regressions on API 36, unified Lite on API 26, standalone Lite package isolation, six-language clock checks and synthetic before/after artwork allocation measurements. Physical remote-microphone validation remains device-dependent.
+
 ## 2.2.0-preview / Lite transition 0.18.3-preview
 
 - Full: integrate poster selection with a restrained focus transition, single fine accent outline, short active-heading underline and graphite item counter. Lightly tint neighbouring pictures with a native paint and restore them when focus leaves the row. Respect reduced motion and high contrast without extra artwork, view-alpha layers, blur layers or a persistent animation clock.

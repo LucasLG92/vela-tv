@@ -1,6 +1,6 @@
 # See Vela in action
 
-A complete tour of **Vela 2.2.0 Preview**, with **36 new native 4K captures** across Full, Lite and shared tools. Open an image for its full 3840 × 2160 view.
+A complete tour of **Vela 2.2**, with **38 native 4K captures** across Full, Lite and shared tools, including the new 2.2.1 search and voice views. Open an image for its full 3840 × 2160 view.
 
 **[Download](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.0-preview)** · [Home](#your-own-home) · [Library](#your-library) · [Television](#television-in-the-same-home) · [Personalisation](#the-details-that-make-it-yours) · **[Lite gallery](../lite/gallery/README.md)**
 
@@ -80,7 +80,11 @@ A manual HDMI profile changes its presentation, not the signal or connection sta
 | --- | --- |
 | [![Short-press and long-press button actions](previews/135-remote-shortcuts.webp)](135-remote-shortcuts.webp) | [![The voice-responsive light around the sidebar](previews/136-voice.webp)](136-voice.webp) |
 
-[![Search results inside Vela](previews/137-search.webp)](137-search.webp)
+| Search with real artwork | Voice without the sidebar |
+| --- | --- |
+| [![Posters, channel logos and programme images in search](previews/145-search-artwork.webp)](145-search-artwork.webp) | [![Compact voice search with the sidebar hidden](previews/146-voice-no-sidebar.webp)](146-voice-no-sidebar.webp) |
+
+Find films by their posters and channels by their logos. When the sidebar is hidden or unavailable behind a modal, a compact microphone capsule replaces the tall outline; when navigation is visible, the exterior light follows its real bounds.
 
 The voice capture uses a simulated recognition callback: no physical microphone or private speech was recorded. Remote mappings work for keys delivered to Vela while it is in the foreground. [Voice and remote limits](../guide/HOME-AND-VOICE.md).
 

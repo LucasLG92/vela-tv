@@ -11,17 +11,20 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import java.util.*;
 
-/** Six native result cards at a time. No artwork worker, catalogue cache or second menu. */
+/** Six native results at a time. Library art shares Home's loader; TV art is page-scoped. */
 final class VelaSearchView extends FrameLayout {
     interface Host {
         void search(String query);void voice();void settings();void close();void navigation();boolean header(View from);
         void open(VelaHub.Hit hit);void save(VelaHub.Hit hit);void next(int direction);void focused();
+        default Runnable artwork(VelaHub.Hit hit,ImageView target,int width,int height){return null;}
     }
     private final Activity activity;private final Host host;
     final EditText input;private final TextView count,empty,previous,next;
     private final FrameLayout cards;private final View[] filters=new View[5];
     private final ArrayList<VelaHub.Hit> all=new ArrayList<>(),visible=new ArrayList<>();
     private final ArrayList<View> tiles=new ArrayList<>();
+    private final ArrayList<Runnable> imageRequests=new ArrayList<>();
+    private VelaProgrammeArt programmeArt;
     private final int pageSize;private String lastQuery="";private int filter,localPage,backendPage;private boolean more,loading,closed;
     private final String[] kinds={"All results","Library","Television","Apps","HDMI"};
     VelaSearchView(Activity a,Host host,String query){
@@ -51,7 +54,8 @@ final class VelaSearchView extends FrameLayout {
         if(closed)return;loading=false;all.clear();all.addAll(values.subList(0,Math.min(96,values.size())));backendPage=page;more=hasMore||values.size()>96;localPage=0;render(hasFocus());
     }
     private void chooseFilter(int at){filter=at;localPage=0;paintFilters();if(!loading)render(false);}
-    private void releaseCards(){for(View v:tiles)if(v instanceof ViewGroup){View icon=((ViewGroup)v).getChildAt(0);if(icon instanceof ImageView)((ImageView)icon).setImageDrawable(null);}for(View v:tiles)cards.removeView(v);tiles.clear();}
+    void pause(){for(Runnable cancel:imageRequests)cancel.run();imageRequests.clear();if(programmeArt!=null){programmeArt.close();programmeArt=null;}for(View v:tiles)if(v instanceof ViewGroup){View icon=((ViewGroup)v).getChildAt(0);if(icon instanceof ImageView)((ImageView)icon).setImageDrawable(null);}}
+    private void releaseCards(){pause();for(View v:tiles)cards.removeView(v);tiles.clear();}
     private void render(boolean focus){
         releaseCards();visible.clear();for(VelaHub.Hit h:all)if(filter==0||kind(h)==filter)visible.add(h);int start=localPage*pageSize;
         for(int i=start;i<Math.min(start+pageSize,visible.size());i++)addCard(visible.get(i),i-start);
@@ -60,14 +64,22 @@ final class VelaSearchView extends FrameLayout {
     }
     private void addCard(VelaHub.Hit hit,int i){
         FrameLayout tile=new FrameLayout(activity);tile.setFocusable(true);tile.setFocusableInTouchMode(true);tile.setDefaultFocusHighlightEnabled(false);tile.setBackground(VelaTheme.panel());tile.setPadding(0,0,0,0);
-        ImageView icon=new ImageView(activity);icon.setScaleType(ImageView.ScaleType.FIT_CENTER);Drawable image=null;
+        int typeId=kind(hit),tileHeight=pageSize==4?280:184;boolean library=typeId==1;
+        ResultArt icon=new ResultArt(activity,typeId);icon.setScaleType(ImageView.ScaleType.FIT_CENTER);icon.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);Drawable image=null;
         if(hit.value instanceof Intent)try{Intent intent=(Intent)hit.value;if(intent.getComponent()!=null)image=activity.getPackageManager().getActivityIcon(intent.getComponent());}catch(Exception unavailable){}
-        icon.setImageDrawable(image==null?new TypeIcon(kind(hit)):image);put(tile,icon,28,pageSize==4?102:54,76,76);
-        TextView type=label(hit.kind,18,VelaTheme.MUTED);type.setSingleLine();type.setEllipsize(TextUtils.TruncateAt.END);put(tile,type,130,21,666,28);
-        TextView name=label(hit.title,29,VelaTheme.WHITE);name.setMaxLines(2);name.setEllipsize(TextUtils.TruncateAt.END);name.setTypeface(Ui.displaySemibold);put(tile,name,130,52,666,pageSize==4?154:90);
-        TextView detail=label(hit.detail,20,VelaTheme.SECONDARY);detail.setSingleLine();detail.setEllipsize(TextUtils.TruncateAt.END);put(tile,detail,130,pageSize==4?232:146,666,pageSize==4?38:30);
+        icon.setImageDrawable(image);
+        int artWidth=library?104:typeId==2?112:76,artHeight=library?156:artWidth;
+        if(hit.value instanceof VelaShows.Airing&&!((VelaShows.Airing)hit.value).image.isEmpty()){artWidth=144;artHeight=100;icon.setScaleType(ImageView.ScaleType.CENTER_CROP);}
+        icon.setBackground(VelaTheme.shape(VelaTheme.CARD,14));icon.setClipToOutline(true);put(tile,icon,24,(tileHeight-artHeight)/2,artWidth,artHeight);
+        if(hit.value instanceof LiveTvData.Channel){if(programmeArt==null)programmeArt=new VelaProgrammeArt(activity,this);programmeArt.bind(icon,((LiveTvData.Channel)hit.value).logo,artWidth,artHeight);}
+        else if(hit.value instanceof VelaShows.Airing){VelaShows.Airing airing=(VelaShows.Airing)hit.value;if(programmeArt==null)programmeArt=new VelaProgrammeArt(activity,this);programmeArt.bind(icon,airing.image.isEmpty()?airing.logo:airing.image,artWidth,artHeight);}
+        else if(library){Runnable cancel=host.artwork(hit,icon,artWidth,artHeight);if(cancel!=null)imageRequests.add(cancel);}
+        int textLeft=Math.max(156,24+artWidth+24),textWidth=812-textLeft;
+        TextView type=label(hit.kind,18,VelaTheme.MUTED);type.setSingleLine();type.setEllipsize(TextUtils.TruncateAt.END);put(tile,type,textLeft,21,textWidth,28);
+        TextView name=label(hit.title,29,VelaTheme.WHITE);name.setMaxLines(2);name.setEllipsize(TextUtils.TruncateAt.END);name.setTypeface(Ui.displaySemibold);put(tile,name,textLeft,52,textWidth,pageSize==4?154:90);
+        TextView detail=label(hit.detail,20,VelaTheme.SECONDARY);detail.setSingleLine();detail.setEllipsize(TextUtils.TruncateAt.END);put(tile,detail,textLeft,pageSize==4?232:146,textWidth,pageSize==4?38:30);
         tile.setContentDescription(hit.title+", "+hit.kind+", "+hit.detail);tile.setOnClickListener(v->host.open(hit));tile.setOnLongClickListener(v->{host.save(hit);return true;});
-        tile.setOnFocusChangeListener((v,f)->{if(f)host.focused();tile.setBackground(f?VelaTheme.shape(VelaReading.accent(activity),VelaTheme.PANEL_RADIUS):VelaTheme.panel());name.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);type.setTextColor(f?0xFF555A65:secondary(VelaTheme.MUTED));detail.setTextColor(f?0xFF555A65:secondary(VelaTheme.SECONDARY));if(icon.getDrawable() instanceof TypeIcon)((TypeIcon)icon.getDrawable()).color(f?VelaTheme.INK:VelaTheme.WHITE);});
+        tile.setOnFocusChangeListener((v,f)->{if(f)host.focused();tile.setBackground(f?VelaTheme.shape(VelaReading.accent(activity),VelaTheme.PANEL_RADIUS):VelaTheme.panel());name.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);type.setTextColor(f?0xFF555A65:secondary(VelaTheme.MUTED));detail.setTextColor(f?0xFF555A65:secondary(VelaTheme.SECONDARY));icon.placeholder.color(VelaTheme.WHITE);});
         final int index=i;tile.setOnKeyListener((v,key,event)->{if(key<KeyEvent.KEYCODE_DPAD_UP||key>KeyEvent.KEYCODE_DPAD_RIGHT)return false;if(event.getAction()!=KeyEvent.ACTION_DOWN)return true;
             if(key==KeyEvent.KEYCODE_DPAD_DOWN){if(index+2<tiles.size())tiles.get(index+2).requestFocus();else if(next.isEnabled())next.requestFocus();else previous.requestFocus();return true;}
             if(key==KeyEvent.KEYCODE_DPAD_UP){if(index>=2)tiles.get(index-2).requestFocus();else filters[filter].requestFocus();return true;}
@@ -81,6 +93,12 @@ final class VelaSearchView extends FrameLayout {
     void partial(boolean value){if(value)count.append(" · "+L10n.text("Some sources are unavailable. Try again."));}
     void message(String text){count.setText(text);}
     void close(){closed=true;releaseCards();all.clear();visible.clear();}
+    private static final class ResultArt extends ImageView {
+        final TypeIcon placeholder;
+        ResultArt(android.content.Context context,int kind){super(context);placeholder=new TypeIcon(kind);placeholder.setCallback(this);}
+        @Override protected void onDraw(Canvas canvas){super.onDraw(canvas);if(getDrawable()==null){int side=Math.min(76,Math.min(getWidth(),getHeight()));placeholder.setBounds((getWidth()-side)/2,(getHeight()-side)/2,(getWidth()+side)/2,(getHeight()+side)/2);placeholder.draw(canvas);}}
+        @Override protected boolean verifyDrawable(Drawable drawable){return drawable==placeholder||super.verifyDrawable(drawable);}
+    }
     private static final class TypeIcon extends Drawable {
         final int type;final Paint p=new Paint(3);final Path play=new Path();int color=VelaTheme.WHITE;TypeIcon(int type){this.type=type;play.moveTo(34,28);play.lineTo(51,40);play.lineTo(34,52);play.close();}
         void color(int value){color=value;invalidateSelf();}

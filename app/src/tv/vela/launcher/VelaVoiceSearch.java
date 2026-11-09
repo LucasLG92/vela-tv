@@ -131,24 +131,34 @@ final class VelaVoiceSearch {
     /** Quiet during capture/processing; permission and failure controls are created only if needed. */
     private final class Panel extends FrameLayout {
         final Signal signal;private final FrameLayout canvas;private FrameLayout strip;private View anchor;private final Rect screenBounds=new Rect();private final int[] canvasAt=new int[2];
+        private final ViewTreeObserver.OnGlobalLayoutListener layout=()->{anchor=activity.findViewById(android.R.id.content).findViewWithTag("vela-sidebar");geometry();};
+        private final ViewTreeObserver.OnPreDrawListener draw=()->{geometry();return true;};
+        private ViewTreeObserver observer;
         private TextView status,words,retry,keyboard,cancel;
         Panel(){
             super(activity);setFocusable(false);
             VelaReading.Stage stage=new VelaReading.Stage(activity,1920,1080);addView(stage,new LayoutParams(-1,-1));canvas=new FrameLayout(activity);stage.addView(canvas);
             anchor=activity.findViewById(android.R.id.content).findViewWithTag("vela-sidebar");signal=new Signal(new VoiceColors(VelaReading.accent(activity)));put(canvas,signal,10,10,104,1060);
-            canvas.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->geometry());
             signal.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         }
         private void geometry(){
-            float x=24,y=24,w=76,h=1032;
-            if(anchor!=null&&anchor.isAttachedToWindow()&&anchor.getGlobalVisibleRect(screenBounds)&&canvas.getWidth()>0){canvas.getLocationOnScreen(canvasAt);float sx=canvas.getScaleX(),sy=canvas.getScaleY();if(sx>0&&sy>0){x=(screenBounds.left-canvasAt[0])/sx;y=(screenBounds.top-canvasAt[1])/sy;w=screenBounds.width()/sx;h=screenBounds.height()/sy;}}
+            float x=912,y=950,w=96,h=72;boolean rail=visibleRail();
+            if(rail&&canvas.getWidth()>0){canvas.getLocationOnScreen(canvasAt);float sx=canvas.getScaleX(),sy=canvas.getScaleY();if(sx>0&&sy>0){x=(screenBounds.left-canvasAt[0])/sx;y=(screenBounds.top-canvasAt[1])/sy;w=screenBounds.width()/sx;h=screenBounds.height()/sy;}else rail=false;}
+            signal.compact(!rail);
             int left=Math.round(x)-14,top=Math.round(y)-14,width=Math.max(48,Math.round(w))+28,height=Math.max(80,Math.round(h))+28;FrameLayout.LayoutParams p=(FrameLayout.LayoutParams)signal.getLayoutParams();
             if(p.leftMargin!=left||p.topMargin!=top||p.width!=width||p.height!=height){p.leftMargin=left;p.topMargin=top;p.width=width;p.height=height;signal.setLayoutParams(p);}
         }
+        private boolean visibleRail(){
+            if(anchor==null||!anchor.isAttachedToWindow()||!anchor.isShown()||anchor instanceof ViewGroup&&((ViewGroup)anchor).getDescendantFocusability()==ViewGroup.FOCUS_BLOCK_DESCENDANTS)return false;
+            for(View view=anchor;view!=null;view=view.getParent() instanceof View?(View)view.getParent():null)if(view.getAlpha()<=.01f)return false;
+            return anchor.getGlobalVisibleRect(screenBounds)&&screenBounds.width()>0&&screenBounds.height()>0;
+        }
+        @Override protected void onAttachedToWindow(){super.onAttachedToWindow();observer=getViewTreeObserver();observer.addOnGlobalLayoutListener(layout);observer.addOnPreDrawListener(draw);}
+        @Override protected void onDetachedFromWindow(){if(observer!=null&&observer.isAlive()){observer.removeOnGlobalLayoutListener(layout);observer.removeOnPreDrawListener(draw);}observer=null;super.onDetachedFromWindow();}
         boolean showingPrompt(){return strip!=null&&strip.getVisibility()==View.VISIBLE;}
-        void quiet(){if(strip!=null)strip.setVisibility(View.GONE);setBackground(null);}
+        void quiet(){if(strip!=null)strip.setVisibility(View.GONE);signal.setVisibility(VISIBLE);setBackground(null);}
         void notice(String title,String detail,boolean canRetry){
-            ensurePrompt();setBackgroundColor(0x33000000);strip.setVisibility(View.VISIBLE);status(title);words.setText(detail);retry.setVisibility(canRetry?View.VISIBLE:View.GONE);(canRetry?retry:cancel).requestFocus();
+            ensurePrompt();signal.setVisibility(GONE);setBackgroundColor(0x33000000);strip.setVisibility(View.VISIBLE);status(title);words.setText(detail);retry.setVisibility(canRetry?View.VISIBLE:View.GONE);(canRetry?retry:cancel).requestFocus();
         }
         private void ensurePrompt(){
             if(strip!=null)return;
@@ -182,15 +192,18 @@ final class VelaVoiceSearch {
         private final Paint paint=new Paint(3);private final RectF rect=new RectF(),bar=new RectF();private final Matrix matrix=new Matrix();
         private final Path clip=new Path();
         private final LinearGradient edge;private ValueAnimator pulse;
-        private float phase,flow,energy,target,processMix,intro,noise=-2,peak=8;private boolean ready,reduced,processing;private long started,lastFrame,lastVoice;
+        private float phase,flow,energy,target,processMix,intro,noise=-2,peak=8;private boolean ready,reduced,processing,compact;private long started,lastFrame,lastVoice;
         Signal(VoiceColors colors){
             super(activity);setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);edge=new LinearGradient(0,0,0,1,colors.rim(),new float[]{0,.34f,.68f,1},Shader.TileMode.MIRROR);
         }
-        protected void onSizeChanged(int w,int h,int ow,int oh){bar.set(14,14,w-14,h-14);clip.rewind();clip.addRoundRect(bar,32,32,Path.Direction.CW);}
+        private float radius(){return compact?bar.height()/2:32;}
+        private void shape(){bar.set(14,14,getWidth()-14,getHeight()-14);clip.rewind();clip.addRoundRect(bar,radius(),radius(),Path.Direction.CW);}
+        void compact(boolean value){if(compact!=value){compact=value;shape();invalidate();}}
+        protected void onSizeChanged(int w,int h,int ow,int oh){shape();}
         void level(float rms){if(!ready||reduced||Float.isNaN(rms)||Float.isInfinite(rms))return;float value=Math.max(-12,Math.min(30,rms));noise=Math.min(noise,value);peak=Math.max(8,Math.max(value,peak*.995f));target=(float)Math.pow(Math.max(0,Math.min(1,(value-noise)/Math.max(6,peak-noise))),.8);lastVoice=SystemClock.uptimeMillis();}
         void listening(boolean value){state(value,false);}void thinking(){state(false,true);}
         void freeze(){if(pulse!=null){pulse.cancel();pulse=null;}}
-        private void frame(){if(getParent()==null)return;Panel owner=panel;if(owner!=null&&owner.signal==this)owner.geometry();invalidate();}
+        private void frame(){if(getParent()!=null)invalidate();}
         private void state(boolean value,boolean thinking){
             if(ready==value&&processing==thinking)return;boolean was=ready||processing;ready=value;processing=thinking;reduced=VelaFocus.reduced(activity);
             if(!value&&!thinking){freeze();energy=target=0;intro=0;frame();return;}
@@ -202,10 +215,11 @@ final class VelaVoiceSearch {
         }
         protected void onDetachedFromWindow(){freeze();ready=processing=false;super.onDetachedFromWindow();}
         private void contour(Canvas canvas,float width,int alpha,float strength){
-            paint.setStrokeWidth(width);paint.setAlpha(Math.round(alpha*strength));canvas.drawRoundRect(bar,32,32,paint);
+            paint.setStrokeWidth(width);paint.setAlpha(Math.round(alpha*strength));canvas.drawRoundRect(bar,radius(),radius(),paint);
         }
         protected void onDraw(Canvas c){
             boolean lit=ready||processing;float h=bar.height(),strength=intro*(.72f+.28f*energy)*(1-.4f*processMix);
+            if(compact){paint.setShader(null);paint.setStyle(Paint.Style.FILL);paint.setColor(0xF01B1E27);c.drawRoundRect(bar,radius(),radius(),paint);}
             if(lit&&bar.width()>0&&h>0){
                 matrix.setScale(1,h*1.18f);matrix.postTranslate(0,bar.top-h*.28f+h*.24f*(float)Math.sin(flow*.58f));edge.setLocalMatrix(matrix);
                 int save=c.save();c.clipOutPath(clip);paint.setShader(edge);paint.setStyle(Paint.Style.STROKE);
@@ -214,7 +228,7 @@ final class VelaVoiceSearch {
                 c.restoreToCount(save);
             }
             // A small neutral microphone is the only replacement for the profile avatar.
-            float cx=bar.left+38,cy=bar.top+64;paint.setShader(null);paint.setStyle(Paint.Style.FILL);paint.setColor(0xFF1B1E27);paint.setAlpha(255);c.drawCircle(cx,cy,22,paint);
+            float cx=compact?bar.centerX():bar.left+38,cy=compact?bar.centerY():bar.top+64;paint.setShader(null);paint.setStyle(Paint.Style.FILL);paint.setColor(0xFF1B1E27);paint.setAlpha(255);c.drawCircle(cx,cy,22,paint);
             paint.setShader(null);paint.setStyle(Paint.Style.FILL);paint.setColor(VelaTheme.WHITE);paint.setAlpha(lit?255:175);int badge=c.save();c.translate(cx,cy);c.scale(.82f,.82f);rect.set(-7,-16,7,5);c.drawRoundRect(rect,7,7,paint);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(2.8f);paint.setStrokeCap(Paint.Cap.ROUND);rect.set(-13,-14,13,12);c.drawArc(rect,0,180,false,paint);c.drawLine(0,12,0,20,paint);c.drawLine(-6,20,6,20,paint);c.restoreToCount(badge);
         }
     }

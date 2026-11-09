@@ -2,7 +2,10 @@
 
 ## Current 2.2 showcase
 
-The current tour contains 36 new captures from unified Vela **2.2.0-preview**, taken on **1 November 2026**. All are native 3840×2160 screenshots, re-encoded as lossless WebP without EXIF/XMP. Separate 1600×900 WebP previews keep the documentation light; every preview links to its native 4K original. The production APK and its Android views are unchanged for this documentation refresh. Current Lite captures live in the main manifest; the separate Lite PNG manifest is retained with its previous gallery.
+Two additional native 4K captures from **Vela 2.2.1-preview**, taken on **9 November 2026**, show search artwork and the compact voice indicator with navigation hidden. The gallery now includes 38 current showcase captures. The new screenshots use original authorised Superman/Oppenheimer artwork and a public Antena 3 logo with demonstration metadata. They do not show real account sessions or certify a broadcast schedule. Voice callbacks are simulated; no microphone audio is recorded.
+
+
+The 1 November presentation refresh contains 36 captures from unified Vela **2.2.0-preview**, taken on **1 November 2026**. All are native 3840×2160 screenshots, re-encoded as lossless WebP without EXIF/XMP. Separate 1600×900 WebP previews keep the documentation light; every preview links to its native 4K original. The production APK and its Android views are unchanged for this documentation refresh. Current Lite captures live in the main manifest; the separate Lite PNG manifest is retained with its previous gallery.
 
 Account sessions, viewing progress, schedules, channel favourites, HDMI connections and tuner records are synthetic. Channel/device identities illustrate the UI and do not certify real reception or a broadcaster's schedule. App inventory fixtures use original app marks and labels; they do not demonstrate signed-in streaming sessions. The voice light uses synthetic recognizer callbacks, with no physical microphone recording. Movie artwork is original, authorised for these interface illustrations; posters retain their original lettering. No generated movie art, private avatar, personal server, provider credential or personal weather location is used.
 
