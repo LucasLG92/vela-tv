@@ -6,7 +6,7 @@
 
 Your films, live channels, apps and HDMI devices — together in a home screen you control.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.0-preview)** · **[See it in action](gallery/README.md)** · [Get started](guide/INSTALL.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.1-preview)** · **[See it in action](gallery/README.md)** · [Get started](guide/INSTALL.md)
 
 **Free & open source · Android TV / Google TV · One APK, Full or Lite · Six languages**
 
@@ -103,7 +103,7 @@ Lite leaves Full's multimedia Home, library clients and IPTV player inactive. Bo
 
 ## Start in a few minutes
 
-1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.0-preview)** and install it on your Android TV or Google TV device.
+1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.1-preview)** and install it on your Android TV or Google TV device.
 2. **Choose Full or Lite.** Link your own media accounts, configure your channels or open your HDMI devices.
 3. **Make it yours.** Choose your Home shelves and sidebar apps, then use Vela's Home-screen setting if you want it as your default launcher.
 
