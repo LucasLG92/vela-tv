@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.1-preview / Lite transition 0.18.6-preview
+
+- Both modes: keep guide programme bounds, title baselines and schedule baselines unchanged when focus enters or leaves the current or next broadcast. Keep progress inside the same card.
+- Both modes: wrap a selected long title only when its second line fits above the schedule at the chosen reading size.
+- Both modes: retain the existing bounded guide during a same-record, same-window refresh; clear completed gaps, rebound channel records and new windows. Keep the selection details in sync even when guide focus is elsewhere.
+- Verification: native Android 16 Full and Android 8 Lite regression, recorded before/after drawing coordinates, repeated minute ticks and redraws, current/next focus, 100/115/130% text, refresh completion and stale-data isolation. No new background work or image allocation in the guide.
+
 ## 2.3.0-preview / Lite transition 0.18.5-preview
 
 - Full: automatic Media3/system selection, bounded per-channel successful-format/engine hints (32 entries, seven-day expiry), and explicit engine controls. Release the existing engine before creating another.

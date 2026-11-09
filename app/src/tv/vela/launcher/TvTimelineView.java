@@ -44,11 +44,11 @@ final class TvTimelineView extends FrameLayout {
     static long present(long now){return now-now%1800;}
     void rowHeight(int pixels){rowHeight=Math.max(ROW,Math.min(180,pixels));requestLayout();invalidate();}
     void data(List<LiveTvData.Channel> visible,Map<String,List<LiveTvData.Programme>> values,long from,LiveTvData.Channel selected,boolean waiting){
-        int count=Math.min(VelaReading.rows(getContext()),visible.size());boolean pageChanged=channels.size()!=count;for(int i=0;!pageChanged&&i<count;i++)pageChanged=!channels.get(i).id.equals(visible.get(i).id);
-        boolean changed=from!=start;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,count));programmes=values;
+        int count=Math.min(VelaReading.rows(getContext()),visible.size());boolean pageChanged=channels.size()!=count,sameRecords=!pageChanged;for(int i=0;i<Math.min(channels.size(),count);i++){pageChanged|=!channels.get(i).id.equals(visible.get(i).id);sameRecords&=channels.get(i)==visible.get(i);}
+        boolean changed=from!=start;Map<String,List<LiveTvData.Programme>> retained=waiting&&sameRecords&&!changed&&values.isEmpty()?programmes:values;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,count));programmes=retained;
         row=pageChanged?0:Math.max(0,Math.min(row,channels.size()-1));if(selected!=null)for(int i=0;i<channels.size();i++)if(channels.get(i).id.equals(selected.id))row=i;
         if(cursor<start||cursor>=start+SECONDS)cursor=Math.max(start,Math.min(start+SECONDS-1,now));
-        invalidate();if(hasFocus()||changed)notifySelection();
+        invalidate();notifySelection();
     }
     void cursor(long value){cursor=Math.max(start,Math.min(start+SECONDS-1,value));invalidate();notifySelection();}
     long cursorTime(){return cursor;}
@@ -78,14 +78,16 @@ final class TvTimelineView extends FrameLayout {
     }
     private void block(Canvas c,long from,long to,float top,LiveTvData.Programme p,boolean focused){
         if(to<=from)return;float left=Math.max(LABEL,x(from))+3,right=Math.min(getWidth(),x(to))-3;if(right-left<3)return;
-        boolean chosen=focused&&(p==null?cursor>=from&&cursor<to:p.start<=cursor&&p.end>cursor);paint.setColor(chosen?Appearance.accent(getContext()):p==null?0x16262831:p.current(now)?0xFF282F3A:VelaTheme.CARD);c.drawRoundRect(left,top,right,top+rowHeight-(chosen?2:12),12,12,paint);
+        boolean chosen=focused&&(p==null?cursor>=from&&cursor<to:p.start<=cursor&&p.end>cursor);paint.setColor(chosen?Appearance.accent(getContext()):p==null?0x16262831:p.current(now)?0xFF282F3A:VelaTheme.CARD);c.drawRoundRect(left,top,right,top+rowHeight-8,12,12,paint);
         if(right-left<104)return;
         String title=p==null?(loading?Ui.tr("Carregando…","Loading…","Cargando…"):Ui.tr("Sem programação","No programme information","Sin programación")):p.title;
-        float reading=VelaReading.scale(getContext());boolean expanded=chosen&&p!=null&&right-left>=180*reading;
-        if(expanded){int width=(int)(right-left-28);if(!title.equals(wrapTitle)||width!=wrapWidth||wrapScale!=reading){wrapTitle=title;wrapWidth=width;wrapScale=reading;paint.setTypeface(Ui.medium);paint.setTextSize(21*reading);int n=paint.breakText(title,true,width,null);if(n<title.length()){int space=title.lastIndexOf(' ',n);if(space>n/2)n=space;if(n>0&&Character.isHighSurrogate(title.charAt(n-1)))n--;wrapFirst=title.substring(0,n);wrapSecond=title.substring(n).trim();}else{wrapFirst=title;wrapSecond="";}}float base=top+25+(rowHeight-ROW)/2f;label(c,wrapFirst,left+14,base,width,21,VelaTheme.INK,Ui.medium);if(!wrapSecond.isEmpty())label(c,wrapSecond,left+14,base+23*reading,width,21,VelaTheme.INK,Ui.medium);}
-        else label(c,title,left+14,top+31+(rowHeight-ROW)/2f,right-left-28,21,chosen?VelaTheme.INK:p==null?VelaTheme.MUTED:0xFFF0F3F8,Ui.medium);
-        if(p!=null&&right-left>=180*reading){String timing=time(p.start)+"–"+time(p.end);if(p.current(now)){String remaining=LiveTvActivity.remainingText(p.remainingMinutes(now));timing=right-left<330*reading?remaining:timing+"  ·  "+remaining;}label(c,timing,left+14,expanded?top+rowHeight-15:top+59+(rowHeight-ROW)/2f,right-left-28,14,chosen?0xFF61636D:VelaTheme.SECONDARY,Ui.regular);}
-        if(expanded&&p.current(now)){paint.setColor(0x28626773);c.drawRoundRect(left+14,top+rowHeight-8,right-14,top+rowHeight-5,1.5f,1.5f,paint);paint.setColor(VelaTheme.INK);c.drawRoundRect(left+14,top+rowHeight-8,left+14+(right-left-28)*p.progress(now)/1000f,top+rowHeight-5,1.5f,1.5f,paint);}
+        float reading=VelaReading.scale(getContext()),titleBaseline=top+31+(rowHeight-ROW)/2f,timingBaseline=top+rowHeight-20,lineStep=23*reading;
+        paint.setTypeface(Ui.medium);paint.setTextSize(21*reading);float descent=paint.descent();paint.setTextSize(14*reading);float timingTop=timingBaseline+paint.ascent();
+        boolean expanded=chosen&&p!=null&&right-left>=180*reading&&titleBaseline+lineStep+descent<=timingTop-4;
+        if(expanded){int width=(int)(right-left-28);if(!title.equals(wrapTitle)||width!=wrapWidth||wrapScale!=reading){wrapTitle=title;wrapWidth=width;wrapScale=reading;paint.setTypeface(Ui.medium);paint.setTextSize(21*reading);int n=paint.breakText(title,true,width,null);if(n<title.length()){int space=title.lastIndexOf(' ',n);if(space>n/2)n=space;if(n>0&&Character.isHighSurrogate(title.charAt(n-1)))n--;wrapFirst=title.substring(0,n);wrapSecond=title.substring(n).trim();}else{wrapFirst=title;wrapSecond="";}}label(c,wrapFirst,left+14,titleBaseline,width,21,VelaTheme.INK,Ui.medium);if(!wrapSecond.isEmpty())label(c,wrapSecond,left+14,titleBaseline+lineStep,width,21,VelaTheme.INK,Ui.medium);}
+        else label(c,title,left+14,titleBaseline,right-left-28,21,chosen?VelaTheme.INK:p==null?VelaTheme.MUTED:0xFFF0F3F8,Ui.medium);
+        if(p!=null&&right-left>=180*reading){String timing=time(p.start)+"–"+time(p.end);if(p.current(now)){String remaining=LiveTvActivity.remainingText(p.remainingMinutes(now));timing=right-left<330*reading?remaining:timing+"  ·  "+remaining;}label(c,timing,left+14,timingBaseline,right-left-28,14,chosen?0xFF61636D:VelaTheme.SECONDARY,Ui.regular);}
+        if(chosen&&p!=null&&p.current(now)&&right-left>=180*reading){paint.setColor(0x28626773);c.drawRoundRect(left+14,top+rowHeight-13,right-14,top+rowHeight-10,1.5f,1.5f,paint);paint.setColor(VelaTheme.INK);c.drawRoundRect(left+14,top+rowHeight-13,left+14+(right-left-28)*p.progress(now)/1000f,top+rowHeight-10,1.5f,1.5f,paint);}
     }
     @Override public boolean onKeyDown(int key,KeyEvent event){
         if(key==KeyEvent.KEYCODE_INFO&&!channels.isEmpty()){if(event.getRepeatCount()==0)actions.correction(channels.get(row));return true;}
