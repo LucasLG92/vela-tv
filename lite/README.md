@@ -4,7 +4,7 @@
 
 **HDMI, antenna television and apps**, in the same visual language as Full Vela. Lite is for the television that mainly serves a TV box, console or computer.
 
-**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.1-preview)** · **[See the Lite gallery](gallery/README.md)** · [Installation](INSTALL.md) · [Full Vela](../README.md)
+**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.3.0-preview)** · **[See the Lite gallery](gallery/README.md)** · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
 **Android TV / Google TV · Android 8.0+ · Six languages · Free & open source · Preview**
 
@@ -48,7 +48,7 @@ Lite is a mode in the **unified Vela app**. It leaves Full's multimedia Home, Pl
 
 Choose Lite on first launch, or switch from **Settings → System → Launcher mode**. Android 8–10 supports Lite; Android 11+ can also use Full. Both modes check and download the same signed GitHub update. Android confirms installation, and Vela clears completed updater downloads afterwards.
 
-Already using the separate old Lite app? Its [0.18.4 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.4-preview) supports an explicit import into unified Vela. [Migration steps](../guide/UNIFIED.md#moving-from-the-old-standalone-lite-app).
+Already using the separate old Lite app? Its [0.18.5 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.5-preview) supports an explicit import into unified Vela. [Migration steps](../guide/UNIFIED.md#moving-from-the-old-standalone-lite-app).
 
 **[Install Lite](INSTALL.md)** · [Hardware limits](../guide/COMPATIBILITY.md) · [Development](DEVELOPMENT.md) · [Privacy](../guide/PRIVACY.md)
 
