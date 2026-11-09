@@ -1481,5 +1481,22 @@
   "These choices affect Home only. Movies, Series and your accounts keep their own settings.": "These choices affect Home only. Movies, Series and your accounts keep their own settings.",
   "Clock, weather and shortcuts can be arranged in Home widgets.": "Clock, weather and shortcuts can be arranged in Home widgets.",
   "A Home that is yours.": "A Home that is yours.",
-  "Choose sections and services to fill your Home.": "Choose sections and services to fill your Home."
+  "Choose sections and services to fill your Home.": "Choose sections and services to fill your Home.",
+  "Automatic selection with one active player.": "Automatic selection with one active player.",
+  "Balanced startup and buffering": "Balanced startup and buffering",
+  "Buffer limits apply to Media3; system players manage their own buffer.": "Buffer limits apply to Media3; system players manage their own buffer.",
+  "Buffering profile": "Buffering profile",
+  "Clears learned playback choices in this profile, keeping your sources and favourites.": "Clears learned playback choices in this profile, keeping your sources and favourites.",
+  "Fast": "Fast",
+  "Forget working signals": "Forget working signals",
+  "Media3 enables buffer profiles and frame-rate matching. The system player is available for compatibility.": "Media3 enables buffer profiles and frame-rate matching. The system player is available for compatibility.",
+  "More buffering · More tolerance for network variation": "More buffering · More tolerance for network variation",
+  "Playback engine": "Playback engine",
+  "Quicker start · Less protection from network variation": "Quicker start · Less protection from network variation",
+  "Reconnecting…": "Reconnecting…",
+  "Stable": "Stable",
+  "System player": "System player",
+  "The source refused access. Check the source settings.": "The source refused access. Check the source settings.",
+  "Try the default format and player again.": "Try the default format and player again.",
+  "Trying the compatibility player…": "Trying the compatibility player…"
 }

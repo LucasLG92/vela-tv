@@ -35,11 +35,11 @@ final class M3uClient {
     }
     boolean refresh(boolean force)throws Exception{
         if(!LiveTvData.prefs(context).contains("m3u-private"))save(url(),epgUrl(),allowHttp(),false);
-        String source=identity(context);if(!force&&cache.fresh(source,4*3600_000L))return false;
+        String source=identity(context);if(!force&&cache.fresh(source,4*3600_000L)&&new JSONObject(cache.metadata(source)).optInt("headersVersion")==1)return false;
         try{String address=url();valid(address,allowHttp());String epg;
             try(XtreamClient.Response response=new XtreamClient.Response(address,32*1024*1024);TvCatalogCache.Writer writer=cache.writer(source,response.connection.getContentLengthLong())){
                 epg=parse(new InputStreamReader(response.in,StandardCharsets.UTF_8),allowHttp(),writer);
-                String custom=epgUrl();if(!custom.isEmpty())epg=custom;if(writer.size()==0)throw new IOException("No direct channels");writer.commit(new JSONObject().put("epg",epg).put("default",address.equals(LiveTvData.DEFAULT_M3U)).toString());
+                String custom=epgUrl();if(!custom.isEmpty())epg=custom;if(writer.size()==0)throw new IOException("No direct channels");writer.commit(new JSONObject().put("epg",epg).put("default",address.equals(LiveTvData.DEFAULT_M3U)).put("headersVersion",1).toString());
             }
             return false;
         }catch(Exception failure){if(Thread.currentThread().isInterrupted())throw failure;if(cache.fresh(source,7*86400_000L))return true;throw new IOException("Playlist unavailable");}
@@ -52,18 +52,25 @@ final class M3uClient {
     static String parse(Reader input,boolean http,TvCatalogCache.Writer writer)throws Exception{
         BufferedReader reader=new BufferedReader(input,8192);String first=line(reader);if(first==null||!first.replace("\uFEFF","").startsWith("#EXTM3U"))throw new IOException("Not an M3U playlist");
         String epg=attribute(first,"x-tvg-url");if(epg.isEmpty())epg=attribute(first,"url-tvg");if(epg.contains(","))epg=epg.substring(0,epg.indexOf(','));if(!epg.isEmpty())try{valid(epg,http);}catch(Exception bad){epg="";}
-        String defaultReplay=attribute(first,"catchup-source"),defaultMode=attribute(first,"catchup"),defaultDays=attribute(first,"catchup-days");String name="",id="",group="",logo="",replay="",replayMode="",days="",current;boolean unsupported=false;int entries=0;
+        String defaultReplay=attribute(first,"catchup-source"),defaultMode=attribute(first,"catchup"),defaultDays=attribute(first,"catchup-days");String name="",id="",group="",logo="",replay="",replayMode="",days="",current;boolean unsupported=false;Map<String,String> headers=new LinkedHashMap<>();int entries=0;
         while((current=line(reader))!=null){
             if(current.startsWith("#EXTINF:")){
                 if(++entries>TvCatalogCache.MAX_CHANNELS)throw new IOException("Channel limit");boolean quoted=false;char quote=0;int comma=-1;
                 for(int i=0;i<current.length();i++){char ch=current.charAt(i);if(ch=='\"'||ch=='\''){if(!quoted){quoted=true;quote=ch;}else if(ch==quote)quoted=false;}if(ch==','&&!quoted){comma=i;break;}}
-                name=limit(comma<0?attribute(current,"tvg-name"):current.substring(comma+1).trim(),160);id=limit(attribute(current,"tvg-id"),256);group=limit(attribute(current,"group-title"),120);logo=limit(attribute(current,"tvg-logo"),4096);if(!LiveTvData.httpUrl(logo))logo="";replay=limit(attribute(current,"catchup-source"),4096);replayMode=attribute(current,"catchup");days=attribute(current,"catchup-days");if(replay.isEmpty())replay=defaultReplay;if(replayMode.isEmpty())replayMode=defaultMode;if(days.isEmpty())days=defaultDays;unsupported=false;
+                name=limit(comma<0?attribute(current,"tvg-name"):current.substring(comma+1).trim(),160);id=limit(attribute(current,"tvg-id"),256);group=limit(attribute(current,"group-title"),120);logo=limit(attribute(current,"tvg-logo"),4096);if(!LiveTvData.httpUrl(logo))logo="";replay=limit(attribute(current,"catchup-source"),4096);replayMode=attribute(current,"catchup");days=attribute(current,"catchup-days");if(replay.isEmpty())replay=defaultReplay;if(replayMode.isEmpty())replayMode=defaultMode;if(days.isEmpty())days=defaultDays;unsupported=false;headers.clear();
             }else if(current.startsWith("#EXTGRP:"))group=limit(current.substring(8).trim(),120);
-            else if(current.startsWith("#EXTV-streamtype:")||current.startsWith("#EXTV-headers:")||current.startsWith("#KODIPROP:"))unsupported=true;
+            else if(current.startsWith("#EXTVLCOPT:http-user-agent="))VelaStreamHeaders.put(headers,"User-Agent",current.substring(current.indexOf('=')+1));
+            else if(current.startsWith("#EXTVLCOPT:http-referrer=")||current.startsWith("#EXTVLCOPT:http-referer="))VelaStreamHeaders.put(headers,"Referer",current.substring(current.indexOf('=')+1));
+            else if(current.startsWith("#EXTV-headers:"))VelaStreamHeaders.jsonHeaders(headers,current.substring(current.indexOf(':')+1));
+            else if(current.startsWith("#KODIPROP:inputstream.adaptive.stream_headers=")||current.startsWith("#KODIPROP:inputstream.adaptive.manifest_headers="))VelaStreamHeaders.options(headers,current.substring(current.indexOf('=')+1));
+            else if(current.equalsIgnoreCase("#KODIPROP:inputstream=inputstream.adaptive")||current.equalsIgnoreCase("#KODIPROP:inputstreamaddon=inputstream.adaptive")){}
+            else if(current.startsWith("#EXTV-streamtype:")||current.startsWith("#KODIPROP:inputstream.adaptive.manifest_type=")){String type=current.substring(current.startsWith("#EXTV-")?current.indexOf(':')+1:current.indexOf('=')+1).trim().toLowerCase(Locale.ROOT);if(!Arrays.asList("hls","m3u8","ts","mpegts").contains(type))unsupported=true;}
+            else if(current.startsWith("#KODIPROP:"))unsupported=true;
             else if(!current.isEmpty()&&!current.startsWith("#")&&!name.isEmpty()){
-                if(!unsupported&&LiveTvData.httpUrl(current)&&(http||LiveTvData.https(current))&&!current.contains("|")){
+                int pipe=current.indexOf('|');if(pipe>=0){Map<String,String> suffix=new LinkedHashMap<>();VelaStreamHeaders.options(suffix,current.substring(pipe+1));if(suffix.isEmpty())unsupported=true;headers.putAll(suffix);current=current.substring(0,pipe);}
+                if(!unsupported&&LiveTvData.httpUrl(current)&&(http||LiveTvData.https(current))){
                     String channelId=id.isEmpty()?LiveTvData.hash(name+"|"+group):id;
-                    LiveTvData.Channel ch=new LiveTvData.Channel(channelId,name,group.isEmpty()?Ui.tr("Minha lista","My playlist","Mi lista"):group,logo,Collections.singletonList(current),"","","","",id);if(!replay.isEmpty()&&Arrays.asList("default","append").contains(replayMode)){try{ch.archiveDays=Math.max(0,Math.min(7,Integer.parseInt(days)));}catch(NumberFormatException missing){ch.archiveDays=1;}ch.replayTemplate=replay;ch.replayMode=replayMode;}writer.add(ch,true);
+                    LiveTvData.Channel ch=new LiveTvData.Channel(channelId,name,group.isEmpty()?Ui.tr("Minha lista","My playlist","Mi lista"):group,logo,Collections.singletonList(current),"","","","",id);if(!replay.isEmpty()&&Arrays.asList("default","append").contains(replayMode)){try{ch.archiveDays=Math.max(0,Math.min(7,Integer.parseInt(days)));}catch(NumberFormatException missing){ch.archiveDays=1;}ch.replayTemplate=replay;ch.replayMode=replayMode;}if(!headers.isEmpty())ch.requestHeaders.put(LiveTvData.hash(current),VelaStreamHeaders.clean(headers));writer.add(ch,true);
                 }name="";
             }
         }return epg;

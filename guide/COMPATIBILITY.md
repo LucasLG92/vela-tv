@@ -34,7 +34,7 @@ Home artwork cache is bounded at 6 MiB, or 3 MiB in light mode. App icons use bo
 
 The guide draws programmes in a single canvas and reads a bounded visible block from disk. Large text/density settings can reduce the normal six visible rows. Playback uses one decoder or tuner session and releases it on exit.
 
-Optional HLS history is stored on disk, capped at 15 minutes, 256 MiB and 240 segments. Media3's 4 MiB queue target does not cap codecs, graphics or total process memory. In the unified APK, Lite does not construct Full’s library Home or start its IPTV/Media3 playback path. The separate legacy Lite migration build excludes those clients from its binary. Lite has no resident background service.
+Optional HLS history is stored on disk, capped at 15 minutes, 256 MiB and 240 segments. Media3's 2/4/8 MiB encoded-buffer targets (clamped to 4 MiB in light/low-RAM mode) does not cap codecs, graphics or total process memory. In the unified APK, Lite does not construct Full’s library Home or start its IPTV/Media3 playback path. The separate legacy Lite migration build excludes those clients from its binary. Lite has no resident background service.
 
 The selected language catalogue alone is loaded. English uses source strings. Phone sessions and preference sync stop outside their intended foreground lifecycle; alerts use one cached approximate system alarm rather than a resident guide service.
 

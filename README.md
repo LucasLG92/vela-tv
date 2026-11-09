@@ -40,6 +40,8 @@ Your **M3U, Xtream or antenna channels**, in the same place as the rest of your 
 
 [![Vela's integrated horizontal television guide](gallery/previews/123-tv-guide.webp)](gallery/123-tv-guide.webp)
 
+**Playback that adapts.** Automatic engine selection remembers working HLS/TS formats, with Fast, Balanced and Stable buffer profiles and bounded recovery. M3U headers follow their own signal. [Playback options and limits](guide/PLAYBACK.md).
+
 Hold OK to manage favourites, put channels in your order or hide what you do not watch. Recent channels and the previous channel stay within reach. While watching, press **Right** to browse channels over the picture.
 
 **What to watch** brings together programmes on now, tonight or in the next 48 hours, using the genres in your guide. Choose a future broadcast and ask Vela to **switch when it starts**, while Vela stays open.

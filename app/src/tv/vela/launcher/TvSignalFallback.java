@@ -29,9 +29,11 @@ final class TvSignalFallback {
     /** Try the other format of this variant first, then the nearest lower quality. */
     private static int order(String name,int selected){int h=height(name);if(selected==0)return 100-TvChannelNames.rank(name);if(h==selected)return 0;if(h>0&&h<selected)return 10_000-h;if(h==0)return 20_000;return 30_000+h;}
     private static int height(String name){String q=TvChannelNames.quality(name);return q.equals("8K")?4320:q.equals("4K")||q.equals("UHD")?2160:q.equals("FHD")||q.startsWith("1080")?1080:q.equals("HD")||q.startsWith("720")?720:q.equals("SD")?480:0;}
-    Signal next(Resolver resolver){
+    Signal next(Resolver resolver){return next(resolver,false);}
+    Signal next(Resolver resolver,boolean sameVariantOnly){
         while(attempts<MAX_SIGNALS){
             if(index>=urls.size()){
+                if(sameVariantOnly&&current!=null)return null;
                 if(variant>=channels.size())return null;
                 current=channels.get(variant++);index=0;urls=Collections.emptyList();
                 try{List<String> values=resolver.streams(current);if(values!=null)urls=new ArrayList<>(values.subList(0,Math.min(4,values.size())));}catch(Exception unavailable){/* Skip unavailable variants without extra network probes. */}
@@ -48,6 +50,7 @@ final class TvSignalFallback {
     static final class Progress {
         private long position,advancedAt;
         void reset(long now,long value){position=value;advancedAt=now;}
-        boolean stalled(long now,long value,boolean paused){if(paused||value!=position){reset(now,value);return false;}return now-advancedAt>=STALL_TIMEOUT_MS;}
+        boolean stalled(long now,long value,boolean paused){return stalled(now,value,paused,STALL_TIMEOUT_MS);}
+        boolean stalled(long now,long value,boolean paused,long limit){if(paused||value!=position){reset(now,value);return false;}return now-advancedAt>=limit;}
     }
 }

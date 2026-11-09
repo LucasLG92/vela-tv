@@ -1825,5 +1825,16 @@
     "height": 2160,
     "version": "2.2.1-preview",
     "sha256": "5505a71832bdfc0c7458b291d2265509dc6fe84bbe491b03c86769147f63bca1"
+  },
+  {
+    "file": "152-playback-settings.webp",
+    "title": "Playback that adapts",
+    "source": "Native 3840x2160 Android production view on an owned emulator. Demonstration profile and weather; no account, signal URL, credentials or device identifiers.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.3.0-preview",
+    "sha256": "5be55699855352ec4b572dbe022218d5b2738dc493ec74612de0a85e9683002d"
   }
 ]

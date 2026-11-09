@@ -737,7 +737,9 @@ final class CinemaHomeView extends FrameLayout {
         heroBounds(title,home?178:280,compact?88:home?128:136);heroBounds(titleLogo,home?178:280,compact?88:home?128:136);
         heroBounds(meta,compact?276:home?310:426,home?30:34);heroBounds(summary,compact?312:home?350:470,compact?32:home?56:large?40:70);summary.setMaxLines(compact?1:home?2:large?1:2);
         for(View action:new View[]{play,link,detailsButton})heroBounds(action,compact?362:home?426:large?530:574,home?56:60);
+        syncMovieTitle();
     }
+    private void syncMovieTitle(){boolean logo=selected!=null&&titleLogo.getDrawable()!=null&&!rowsOnly();titleLogo.setVisibility(logo?VISIBLE:GONE);title.setVisibility(rowsOnly()?GONE:logo?INVISIBLE:VISIBLE);}
     private void layoutPlaybackAction(){
         LayoutParams action=(LayoutParams)play.getLayoutParams();action.width=Math.min(440,Math.max(256,(int)Math.ceil(play.getPaint().measureText(play.getText().toString()))+90));play.setLayoutParams(action);
         LayoutParams options=(LayoutParams)link.getLayoutParams();options.leftMargin=action.leftMargin+action.width+18;link.setLayoutParams(options);LayoutParams info=(LayoutParams)detailsButton.getLayoutParams();info.leftMargin=options.leftMargin+options.width+18;info.width=Math.min(260,Math.max(180,(int)Math.ceil(detailsButton.getPaint().measureText(detailsButton.getText().toString()))+44));detailsButton.setLayoutParams(info);
@@ -750,7 +752,7 @@ final class CinemaHomeView extends FrameLayout {
         selected=film;title.setText(film.title);Drawable provider=providerBrand(film);providerMark.setImageDrawable(provider);providerMark.setVisibility(provider==null?GONE:VISIBLE);
         connection.setText((film.packageName.equals(JellyfinClient.PACKAGE)?film.continuing?Ui.tr("Continuar assistindo","Continue watching","Seguir viendo"):film.recentlyAdded?Ui.tr("Adicionados recentemente","Recently added","Últimas subidas"):Ui.tr("Sua biblioteca","Your library","Tu biblioteca"):film.section)+(!film.tvSource?" · "+(filter==0?homeLibrary:plex).nameFor(film):provider==null?" · "+film.provider:""));meta.setText(metadata+(film.continuing&&film.remainingMs()>0?(metadata.isEmpty()?"":"  ·  ")+ContinueWatching.remaining(film):""));summary.setText(film.summary);play.setText(film.nextEpisode?Ui.tr("Ver em ","Watch in ","Ver en ")+film.provider:film.continuing?Ui.tr("Continuar em ","Resume in ","Continuar en ")+film.provider:Ui.tr("Abrir ","Open ","Abrir ")+film.provider);layoutPlaybackAction();
         if(rowsOnly()){hideHero();imageGeneration++;if(heroRequest!=null)heroRequest.cancel();if(logoRequest!=null)logoRequest.cancel();heroBitmap=null;backdrop.setImageDrawable(null);return;}
-        if(same){if(changed){imageGeneration++;if(heroLoad!=null)main.removeCallbacks(heroLoad);if(heroRequest!=null)heroRequest.cancel();if(logoRequest!=null)logoRequest.cancel();}return;}
+        if(same){if(changed){imageGeneration++;if(heroLoad!=null)main.removeCallbacks(heroLoad);if(heroRequest!=null)heroRequest.cancel();if(logoRequest!=null)logoRequest.cancel();}syncMovieTitle();return;}
         title.setVisibility(VISIBLE);titleLogo.setVisibility(GONE);titleLogo.setImageDrawable(null);titleLogo.setContentDescription(film.title);
         int generation=++imageGeneration;if(heroLoad!=null)main.removeCallbacks(heroLoad);
         if(heroRequest!=null)heroRequest.cancel();if(logoRequest!=null)logoRequest.cancel();
@@ -761,7 +763,7 @@ final class CinemaHomeView extends FrameLayout {
             if(film.tvSource){if(!VelaStyle.minimal(activity))heroRequest=images.loadTv(film.art,Visuals.light(activity)?1280:1920,Visuals.light(activity)?720:1080,art);}
             else{
                 boolean light=Visuals.light(activity);if(!VelaStyle.minimal(activity))heroRequest=images.load(film.art,light?1280:1920,light?720:1080,art);
-                logoRequest=images.loadLogo(film.logo,b->{if(active&&!closed&&generation==imageGeneration){titleLogo.setImageBitmap(b);titleLogo.setVisibility(VISIBLE);title.setVisibility(INVISIBLE);}});
+                logoRequest=images.loadLogo(film.logo,b->{if(active&&!closed&&generation==imageGeneration){titleLogo.setImageBitmap(b);syncMovieTitle();}});
             }
         };
         main.postDelayed(heroLoad,90);

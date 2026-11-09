@@ -8,23 +8,30 @@ import android.view.Surface;
 import androidx.media3.common.*;
 import androidx.media3.common.text.CueGroup;
 import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.DecoderCounters;
+import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy;
+import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy;
 import androidx.media3.exoplayer.*;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import java.util.*;
 
-/** One optional engine for disk-backed HLS or frame-rate matching; never alongside MediaPlayer. */
+/** The bounded Media3 network engine; never runs alongside MediaPlayer. */
 final class VelaDvrPlayer {
-    interface Events {void ready();void frame();void size(int height);void failed();void captions(String text);default void ended(){}}
+    interface Events {void ready();void frame();void size(int height);void failed();default void failed(VelaPlaybackRecovery.Failure reason){failed();}void captions(String text);default void ended(){}}
     private final ExoPlayer engine;private final Context context;private final String channel;private boolean ready;private volatile boolean closed;int seeks;
     private final Handler main=new Handler(Looper.getMainLooper());
     private final VelaFrameRate frameRate;
     private final VideoCadence cadence=new VideoCadence();
-    private Format observedFormat;private boolean sampled;private volatile boolean timingUnavailable;
+    private Format observedFormat;private boolean sampled;private volatile boolean timingUnavailable;private int liveWindowRecoveries;
     VelaDvrPlayer(android.app.Activity c,String name,Surface surface,String loopback,Events events){
+        this(c,name,surface,loopback,Collections.emptyMap(),VelaPlaybackPolicy.buffer(c),events);
+    }
+    VelaDvrPlayer(android.app.Activity c,String name,Surface surface,String loopback,Map<String,String> headers,VelaPlaybackPolicy.Buffer profile,Events events){
         context=c;channel=name;
-        DefaultLoadControl limits=new DefaultLoadControl.Builder().setBufferDurationsMs(1000,3000,300,600).setTargetBufferBytes(4*1024*1024).setPrioritizeTimeOverSizeThresholds(false).build();
+        DefaultLoadControl limits=new DefaultLoadControl.Builder().setBufferDurationsMs(profile.minMs,profile.maxMs,profile.startMs,profile.rebufferMs).setTargetBufferBytes(profile.bytes).setPrioritizeTimeOverSizeThresholds(false).build();
         int matching=VelaFrameRate.mode(c);frameRate=matching==VelaFrameRate.OFF?null:new VelaFrameRate(c,surface,matching);
-        engine=new ExoPlayer.Builder(c).setLoadControl(limits).setVideoChangeFrameRateStrategy(C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF).build();
+        engine=new ExoPlayer.Builder(c,new DefaultRenderersFactory(c).setEnableDecoderFallback(true)).setLoadControl(limits).setVideoChangeFrameRateStrategy(C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF).build();
+        try{
         engine.setAudioAttributes(new AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(),false);
         engine.setVideoSurface(surface);
         if(frameRate!=null)engine.setVideoFrameMetadataListener((presentationUs,releaseNs,format,mediaFormat)->{
@@ -36,17 +43,27 @@ final class VelaDvrPlayer {
             @Override public void onPlaybackStateChanged(int state){if(closed)return;if(state==Player.STATE_READY&&!ready){ready=true;events.ready();}matchingState();if(state==Player.STATE_ENDED)events.ended();}
             @Override public void onRenderedFirstFrame(){if(!closed)events.frame();}
             @Override public void onVideoSizeChanged(VideoSize size){if(!closed)events.size(size.height);}
-            @Override public void onPlayerError(PlaybackException error){if(!closed)events.failed();}
+            @Override public void onPlayerError(PlaybackException error){if(closed)return;if(error.errorCode==PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW&&engine.getPlayWhenReady()&&liveWindowRecoveries++==0){try{engine.seekToDefaultPosition();engine.prepare();engine.play();return;}catch(RuntimeException unavailable){events.failed(VelaPlaybackRecovery.Failure.NETWORK);return;}}events.failed(classify(error));}
             @Override public void onCues(CueGroup cues){StringBuilder text=new StringBuilder();for(androidx.media3.common.text.Cue cue:cues.cues)if(cue.text!=null){if(text.length()>0)text.append('\n');if(text.length()<4096)text.append(cue.text);}if(!closed)events.captions(text.toString());}
             @Override public void onPositionDiscontinuity(Player.PositionInfo oldPosition,Player.PositionInfo newPosition,int reason){if(reason==Player.DISCONTINUITY_REASON_SEEK)seeks++;}
             @Override public void onTracksChanged(Tracks tracks){if(closed)return;restore();if(frameRate!=null&&audioOnly()){timingUnavailable=true;frameRate.unknown();}}
             @Override public void onIsPlayingChanged(boolean playing){if(!closed&&playing&&audioOnly())events.frame();}
             @Override public void onPlayWhenReadyChanged(boolean playWhenReady,int reason){matchingState();}
         });
-        MediaItem item=new MediaItem.Builder().setUri(loopback).setLiveConfiguration(new MediaItem.LiveConfiguration.Builder().setTargetOffsetMs(2500).setMinPlaybackSpeed(1f).setMaxPlaybackSpeed(1f).build()).build();
-        try{engine.setMediaSource(new DefaultMediaSourceFactory(new DefaultHttpDataSource.Factory().setUserAgent("Vela")).createMediaSource(item));engine.prepare();engine.play();}
-        catch(RuntimeException failure){close();throw failure;}
+        // Respect the source's advertised live position; a tiny forced offset can fall outside its HLS window.
+        MediaItem item=new MediaItem.Builder().setUri(loopback).setLiveConfiguration(new MediaItem.LiveConfiguration.Builder().setMinPlaybackSpeed(1f).setMaxPlaybackSpeed(1f).build()).build();
+        Map<String,String> requestHeaders=VelaStreamHeaders.transport(headers);
+        DefaultHttpDataSource.Factory http=new DefaultHttpDataSource.Factory().setUserAgent(requestHeaders.get("User-Agent")).setConnectTimeoutMs(5000).setReadTimeoutMs(6000).setDefaultRequestProperties(requestHeaders);
+        DefaultLoadErrorHandlingPolicy errors=new DefaultLoadErrorHandlingPolicy(1){@Override public long getRetryDelayMsFor(LoadErrorHandlingPolicy.LoadErrorInfo info){VelaPlaybackRecovery.Failure type=classify(info.exception);return info.errorCount>1||type==VelaPlaybackRecovery.Failure.ACCESS||type==VelaPlaybackRecovery.Failure.MISSING?C.TIME_UNSET:Math.min(1000,250L*info.errorCount);}};
+        engine.setMediaSource(new DefaultMediaSourceFactory(http).setLoadErrorHandlingPolicy(errors).createMediaSource(item));engine.prepare();engine.play();
+        }catch(RuntimeException failure){close();throw failure;}
     }
+    static VelaPlaybackRecovery.Failure classify(Throwable error){
+        Throwable cause=error;for(int i=0;cause!=null&&i<8;i++,cause=cause.getCause())if(cause instanceof DefaultHttpDataSource.InvalidResponseCodeException){int code=((DefaultHttpDataSource.InvalidResponseCodeException)cause).responseCode;return code==401||code==403?VelaPlaybackRecovery.Failure.ACCESS:code==404||code==410?VelaPlaybackRecovery.Failure.MISSING:VelaPlaybackRecovery.Failure.NETWORK;}
+        if(error instanceof PlaybackException){int code=((PlaybackException)error).errorCode;if(code>=4000&&code<6000)return VelaPlaybackRecovery.Failure.DECODER;if(code>=2000&&code<3000||code==PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW||code==PlaybackException.ERROR_CODE_TIMEOUT)return VelaPlaybackRecovery.Failure.NETWORK;if(code>=3000&&code<4000)return VelaPlaybackRecovery.Failure.DECODER;}
+        return error instanceof java.io.IOException?VelaPlaybackRecovery.Failure.NETWORK:VelaPlaybackRecovery.Failure.UNKNOWN;
+    }
+    long progress(){DecoderCounters counters=engine.getVideoDecoderCounters();if(counters!=null){counters.ensureUpdated();if(counters.renderedOutputBufferCount>0)return counters.renderedOutputBufferCount;}return engine.getCurrentPosition();}
     private void postRate(float rate){main.post(()->{if(!closed)frameRate.rate(rate);});}
     private void matchingState(){if(closed||frameRate==null)return;int state=engine.getPlaybackState();frameRate.playing(ready&&engine.getPlayWhenReady()&&(state==Player.STATE_READY||state==Player.STATE_BUFFERING));}
     private boolean audioOnly(){Tracks tracks=engine.getCurrentTracks();return tracks.isTypeSelected(C.TRACK_TYPE_AUDIO)&&!tracks.isTypeSelected(C.TRACK_TYPE_VIDEO);}

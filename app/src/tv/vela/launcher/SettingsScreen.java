@@ -304,6 +304,10 @@ class SettingsScreen extends VelaScreen {
                 section(Ui.tr("SUAS FONTES","YOUR SOURCES","TUS FUENTES"),300);
                 row(Ui.tr("Listas e ajustes","Playlists and settings","Listas y ajustes"),"›",342,Ui.tr("Seus canais, conectados.","Your channels, connected.","Tus canales, conectados."),Ui.tr("Configure suas listas M3U, conta Xtream, antena e guia de programação.","Configure your M3U playlists, Xtream account, antenna and programme guide.","Configura tus listas M3U, tu cuenta Xtream, la antena y la guía de programación."),()->activity.startActivity(new Intent(activity,LiveTvActivity.class).putExtra("sources",true)));
                 section(L10n.text("Playback controls"),1);
+                int engine=VelaPlaybackPolicy.engine(activity),buffer=VelaPlaybackPolicy.profile(activity);
+                row(L10n.text("Playback engine"),VelaPlaybackPolicy.engineName(engine),0,L10n.text("Automatic selection with one active player."),L10n.text("Media3 enables buffer profiles and frame-rate matching. The system player is available for compatibility."),()->{VelaPlaybackPanel.prefs(activity).edit().putInt("engine",(engine+1)%3).apply();render(22);rows.get(3).requestFocus();});
+                row(L10n.text("Buffering profile"),VelaPlaybackPolicy.profileName(buffer),0,VelaPlaybackPolicy.profileDetail(buffer),L10n.text("Buffer limits apply to Media3; system players manage their own buffer."),()->{VelaPlaybackPanel.prefs(activity).edit().putInt("buffer",(buffer+1)%3).apply();render(22);rows.get(4).requestFocus();});
+                row(L10n.text("Forget working signals"),"",0,L10n.text("Try the default format and player again."),L10n.text("Clears learned playback choices in this profile, keeping your sources and favourites."),()->{VelaWorkspace.prefs(activity,"vela-playback-hints").edit().clear().apply();render(22);rows.get(5).requestFocus();});
                 row(L10n.text("Match content frame rate"),VelaFrameRate.name(VelaFrameRate.mode(activity)),0,L10n.text("Smoother video on compatible displays."),L10n.text("Off, seamless changes, or allow display switching. Applies only while Vela plays a network channel."),()->open(25,0));
                 note(Ui.tr("A vista escolhida é aplicada ao voltar à televisão.","Your chosen view applies when you return to TV.","La vista elegida se aplica al volver a la televisión."),470);
             }else if(page==21){
@@ -406,7 +410,7 @@ class SettingsScreen extends VelaScreen {
             if(key==KeyEvent.KEYCODE_BACK&&root&&categories[categoryFor(page)].hasFocus()){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}
 
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==21){if(e.getAction()==KeyEvent.ACTION_UP)render(14);return true;}
-            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==25){if(e.getAction()==KeyEvent.ACTION_UP){render(22);rows.get(3).requestFocus();}return true;}
+            if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==25){if(e.getAction()==KeyEvent.ACTION_UP){render(22);rows.get(6).requestFocus();}return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&page==24){if(e.getAction()==KeyEvent.ACTION_UP){render(17);rows.get(rows.size()-1).requestFocus();}return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(page>=17&&page<=20)){if(e.getAction()==KeyEvent.ACTION_UP){int old=page;render(old==17?2:17);rows.get(old==17?3:old-17).requestFocus();}return true;}
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK&&(activity.returnToSetup||activity.returnToCaller)&&page==activity.entryPage){if(e.getAction()==KeyEvent.ACTION_UP)activity.finish();return true;}

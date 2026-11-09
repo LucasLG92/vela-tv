@@ -3,17 +3,17 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "2.2.1-preview",
-      "code": 81,
-      "tag": "v2.2.1-preview",
-      "title": "Vela 2.2.1 Preview \u00b7 Search with a clearer picture",
-      "file": "Vela-2.2.1-preview.apk",
-      "size": 4982555,
-      "sha256": "a114c547a86c30d1940239eb1667f5bda3f503122a472bd69bf2e8e67160b0ff",
-      "blob_sha": "5ac8431d963918de03ed55adb8b95fa6306c2f1e",
+      "version": "2.3.0-preview",
+      "code": 82,
+      "tag": "v2.3.0-preview",
+      "title": "Vela 2.3.0 Preview - Playback that learns",
+      "file": "Vela-2.3.0-preview.apk",
+      "size": 5011227,
+      "sha256": "b2b43a56feea5cfa8a6ae5d256857abd7a3d5ae264a705c243afc9c294ce8215",
+      "blob_sha": "4329fc4b37d753283df9a1b9d4768f3415d0d78c",
       "chunks": [
         {
-          "sha": "79ad52445d02802bb4c78e182219a0fe6c2a479e",
+          "sha": "253cd6db928e66c8562a0c834937f940fa5537b3",
           "size": 262144
         },
         {
@@ -29,85 +29,85 @@
           "size": 262144
         },
         {
-          "sha": "3aaf6cc939771ab1e2686db61ffeeb88024c3ea3",
+          "sha": "77bdde005395c1a2bc000eecaf892f735875d64b",
           "size": 262144
         },
         {
-          "sha": "0dab119bfd1a44f364ec5dbd9b17fcfd49df1295",
+          "sha": "f4e56d7fad2e184486e76f12664a5244e9cefe4a",
           "size": 262144
         },
         {
-          "sha": "5be128318302d9db81b5842ce92988ceaedbdcff",
+          "sha": "2d159f6fe1b7d1f68155a2e5cffe3f807c29b558",
           "size": 262144
         },
         {
-          "sha": "7c366ba5df69da18ca8c31df4a28195a8d97f75a",
+          "sha": "1c2d407691bf172daa52b642349aa56a77f7a0e6",
           "size": 262144
         },
         {
-          "sha": "d74c09154543edb7dacd170d5c4ba07dfe2668a7",
+          "sha": "dd8ab1280ab300c977a5ff3c7a53399646202d2e",
           "size": 262144
         },
         {
-          "sha": "a84bbd5e48aa8b18fb6b22bce097628e858b8bbf",
+          "sha": "0296b3129efc7f3e39b719d22dc0caa8e6933dc0",
           "size": 262144
         },
         {
-          "sha": "8b7c474396a4fcddea7dad4865bc6d3dc75dafe3",
+          "sha": "561b6f6c1847e85c3d3de3298d39152d9da23224",
           "size": 262144
         },
         {
-          "sha": "ccb48b95af4c7de95c5b60c3775340f88df80d3c",
+          "sha": "20fc67248be799e7df5371180a5e21acf89ef296",
           "size": 262144
         },
         {
-          "sha": "2a2d131147c27ad22d8d50e7f1e768bac333f5e1",
+          "sha": "d3046a9ba283d509015d1918a973ce011e1138cf",
           "size": 262144
         },
         {
-          "sha": "a4e9664cd3276edb4ec0a6a4c8631bf9c3b23678",
+          "sha": "35d2e9689256002028167ac5d2cde3004f45cab2",
           "size": 262144
         },
         {
-          "sha": "7ad9a3491758e5736a934aa2c63bb26c6eed8aa4",
+          "sha": "b10bd3a1ebd1f6f27098c6ecd48d074cab6c059e",
           "size": 262144
         },
         {
-          "sha": "4486c678b96263bfdc26157b5aeb6782119a22d6",
+          "sha": "3ea832fe71a19c1d820414946ae7103d19b32c43",
           "size": 262144
         },
         {
-          "sha": "f0c92fd80cacc7c5595c66f2a7d99b39fdd2f080",
+          "sha": "953339886a6a6b4d6d64d52a17ccbcaeb31f780d",
           "size": 262144
         },
         {
-          "sha": "2b74b8b85b5de150824d7e045bcd58c35a008fcd",
+          "sha": "821c434fb8077779bcb387bac2afa648809238b0",
           "size": 262144
         },
         {
-          "sha": "5bb2c97da215bb9500481851dd4e75a096a0bab1",
+          "sha": "f918e0c762b5c87148958e4c0d682db915105190",
           "size": 262144
         },
         {
-          "sha": "a7a6b8f684ca0fd5925e1e9995fa7e2e67d9cef4",
-          "size": 1819
+          "sha": "4148612fc10b118e93f9254f322664df4b65bc4c",
+          "size": 30491
         }
       ],
-      "notes": "guide/releases/2.2.1-preview.md"
+      "notes": "guide/releases/2.3.0-preview.md"
     },
     {
       "package": "tv.vela.launcher.lite",
-      "version": "0.18.4-preview",
-      "code": 38,
-      "tag": "lite-v0.18.4-preview",
-      "title": "Vela Lite 0.18.4 Preview \u00b7 Clearer search, quieter voice",
-      "file": "Vela-Lite-0.18.4-preview.apk",
-      "size": 2452314,
-      "sha256": "8197383b0dfb0762f96797b74c9779ae5fd342c58259255008c3c875d5b95698",
-      "blob_sha": "b6a8acd9cb60beaadc4e0ec4ee015f278139557d",
+      "version": "0.18.5-preview",
+      "code": 39,
+      "tag": "lite-v0.18.5-preview",
+      "title": "Vela Lite 0.18.5 Preview - Compatibility update",
+      "file": "Vela-Lite-0.18.5-preview.apk",
+      "size": 2460506,
+      "sha256": "e2d1f9f263d3c8314237cd96770f79001953909408ab6a5c8c0ae1a7d6cb01df",
+      "blob_sha": "06fe282f3deb539aa18360beda797c8d7b4493e1",
       "chunks": [
         {
-          "sha": "fb4f2d04df0d35317ff31e30dab81e225c9f8122",
+          "sha": "d9274da9c8ec6f26532db966ad51f8f9cf7980eb",
           "size": 262144
         },
         {
@@ -119,35 +119,35 @@
           "size": 262144
         },
         {
-          "sha": "cc9314163903f4db03785e6d9dfbecf03793dd2e",
+          "sha": "c801a52eb9394d0dfcce067719b9dd8639856679",
           "size": 262144
         },
         {
-          "sha": "4844e2afb1c6896129b9a33bb13600147425810f",
+          "sha": "859ef5ec8a20ff9edd7161f930f8601718e54ac2",
           "size": 262144
         },
         {
-          "sha": "6d35acf50f38ec616339f2d5fa1ce23831178b24",
+          "sha": "bf9d8bc996a5b6b31036bb10db03385a60ad7ae2",
           "size": 262144
         },
         {
-          "sha": "d2d633a42414af0823139c2f59c2bc1e40daf852",
+          "sha": "630520735850bed52e45bb68a49a5349a8b5f3f1",
           "size": 262144
         },
         {
-          "sha": "276be5ee81e8053c4f2f5daafeb2c4663b4c0503",
+          "sha": "9abf46f8aacefe2517d5e8c595c2878e0ae83be9",
           "size": 262144
         },
         {
-          "sha": "68270dbd38fbd445cb4b19abd686f9432b7d56a3",
+          "sha": "c0b3ad37de4234c221a257fc156165162c5eb20f",
           "size": 262144
         },
         {
-          "sha": "8d1ef46aea2a878a477e0b81a3944066a1dd5906",
-          "size": 93018
+          "sha": "bf098d90be56f11b4433ebdaa9e6b35685beb8ee",
+          "size": 101210
         }
       ],
-      "notes": "guide/releases/lite-0.18.4-preview.md"
+      "notes": "guide/releases/lite-0.18.5-preview.md"
     }
   ]
 }

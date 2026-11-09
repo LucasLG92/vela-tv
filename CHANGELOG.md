@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.3.0-preview / Lite transition 0.18.5-preview
+
+- Full: automatic Media3/system selection, bounded per-channel successful-format/engine hints (32 entries, seven-day expiry), and explicit engine controls. Release the existing engine before creating another.
+- Full: Fast/Balanced/Stable Media3 profiles with 2/4/8 MiB encoded-buffer targets; light mode and Android low-RAM devices clamp targets to 4 MiB. Decoder, graphics and total process memory are separate.
+- Full: classify transient network, stalled playback, codec/format, missing-signal and access errors. Bound recovery to ten starts and 90 seconds per incident; preserve same-channel quality fallback and avoid probing all qualities after access refusal.
+- Full: parse allow-listed per-signal M3U headers, retain them through encrypted catalogue merges and representative channels, and use them on HLS requests and the existing disk-backed pause path.
+- Full: keep logo and text titles mutually exclusive in Home/Movies/Series, including same-title and relayout paths. Restore remote focus to frame-rate settings after Back.
+- Both packages: portable engine/profile choices use strict validation and exclude learned connection hints and source headers. Lite does not initialise Full playback.
+- Verification: real synthetic HLS/TS decoding, protected master/media/segments, local pause, Xtream HLS-to-TS learning, access/network recovery, one-engine teardown, title presentation, frame-rate controls, preference isolation and Android 8 Lite startup. A physical TCL check confirms picture and sound; network availability and device codecs still vary.
+
 ## 2.2.1-preview / Lite transition 0.18.4-preview
 
 - Both modes: replace the detached voice outline with a compact microphone capsule when navigation is hidden or unavailable behind a modal. Track actual collapsed/expanded rail bounds, including reduced motion, and release window observers, animations and recognition on close.

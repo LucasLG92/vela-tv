@@ -1,6 +1,6 @@
 # See Vela in action
 
-A complete tour of **Vela 2.2**, with **38 native 4K captures** across Full, Lite and shared tools, including the new 2.2.1 search and voice views. Open an image for its full 3840 × 2160 view.
+A complete tour of **Vela 2.3**, with **39 native 4K captures** across Full, Lite and shared tools, including the new 2.2.1 search and voice views. Open an image for its full 3840 × 2160 view.
 
 **[Download](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.1-preview)** · [Home](#your-own-home) · [Library](#your-library) · [Television](#television-in-the-same-home) · [Personalisation](#the-details-that-make-it-yours) · **[Lite gallery](../lite/gallery/README.md)**
 
@@ -43,6 +43,12 @@ Browse original posters in a paged catalogue. Full Vela connects Plex and Jellyf
 [![A season's episodes and actions](previews/146-series-episodes.webp)](146-series-episodes.webp)
 
 Titles open in their Plex or Jellyfin app. Other apps contribute only the compatible Android TV information they publish. [Library filters](../guide/LIBRARY-FILTERS.md) · [Service compatibility](../guide/COMPATIBILITY.md#libraries-and-service-apps).
+
+## Playback that adapts
+
+Choose automatic playback or a compatibility engine, and balance startup against buffering in the existing Television settings. Vela keeps only the working format hints it needs. [Options and limits](../guide/PLAYBACK.md).
+
+[![Playback engine and buffering profiles](previews/152-playback-settings.webp)](152-playback-settings.webp)
 
 ## Television in the same Home
 

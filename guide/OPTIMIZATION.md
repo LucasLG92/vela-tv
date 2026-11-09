@@ -1,5 +1,21 @@
 # Optimisation: artwork, playback and shared controls
 
+## Network playback — Vela 2.3.0 Preview
+
+[Playback controls and exact limits](PLAYBACK.md). Automatic playback and the existing disk-backed HLS pause share one active engine. No new dependency or background service is added. The encoded buffer targets are 2/4/8 MiB, with a 4 MiB clamp in light/Android low-RAM mode; they are not a process RAM cap.
+
+The new native stream suite uses generated 640×360 H.264/AAC media over a local HTTP server. It decodes protected HLS master/media/segments, carries headers through local pause, decodes explicit System TS, simulates Xtream HLS 404 → TS recovery, checks learned format ordering and verifies bounded 403/503 handling. It checks that only one engine exists and that pause releases both possible engine fields. Synthetic first-frame observations are fixture measurements, not performance promises for subscriber streams.
+
+```sh
+python3 tests/stream_fixture.py --media-dir <synthetic-hls-directory> --port-file <private-port-file>
+adb -s <owned-emulator> reverse tcp:<port> tcp:<port>
+python3 tests/run_refinement.py --serial <owned-emulator> --test stream-playback --art gallery --fixture http://127.0.0.1:<port>
+```
+
+Generate at least eight two-second `segmentNNN.ts` files using your local ffmpeg and synthetic `testsrc2`/`sine` inputs. For the additional frame-rate suite, also generate a short `radio.aac` file. The server binds loopback only and the native runner refuses physical devices and personal accounts. Normal recovery logs include only a failure category, engine number and attempt count, with no channel identity or URL.
+
+The frame-rate suite additionally checks direct HLS, finite TS archives, audio-only AAC, completion, fallback and themed control focus. The Home personalisation suite checks logo/text exclusivity after relayout in all three library tabs and the same-title fast path. A TCL Android 11 check validates real picture and sound. No blanket total-RAM reduction is inferred from the buffer targets.
+
 ## Artwork and navigation fixes — Vela 2.2.1 Preview
 
 This pass is included in Vela 2.2.1 Preview and the standalone Lite 0.18.4 transition update. It keeps the existing layout and cache budgets; it does not add a service or a background timer.

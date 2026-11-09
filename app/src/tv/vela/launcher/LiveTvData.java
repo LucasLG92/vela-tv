@@ -28,6 +28,7 @@ final class LiveTvData {
         final String id,name,group,logo,xtreamId,xtreamAccount,inputId,number,epgId;
         long providerId;String identity="",alias="";boolean radio,hd,locked;
         final List<String> streams;
+        final Map<String,Map<String,String>> requestHeaders=new LinkedHashMap<>();
         int archiveDays;String replayTemplate="",replayMode="";
         List<Channel> variants=Collections.emptyList();
         Channel(String id,String name,String group,String logo,List<String> streams){this(id,name,group,logo,streams,"","","","",id);}

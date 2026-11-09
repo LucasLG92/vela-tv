@@ -44,12 +44,16 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     private TvSignalFallback.Signal signal;
     private final TvSignalFallback.Progress progress=new TvSignalFallback.Progress();
     private int generation;
+    private VelaPlaybackRecovery recovery=new VelaPlaybackRecovery();
+    private VelaPlaybackPolicy.Buffer limits;
+    private int forcedEngine,currentEngine;private boolean systemBuffering;private Runnable remember;
+    private VelaPlaybackRecovery.Failure lastFailure=VelaPlaybackRecovery.Failure.UNKNOWN;
     private final Runnable hide=this::hideControls;
-    private final Runnable timeout=()->failed();
+    private final Runnable timeout=()->failed(VelaPlaybackRecovery.Failure.NETWORK);
     private final Runnable retry=this::startSignal;
     private final Runnable watch=new Runnable(){public void run(){
         if(!active||(player==null&&dvr==null)||!rendered)return;
-        try{if(progress.stalled(SystemClock.elapsedRealtime(),position(),paused)){failed();return;}}catch(IllegalStateException unavailable){failed();return;}
+        try{long token=progressToken();if(token==Long.MIN_VALUE&&!systemBuffering)progress.reset(SystemClock.elapsedRealtime(),token);else if(progress.stalled(SystemClock.elapsedRealtime(),token,paused,limits==null?TvSignalFallback.STALL_TIMEOUT_MS:limits.stallMs)){failed(VelaPlaybackRecovery.Failure.STALLED);return;}}catch(IllegalStateException unavailable){failed(VelaPlaybackRecovery.Failure.DECODER);return;}
         main.postDelayed(this,TvSignalFallback.CHECK_INTERVAL_MS);
     }};
     LiveTvPlayer(android.app.Activity a,Actions actions){
@@ -101,7 +105,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         ((GradientDrawable)quickDrawer.getBackground()).setCornerRadius(28*uiScale);quickAdapter.notifyDataSetChanged();
     }
     void select(LiveTvData.Channel ch){selectReplay(ch,null,"");}
-    void selectReplay(LiveTvData.Channel ch,LiveTvData.Programme recording,String url){replayUrl=url;replayProgramme=recording;liveBadge.setText(recording==null?Ui.tr("●  AO VIVO","●  LIVE","●  EN DIRECTO"):Ui.tr("↺  ARQUIVO","↺  REPLAY","↺  ARCHIVO"));bufferedSignals.clear();frameworkSignal="";if(controls!=null)controls.close();timeShiftStatus=TvInputManager.TIME_SHIFT_STATUS_UNSUPPORTED;timeShiftStart=timeShiftCurrent=0;closeChannels(false);selected=ch;historyNotified=false;metadata(null,null);channelLogo.label(ch.antenna()&&!ch.number.isEmpty()?ch.number:LiveTvActivity.displayName(ch.name));channelLogo.setImageDrawable(null);if(artwork==null)artwork=new LiveTvLogos(activity);artwork.page();artwork.load(ch,channelLogo);intro.setVisibility(VISIBLE);signals=new TvSignalFallback(ch);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(ch,replayUrl);paused=false;channel.setText((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));showControls();if(active)startSignal();}
+    void selectReplay(LiveTvData.Channel ch,LiveTvData.Programme recording,String url){replayUrl=url;replayProgramme=recording;liveBadge.setText(recording==null?Ui.tr("●  AO VIVO","●  LIVE","●  EN DIRECTO"):Ui.tr("↺  ARQUIVO","↺  REPLAY","↺  ARCHIVO"));bufferedSignals.clear();frameworkSignal="";if(controls!=null)controls.close();timeShiftStatus=TvInputManager.TIME_SHIFT_STATUS_UNSUPPORTED;timeShiftStart=timeShiftCurrent=0;closeChannels(false);selected=ch;historyNotified=false;metadata(null,null);channelLogo.label(ch.antenna()&&!ch.number.isEmpty()?ch.number:LiveTvActivity.displayName(ch.name));channelLogo.setImageDrawable(null);if(artwork==null)artwork=new LiveTvLogos(activity);artwork.page();artwork.load(ch,channelLogo);intro.setVisibility(VISIBLE);resetNetworkSession();signals=new TvSignalFallback(ch);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(ch,replayUrl);paused=false;channel.setText((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));showControls();if(active)startSignal();}
     void metadata(LiveTvData.Programme current,LiveTvData.Programme next){
         playerClock.setText(VelaPlayerUi.clock());programmeEnd=current==null?0:current.end;long now=System.currentTimeMillis()/1000;if(replayProgramme!=null){programmeProgress.setVisibility(INVISIBLE);programme.setText(replayProgramme.title);programmeTiming.setText(L10n.text("Past programme · ")+new java.text.SimpleDateFormat("HH:mm",Ui.locale()).format(new java.util.Date(replayProgramme.start*1000)));nextProgramme.bind(null,0,0,now);return;}if(current!=null&&!current.current(now))current=null;
         programme.setText(current==null?Ui.tr("Programação não disponível","Programme information unavailable","Programación no disponible"):current.title);
@@ -112,35 +116,55 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         // Reuse the host minute tick; an open channel list needs no extra timer.
         if(quickDrawer.getVisibility()==VISIBLE)quickAdapter.notifyDataSetChanged();
     }
-    void resume(){if(active)return;active=true;if(artwork==null)artwork=new LiveTvLogos(activity);if(selected!=null)artwork.load(selected,channelLogo);signals=new TvSignalFallback(selected);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(selected,replayUrl);setKeepScreenOn(true);if(selected!=null&&(selected.antenna()||video.getHolder().getSurface().isValid()))startSignal();}
+    void resume(){if(active)return;active=true;if(artwork==null)artwork=new LiveTvLogos(activity);if(selected!=null)artwork.load(selected,channelLogo);signals=new TvSignalFallback(selected);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(selected,replayUrl);resetNetworkSession();setKeepScreenOn(true);if(selected!=null&&(selected.antenna()||video.getHolder().getSurface().isValid()))startSignal();}
     void pause(){sleep.close();if(controls!=null)controls.close();selectPress.cancel();pickerPress.cancel();active=false;main.removeCallbacksAndMessages(null);closeChannels(false);release();intro.setVisibility(GONE);channelLogo.setImageDrawable(null);if(artwork!=null){artwork.close();artwork=null;}setKeepScreenOn(false);}
+    private void resetNetworkSession(){recovery=new VelaPlaybackRecovery();forcedEngine=0;limits=VelaPlaybackPolicy.buffer(activity);lastFailure=VelaPlaybackRecovery.Failure.UNKNOWN;}
+    private void restartNetwork(){signals=new TvSignalFallback(selected);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(selected,replayUrl);bufferedSignals.clear();resetNetworkSession();startSignal();}
     private void startSignal(){
         release();if(!active||selected==null||!selected.playable()||!selected.antenna()&&!video.getHolder().getSurface().isValid())return;
         intro.setVisibility(VISIBLE);message.setVisibility(VISIBLE);message.setText(Ui.tr("Conectando a ","Connecting to ","Conectando con ")+LiveTvActivity.displayName(selected.name)+"…");panel.setVisibility(VISIBLE);
         if(selected.antenna()){startAntenna();return;}
-        if(signal==null)signal=nextSignal();if(signal==null){unavailable();return;}
-        if(signals.attempts()>1)message.setText(Ui.tr("Tentando outra emissão…","Trying another signal…","Probando otra señal…"));
+        if(limits==null)resetNetworkSession();if(signal==null)signal=nextSignal();if(signal==null){unavailable();return;}
+        if(signals.attempts()>1)message.setText(L10n.text("Trying another signal…"));
         final int attempt=generation;
         audioFocus=new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MOVIE).build()).setOnAudioFocusChangeListener(focus->{if(focus<0&&active&&attempt==generation){release();message.setText(Ui.tr("Áudio interrompido. Pressione OK para tentar novamente.","Audio interrupted. Press OK to retry.","Audio interrumpido. Pulsa OK para reintentar."));message.setVisibility(VISIBLE);showControls();}},main).build();
         if(audio!=null&&audio.requestAudioFocus(audioFocus)!=AudioManager.AUDIOFOCUS_REQUEST_GRANTED){release();message.setText(Ui.tr("Áudio indisponível. Tente novamente.","Audio unavailable. Try again.","Audio no disponible. Vuelve a intentarlo."));return;}
         try{
-            rendered=false;prepared=false;paused=false;media3Attempt=false;
-            String playback=signal.url;if(replayUrl.isEmpty()&&VelaPlaybackPanel.prefs(activity).getBoolean("timeshift",false)&&java.net.URI.create(playback).getPath().toLowerCase(java.util.Locale.ROOT).endsWith(".m3u8")&&bufferedSignals.add(LiveTvData.hash(playback)))try{buffer=new VelaHlsBuffer(activity,playback);playback=buffer.url();}catch(java.io.IOException unavailable){}
-            if(buffer!=null||VelaFrameRate.mode(activity)!=VelaFrameRate.OFF&&!frameworkSignal.equals(LiveTvData.hash(signal.url))){media3Attempt=true;dvr=new VelaDvrPlayer(activity,selected.name,video.getHolder().getSurface(),playback,new VelaDvrPlayer.Events(){public void ready(){if(active&&attempt==generation){prepared=true;}}public void frame(){if(active&&attempt==generation)playbackStarted(null);}public void size(int h){if(active&&attempt==generation){resize();quality(h);}}public void failed(){if(active&&attempt==generation)LiveTvPlayer.this.failed();}public void captions(String value){if(active&&attempt==generation)caption(value);}public void ended(){if(active&&attempt==generation)completed();}});main.postDelayed(timeout,TvSignalFallback.START_TIMEOUT_MS);return;}
-            MediaPlayer next=new MediaPlayer();player=next;
-            next.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MOVIE).build());
-            next.setSurface(video.getHolder().getSurface());next.setScreenOnWhilePlaying(true);
-            next.setOnVideoSizeChangedListener((p,w,h)->{if(p==player){resize();quality(h);}});
-            next.setOnPreparedListener(p->{if(active&&p==player){try{prepared=true;restoreTracks(p);p.start();boolean hasAudio=false,hasVideo=false;for(MediaPlayer.TrackInfo track:p.getTrackInfo()){hasAudio|=track.getTrackType()==MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_AUDIO;hasVideo|=track.getTrackType()==MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_VIDEO;}if(hasAudio&&!hasVideo)playbackStarted(p);}catch(IllegalStateException unavailable){failed();}}});
-            next.setOnInfoListener((p,what,extra)->{if(active&&p==player&&what==MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START){playbackStarted(p);}return false;});
-            next.setOnTimedTextListener((p,text)->{if(p==player)caption(text==null?"":text.getText());});
-            next.setOnErrorListener((p,what,extra)->{if(active&&p==player)failed();return true;});
-            next.setOnCompletionListener(p->{if(active&&p==player)completed();});
-            format.setText(Ui.tr("Qualidade automática","Automatic quality","Calidad automática"));
-            next.setDataSource(activity,Uri.parse(playback),Collections.singletonMap("User-Agent","Vela"));next.prepareAsync();main.postDelayed(timeout,TvSignalFallback.START_TIMEOUT_MS);
-        }catch(Exception e){failed();}
+            rendered=false;prepared=false;paused=false;media3Attempt=false;systemBuffering=false;
+            Map<String,String> headers=VelaStreamHeaders.forSignal(signal.channel,signal.url);
+            if(headers.isEmpty()&&!replayUrl.isEmpty()&&!signal.channel.streams.isEmpty())headers=VelaStreamHeaders.forSignal(signal.channel,signal.channel.streams.get(0));
+            String playback=signal.url;
+            if(replayUrl.isEmpty()&&VelaPlaybackPanel.prefs(activity).getBoolean("timeshift",false)&&VelaPlaybackPolicy.format(playback).equals("hls")&&bufferedSignals.add(LiveTvData.hash(playback)))try{buffer=new VelaHlsBuffer(activity,playback,headers);playback=buffer.url();}catch(java.io.IOException unavailable){}
+            currentEngine=buffer!=null?VelaPlaybackPolicy.MEDIA3:forcedEngine!=0?forcedEngine:VelaPlaybackPolicy.chooseEngine(activity,selected);
+            if(!recovery.start(LiveTvData.hash(signal.url),currentEngine,SystemClock.elapsedRealtime())){release();unavailable();return;}
+            if(currentEngine==VelaPlaybackPolicy.MEDIA3){
+                media3Attempt=true;
+                dvr=new VelaDvrPlayer(activity,selected.name,video.getHolder().getSurface(),playback,buffer==null?headers:Collections.emptyMap(),limits,new VelaDvrPlayer.Events(){
+                    public void ready(){if(active&&attempt==generation)prepared=true;}
+                    public void frame(){if(active&&attempt==generation)playbackStarted(null);}
+                    public void size(int h){if(active&&attempt==generation){resize();quality(h);}}
+                    public void failed(){failed(VelaPlaybackRecovery.Failure.UNKNOWN);}
+                    public void failed(VelaPlaybackRecovery.Failure reason){if(active&&attempt==generation)LiveTvPlayer.this.failed(reason);}
+                    public void captions(String value){if(active&&attempt==generation)caption(value);}
+                    public void ended(){if(active&&attempt==generation)completed();}
+                });
+            }else{
+                MediaPlayer next=new MediaPlayer();player=next;
+                next.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MOVIE).build());
+                next.setSurface(video.getHolder().getSurface());next.setScreenOnWhilePlaying(true);
+                next.setOnVideoSizeChangedListener((m,w,h)->{if(m==player){resize();quality(h);}});
+                next.setOnPreparedListener(m->{if(active&&m==player){try{prepared=true;restoreTracks(m);m.start();boolean hasAudio=false,hasVideo=false;for(MediaPlayer.TrackInfo track:m.getTrackInfo()){hasAudio|=track.getTrackType()==MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_AUDIO;hasVideo|=track.getTrackType()==MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_VIDEO;}if(hasAudio&&!hasVideo)playbackStarted(m);}catch(RuntimeException bad){failed(VelaPlaybackRecovery.Failure.DECODER);}}});
+                next.setOnInfoListener((m,what,extra)->{if(active&&m==player){if(what==MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START)playbackStarted(m);else if(what==MediaPlayer.MEDIA_INFO_BUFFERING_START)systemBuffering=true;else if(what==MediaPlayer.MEDIA_INFO_BUFFERING_END)systemBuffering=false;}return false;});
+                next.setOnErrorListener((m,what,extra)->{if(active&&m==player)failed(extra==MediaPlayer.MEDIA_ERROR_IO||extra==MediaPlayer.MEDIA_ERROR_TIMED_OUT?VelaPlaybackRecovery.Failure.NETWORK:VelaPlaybackRecovery.Failure.DECODER);return true;});
+                next.setOnCompletionListener(m->{if(active&&m==player)completed();});
+                next.setOnTimedTextListener((m,text)->{if(m==player)caption(text==null?"":text.getText());});
+                format.setText(Ui.tr("Qualidade automática","Automatic quality","Calidad automática"));
+                next.setDataSource(activity,Uri.parse(playback),VelaStreamHeaders.transport(headers));next.prepareAsync();
+            }
+            main.postDelayed(timeout,limits.timeoutMs);
+        }catch(java.io.IOException network){failed(VelaPlaybackRecovery.Failure.NETWORK);}catch(RuntimeException unsupported){failed(VelaPlaybackRecovery.Failure.DECODER);}
     }
-    private TvSignalFallback.Signal nextSignal(){return signals==null?null:signals.next(ch->ch.xtreamId.isEmpty()?ch.streams:new XtreamClient(activity).streams(ch));}
+    private TvSignalFallback.Signal nextSignal(){return signals==null?null:signals.next(ch->VelaPlaybackPolicy.order(activity,selected,ch,ch.xtreamId.isEmpty()?ch.streams:new XtreamClient(activity).streams(ch)),recovery.sameVariantOnly());}
     private void startAntenna(){
         video.setVisibility(GONE);format.setText(Ui.tr("ANTENA","ANTENNA","ANTENA"));TvView next=new TvView(activity);tuner=next;addView(next,0,new LayoutParams(-1,-1));
         next.setCallback(new TvView.TvInputCallback(){
@@ -155,14 +179,22 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         next.setTimeShiftPositionCallback(new TvView.TimeShiftPositionCallback(){public void onTimeShiftStartPositionChanged(String input,long value){timeShiftStart=value;}public void onTimeShiftCurrentPositionChanged(String input,long value){timeShiftCurrent=value;}});
         try{next.tune(selected.inputId,android.media.tv.TvContract.buildChannelUri(Long.parseLong(selected.epgId)));next.setStreamVolume(1f);main.postDelayed(timeout,25_000);}catch(RuntimeException unavailable){failed();}
     }
-    private void completed(){if(replayUrl.isEmpty()){failed();return;}release();message.setText(L10n.text("The programme has ended. Press Back to return to the guide."));message.setVisibility(VISIBLE);showControls();}
-    private void failed(){
-        boolean buffered=buffer!=null,optional=media3Attempt;if(optional&&signal!=null)frameworkSignal=LiveTvData.hash(signal.url);release();if(!replayUrl.isEmpty()){message.setText(L10n.text("The source could not play this programme. Press Back to return to the guide."));message.setVisibility(VISIBLE);showControls();return;}if(buffered&&active){message.setText(L10n.text("This signal will play without local pause."));main.postDelayed(retry,250);return;}if(!active)return;
-        if(optional){message.setVisibility(VISIBLE);message.setText(L10n.text("Continuing with the system player."));main.postDelayed(retry,250);return;}
-        if(selected!=null&&!selected.antenna()&&(signal=nextSignal())!=null){message.setVisibility(VISIBLE);message.setText(Ui.tr("Tentando outra emissão…","Trying another signal…","Probando otra señal…"));panel.setVisibility(VISIBLE);main.postDelayed(retry,250);return;}
-        unavailable();
+    private void completed(){if(replayUrl.isEmpty()){failed(VelaPlaybackRecovery.Failure.NETWORK);return;}release();message.setText(L10n.text("The programme has ended. Press Back to return to the guide."));message.setVisibility(VISIBLE);showControls();}
+    private void failed(){failed(VelaPlaybackRecovery.Failure.UNKNOWN);}
+    private void failed(VelaPlaybackRecovery.Failure reason){
+        if(selected!=null&&selected.antenna()){release();unavailable();return;}
+        boolean buffered=buffer!=null;int engine=currentEngine;lastFailure=reason;android.util.Log.w("VelaPlayback","Recovery: "+reason+" engine="+engine+" starts="+recovery.starts());
+        VelaPlaybackRecovery.Action action=recovery.failed(reason,engine,VelaPlaybackPolicy.engine(activity)==VelaPlaybackPolicy.AUTO);
+        release();if(!active)return;
+        if(!replayUrl.isEmpty()){message.setText(L10n.text("The source could not play this programme. Press Back to return to the guide."));message.setVisibility(VISIBLE);showControls();return;}
+        if(action==VelaPlaybackRecovery.Action.STOP){unavailable();return;}
+        if(buffered){forcedEngine=engine;message.setText(L10n.text("This signal will play without local pause."));main.postDelayed(retry,250);return;}
+        if(action==VelaPlaybackRecovery.Action.RETRY){forcedEngine=engine;message.setText(L10n.text("Reconnecting…"));main.postDelayed(retry,1000);return;}
+        if(action==VelaPlaybackRecovery.Action.OTHER_ENGINE){forcedEngine=engine==VelaPlaybackPolicy.MEDIA3?VelaPlaybackPolicy.SYSTEM:VelaPlaybackPolicy.MEDIA3;message.setText(L10n.text("Trying the compatibility player…"));main.postDelayed(retry,250);return;}
+        forcedEngine=0;signal=nextSignal();if(signal==null){unavailable();return;}
+        message.setVisibility(VISIBLE);message.setText(L10n.text("Trying another signal…"));panel.setVisibility(VISIBLE);main.postDelayed(retry,250);
     }
-    private void unavailable(){intro.setVisibility(GONE);message.setVisibility(VISIBLE);message.setText(selected!=null&&selected.antenna()?Ui.tr("Sem sinal de antena. Confira o cabo e os canais sintonizados.","No antenna signal. Check the cable and tuned channels.","Sin señal de antena. Comprueba el cable y los canales sintonizados."):Ui.tr("Nenhuma emissão disponível. Pressione OK para tentar novamente ou → para ver os canais.","No signal available. Press OK to retry or → for channels.","No hay señales disponibles. Pulsa OK para reintentar o → para ver los canales."));showControls();}
+    private void unavailable(){intro.setVisibility(GONE);message.setVisibility(VISIBLE);message.setText(selected!=null&&selected.antenna()?Ui.tr("Sem sinal de antena. Confira o cabo e os canais sintonizados.","No antenna signal. Check the cable and tuned channels.","Sin señal de antena. Comprueba el cable y los canales sintonizados."):Ui.tr("Nenhuma emissão disponível. Pressione OK para tentar novamente ou → para ver os canais.","No signal available. Press OK to retry or → for channels.","No hay señales disponibles. Pulsa OK para reintentar o → para ver los canales."));if(lastFailure==VelaPlaybackRecovery.Failure.ACCESS||recovery.sameVariantOnly())message.setText(L10n.text("The source refused access. Check the source settings."));showControls();}
     private void resize(){
         if(player==null&&dvr==null)return;
         try{
@@ -177,6 +209,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     }
     private void release(){
         media3Attempt=false;
+        if(remember!=null){main.removeCallbacks(remember);remember=null;}
         if(dvr!=null){dvr.close();dvr=null;}if(buffer!=null){buffer.close();buffer=null;}generation++;main.removeCallbacks(hideIntro);main.removeCallbacks(timeout);main.removeCallbacks(hide);main.removeCallbacks(retry);main.removeCallbacks(watch);TvView oldTuner=tuner;tuner=null;if(oldTuner!=null){oldTuner.setCallback(null);oldTuner.reset();removeView(oldTuner);}video.setVisibility(VISIBLE);if(captions!=null){captions.setText("");captions.setVisibility(GONE);}MediaPlayer old=player;player=null;prepared=false;rendered=false;
         if(old!=null){old.setOnPreparedListener(null);old.setOnInfoListener(null);old.setOnErrorListener(null);old.setOnCompletionListener(null);old.setOnVideoSizeChangedListener(null);old.setOnTimedTextListener(null);old.release();}
         if(audio!=null&&audioFocus!=null)audio.abandonAudioFocusRequest(audioFocus);audioFocus=null;
@@ -210,10 +243,15 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     void channelError(){pickerLoading=false;updatePickerStatus();quickStatus.setText(Ui.tr("Não foi possível carregar. Tente novamente.","Could not load. Please retry.","No se ha podido cargar. Reinténtalo."));}
     void favorites(Set<String> ids){boolean changed=!favoriteIds.equals(ids);favoriteIds=new HashSet<>(ids);if(selected!=null)channel.setText((TvChannelNames.favorite(selected,favoriteIds)?"★ ":"")+(selected.antenna()&&!selected.number.isEmpty()?selected.number+" · ":"")+LiveTvActivity.displayName(selected.name));if(quickDrawer.getVisibility()==VISIBLE){quickAdapter.notifyDataSetChanged();if(changed&&pickerFavorites&&!pickerLoading){pickerLoading=true;updatePickerStatus();actions.channels(pickerPage,true);}}}
     private void filterChannels(boolean value){if(pickerFavorites==value&&!pickerRecent)return;pickerRecent=false;pickerFavorites=value;pickerLoading=true;pickerDirection=0;updatePickerStatus();actions.channels(0,value);}
-    private void selectClick(){if(!rendered&&player==null&&dvr==null&&selected!=null){signals=new TvSignalFallback(selected);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(selected,replayUrl);startSignal();}else if(panel.getVisibility()==VISIBLE&&rendered)dismissInfo();else showControls();}
+    private void selectClick(){if(!rendered&&player==null&&dvr==null&&selected!=null){restartNetwork();}else if(panel.getVisibility()==VISIBLE&&rendered)dismissInfo();else showControls();}
     private void openChannels(){main.removeCallbacks(hide);panel.setVisibility(GONE);intro.setVisibility(GONE);quickDrawer.setVisibility(VISIBLE);if(artwork==null)artwork=new LiveTvLogos(activity);quickList.setAdapter(quickAdapter);updatePickerStatus();int focus=0;for(int i=0;i<pickerChannels.size();i++)if(selected!=null&&pickerChannels.get(i).id.equals(selected.id))focus=i;quickList.setSelection(focus);quickList.requestFocus();if(pickerChannels.isEmpty())(pickerRecent?quickRecent:quickFavorites).requestFocus();if((pickerFavorites||pickerRecent)&&!pickerLoading){pickerLoading=true;updatePickerStatus();actions.channels(pickerPage,pickerFavorites);}}
     private void closeChannels(boolean focus){pickerPress.cancel();selectPress.cancel();if(quickDrawer.getVisibility()!=VISIBLE)return;quickDrawer.setVisibility(GONE);quickList.setAdapter(null);if(artwork!=null)artwork.page();if(focus){if(rendered){panel.setVisibility(GONE);requestFocus();}else showControls();}}
-    private void playbackStarted(MediaPlayer p){rendered=true;notifyStarted();progress.reset(SystemClock.elapsedRealtime(),position());main.removeCallbacks(timeout);main.removeCallbacks(watch);main.postDelayed(watch,TvSignalFallback.CHECK_INTERVAL_MS);message.setVisibility(GONE);LiveTvData.prefs(activity).edit().putString("last-"+LiveTvData.hash(LiveTvData.source(activity)),selected.id).apply();hideIntroSoon();delayHide();}
+    private void playbackStarted(MediaPlayer p){
+        rendered=true;notifyStarted();recovery.success();long first=progressToken();progress.reset(SystemClock.elapsedRealtime(),first);main.removeCallbacks(timeout);main.removeCallbacks(watch);main.postDelayed(watch,TvSignalFallback.CHECK_INTERVAL_MS);
+        if(remember!=null)main.removeCallbacks(remember);final int attempt=generation,engine=currentEngine;final TvSignalFallback.Signal playing=signal;final LiveTvData.Channel requested=selected;
+        if(playing!=null&&replayUrl.isEmpty()){remember=()->{if(active&&attempt==generation&&rendered&&!paused){try{long now=progressToken();if(now!=Long.MIN_VALUE&&now!=first){VelaPlaybackPolicy.success(activity,requested,playing.url,engine);recovery.stable(engine);}}catch(IllegalStateException ignored){}}remember=null;};main.postDelayed(remember,5000);}
+        message.setVisibility(GONE);LiveTvData.prefs(activity).edit().putString("last-"+LiveTvData.hash(LiveTvData.source(activity)),selected.id).apply();hideIntroSoon();delayHide();
+    }
     private void notifyStarted(){if(!historyNotified&&selected!=null){historyNotified=true;VelaRecentActivity.channel(activity,selected.id,LiveTvActivity.displayName(selected.name),LiveTvData.source(activity));actions.started(selected);}}
     boolean pairedKey(int key){return controls!=null||key==controlsKey||TvRemotePress.select(key);}
     boolean key(KeyEvent event){
@@ -231,6 +269,11 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         if(panel.getVisibility()==VISIBLE)delayHide();return false;
     }
     private long position(){return dvr!=null?dvr.position():player==null?0:player.getCurrentPosition();}
+    private long progressToken(){
+        if(dvr!=null)return dvr.progress();if(player==null)return Long.MIN_VALUE;
+        try{PersistableBundle metrics=player.getMetrics();Object frames=metrics==null?null:metrics.get(MediaPlayer.MetricsConstants.FRAMES);if(frames instanceof Number&&((Number)frames).longValue()>0)return ((Number)frames).longValue();}catch(RuntimeException unavailable){}
+        long time=player.getCurrentPosition();return time>0?time:Long.MIN_VALUE;
+    }
     private void caption(String value){
         if(value==null||value.isEmpty()){if(captions!=null){captions.setText("");captions.setVisibility(GONE);}return;}
         if(captions==null){captions=new TextView(activity);captions.setTextColor(android.graphics.Color.WHITE);captions.setTextSize(24);captions.setGravity(Gravity.CENTER);captions.setBackgroundColor(0x99000000);LayoutParams cp=new LayoutParams(-1,-2,Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL);cp.bottomMargin=60;cp.leftMargin=120;cp.rightMargin=120;addView(captions,cp);}captions.setText(value);captions.setVisibility(VISIBLE);
@@ -279,12 +322,15 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         }catch(RuntimeException unavailable){items.add(new VelaPlaybackPanel.Item(L10n.text("Preparing playback"),L10n.text("Tracks appear when connected."),null));}
     }
     private void networkItems(List<VelaPlaybackPanel.Item> items){
+        int engine=VelaPlaybackPolicy.engine(activity),profile=VelaPlaybackPolicy.profile(activity);
+        items.add(new VelaPlaybackPanel.Item(L10n.text("Playback engine"),VelaPlaybackPolicy.engineName(engine),()->{VelaPlaybackPanel.prefs(activity).edit().putInt("engine",(engine+1)%3).apply();restartNetwork();}));
+        items.add(new VelaPlaybackPanel.Item(L10n.text("Buffering profile"),VelaPlaybackPolicy.profileName(profile)+" · "+VelaPlaybackPolicy.profileDetail(profile),()->{VelaPlaybackPanel.prefs(activity).edit().putInt("buffer",(profile+1)%3).apply();restartNetwork();}));
         int matching=VelaFrameRate.mode(activity);String detail=VelaFrameRate.name(matching);
         if(matching!=VelaFrameRate.OFF)detail+=" · "+(dvr==null?L10n.text("Unavailable for this signal"):dvr.frameRateDetail());
-        items.add(new VelaPlaybackPanel.Item(L10n.text("Match content frame rate"),detail,()->{VelaFrameRate.mode(activity,(matching+1)%3);frameworkSignal="";startSignal();}));
+        items.add(new VelaPlaybackPanel.Item(L10n.text("Match content frame rate"),detail,()->{VelaFrameRate.mode(activity,(matching+1)%3);frameworkSignal="";restartNetwork();}));
         if(replayUrl.isEmpty()){
             SharedPreferences saved=VelaPlaybackPanel.prefs(activity);boolean enabled=saved.getBoolean("timeshift",false);
-            items.add(new VelaPlaybackPanel.Item(L10n.text("Local live pause"),enabled?L10n.text("On for supported HLS · Up to 15 min and 256 MiB on disk"):L10n.text("Off · Only buffers the channel you are watching"),()->{saved.edit().putBoolean("timeshift",!enabled).apply();startSignal();}));
+            items.add(new VelaPlaybackPanel.Item(L10n.text("Local live pause"),enabled?L10n.text("On for supported HLS · Up to 15 min and 256 MiB on disk"):L10n.text("Off · Only buffers the channel you are watching"),()->{saved.edit().putBoolean("timeshift",!enabled).apply();restartNetwork();}));
         }
         if(prepared&&(buffer!=null||!replayUrl.isEmpty())){
             items.add(new VelaPlaybackPanel.Item(paused?L10n.text("Resume"):L10n.text("Pause"),"",this::togglePause));

@@ -90,6 +90,13 @@ public final class AndroidHomePersonalizationTest extends Instrumentation {
         phase="studio-empty";ui(activity::finish);JSONObject empty=VelaLayout.read(context).put("hidden",new JSONArray(VelaLayout.ROWS));VelaLayout.save(context,empty);int requestsBefore=rowRequests.get(),resumesBefore=resumeRequests.get();activity=(HomeActivity)startActivitySync(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));home=(CinemaHomeView)field(activity,"home");await(()->field(home,"emptyHome")!=null);Thread.sleep(400);check(((View)field(home,"emptyEdit")).isShown()&&rowRequests.get()==requestsBefore&&resumeRequests.get()==resumesBefore,"Empty Home fetched hidden feeds or lost its editor access");shot("11-empty-home");
     }
     void launch()throws Exception{activity=(HomeActivity)startActivitySync(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));home=(CinemaHomeView)field(activity,"home");await(()->!cards().isEmpty()&&field(home,"heroBitmap")!=null);}
+    void titlePresentation()throws Exception{
+        phase="exclusive movie title presentation";
+        await(()->{PlexClient.Film f=(PlexClient.Film)field(home,"selected");return f!=null&&field(home,"heroBitmap")!=null&&field(home,"heroKey").equals(f.provider+f.key)&&!(Boolean)field(home,"artReleased");});
+        ImageView logo=(ImageView)field(home,"titleLogo");TextView title=(TextView)field(home,"title");PlexClient.Film selected=(PlexClient.Film)field(home,"selected");
+        Bitmap fake=Bitmap.createBitmap(64,24,Bitmap.Config.ARGB_8888);int previousFilter=(Integer)field(home,"filter");
+        try{ui(()->{logo.setImageBitmap(fake);try{for(int kind:new int[]{0,1,2}){java.lang.reflect.Field f=home.getClass().getDeclaredField("filter");f.setAccessible(true);f.setInt(home,kind);Method layout=home.getClass().getDeclaredMethod("layoutHero");layout.setAccessible(true);layout.invoke(home);check(logo.getVisibility()==View.VISIBLE&&title.getVisibility()!=View.VISIBLE,"Artwork logo and text title overlap after relayout");}java.lang.reflect.Field f=home.getClass().getDeclaredField("filter");f.setAccessible(true);f.setInt(home,previousFilter);Method select=home.getClass().getDeclaredMethod("selectFilm",PlexClient.Film.class);select.setAccessible(true);select.invoke(home,selected);check(title.getVisibility()!=View.VISIBLE,"Same-title fast path restored duplicate text");logo.setImageDrawable(null);Method layout=home.getClass().getDeclaredMethod("layoutHero");layout.setAccessible(true);layout.invoke(home);check(title.getVisibility()==View.VISIBLE&&logo.getVisibility()!=View.VISIBLE,"Missing logo did not restore the readable title");}catch(Exception e){throw new RuntimeException(e);}});}finally{ui(()->logo.setImageDrawable(null));fake.recycle();}
+    }
     public void onCreate(Bundle b){super.onCreate(b);args=b;start();}
     public void onStart(){context=getTargetContext();try{
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){check(in.read()=='1',"Owned emulator required");}
@@ -107,7 +114,7 @@ public final class AndroidHomePersonalizationTest extends Instrumentation {
         phase="home-feeds";launch();await(()->((Map<?,?>)field(home,"homeRows")).size()==4);check(rowRequests.get()==4,"A row made redundant feed requests");check(shelves().size()==6,"The configured Home rows are missing");
         List<PlexClient.Film> films=(List<PlexClient.Film>)field(home,"posterFilms");check(films.size()<=72,"Home retained an entire catalogue");
         for(String row:VelaLayout.EXTRA_ROWS){List<?> values=((Map<String,List<?>>)field(home,"homeRows")).get(row);check(values.size()==12,"Home row exceeded twelve titles");}
-        phase="home-card-item-handoffs";itemHandoffs();
+        phase="home-card-item-handoffs";itemHandoffs();titlePresentation();
         overrun=true;boolean refused=false;try{new LibraryClient(context).homeRow("recent_movies");}catch(IOException expected){refused=true;}overrun=false;check(refused,"The server ignored the Home response limit");
         await(()->{for(ImageView v:(List<ImageView>)field(home,"posterImages"))if(v.getGlobalVisibleRect(new Rect())&&v.getDrawable()==null)return false;return true;});shot("01-home");
         phase="scroll-motion";ScrollView scroll=(ScrollView)field(home,"shelvesScroll");Object next=shelves().get(1);View nextCard=((List<View>)field(next,"items")).get(0);int target=((View)field(next,"root")).getTop();int initial=scroll.getScrollY();
