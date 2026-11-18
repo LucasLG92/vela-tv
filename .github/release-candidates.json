@@ -94,60 +94,6 @@
         }
       ],
       "notes": "guide/releases/2.4.0-preview.md"
-    },
-    {
-      "package": "tv.vela.launcher.lite",
-      "version": "0.19.0-preview",
-      "code": 41,
-      "tag": "lite-v0.19.0-preview",
-      "title": "Vela Lite 0.19.0 Preview - Two ways to start",
-      "file": "Vela-Lite-0.19.0-preview.apk",
-      "size": 2476890,
-      "sha256": "9c9ad4c42ba95fa4892621ff4702275e420317c0df317592ea248b8bb55db786",
-      "blob_sha": "d02aa9540302259d40ed719a2bac05914f4673ff",
-      "chunks": [
-        {
-          "sha": "d693d2d1506643b3316c0c2b5e867ef7634e9e74",
-          "size": 262144
-        },
-        {
-          "sha": "6232d117b596aec6dec2e44da6494416db9e78b4",
-          "size": 262144
-        },
-        {
-          "sha": "72dd5985b84c8f843675075eec0805a68526f790",
-          "size": 262144
-        },
-        {
-          "sha": "d03781efd134938f3cace5fc55cf59c153b2cef7",
-          "size": 262144
-        },
-        {
-          "sha": "30ab99485c152fe5a5ab1116362dcf179801d431",
-          "size": 262144
-        },
-        {
-          "sha": "32efe6985ccbebd0b5ce3130708de8cc914f1524",
-          "size": 262144
-        },
-        {
-          "sha": "2bfac9bfbdf1722018d273a1d43e8de3cb2525ee",
-          "size": 262144
-        },
-        {
-          "sha": "5f247fb391e693cf8ec269d9b25529c5673bf578",
-          "size": 262144
-        },
-        {
-          "sha": "33ecdf7f802f8b77ed65a337cd7ef690c4fba46d",
-          "size": 262144
-        },
-        {
-          "sha": "1c0fd2456b22fad05cb843dea657dade7ad01847",
-          "size": 117594
-        }
-      ],
-      "notes": "guide/releases/lite-0.19.0-preview.md"
     }
   ]
 }

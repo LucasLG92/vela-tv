@@ -1,4 +1,4 @@
-"""Publish already signed, reviewed APKs. No signing key is used by GitHub Actions."""
+"""Publish the signed and reviewed unified Vela APK."""
 from pathlib import Path
 import argparse,base64,hashlib,json,os,re,subprocess,xml.etree.ElementTree as ET
 
@@ -14,21 +14,20 @@ def manifest(path):
     doc=json.loads(path.read_text(encoding='utf-8'))
     require(doc.get('repository')==REPO,'Unexpected repository')
     releases=doc.get('releases',[])
-    require(len(releases)==2,'Exactly Full and Lite must be reviewed together')
-    packages=set()
-    for item in releases:
-        package=item['package'];lite=package=='tv.vela.launcher.lite'
-        require(package in ('tv.vela.launcher','tv.vela.launcher.lite') and package not in packages,'Unexpected or duplicate package');packages.add(package)
-        version=item['version'];require(re.fullmatch(r'\d+\.\d+\.\d+-preview',version) is not None,'Invalid version')
-        require(item['tag']==('lite-v' if lite else 'v')+version,'Tag/version mismatch')
-        require(item['file']==('Vela-Lite-' if lite else 'Vela-')+version+'.apk','Unexpected APK filename')
-        require(0<item['size']<=64*1024*1024,'Invalid APK size')
-        require(re.fullmatch('[a-f0-9]{40}',item['blob_sha']) is not None and re.fullmatch('[a-f0-9]{64}',item['sha256']) is not None,'Invalid content digest')
-        source=ET.parse(ROOT/('lite/AndroidManifest.xml' if lite else 'app/AndroidManifest.xml')).getroot()
-        require(source.attrib['package']==package and source.attrib[ANDROID+'versionName']==version and int(source.attrib[ANDROID+'versionCode'])==item['code'],'Source/APK version mismatch')
-        chunks=item.get('chunks',[]);require(0<len(chunks)<=128,'Invalid APK parts');require(sum(c['size'] for c in chunks)==item['size'],'APK part sizes mismatch')
-        for c in chunks:require(re.fullmatch('[a-f0-9]{40}',c['sha']) is not None and 0<c['size']<=512*1024,'Invalid APK part')
-        notes=ROOT/item['notes'];require(notes.resolve().is_relative_to((ROOT/'guide/releases').resolve()) and notes.is_file(),'Invalid release notes path')
+    require(len(releases)==1,'Exactly one unified Vela APK must be reviewed')
+    item=releases[0]
+    package=item['package']
+    require(package=='tv.vela.launcher','Only the unified Vela package can be published')
+    version=item['version'];require(re.fullmatch(r'\d+\.\d+\.\d+-preview',version) is not None,'Invalid version')
+    require(item['tag']=='v'+version,'Tag/version mismatch')
+    require(item['file']=='Vela-'+version+'.apk','Unexpected APK filename')
+    require(0<item['size']<=64*1024*1024,'Invalid APK size')
+    require(re.fullmatch('[a-f0-9]{40}',item['blob_sha']) is not None and re.fullmatch('[a-f0-9]{64}',item['sha256']) is not None,'Invalid content digest')
+    source=ET.parse(ROOT/'app/AndroidManifest.xml').getroot()
+    require(source.attrib['package']==package and source.attrib[ANDROID+'versionName']==version and int(source.attrib[ANDROID+'versionCode'])==item['code'],'Source/APK version mismatch')
+    chunks=item.get('chunks',[]);require(0<len(chunks)<=128,'Invalid APK parts');require(sum(c['size'] for c in chunks)==item['size'],'APK part sizes mismatch')
+    for c in chunks:require(re.fullmatch('[a-f0-9]{40}',c['sha']) is not None and 0<c['size']<=512*1024,'Invalid APK part')
+    notes=ROOT/item['notes'];require(notes.resolve().is_relative_to((ROOT/'guide/releases').resolve()) and notes.is_file(),'Invalid release notes path')
     return releases
 
 def verify_bytes(data,item):
@@ -144,7 +143,6 @@ def main():
             verify_bytes(data,item);path=folder/item['file'];path.write_bytes(data)
         verify_apk(path,item);prepared.append((item,path));print('Verified package, version, official signer and bytes:',item['file'])
     if args.verify_only:return
-    # Verify both packages before creating or publishing either release.
     for item,path in prepared:Path(str(path)+'.sha256').write_text(item['sha256']+'  '+item['file']+'\n',encoding='utf-8')
     releases=[publish(item,path,args.source) for item,path in prepared]
     if os.environ.get('GITHUB_STEP_SUMMARY'):

@@ -115,7 +115,7 @@ Choose your mode when Vela first opens. You can switch later from **Settings →
 
 [![Lite mode puts HDMI devices and the television's essentials first](gallery/previews/127-lite-home.webp)](gallery/127-lite-home.webp)
 
-Lite leaves Full's multimedia Home, library clients and IPTV player inactive. Both modes use the same APK and update channel. Existing standalone Lite users have an [explicit migration path](guide/UNIFIED.md#moving-from-the-old-standalone-lite-app).
+Lite leaves Full's multimedia Home, library clients and IPTV player inactive. Both modes use the same APK and update channel. The separate Lite app has been discontinued. Its final build is available for [moving existing profiles to Vela](guide/UNIFIED.md#moving-from-the-old-standalone-lite-app).
 
 **[Explore Lite →](lite/README.md)** · [Which launcher fits your setup?](guide/WHY-VELA.md)
 

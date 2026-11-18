@@ -185,7 +185,7 @@ See [interface refinement](INTERFACE.md) for the shared UI, scroll-safe settings
 
 ## Unified modes and legacy import
 
-The production `Vela.apk` includes both controllers. Android 8–10 exposes Lite only; Android 11+ offers Full or Lite. Test both Android versions before publishing. The standalone `lite/Vela-Lite.apk` is a transition package for existing Lite installations, not a second option for new users. [Mode and migration contract](UNIFIED.md).
+The production `Vela.apk` includes both controllers. Android 8–10 exposes Lite only; Android 11+ offers Full or Lite. Test both Android versions before publishing. The legacy `lite/Vela-Lite.apk` build is retained for migration tests. The GitHub publisher ships only the unified APK. [Mode and migration contract](UNIFIED.md).
 
 ```sh
 python tests/run_refinement.py --serial emulator-5560 --adb-port 5038 --art /path/to/test-art --test unified --language en

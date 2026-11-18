@@ -33,7 +33,7 @@ jobs:
           python3 tools/audit_publication.py
           python3 tools/check_localization.py
           python3 tests/test_release_publication.py
-      - name: Verify both signed APKs and publish previews
+      - name: Verify and publish the unified Vela preview
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 tools/publish_releases.py --source "$GITHUB_SHA"

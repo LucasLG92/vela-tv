@@ -25,10 +25,12 @@ Update from Vela or install the latest unified APK from [GitHub Releases](https:
 
 ## Moving from the old standalone Lite app
 
-Android treats **tv.vela.launcher.lite** and **tv.vela.launcher** as different apps. One APK cannot update both package identities in place. **Lite 0.18.0 Preview is a transition release**, not a second download choice for new users.
+The standalone Lite app has reached end of development. [Lite 0.19.0 Preview](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.19.0-preview) is the final archived build. Future releases use the unified **Vela** APK.
 
-1. Update the old Lite app to **0.18.0 Preview**.
-2. Install **Vela 2.0.0 Preview** once. On its mode screen, choose **Import current Lite profile**. You can reopen this screen from Settings → System → Launcher mode.
+Android treats **tv.vela.launcher.lite** and **tv.vela.launcher** as separate apps. Use the included profile transfer to make the switch.
+
+1. Update the old Lite app to [**0.19.0 Preview**](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.19.0-preview) if it is on an earlier version.
+2. Install the unified **Vela** APK from [Vela Releases](https://github.com/LucasLG92/vela-tv/releases). On its mode screen, choose **Import current Lite profile**. You can reopen this screen from Settings → System → Launcher mode.
 3. The old app opens its own confirmation screen. Choose **Import settings** to grant a temporary, one-use read of that profile.
 4. Vela opens Lite with the imported layout, remote shortcuts, antenna favourites and guide corrections. If you already configured the new app, the import creates a separate profile. Existing profiles are preserved. Importing into a pristine new installation also saves a recovery copy.
 5. In Lite settings, open **System → Home screen** and select **Vela** as Android's Home app. Check HDMI, antenna and sound before removing the old **Vela Lite** app yourself.

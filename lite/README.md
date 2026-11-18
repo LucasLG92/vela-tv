@@ -52,7 +52,7 @@ Choose **Television** to start in the antenna guide, or **HDMI and apps** for yo
 
 [![Choose a Home layout in Vela Lite](../gallery/previews/156-lite-home-layout.webp)](../gallery/156-lite-home-layout.webp)
 
-Already using the separate old Lite app? Its [0.19.0 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.19.0-preview) supports an explicit import into unified Vela. [Migration steps](../guide/UNIFIED.md#moving-from-the-old-standalone-lite-app).
+The standalone Lite app has been discontinued. The archived [0.19.0 migration build](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.19.0-preview) lets existing users transfer a profile into unified Vela. [Migration steps](../guide/UNIFIED.md#moving-from-the-old-standalone-lite-app).
 
 **[Install Lite](INSTALL.md)** · [Hardware limits](../guide/COMPATIBILITY.md) · [Development](DEVELOPMENT.md) · [Privacy](../guide/PRIVACY.md)
 

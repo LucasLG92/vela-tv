@@ -42,7 +42,7 @@
 
 Full Vela offers aerial videos or original library artwork, with optional clock/weather and a demonstration preview. Lite keeps the television's own screensaver.
 
-Both modes check the same unified GitHub release feed; only the separate legacy Lite migration package uses its own feed. They can download automatically, verify APK identity/integrity/signature and resume after installation permission. Android asks for confirmation; completed updater files are cleaned.
+Both modes check the unified GitHub release feed. The separate Lite feed ends at its archived migration build. They can download automatically, verify APK identity/integrity/signature and resume after installation permission. Android asks for confirmation; completed updater files are cleaned.
 
 ## Resource care
 

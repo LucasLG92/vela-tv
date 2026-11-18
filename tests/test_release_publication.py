@@ -13,13 +13,17 @@ class PublicationSafety(unittest.TestCase):
         self.data=b'reviewed synthetic bytes'
         self.item={'file':'Vela-test.apk','package':'tv.vela.launcher','code':69,'version':'1.35.1-preview','size':len(self.data),'sha256':hashlib.sha256(self.data).hexdigest(),'blob_sha':hashlib.sha1(b'blob '+str(len(self.data)).encode()+b'\0'+self.data).hexdigest(),'tag':'v1.35.1-preview'}
     def parse(self):return p.manifest(types.SimpleNamespace(read_text=lambda **kw:json.dumps(self.doc)))
-    def test_reviewed_manifest_matches_both_source_packages(self):self.assertEqual(len(self.parse()),2)
+    def test_reviewed_manifest_matches_the_unified_package(self):
+        self.assertEqual([item['package'] for item in self.parse()],['tv.vela.launcher'])
     def test_another_repository_is_rejected(self):
         self.doc['repository']='example/unrelated'
         with self.assertRaises(ValueError):self.parse()
-    def test_package_duplicates_are_rejected(self):
-        self.doc['releases'][1]=copy.deepcopy(self.doc['releases'][0])
+    def test_a_second_candidate_is_rejected(self):
+        self.doc['releases'].append(copy.deepcopy(self.doc['releases'][0]))
         with self.assertRaises(ValueError):self.parse()
+    def test_the_legacy_lite_package_is_rejected(self):
+        self.doc['releases'][0]['package']='tv.vela.launcher.lite'
+        with self.assertRaisesRegex(ValueError,'Only the unified Vela package'):self.parse()
     def test_filename_cannot_escape_output(self):
         self.doc['releases'][0]['file']='../private.apk'
         with self.assertRaises(ValueError):self.parse()
