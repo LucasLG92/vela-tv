@@ -4,15 +4,19 @@
 
 ## Install or update
 
-1. Download **Vela-2.2.0-preview.apk** from [Vela Releases](https://github.com/LucasLG92/vela-tv/releases/tag/v2.2.0-preview).
+1. Download the newest **Vela-<version>-preview.apk** from [Vela Releases](https://github.com/LucasLG92/vela-tv/releases). The unified APK is the one listed as **Vela**, without the **Lite** prefix.
 2. Transfer it to the television and open it with your usual file manager. Allow installation from that manager if Android asks.
-3. Open Vela and choose Full or Lite. Android 8–10 offers Lite. You can change the choice in **Settings → System → Launcher mode**; profiles and accounts remain saved.
+3. Open Vela, choose Full or Lite and preview a Home layout. Press OK to apply it. You can link services, add TV sources and set the weather later. Android 8–10 offers Lite. You can change the choice in **Settings → System → Launcher mode**; profiles and accounts remain saved.
 4. Existing Full users can install over their current signed app or use its updater. Their configured Full mode is preserved automatically.
 5. If you use the old separate Lite app, follow the [one-time migration steps](UNIFIED.md#moving-from-the-old-standalone-lite-app). Android cannot replace both old package identities with one APK in a normal update.
 
 Both modes then check and download the same official Vela release. Android's installer still asks for installation permission and confirmation when required. APK size, package, version and signing identity are verified before installation; completed downloads are cleaned after an update.
 
-## Choose your Home screen
+## Change your Home layout
+
+Hold OK on **Home** in the Full sidebar, or **HDMI** in Lite. In the editor, open **Home layouts**. Preview any layout with the arrow keys. Press OK to stage your choice and **Save layout** to apply it. **Restore previous Home** brings back the layout before your most recent preset change. Accounts, lists and remote shortcuts stay saved.
+
+## Set Vela as the system Home
 
 Open **Settings → System → Home screen** to choose Vela or return to Original. Devices that need the local ADB connection may request authorisation on the television. Recovery of the original home is saved before activation completes.
 

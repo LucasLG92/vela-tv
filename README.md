@@ -16,7 +16,23 @@ Your films, live channels, apps and HDMI devices — together in a home screen y
 
 Vela brings your own entertainment to the front. Pick up a film from Plex or Jellyfin, explore the television guide, open a favourite app or switch to your console. The same sidebar and quiet, consistent controls follow you through it all. Vela adds no adverts or sponsored rows.
 
-**[Home](#your-collection-takes-centre-stage)** · **[Live TV](#live-tv-belongs-here-too)** · **[Personalisation](#make-it-your-home)** · **[Lite](#one-download-two-ways-to-use-it)** · **[Install](#start-in-a-few-minutes)**
+**[Home layouts](#start-with-what-you-watch)** · **[Library](#your-collection-takes-centre-stage)** · **[Live TV](#live-tv-belongs-here-too)** · **[Personalisation](#make-it-your-home)** · **[Lite](#one-download-two-ways-to-use-it)** · **[Install](#start-in-a-few-minutes)**
+
+## Start with what you watch
+
+Choose a layout when you first open Vela. Preview it with the remote and start using the launcher straight away.
+
+| Home layout | What opens first |
+| --- | --- |
+| **Library** · Full | Continue watching and recently added titles from Plex and Jellyfin, with your artwork. |
+| **Television** | In Full, favourites and what is on now, with shortcuts to the previous channel and full guide. In Lite, the antenna channel guide on supported TVs. |
+| **HDMI and apps** | Connected inputs and shortcuts to your installed apps. |
+
+[![Vela previews the Library layout before applying it](gallery/previews/153-home-layout-library.webp)](gallery/153-home-layout-library.webp)
+
+[Watch the 29-second walkthrough](media/home/vela-home-layouts.mp4) · [See all Home layouts](gallery/README.md#your-own-home)
+
+Hold OK on **Home** in the sidebar (or **HDMI** in Lite) to open the editor, then choose **Home layouts**. Choose **Restore previous Home**, then **Save layout**, to go back. Each profile keeps its own layout.
 
 ## Your collection takes centre stage
 
@@ -106,7 +122,7 @@ Lite leaves Full's multimedia Home, library clients and IPTV player inactive. Bo
 ## Start in a few minutes
 
 1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.3.1-preview)** and install it on your Android TV or Google TV device.
-2. **Choose Full or Lite.** Link your own media accounts, configure your channels or open your HDMI devices.
+2. **Choose Full or Lite**, then pick your Home layout. Link your media accounts and add your TV sources when you are ready.
 3. **Make it yours.** Choose your Home shelves and sidebar apps, then use Vela's Home-screen setting if you want it as your default launcher.
 
 **[Installation and recovery guide](guide/INSTALL.md)** · [Compatibility](guide/COMPATIBILITY.md) · [Troubleshooting and bug reports](https://github.com/LucasLG92/vela-tv/issues)

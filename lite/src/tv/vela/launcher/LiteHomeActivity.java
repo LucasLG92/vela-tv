@@ -73,8 +73,23 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     @Override public void toolsGuide(String name){tools(9);if(hub!=null)hub.guideFix(name);}
     private android.content.SharedPreferences preferences(){return VelaWorkspace.prefs(this,"lite_home");}
     @Override public void startActivity(Intent intent){super.startActivity(intent);VelaRecentActivity.launched(this,intent);}
+    static int startSection(Context context,int fallback){
+        String preset=VelaLayout.start(context);
+        if(VelaLayout.TELEVISION.equals(preset))return TV;
+        if(VelaLayout.DEVICES.equals(preset))return INPUTS;
+        return Math.max(0,Math.min(2,fallback));
+    }
+    private int startSection(){return startSection(this,preferences().getInt("start_section",INPUTS));}
+    private String toolsStart;
+    private List<LiteCatalog.App> inputApps;
+    private View inputApps(int y){
+        if(inputApps==null)inputApps=VelaStartApps.read(this);
+        View strip=new VelaStartApps(this,inputApps,()->show(APPS,false));
+        put(content,strip,64,y,1654,70);
+        return strip;
+    }
     @Override public void onCreate(Bundle state){
-        super.onCreate(state);if(VelaEdition.route(this,"lite"))return;voice.restore(state);long homeCreated=SystemClock.elapsedRealtimeNanos();Ui.init(this);updates=LiteUpdateManager.get(this);section=Math.max(0,Math.min(2,preferences().getInt("start_section",INPUTS)));inputSource=createInputsSource();selectedPort=preferences().getString("selected_port","");
+        super.onCreate(state);if(VelaEdition.route(this,"lite"))return;voice.restore(state);long homeCreated=SystemClock.elapsedRealtimeNanos();Ui.init(this);updates=LiteUpdateManager.get(this);section=startSection();inputSource=createInputsSource();selectedPort=preferences().getString("selected_port","");
         if(state!=null){section=state.getInt("section",INPUTS);inputPage=Math.max(0,state.getInt("input_page"));appPage=Math.max(0,state.getInt("app_page"));settingsCategory=state.getInt("settings_category",0);}
         buildShell();VelaPerformance.firstFrame(shell,homeCreated);int tools=state==null?getIntent().getIntExtra("velaTools",-1):state.getInt("velaTools",-1);getIntent().removeExtra("velaTools");if(tools>=0)tools(tools);
         receiveSearch(getIntent());
@@ -84,11 +99,11 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         if(hub==null)show(section==PROFILE?INPUTS:section,false);else stage.setVisibility(View.VISIBLE);tick.run();VelaShows.schedule(this);startSync();updates.observe(updateListener);if(allowAutomaticChecks())updates.automaticCheck();if(hub==null&&updates.requested()&&getPackageManager().canRequestPackageInstalls()){show(UPDATES,false);updates.resumeInstall(this);}
         if(!deliverVoice()&&hub!=null)hub.resumeSearch();resumeAutoTune();
     }
-    @Override public void onPause(){if(shell==null){super.onPause();return;}visible=false;if(voiceSearchUI!=null)voiceSearchUI.pause();if(autoTune!=null)autoTune.pause();if(remote!=null)remote.cancel();if(headerWidgets!=null)headerWidgets.stop();stopSync();if(programmes!=null)programmes.pause();if(hub!=null)hub.pause();updates.forget(updateListener);main.removeCallbacksAndMessages(null);closeTelevision();inputSource.stop();releaseImages();content.removeAllViews();settingsView=null;tiles.clear();if(registered){unregisterReceiver(packagesChanged);registered=false;}if(channelMenu!=null)channelMenu.close();super.onPause();}
+    @Override public void onPause(){if(shell==null){super.onPause();return;}visible=false;inputApps=null;if(voiceSearchUI!=null)voiceSearchUI.pause();if(autoTune!=null)autoTune.pause();if(remote!=null)remote.cancel();if(headerWidgets!=null)headerWidgets.stop();stopSync();if(programmes!=null)programmes.pause();if(hub!=null)hub.pause();updates.forget(updateListener);main.removeCallbacksAndMessages(null);closeTelevision();inputSource.stop();releaseImages();content.removeAllViews();settingsView=null;tiles.clear();if(registered){unregisterReceiver(packagesChanged);registered=false;}if(channelMenu!=null)channelMenu.close();super.onPause();}
     @Override public void onDestroy(){if(shell==null){super.onDestroy();return;}destroying=true;if(voiceSearchUI!=null)voiceSearchUI.cancel();if(headerWidgets!=null)headerWidgets.stop();if(programmes!=null)programmes.close();if(hub!=null)hub.close();if(shell!=null&&shell.getViewTreeObserver().isAlive())shell.getViewTreeObserver().removeOnGlobalLayoutListener(reading);main.removeCallbacksAndMessages(null);closeTelevision();inputSource.stop();releaseImages();if(shell!=null&&shell.getViewTreeObserver().isAlive()){shell.getViewTreeObserver().removeOnGlobalFocusChangeListener(focusListener);shell.getViewTreeObserver().removeOnGlobalLayoutListener(reading);}super.onDestroy();}
     @Override public void onTrimMemory(int level){super.onTrimMemory(level);appIcons.evictAll();}
     @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);voice.save(out);out.putInt("section",section==PROFILE?INPUTS:section);out.putInt("input_page",inputPage);out.putInt("app_page",appPage);out.putInt("settings_category",settingsCategory);if(hub!=null)out.putInt("velaTools",hub.page());}
-    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);if(voiceSearchUI!=null)voiceSearchUI.cancel();setIntent(intent);if(receiveSearch(intent))return;if(intent.hasExtra("velaTools")){int page=intent.getIntExtra("velaTools",0);intent.removeExtra("velaTools");tools(page);return;}if(hub!=null){hub.close();return;}if(intent.hasCategory(Intent.CATEGORY_HOME)){section=Math.max(0,Math.min(2,preferences().getInt("start_section",INPUTS)));if(visible)show(section,false);}}
+    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);if(voiceSearchUI!=null)voiceSearchUI.cancel();setIntent(intent);if(receiveSearch(intent))return;if(intent.hasExtra("velaTools")){int page=intent.getIntExtra("velaTools",0);intent.removeExtra("velaTools");tools(page);return;}if(hub!=null){hub.close();return;}if(intent.hasCategory(Intent.CATEGORY_HOME)){section=startSection();if(visible)show(section,false);}}
     @Override public void onConfigurationChanged(Configuration configuration){super.onConfigurationChanged(configuration);if(voiceSearchUI!=null)voiceSearchUI.cancel();if(hub!=null){recreate();return;}buildShell();if(visible){show(section==PROFILE?INPUTS:section,false);main.removeCallbacks(tick);tick.run();}}
     private void hideSystemBars(){getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);}
     private void releaseImages(){generation++;for(Future<?> job:jobs)job.cancel(true);jobs.clear();if(worker!=null){worker.shutdownNow();worker=null;}for(ImageView image:appImages)image.setImageDrawable(null);appImages.clear();appIcons.evictAll();if(devices!=null){devices.close();devices=null;}apps=Collections.emptyList();}
@@ -127,7 +142,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         if(visible&&headerWidgets!=null)headerWidgets.start();
         if(hub!=null){hub.close();if(destroying)return;}
         if(destination>=SETTINGS&&VelaSessions.blocked(this)){tools(4);return;}
-        section=destination;inputSource.stop();main.removeCallbacks(inputsChanged);resetContent();setSidebar(false);styleNavigation();FrameLayout.LayoutParams footerBounds=(FrameLayout.LayoutParams)footer.getLayoutParams();footerBounds.leftMargin=188;footerBounds.topMargin=988;footerBounds.width=1100;footer.setLayoutParams(footerBounds);
+        section=destination;inputApps=null;inputSource.stop();main.removeCallbacks(inputsChanged);resetContent();setSidebar(false);styleNavigation();FrameLayout.LayoutParams footerBounds=(FrameLayout.LayoutParams)footer.getLayoutParams();footerBounds.leftMargin=188;footerBounds.topMargin=988;footerBounds.width=1100;footer.setLayoutParams(footerBounds);
         if(destination==INPUTS){heading.setText(VelaLayout.title(this,"inputs"));devices=new DeviceIcons(this);inputSource.start(()->{main.removeCallbacks(inputsChanged);main.postDelayed(inputsChanged,150);});renderInputs();}
         else if(destination==TV)renderTelevision();else if(destination==APPS)loadApps();else if(destination==SETTINGS||destination==LICENSES||destination==TV_SETTINGS||destination==UPDATES||destination==APPEARANCE)renderSettings(destination);
         if(keepNavigation&&destination<4)navigation[destination].requestFocus();
@@ -145,10 +160,11 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         rebuildingInputs=true;final String restorePort=selectedPort;
         boolean navFocus=preserveNavigation&&navigation[INPUTS].hasFocus();if(devices==null)devices=new DeviceIcons(this);else devices.clearViews();content.removeAllViews();tiles.clear();pager.removeAllViews();
         List<TvInputs.Entry> entries=inputSource.read();
+        boolean appsHome=VelaLayout.DEVICES.equals(VelaLayout.start(this));
         if(entries.isEmpty()){
             put(content,text(t("Nenhuma entrada compartilhada pela TV","No inputs shared by this TV","La TV no comparte entradas HDMI"),36,VelaTheme.WHITE),64,110,1560,70);
             put(content,text(t("Instale o Vela Lite na televisão, não no aparelho HDMI.","Install Vela Lite on the television, rather than the HDMI box.","Instala Vela Lite en la televisión, en lugar del dispositivo HDMI."),25,VelaTheme.SECONDARY),64,205,1560,60);
-            TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,320,570,76);tiles.add(settings);rebuildingInputs=false;focusFirst();return;
+            TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,320,570,76);tiles.add(settings);rebuildingInputs=false;if(appsHome)inputApps(450).requestFocus();else focusFirst();return;
         }
         View featureSurface=new View(this);featureSurface.setBackground(VelaTheme.panel());put(content,featureSurface,64,14,1654,342);heroName=text("",52,VelaTheme.WHITE);put(content,heroName,104,52,900,92);heroPort=text("",24,VelaTheme.SECONDARY);put(content,heroPort,106,150,860,45);
         heroOpen=button("",()->{if(featured!=null)launchInput(featured);});heroOpen.setBackground(plate(VelaReading.accent(this),VelaTheme.CONTROL_RADIUS));heroOpen.setTextColor(VelaTheme.INK);heroOpen.setOnFocusChangeListener((v,f)->{heroOpen.setBackground(plate(VelaReading.accent(this),VelaTheme.CONTROL_RADIUS));heroOpen.setTextColor(VelaTheme.INK);VelaFocus.card(heroOpen,f);});put(content,heroOpen,106,236,300,60);heroOpen.setOnKeyListener(this::widgetsUp);heroOpen.setOnLongClickListener(v->{consumeOkUp=true;if(featured!=null)chooseProfile(featured);return true;});
@@ -163,7 +179,10 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
             card.setOnFocusChangeListener((v,f)->{if(devices!=null)well.setBackground(devices.surface(entry.model,f,37));name.setTextColor(f?VelaTheme.WHITE:VelaTheme.SECONDARY);VelaFocus.card(well,f);if(f&&section==INPUTS&&!rebuildingInputs){selectedPort=entry.key;preferences().edit().putString("selected_port",selectedPort).apply();feature(entry);}});
             card.setOnClickListener(v->launchInput(entry));card.setOnLongClickListener(v->{consumeOkUp=true;chooseProfile(entry);return true;});if(i==0)edgeNavigation(card,0,1);if(entry.key.equals(restorePort)){restored=card;initial=entry;}if(connected==null&&entry.state==TvInputs.CONNECTED){connected=card;if(restored==null)initial=entry;}
         }
-        feature(initial);TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,806,420,58);
+        feature(initial);
+        if(appsHome){inputApps(790);}else{
+            TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,806,420,58);
+        }
         FrameLayout.LayoutParams hint=(FrameLayout.LayoutParams)footer.getLayoutParams();hint.leftMargin=652;hint.topMargin=926;hint.width=1180;footer.setLayoutParams(hint);footer.setText(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"));
         rebuildingInputs=false;if(navFocus)navigation[INPUTS].requestFocus();else if(restored!=null)restored.requestFocus();else if(connected!=null)connected.requestFocus();else focusFirst();
     }
@@ -226,7 +245,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         if(!action.equals("voice")&&voiceSearchUI!=null)voiceSearchUI.cancel();
         if(action.equals("voice")){voiceSearch();return;}if(action.equals("search")){tools(0);return;}if(action.equals("profiles")){tools(4);return;}if(action.equals("widgets")){tools(VelaHub.WIDGETS);return;}
         if(action.startsWith("app:")){String pkg=action.substring(4);android.content.pm.PackageManager pm=getPackageManager();Intent intent=pm.getLeanbackLaunchIntentForPackage(pkg);if(intent==null)intent=pm.getLaunchIntentForPackage(pkg);if(intent!=null)try{startActivity(intent);return;}catch(android.content.ActivityNotFoundException|SecurityException unavailable){}android.widget.Toast.makeText(this,L10n.text("App unavailable"),android.widget.Toast.LENGTH_SHORT).show();return;}
-        if(action.equals("home"))show(Math.max(0,Math.min(2,preferences().getInt("start_section",INPUTS))),false);else if(action.equals("tv"))show(TV,false);else if(action.equals("apps"))show(APPS,false);else if(action.equals("inputs"))show(INPUTS,false);else if(action.equals("settings"))show(SETTINGS,false);
+        if(action.equals("home"))show(startSection(),false);else if(action.equals("tv"))show(TV,false);else if(action.equals("apps"))show(APPS,false);else if(action.equals("inputs"))show(INPUTS,false);else if(action.equals("settings"))show(SETTINGS,false);
     }
     @Override public boolean dispatchKeyEvent(KeyEvent event){if(channelMenu!=null){if(channelHeld&&TvRemotePress.select(event.getKeyCode())){if(event.getAction()==KeyEvent.ACTION_UP){channelHeld=false;return true;}if(event.getRepeatCount()>0)return true;channelHeld=false;}return channelMenu.remote(event)||super.dispatchKeyEvent(event);}if(hub!=null&&hub.testingRemote()){if(remote!=null)remote.cancel();return hub.remote(event)||super.dispatchKeyEvent(event);}if(remote==null)remote=new VelaRemote.Dispatcher(this,new VelaRemote.Dispatcher.Host(){public void activate(String action){remoteAction(action);}public void replay(KeyEvent original){dispatchKeyEvent(original);}});if(remote.dispatch(event))return true;if(voiceSearchUI!=null&&voiceSearchUI.remote(event))return true;if(VelaVoice.key(event.getKeyCode())){if(event.getAction()==KeyEvent.ACTION_UP&&!event.isCanceled())voiceSearch();return true;}if(hub!=null){if(hub.remote(event))return true;KeyEvent mapped=VelaRemote.gamepad(event);if(mapped!=event&&hub.remote(mapped))return true;return super.dispatchKeyEvent(mapped);}event=VelaRemote.gamepad(event);if(consumeOkUp&&(event.getKeyCode()==KeyEvent.KEYCODE_DPAD_CENTER||event.getKeyCode()==KeyEvent.KEYCODE_ENTER)){if(event.getAction()==KeyEvent.ACTION_UP)consumeOkUp=false;return true;}if(player!=null&&player.remote(event))return true;if(guide!=null&&guide.remote(event))return true;return super.dispatchKeyEvent(event);}
     @Override public void onBackPressed(){if(voiceSearchUI!=null&&voiceSearchUI.active()){voiceSearchUI.cancel();return;}if(guide!=null&&guide.back())return;if(sidebarOpen){returnContent();return;}if(hub!=null){hub.close();return;}if(player!=null){show(TV,false);return;}if(settingsView!=null&&settingsView.back())return;if(section==PROFILE)show(INPUTS,false);else if(section==LICENSES||section==TV_SETTINGS||section==UPDATES||section==APPEARANCE)show(SETTINGS,false);else if(!navigation[Math.min(section,3)].hasFocus())navigation[Math.min(section,3)].requestFocus();else if(section!=INPUTS)show(INPUTS,true);}
@@ -236,14 +255,14 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     @Override public void tools(int page){
         if(VelaSessions.blocked(this)&&page!=0&&page!=3&&page!=8)page=4;
         stopSync();
-        if(hub!=null){hub.close();if(destroying)return;}if(programmes!=null)programmes.pause();toolsReturnFocus=getCurrentFocus();closeTelevision();inputSource.stop();releaseImages();setSidebar(false);content.setVisibility(View.INVISIBLE);pager.setVisibility(View.INVISIBLE);footer.setVisibility(View.INVISIBLE);heading.setText(L10n.text(page==8?"Live TV":"Personalisation"));
+        if(hub!=null){hub.close();if(destroying)return;}if(programmes!=null)programmes.pause();toolsReturnFocus=getCurrentFocus();toolsStart=VelaLayout.start(this);closeTelevision();inputSource.stop();releaseImages();setSidebar(false);content.setVisibility(View.INVISIBLE);pager.setVisibility(View.INVISIBLE);footer.setVisibility(View.INVISIBLE);heading.setText(L10n.text(page==8?"Live TV":"Personalisation"));
         hub=new VelaHub(this,new LiteToolsData(this){
             public void activate(VelaHub.Hit hit){if(hit.value instanceof Intent)launch((Intent)hit.value);else if(hit.value instanceof TvInputs.Entry){TvInputs.Entry e=(TvInputs.Entry)hit.value;launch(new Intent(Intent.ACTION_VIEW,TvContract.buildChannelUriForPassthroughInput(e.inputId)));}else if(hit.value instanceof LiveTvData.Channel){section=TV;LiveTvData.Channel c=(LiveTvData.Channel)hit.value;playAntenna(c,Collections.singletonList(c));}}
             public boolean navigation(){navigation[hub!=null&&hub.page()==8?TV:SETTINGS].requestFocus();return true;}
             public boolean header(View from){return focusHeader(from);}
             public void title(String label){heading.setText(label);styleNavigation();}
             public void contentFocused(){setSidebar(false);}
-            public void closed(boolean changed){hub=null;content.setVisibility(View.VISIBLE);pager.setVisibility(View.VISIBLE);footer.setVisibility(View.VISIBLE);View restore=toolsReturnFocus;toolsReturnFocus=null;if(destroying)return;if(changed)buildShell();if(visible)show(section==PROFILE?INPUTS:section,false);if(!changed&&restore!=null&&restore.isAttachedToWindow()&&restore.isShown())restore.requestFocus();scanProgrammes();startSync();}
+            public void closed(boolean changed){hub=null;content.setVisibility(View.VISIBLE);pager.setVisibility(View.VISIBLE);footer.setVisibility(View.VISIBLE);View restore=toolsReturnFocus;toolsReturnFocus=null;if(destroying)return;if(changed){buildShell();if(!Objects.equals(toolsStart,VelaLayout.start(LiteHomeActivity.this)))section=startSection();}if(visible)show(section==PROFILE?INPUTS:section,false);if(!changed&&restore!=null&&restore.isAttachedToWindow()&&restore.isShown())restore.requestFocus();scanProgrammes();startSync();}
         },page,true);put(shell,hub,112,116,1790,940);rail.bringToFront();styleNavigation();
     }
     private final class Stage extends FrameLayout {

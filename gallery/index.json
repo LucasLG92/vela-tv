@@ -1836,5 +1836,49 @@
     "height": 2160,
     "version": "2.3.0-preview",
     "sha256": "5be55699855352ec4b572dbe022218d5b2738dc493ec74612de0a85e9683002d"
+  },
+  {
+    "file": "153-home-layout-library.webp",
+    "title": "Preview the Library Home",
+    "source": "Native 3840x2160 Android view on an owned emulator using the public APK. Layout preview with schematic tiles; no personal data or connected account.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.4.0-preview",
+    "sha256": "e314e3c197c5353e24eac96231104b530950c0fd8a83cb17b784bc5a3d859f80"
+  },
+  {
+    "file": "154-home-layout-television.webp",
+    "title": "Preview the Television Home",
+    "source": "Native 3840x2160 Android view on an owned emulator using the public APK. Layout preview with schematic tiles; no personal data or connected account.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.4.0-preview",
+    "sha256": "08ea503155d03da9fedb5af20a51294c00d06168bee308165827dc0f2fdeb616"
+  },
+  {
+    "file": "155-home-layout-hdmi.webp",
+    "title": "Preview HDMI and apps",
+    "source": "Native 3840x2160 Android view on an owned emulator using the public APK. Layout preview with schematic tiles; no personal data or connected account.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.4.0-preview",
+    "sha256": "c6d5b6d9d2353f8ed5acf2c7d2aeb0b0822e04a625cbbabd7c760b506405b096"
+  },
+  {
+    "file": "156-lite-home-layout.webp",
+    "title": "Choose a Lite Home",
+    "source": "Native 3840x2160 Android view on an owned emulator using the public APK. Layout preview with schematic tiles; no personal data or connected account.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.4.0-preview",
+    "sha256": "f7304d6587a0b43effd319ae186cbff8827e3862e7a4f1bd412767d75131d7c3"
   }
 ]

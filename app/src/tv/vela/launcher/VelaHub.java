@@ -194,7 +194,8 @@ final class VelaHub extends FrameLayout {
         clear();heading.setText(L10n.text("Your Home"));caption.setText(L10n.text("Loading…"));JSONObject draft=layoutDraft;
         work(signal->host.homeServices(),value->{if(layoutDraft!=draft)return;for(int i=0;i<canvas.getChildCount();i++)canvas.getChildAt(i).setVisibility(GONE);
             homeEditor=new VelaHomeEditor(activity,draft,(List<VelaLayout.Service>)value,new VelaHomeEditor.Host(){
-                public void save(JSONObject j)throws Exception{VelaLayout.save(activity,j);layoutDraft=null;grabbed="";changed=true;render();first();}
+                public void save(JSONObject j)throws Exception{save(j,false);}
+                public void save(JSONObject j,boolean remember)throws Exception{VelaLayout.save(activity,j,remember);layoutDraft=null;grabbed="";changed=true;render();first();}
                 public void cancel(){layoutDraft=null;grabbed="";render();first();}public void navigation(){if(!host.navigation())cancel();}public void focused(){host.contentFocused();}
             });put(canvas,homeEditor,0,0,1790,940);host.title(L10n.text("Personalisation"));homeEditor.focusFirst();
         });

@@ -1,6 +1,6 @@
 # See Vela in action
 
-A complete tour of **Vela 2.3**, with **39 native 4K captures** across Full, Lite and shared tools, including the new 2.2.1 search and voice views. Open an image for its full 3840 × 2160 view.
+Native 4K captures across Vela Full, Lite and shared tools. Open an image for its full 3840 × 2160 view.
 
 **[Download](https://github.com/LucasLG92/vela-tv/releases/tag/v2.3.1-preview)** · [Home](#your-own-home) · [Library](#your-library) · [Television](#television-in-the-same-home) · [Personalisation](#the-details-that-make-it-yours) · **[Lite gallery](../lite/gallery/README.md)**
 
@@ -9,6 +9,12 @@ These are real production Android views captured in an owned emulator, with orig
 <a id="make-home-yours"></a>
 
 ## Your own Home
+
+Preview your Home with the remote. Choose the Library layout in Full, or start in Television or HDMI and apps in either mode. [Watch the 29-second setup walkthrough](../media/home/vela-home-layouts.mp4).
+
+| Library | Television | HDMI and apps |
+| --- | --- | --- |
+| [![Library layout preview](previews/153-home-layout-library.webp)](153-home-layout-library.webp) | [![Television layout preview](previews/154-home-layout-television.webp)](154-home-layout-television.webp) | [![HDMI and apps layout preview](previews/155-home-layout-hdmi.webp)](155-home-layout-hdmi.webp) |
 
 Your library becomes part of the screen you see when the TV opens. Continue watching keeps the platform, time left and progress inside each image, with recently added posters visible below.
 

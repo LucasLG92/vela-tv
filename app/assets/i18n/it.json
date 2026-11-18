@@ -1498,5 +1498,14 @@
   "System player": "Lettore di sistema",
   "The source refused access. Check the source settings.": "La fonte ha rifiutato l’accesso. Controlla le impostazioni.",
   "Try the default format and player again.": "Riprova il formato e il lettore predefiniti.",
-  "Trying the compatibility player…": "Prova del lettore compatibile…"
+  "Trying the compatibility player…": "Prova del lettore compatibile…",
+  "Home layouts": "Layout della schermata iniziale",
+  "Choose a layout to preview it. Press OK to use it.": "Seleziona un layout per l’anteprima. Premi OK per usarlo.",
+  "Restore previous Home": "Ripristina la schermata precedente",
+  "HDMI and apps": "HDMI e app",
+  "Your antenna channels, favourites and programme guide.": "I tuoi canali via antenna, i preferiti e la guida TV.",
+  "On now, favourite channels, the previous channel and the full programme guide.": "In onda, canali preferiti, canale precedente e guida TV completa.",
+  "Connected HDMI devices and shortcuts to your installed apps.": "Dispositivi HDMI collegati e scorciatoie per le app installate.",
+  "Continue watching and recently added titles from Plex and Jellyfin.": "Continua a guardare e scopri le ultime aggiunte su Plex e Jellyfin.",
+  "All apps": "Tutte le app"
 }

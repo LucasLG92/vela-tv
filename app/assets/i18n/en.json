@@ -1498,5 +1498,14 @@
   "System player": "System player",
   "The source refused access. Check the source settings.": "The source refused access. Check the source settings.",
   "Try the default format and player again.": "Try the default format and player again.",
-  "Trying the compatibility player…": "Trying the compatibility player…"
+  "Trying the compatibility player…": "Trying the compatibility player…",
+  "Home layouts": "Home layouts",
+  "Choose a layout to preview it. Press OK to use it.": "Choose a layout to preview it. Press OK to use it.",
+  "Restore previous Home": "Restore previous Home",
+  "HDMI and apps": "HDMI and apps",
+  "Your antenna channels, favourites and programme guide.": "Your antenna channels, favourites and programme guide.",
+  "On now, favourite channels, the previous channel and the full programme guide.": "On now, favourite channels, the previous channel and the full programme guide.",
+  "Connected HDMI devices and shortcuts to your installed apps.": "Connected HDMI devices and shortcuts to your installed apps.",
+  "Continue watching and recently added titles from Plex and Jellyfin.": "Continue watching and recently added titles from Plex and Jellyfin.",
+  "All apps": "All apps"
 }

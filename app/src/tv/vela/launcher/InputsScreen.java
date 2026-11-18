@@ -13,16 +13,19 @@ import java.util.*;
 
 /** Event-driven HDMI cards; no network icons, background services or idle polling. */
 final class InputsScreen extends VelaScreen {
+    final boolean home;
+    private List<LiteCatalog.App> apps;
     private final TvInputs.Source source;private final Handler main=new Handler(Looper.getMainLooper());
     private final Runnable refresh=()->{if(this.active&&!this.picking)render();};
     private DeviceIcons icons;
     private FrameLayout root;private final List<View> cards=new ArrayList<>();
     private FrameLayout heroWell;private ImageView heroIcon;private TextView heroName,heroPort,open;private TvInputs.Entry heroEntry;
     private boolean active,picking,consumeConfirmUp;private String selected="";private int column;
-    InputsScreen(Activity owner,Navigation navigation,TvInputs.Source source){super(owner,navigation);this.source=source;}
+    InputsScreen(Activity owner,Navigation navigation,TvInputs.Source source){this(owner,navigation,source,false);}
+    InputsScreen(Activity owner,Navigation navigation,TvInputs.Source source,boolean home){super(owner,navigation);this.source=source;this.home=home;}
     protected void onCreate(Bundle state){if(state!=null)selected=state.getString("selected","");}
     protected void onResume(){active=true;icons=new DeviceIcons(this);source.start(()->{main.removeCallbacks(refresh);main.postDelayed(refresh,150);});render();}
-    protected void onPause(){active=false;source.stop();if(icons!=null){icons.close();icons=null;}main.removeCallbacksAndMessages(null);}
+    protected void onPause(){active=false;apps=null;source.stop();if(icons!=null){icons.close();icons=null;}main.removeCallbacksAndMessages(null);}
     @Override void onTrimMemory(int level){if(icons!=null){icons.close();icons=null;}}
     protected void onDestroy(){onPause();cards.clear();if(root!=null)root.removeAllViews();}
     protected void onSaveInstanceState(Bundle out){out.putString("selected",selected);}
@@ -63,9 +66,16 @@ final class InputsScreen extends VelaScreen {
             if(entry.key.equals(selected)){restore=card;initial=entry;}
         }
         if(initial!=null)feature(initial);else{heroName.setText(t("Suas entradas HDMI","Your HDMI inputs","Tus entradas HDMI"));heroPort.setText(t("Disponíveis quando a TV as compartilha","Available when shared by your TV","Disponibles cuando la TV las comparte"));open.setText(t("Ajustes da televisão","TV settings","Ajustes de la televisión"));open.setOnClickListener(v->systemSettings());}
-        TextView settings=action(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),this::systemSettings);place(root,settings,64,806,420,58);
-        place(root,text(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"),20,VelaTheme.MUTED),540,810,1180,40);
-        setContentView(root);if(!navFocus){if(restore!=null)restore.requestFocus();else if(!cards.isEmpty()){int preferred=0;for(int n=0;n<entries.size();n++)if(entries.get(n)==initial){preferred=n;break;}cards.get(preferred).requestFocus();}else open.requestFocus();}root.post(()->{if(active&&icons!=null)icons.refreshVisible();});
+        View appsStrip=null;
+        if(home){
+            if(apps==null)apps=VelaStartApps.read(this);
+            appsStrip=new VelaStartApps(this,apps,()->startActivity(new Intent(HomeScreenHost.APPS)));
+            place(root,appsStrip,64,entries.isEmpty()?470:790,1654,70);
+        }else{
+            TextView settings=action(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),this::systemSettings);place(root,settings,64,806,420,58);
+            place(root,text(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"),20,VelaTheme.MUTED),540,810,1180,40);
+        }
+        setContentView(root);if(!navFocus){if(restore!=null)restore.requestFocus();else if(!cards.isEmpty()){int preferred=0;for(int n=0;n<entries.size();n++)if(entries.get(n)==initial){preferred=n;break;}cards.get(preferred).requestFocus();}else if(appsStrip!=null)appsStrip.requestFocus();else open.requestFocus();}root.post(()->{if(active&&icons!=null)icons.refreshVisible();});
     }
     private void choose(TvInputs.Entry entry){
         picking=true;if(icons!=null)icons.clearViews();root=new FrameLayout(this);cards.clear();place(root,text(entry.port+" · "+t("Escolha o dispositivo","Choose device","Elige el dispositivo"),38,VelaTheme.WHITE),64,24,1600,70);

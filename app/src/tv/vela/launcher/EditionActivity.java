@@ -17,13 +17,21 @@ import org.json.*;
 public class EditionActivity extends Activity {
     static final int IMPORT=9061;
     private TextView message;
+    private String setupMode="";
     private final Handler main=new Handler(Looper.getMainLooper());
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private Future<?> importing;private boolean busy;
-    @Override public void onCreate(Bundle state){super.onCreate(state);if(!VelaEdition.mode(this).isEmpty()&&VelaSessions.blocked(this)){startActivity(new Intent().setClassName(getPackageName(),VelaEdition.home(this)).putExtra("velaTools",4));finish();return;}Ui.init(this);render();}
+    @Override public void onCreate(Bundle state){super.onCreate(state);if(!VelaEdition.mode(this).isEmpty()&&VelaSessions.blocked(this)){startActivity(new Intent().setClassName(getPackageName(),VelaEdition.home(this)).putExtra("velaTools",4));finish();return;}Ui.init(this);setupMode=state==null||!VelaEdition.mode(this).isEmpty()?"":state.getString("setupMode","");render();}
     private void render(){
         FrameLayout root=new FrameLayout(this);root.setBackground(VelaTheme.canvas());setContentView(root);
-        VelaReading.Stage stage=new VelaReading.Stage(this,1920,1080);root.addView(stage,new FrameLayout.LayoutParams(-1,-1));FrameLayout page=new FrameLayout(this);stage.addView(page);
+        VelaReading.Stage stage=new VelaReading.Stage(this,1920,1080);root.addView(stage,new FrameLayout.LayoutParams(-1,-1));getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        if(!setupMode.isEmpty()){
+            VelaHomePresets picker=new VelaHomePresets(this,setupMode.equals("lite"),"",false,this::firstHome,this::backToMode);
+            FrameLayout page=new FrameLayout(this);stage.addView(page);
+            put(page,picker,65,70,1790,940);picker.focusChoice();
+            return;
+        }
+        FrameLayout page=new FrameLayout(this);stage.addView(page);
         put(page,label(L10n.text("Choose your Vela"),48),160,110,1600,90);
         put(page,label(L10n.text("One app. Choose the experience that fits this television."),25),164,215,1590,64);
         View full=card(L10n.text("Full"),L10n.text("Plex, Jellyfin, IPTV, antenna, HDMI and apps."),()->choose("full"));
@@ -33,7 +41,6 @@ public class EditionActivity extends Activity {
         if(legacyInstalled()){View migration=button(L10n.text("Import current Lite profile"),this::importLegacy);put(page,migration,160,845,780,76);}
         if(!VelaEdition.mode(this).isEmpty()){View back=button(L10n.text("Back"),()->openHome());put(page,back,980,845,780,76);}
         (VelaEdition.mode(this).equals("lite")||!VelaEdition.fullAvailable()?lite:full).requestFocus();
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
     private TextView label(String text,int size){TextView v=new TextView(this);v.setText(text);v.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,size);v.setTextColor(VelaTheme.WHITE);v.setTypeface(Ui.medium);v.setIncludeFontPadding(false);v.setGravity(Gravity.CENTER_VERTICAL);v.setMaxLines(2);return v;}
     private View card(String title,String detail,Runnable action){
@@ -43,7 +50,19 @@ public class EditionActivity extends Activity {
     }
     private View button(String text,Runnable action){TextView v=label(text,24);v.setGravity(Gravity.CENTER);v.setFocusable(true);v.setDefaultFocusHighlightEnabled(false);v.setBackground(VelaTheme.row(false,VelaTheme.WHITE));v.setOnFocusChangeListener((w,f)->{v.setBackground(VelaTheme.row(f,VelaTheme.WHITE));v.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);});v.setOnClickListener(w->action.run());return v;}
     private void put(FrameLayout parent,View v,int x,int y,int w,int h){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;parent.addView(v,p);}
-    private void choose(String mode){if(busy)return;try{VelaEdition.select(this,mode);openHome();}catch(RuntimeException failed){message.setText(L10n.text("Could not save mode. Try again."));}}
+    private void backToMode(){setupMode="";render();}
+    private void firstHome(String preset){
+        try{
+            VelaLayout.save(this,VelaLayout.preset(VelaLayout.read(this),preset));
+            VelaEdition.select(this,setupMode);
+            if(setupMode.equals("full")){Personalization.prepare(this);Personalization.complete(this);}
+            openHome();
+        }catch(Exception failed){
+            Toast.makeText(this,L10n.text("Could not save the change."),Toast.LENGTH_SHORT).show();
+        }
+    }
+    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("setupMode",setupMode);}
+    private void choose(String mode){if(busy)return;if(VelaEdition.mode(this).isEmpty()){setupMode=mode;render();return;}try{VelaEdition.select(this,mode);if(mode.equals("full")&&!VelaLayout.start(this).isEmpty()){Personalization.prepare(this);Personalization.complete(this);}openHome();}catch(RuntimeException failed){message.setText(L10n.text("Could not save mode. Try again."));}}
     private void openHome(){if(busy)return;String mode=VelaEdition.mode(this);if(mode.isEmpty())return;Intent next=new Intent(getIntent());next.removeExtra("changeMode");next.removeExtra("importLegacy");next.setClassName(getPackageName(),VelaEdition.home(this));next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);startActivity(next);finish();}
     private boolean legacyInstalled(){return getPackageManager().checkSignatures(getPackageName(),"tv.vela.launcher.lite")==PackageManager.SIGNATURE_MATCH;}
     private void importLegacy(){if(busy)return;try{startActivityForResult(new Intent().setClassName("tv.vela.launcher.lite","tv.vela.launcher.LiteExportActivity"),IMPORT);}catch(ActivityNotFoundException|SecurityException unavailable){message.setText(L10n.text("Update the old Lite app to the migration release first."));}}
@@ -65,6 +84,6 @@ public class EditionActivity extends Activity {
         });
     }
     private boolean pristine(){try{return !VelaEdition.prefs(this).getBoolean("imported",false)&&VelaWorkspace.snapshot(this).getJSONObject("settings").length()==0;}catch(Exception invalid){return false;}}
-    @Override public void onBackPressed(){if(!busy&&!VelaEdition.mode(this).isEmpty())openHome();}
+    @Override public void onBackPressed(){if(busy)return;if(!setupMode.isEmpty())backToMode();else if(!VelaEdition.mode(this).isEmpty())openHome();}
     @Override protected void onDestroy(){if(importing!=null)importing.cancel(true);worker.shutdownNow();main.removeCallbacksAndMessages(null);super.onDestroy();}
 }

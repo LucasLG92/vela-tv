@@ -37,7 +37,26 @@ public final class AndroidHomeEditorTest extends Instrumentation {
         shot("01-lite-editor");ui(saved::focusFirst);key(KeyEvent.KEYCODE_DPAD_DOWN);key(KeyEvent.KEYCODE_DPAD_DOWN);key(KeyEvent.KEYCODE_DPAD_DOWN);check(saved.save.hasFocus(),"The remote cannot reach Save from the final section");key(KeyEvent.KEYCODE_DPAD_CENTER);check(VelaLayout.title(context,"inputs").equals(inputTitle()),"Save discarded the custom Lite name");ui(()->((VelaHub)unchecked(activity,"hub")).close());
         TextView[] labels=(TextView[])field(activity,"navigationLabels");check(labels[0].getText().toString().equals(inputTitle()),"The Lite sidebar ignored its saved destination name");
         phase="portable-and-profile";JSONObject backup=VelaWorkspace.snapshot(context);check(backup.toString().contains(inputTitle()),"Portable settings lost the Home title");VelaWorkspace.select(context,previous);check(!VelaLayout.title(context,"inputs").equals(inputTitle()),"The editor changed another profile");VelaWorkspace.select(context,profile);
-        result.putString("result","PASS shared Lite Home editor: media controls absent, three destinations, real D-pad focus, reorder/Back undo, Cancel, Save, sidebar title, portable settings and profile isolation. Synthetic local profile; no TV or account contacted.");
+        phase="presets";
+        VelaHomeEditor preset=editor();ui(preset::focusFirst);
+        key(KeyEvent.KEYCODE_DPAD_UP);key(KeyEvent.KEYCODE_DPAD_UP);
+        check(((View)field(preset,"presets")).hasFocus(),"Home layouts is not reachable by remote");
+        key(KeyEvent.KEYCODE_DPAD_CENTER);
+        check(field(preset,"picker")!=null,"Preset preview did not open");
+        key(KeyEvent.KEYCODE_DPAD_DOWN);
+        check(VelaLayout.start(context).isEmpty(),"Preview changed the current layout");
+        key(KeyEvent.KEYCODE_DPAD_CENTER);
+        check(preset.save.hasFocus()&&VelaLayout.DEVICES.equals(preset.draft.optString("start")),"Applying a preview did not stage the HDMI layout");
+        check(VelaLayout.start(context).isEmpty(),"Staging a preview wrote to disk");
+        key(KeyEvent.KEYCODE_DPAD_CENTER);
+        check(VelaLayout.DEVICES.equals(VelaLayout.start(context)),"Saving the preset did not persist the layout");
+        ui(()->((VelaHub)unchecked(activity,"hub")).close());
+        VelaHomeEditor restore=editor();ui(()->((View)unchecked(restore,"presets")).performClick());
+        key(KeyEvent.KEYCODE_DPAD_DOWN);key(KeyEvent.KEYCODE_DPAD_CENTER);
+        check(restore.save.hasFocus()&&restore.draft.optString("start").isEmpty(),"Previous layout not staged");
+        key(KeyEvent.KEYCODE_DPAD_CENTER);
+        check(VelaLayout.start(context).isEmpty()&&VelaLayout.title(context,"inputs").equals(inputTitle()),"Previous layout lost its custom section name");
+        result.putString("result","PASS shared Lite Home editor: media controls absent, three destinations, real D-pad focus, reorder/Back undo, Cancel, Save, sidebar title, portable settings, profile isolation, preset preview, confirmation and restore. Synthetic local profile; no TV or account contacted.");
     }catch(Throwable t){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(t));try{shot("failure");}catch(Exception ignored){}}
     finally{try{if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}if(mode!=null){if(mode.isEmpty())VelaEdition.prefs(context).edit().remove("mode").commit();else VelaEdition.select(context,mode);}}catch(Exception ignored){}}
     finish(result.containsKey("error")?1:-1,result);}

@@ -10,15 +10,16 @@ import android.widget.*;
 import org.json.*;
 import java.util.*;
 
-/** A profile-local draft, one recycled list and ordinary controls. No previews, images or network worker. */
+/** A profile-local draft and native controls for arranging Home. */
 final class VelaHomeEditor extends FrameLayout {
-    interface Host {void save(JSONObject draft)throws Exception;void cancel();void navigation();void focused();}
+    interface Host {void save(JSONObject draft)throws Exception;default void save(JSONObject draft,boolean remember)throws Exception{save(draft);}void cancel();void navigation();void focused();}
     final JSONObject draft;final ListView list;final TextView save,cancel;private final Activity activity;private final Host host;
     private final List<VelaLayout.Service> services;private final ArrayList<String> keys=new ArrayList<>();private final TextView[] tabs=new TextView[3];
-    private final LinearLayout detail;private final TextView caption,state;private final BaseAdapter adapter;private View firstDetail;private int tab,index;private String grabbed="";private JSONArray beforeMove;
+    private final LinearLayout detail;private final TextView caption,state;private final BaseAdapter adapter;private View firstDetail;private int tab,index;private String grabbed="";private JSONArray beforeMove;private final TextView presets;private VelaHomePresets picker;private boolean remember;
     VelaHomeEditor(Activity a,JSONObject document,List<VelaLayout.Service> candidates,Host h){
         super(a);activity=a;host=h;draft=document;services=new ArrayList<>(candidates.subList(0,Math.min(128,candidates.size())));setBackground(VelaTheme.canvas());
         TextView title=text(L10n.text("Your Home"),38,VelaTheme.WHITE);title.setTypeface(Ui.displaySemibold);put(this,title,50,20,1100,58);
+        presets=button(L10n.text("Home layouts"),this::choosePreset);put(this,presets,1250,20,490,62);
         caption=text(L10n.text("Choose what belongs on your Home. Each profile keeps its own layout."),21,VelaTheme.SECONDARY);put(this,caption,50,86,1650,56);
         for(int i=0;i<3;i++){final int at=i;tabs[i]=button(L10n.text(new String[]{"Sections","Continue watching services","Appearance"}[i]),()->tab(at));put(this,tabs[i],50+i*550,152,530,58);}
         if(VelaEdition.lite(a)){tabs[1].setVisibility(GONE);tabs[2].setVisibility(GONE);tabs[0].getLayoutParams().width=1690;}
@@ -29,7 +30,8 @@ final class VelaHomeEditor extends FrameLayout {
         list.setOnFocusChangeListener((v,f)->{paintRows();if(f)host.focused();});list.setOnItemClickListener((p,v,position,id)->{index=position;if(!grabbed.isEmpty()){grabbed="";state();adapter.notifyDataSetChanged();}else if(tab==1){toggleService(keys.get(index));}else{details();if(firstDetail!=null)firstDetail.requestFocus();}});
         list.setOnItemLongClickListener((p,v,position,id)->{if(tab!=0)return false;index=position;grabbed=keys.get(index);beforeMove=new JSONArray(order());state();adapter.notifyDataSetChanged();return true;});
         list.setOnKeyListener((v,key,event)->{if(event.getAction()!=KeyEvent.ACTION_DOWN)return false;if(key==KeyEvent.KEYCODE_DPAD_LEFT){host.navigation();return true;}if(key==KeyEvent.KEYCODE_DPAD_RIGHT){if(firstDetail!=null)firstDetail.requestFocus();return true;}if(key==KeyEvent.KEYCODE_DPAD_UP&&index==0&&grabbed.isEmpty()){tabs[tab].requestFocus();return true;}if(!grabbed.isEmpty()&&(key==KeyEvent.KEYCODE_DPAD_UP||key==KeyEvent.KEYCODE_DPAD_DOWN)){move(key==KeyEvent.KEYCODE_DPAD_UP?-1:1);return true;}return false;});
-        state=text("",18,VelaTheme.SECONDARY);put(this,state,50,780,1650,40);save=button(L10n.text("Save layout"),()->{try{VelaLayout.validate(draft);host.save(draft);}catch(Exception invalid){state.setText(L10n.text("Could not save the change."));}});cancel=button(L10n.text("Cancel"),h::cancel);put(this,save,50,840,1080,60);put(this,cancel,1150,840,590,60);list.setNextFocusDownId(save.getId());save.setNextFocusUpId(list.getId());cancel.setNextFocusUpId(list.getId());tab(0);
+        state=text("",18,VelaTheme.SECONDARY);put(this,state,50,780,1650,40);save=button(L10n.text("Save layout"),()->{try{VelaLayout.validate(draft);host.save(draft,remember);}catch(Exception invalid){state.setText(L10n.text("Could not save the change."));}});cancel=button(L10n.text("Cancel"),h::cancel);put(this,save,50,840,1080,60);put(this,cancel,1150,840,590,60);list.setNextFocusDownId(save.getId());save.setNextFocusUpId(list.getId());cancel.setNextFocusUpId(list.getId());tab(0);
+        tabs[0].setNextFocusUpId(presets.getId());presets.setNextFocusDownId(tabs[0].getId());if(!VelaEdition.lite(a))tabs[2].setNextFocusUpId(presets.getId());
     }
     private TextView text(String value,int size,int color){TextView v=new TextView(activity);v.setText(value);v.setTextColor(color);v.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,size*VelaReading.scale(activity));v.setTypeface(Ui.medium);v.setIncludeFontPadding(false);v.setGravity(Gravity.CENTER_VERTICAL);return v;}
     private TextView button(String title,Runnable action){TextView v=text(title,22,VelaTheme.WHITE);v.setId(View.generateViewId());v.setFocusable(true);v.setFocusableInTouchMode(true);v.setDefaultFocusHighlightEnabled(false);v.setGravity(Gravity.CENTER);v.setPadding(18,6,18,6);v.setBackground(VelaTheme.row(false,VelaReading.accent(activity)));v.setOnFocusChangeListener((w,f)->{v.setBackground(VelaTheme.row(f,VelaReading.accent(activity)));v.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);v.setAlpha(f||v.isSelected()?1:.9f);if(f)host.focused();});v.setOnClickListener(w->action.run());return v;}
@@ -61,6 +63,31 @@ final class VelaHomeEditor extends FrameLayout {
         }else if(tab==1){VelaLayout.Service s=service(key);try{Drawable icon=activity.getPackageManager().getApplicationIcon(key);icon.setBounds(0,0,44,44);title.setCompoundDrawables(icon,null,null,null);title.setCompoundDrawablePadding(16);}catch(Exception unavailable){}note(s.detail);action(L10n.text(selected(s)?"Remove from Continue watching":"Include in Continue watching"),()->{toggleService(key);if(firstDetail!=null)firstDetail.requestFocus();});note(L10n.text("App history depends on what the service shares with Android TV. Linking Plex or Jellyfin also enables their own library feeds."));action(L10n.text("Use automatic service selection"),()->{draft.remove("resumeServices");adapter.notifyDataSetChanged();details();if(firstDetail!=null)firstDetail.requestFocus();});
         }else{note(L10n.text("These choices affect Home only. Movies, Series and your accounts keep their own settings."));if(key.equals("Home presentation"))for(String hero:Arrays.asList("cinema","compact","rows"))action((draft.optString("hero","cinema").equals(hero)?"✓  ":"")+L10n.text(hero.equals("rows")?"Rows only":hero.equals("compact")?"Compact":"Cinema"),()->{set("hero",hero);adapter.notifyDataSetChanged();details();if(firstDetail!=null)firstDetail.requestFocus();});else if(key.equals("Home library"))for(String source:Arrays.asList("current","plex","jellyfin","both"))action((VelaLayout.source(draft).equals(source)?"✓  ":"")+VelaLayout.sourceLabel(source),()->{set("librarySource",source);adapter.notifyDataSetChanged();details();if(firstDetail!=null)firstDetail.requestFocus();});else for(String focus:Arrays.asList("soft","clear"))action((draft.optString("focus","soft").equals(focus)?"✓  ":"")+L10n.text(focus.equals("clear")?"High contrast":"Soft focus"),()->{set("focus",focus);adapter.notifyDataSetChanged();details();if(firstDetail!=null)firstDetail.requestFocus();});note(L10n.text("Clock, weather and shortcuts can be arranged in Home widgets."));}
     }
-    boolean back(){if(grabbed.isEmpty())return false;set("order",beforeMove);grabbed="";tab(0);focusFirst();return true;}
+    private void choosePreset(){
+        if(picker!=null)return;
+        JSONObject previous=VelaLayout.previous(activity);
+        for(int i=0;i<getChildCount();i++){
+            View child=getChildAt(i);
+            if(child.getVisibility()==VISIBLE)child.setVisibility(INVISIBLE);
+        }
+        picker=new VelaHomePresets(activity,VelaEdition.lite(activity),draft.optString("start"),previous!=null,key->{
+            try{
+                JSONObject next="previous".equals(key)?previous:VelaLayout.preset(draft,key);
+                if(next==null)return;
+                for(Iterator<String> it=draft.keys();it.hasNext();){it.next();it.remove();}
+                for(Iterator<String> it=next.keys();it.hasNext();){String field=it.next();draft.put(field,next.get(field));}
+                remember=true;closePicker();tab(0);save.requestFocus();
+            }catch(Exception invalid){closePicker();state.setText(L10n.text("Could not save the change."));}
+        },this::closePicker);
+        put(this,picker,0,0,1790,940);picker.focusChoice();
+        host.focused();
+    }
+    private void closePicker(){
+        if(picker==null)return;
+        removeView(picker);picker=null;
+        for(int i=0;i<getChildCount();i++)if(getChildAt(i).getVisibility()==INVISIBLE)getChildAt(i).setVisibility(VISIBLE);
+        presets.requestFocus();
+    }
+    boolean back(){if(picker!=null){closePicker();return true;}if(grabbed.isEmpty())return false;set("order",beforeMove);grabbed="";tab(0);focusFirst();return true;}
     void close(){for(int i=0;i<list.getChildCount();i++)if(list.getChildAt(i) instanceof TextView)((TextView)list.getChildAt(i)).setCompoundDrawables(null,null,null,null);}
 }

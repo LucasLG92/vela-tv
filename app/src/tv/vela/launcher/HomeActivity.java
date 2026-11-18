@@ -8,6 +8,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.widget.TextView;
+import java.util.Objects;
 
 /**
  * The Vela home screen (Android's "Home" role in Vela mode). It runs in the :home process: if it crashes,
@@ -72,7 +73,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         boolean setup=Personalization.needed(this);
         home = new CinemaHomeView(this);
         setContentView(home);VelaPerformance.firstFrame(home,homeCreated);
-        if(savedInstanceState!=null&&savedInstanceState.containsKey("velaScreens"))home.restorePanels(savedInstanceState.getBundle("velaScreens"));else if("settings".equals(getIntent().getStringExtra("velaEntry")))home.settings();else if(setup)home.route(new Intent(this,SetupActivity.class));
+        if(savedInstanceState!=null&&savedInstanceState.containsKey("velaScreens"))home.restorePanels(savedInstanceState.getBundle("velaScreens"));else if("settings".equals(getIntent().getStringExtra("velaEntry")))home.settings();else if(setup)home.route(new Intent(this,SetupActivity.class));else startPending=true;
         getWindow().getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
                 | android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         getWindow().setBackgroundDrawable(null);
@@ -81,10 +82,12 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
         receiveSearch(getIntent());
     }
 
+    private boolean startPending;
+    private String toolsStart;
     @Override protected void onResume() {
         super.onResume();if(home==null||VelaEdition.route(this,"full"))return;
-        foreground=true;if(voiceSearchUI!=null)voiceSearchUI.resume();toolsMain.removeCallbacks(programmeTick);programmeTick.run();
-        if(home!=null&&hub==null){home.resume();if(!home.showingUpdates())Updates.resumeInstallation(this);}else if(home!=null)home.resumeTools();VelaShows.schedule(this);startSync();
+        foreground=true;Updates.automatic(this);if(voiceSearchUI!=null)voiceSearchUI.resume();toolsMain.removeCallbacks(programmeTick);programmeTick.run();
+        if(home!=null&&hub==null){if(!startPending||!home.openStart())home.resume();startPending=false;if(!home.showingUpdates())Updates.resumeInstallation(this);}else if(home!=null)home.resumeTools();VelaShows.schedule(this);startSync();
         if(!deliverVoice()&&hub!=null)hub.resumeSearch();resumeAutoTune();
     }
 
@@ -165,7 +168,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     @Override public void tools(int page){
         if(VelaSessions.blocked(this)&&page!=0&&page!=3&&page!=8)page=4;
         stopSync();
-        if(hub!=null){hub.close();if(destroying)return;}if(home==null)return;if(programmes!=null)programmes.pause();toolsReturnFocus=getCurrentFocus();toolsProfile=VelaWorkspace.active(this);toolsDestination=home.navigationDestination();toolsPanels=home.savePanels();home.pause();home.releaseImages();
+        if(hub!=null){hub.close();if(destroying)return;}if(home==null)return;if(programmes!=null)programmes.pause();toolsReturnFocus=getCurrentFocus();toolsProfile=VelaWorkspace.active(this);toolsDestination=home.navigationDestination();toolsStart=VelaLayout.start(this);toolsPanels=home.savePanels();home.pause();home.releaseImages();
         hub=new VelaHub(this,new FullToolsData(this){
             public Runnable artwork(VelaHub.Hit hit,android.widget.ImageView target,int width,int height){return home.searchArtwork(hit,target,width,height);}
             public void activate(VelaHub.Hit hit){try{if(hit.value instanceof Intent)startActivity((Intent)hit.value);else if(hit.value instanceof TvInputs.Entry){TvInputs.Entry e=(TvInputs.Entry)hit.value;startActivity(new Intent(Intent.ACTION_VIEW,android.media.tv.TvContract.buildChannelUriForPassthroughInput(e.inputId)));}else if(hit.value instanceof LiveTvData.Channel)home.searchChannel((LiveTvData.Channel)hit.value);else if(hit.value instanceof PlexClient.Film){Intent i=new LibraryClient(HomeActivity.this).open((PlexClient.Film)hit.value);if(i!=null)startActivity(i);}}catch(RuntimeException unavailable){android.widget.Toast.makeText(HomeActivity.this,"No se puede abrir en este dispositivo.",android.widget.Toast.LENGTH_SHORT).show();}}
@@ -173,7 +176,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
             public boolean header(android.view.View from){return home.focusHeader(from);}
             public void title(String label){home.toolsTitle(label);}
             public void contentFocused(){home.toolsContent();}
-            public void closed(boolean changed){hub=null;home.unmountTools();android.view.View restore=toolsReturnFocus;toolsReturnFocus=null;if(destroying)return;if(changed){if(home.getViewTreeObserver().isAlive())home.getViewTreeObserver().removeOnGlobalLayoutListener(reading);home.destroy();home=new CinemaHomeView(HomeActivity.this);setContentView(home);home.getViewTreeObserver().addOnGlobalLayoutListener(reading);if(toolsProfile!=null&&toolsProfile.equals(VelaWorkspace.active(HomeActivity.this))){if(toolsPanels!=null)home.restorePanels(toolsPanels);else if(toolsDestination!=0)home.navigateSection(toolsDestination);}}home.setVisibility(android.view.View.VISIBLE);if(foreground&&home!=null)home.resume();if(!changed&&restore!=null&&restore.isAttachedToWindow()&&restore.isShown())restore.requestFocus();scanProgrammes();startSync();}
+            public void closed(boolean changed){hub=null;home.unmountTools();android.view.View restore=toolsReturnFocus;toolsReturnFocus=null;if(destroying)return;if(changed){if(home.getViewTreeObserver().isAlive())home.getViewTreeObserver().removeOnGlobalLayoutListener(reading);home.destroy();home=new CinemaHomeView(HomeActivity.this);setContentView(home);home.getViewTreeObserver().addOnGlobalLayoutListener(reading);if(toolsProfile!=null&&toolsProfile.equals(VelaWorkspace.active(HomeActivity.this))&&Objects.equals(toolsStart,VelaLayout.start(HomeActivity.this))){if(toolsPanels!=null)home.restorePanels(toolsPanels);else if(toolsDestination!=0)home.navigateSection(toolsDestination);else startPending=true;}else startPending=true;}home.setVisibility(android.view.View.VISIBLE);if(foreground&&home!=null){if(!startPending||!home.openStart())home.resume();startPending=false;}if(!changed&&restore!=null&&restore.isAttachedToWindow()&&restore.isShown())restore.requestFocus();scanProgrammes();startSync();}
         },page,true);home.mountTools(hub);
     }
 

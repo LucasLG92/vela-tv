@@ -42,7 +42,13 @@ public final class AndroidUnifiedTest extends Instrumentation {
         RefinementHttp.install(url->null);L10n.choose(context,"en");Ui.init(context);
         VelaEdition.prefs(context).edit().clear().commit();context.getSharedPreferences("personalization",0).edit().clear().commit();context.getSharedPreferences("updates",0).edit().putBoolean("automatic",false).commit();LiteUpdateManager.prefs(context).edit().putBoolean("automatic",false).commit();
         boolean priorArt=new File(context.getCacheDir(),"plex-art").exists();phase="first-launch";getContext().startActivity(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));Activity chooser=foreground(EditionActivity.class.getName());check(VelaEdition.mode(context).isEmpty(),"Fresh install silently selected a mode");shot("01-choose");
-        phase="lite-mode";card(chooser,"Lite");Activity lite=foreground(LiteHomeActivity.class.getName());check(VelaEdition.lite(context)&&field(lite,"shell")!=null,"Lite controller did not start");
+        phase="lite-mode";card(chooser,"Lite");
+        View devices=title(chooser.findViewById(android.R.id.content),"HDMI and apps");
+        check(devices!=null&&devices.isFocusable()&&VelaEdition.mode(context).isEmpty(),"Preview committed a mode early");
+        check(title(chooser.findViewById(android.R.id.content),"Library")==null,"Lite offered a media library");
+        ui(devices::requestFocus);shot("01b-layout");
+        ui(devices::performClick);check(VelaLayout.DEVICES.equals(VelaLayout.start(context)),"Layout not persisted");
+        Activity lite=foreground(LiteHomeActivity.class.getName());check(VelaEdition.lite(context)&&field(lite,"shell")!=null,"Lite controller did not start");
         check(priorArt||!new File(context.getCacheDir(),"plex-art").exists(),"Lite initialized multimedia artwork");for(Activity a:opened)if(a instanceof HomeActivity)check(field(a,"home")==null,"Lite constructed the Full home controller");
         Method preview=LiteHomeActivity.class.getDeclaredMethod("show",int.class,boolean.class);preview.setAccessible(true);final Activity previewLite=lite;ui(()->{try{preview.invoke(previewLite,0,false);}catch(Exception e){throw new RuntimeException(e);}});shot("02-lite");
         VelaWorkspace.prefs(context,"lite_home").edit().putInt("start_section",2).commit();VelaWorkspace.prefs(context,"vela-remote").edit().putInt("voice_key",KeyEvent.KEYCODE_F6).commit();
@@ -53,7 +59,20 @@ public final class AndroidUnifiedTest extends Instrumentation {
         View change=title(lite.findViewById(android.R.id.content),"Launcher mode");check(change!=null,"Mode switch is missing from System");ui(()->{View v=change;while(v!=null&&!v.isClickable())v=v.getParent() instanceof View?(View)v.getParent():null;if(v!=null)v.performClick();});chooser=foreground(EditionActivity.class.getName());
         if(VelaEdition.fullAvailable()){
             context.getSharedPreferences("plex",0).edit().putString("accountToken","synthetic-retained-session").commit();
-            phase="full-mode";card(chooser,"Full");Activity full=foreground(HomeActivity.class.getName());check(!VelaEdition.lite(context)&&field(full,"home")!=null,"Full controller did not start");shot("04-full");
+            phase="full-mode";card(chooser,"Full");Activity full=foreground(HomeActivity.class.getName());check(!VelaEdition.lite(context)&&field(full,"home")!=null,"Full controller did not start");
+            CinemaHomeView cinema=(CinemaHomeView)field(full,"home");
+            await(()->title(full.findViewById(android.R.id.content),"All apps")!=null);
+            check(cinema.navigationDestination()==0,"Full HDMI preset did not stay under Home");
+            shot("04-full");
+            VelaLayout.save(context,VelaLayout.preset(VelaLayout.read(context),VelaLayout.TELEVISION),true);
+            LiveTvData.guideView(context,false);
+            ui(cinema::reset);
+            View guide=title(full.findViewById(android.R.id.content),"Programme guide");
+            check(guide!=null&&cinema.navigationDestination()==0,"Television Home has no guide shortcut");
+            ui(guide::performClick);
+            check(cinema.navigationDestination()==6&&(Boolean)field(field(cinema,"liveTv"),"guideMode"),"Guide shortcut did not open the guide");
+            check(!LiveTvData.guideView(context),"Guide shortcut changed the TV display preference");
+            VelaLayout.save(context,VelaLayout.previous(context),true);
             check(context.getSharedPreferences("plex",0).getString("accountToken","").equals("synthetic-retained-session"),"Mode switch deleted an account");
             ui(()->VelaEdition.chooser(full));chooser=foreground(EditionActivity.class.getName());card(chooser,"Lite");lite=foreground(LiteHomeActivity.class.getName());
             check(VelaWorkspace.prefs(context,"lite_home").getInt("start_section",-1)==2&&VelaWorkspace.prefs(context,"vela-remote").getInt("voice_key",0)==KeyEvent.KEYCODE_F6,"Mode switch reset profile settings");
@@ -62,12 +81,19 @@ public final class AndroidUnifiedTest extends Instrumentation {
         }else{
             View label=title(chooser.findViewById(android.R.id.content),"Full");check(label!=null&&!((View)label.getParent()).isEnabled(),"Android 8 offered an unsupported Full controller");card(chooser,"Lite");lite=foreground(LiteHomeActivity.class.getName());
         }
+        phase="preset-rollback";
+        org.json.JSONObject original=VelaLayout.read(context);
+        VelaLayout.save(context,VelaLayout.preset(original,VelaLayout.TELEVISION),true);
+        check(LiteHomeActivity.startSection(context,2)==1,"Television preset did not route to TV");
+        check(VelaLayout.previous(context).toString().equals(original.toString()),"Previous Home lost");
+        VelaLayout.save(context,VelaLayout.previous(context),true);
+        check(LiteHomeActivity.startSection(context,2)==0,"Restored HDMI Home did not route to inputs");
         phase="home-key-routing";getContext().startActivity(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP));foreground(LiteHomeActivity.class.getName());check(VelaEdition.lite(context),"HOME changed selected mode");
         phase="settings-pin";VelaSessions.setPin(context,"2468");VelaSessions.lock();boolean locked=false;try{VelaEdition.select(context,"lite");}catch(IllegalStateException expected){locked=true;}check(locked,"Mode selection bypassed the settings PIN");VelaSessions.unlock(context,"2468");VelaSessions.prefs(context).edit().clear().commit();
         phase="unified-update-channel";String hash=String.join("",Collections.nCopies(64,"a"));JSONObject a=new JSONObject().put("tag_name","v2.0.1-preview").put("draft",false).put("prerelease",true).put("assets",new JSONArray().put(new JSONObject().put("name","Vela-2.0.1-preview.apk").put("browser_download_url",LiteReleaseFeed.REPO+"/releases/download/v2.0.1-preview/Vela-2.0.1-preview.apk").put("state","uploaded").put("size",2000).put("digest","sha256:"+hash)));
         LiteReleaseFeed.Release release=LiteReleaseFeed.newest(new JSONArray().put(a),"2.0.0-preview",true,true);check(release!=null&&release.json().getJSONArray("assets").getJSONObject(0).getString("name").equals("Vela-2.0.1-preview.apk"),"Unified Lite uses the legacy APK");check(LiteReleaseFeed.newest(new JSONArray().put(a),"0.18.0-preview",true)==null,"Legacy Lite accepted another package's feed");check(LiteUpdateManager.authority(context).equals("tv.vela.launcher.lite-updates"),"Installer provider collides with Full");
-        result.putString("result","PASS native first-run choice, Lite controller without multimedia artwork, embedded mode settings, Android 8 Full refusal / modern reversible Full-Lite flow, saved profile/account retention, unchanged antenna identities/EPG fixes, HOME routing and unified-vs-legacy update channel. Owned emulator, synthetic data only.");
+        result.putString("result","PASS native first-run choices and saved presets, Home-to-guide routing, Lite controller without multimedia artwork, embedded mode settings, Android 8 Full refusal / modern reversible Full-Lite flow, saved profile/account retention, unchanged antenna identities/EPG fixes, HOME routing and unified-vs-legacy update channel. Owned emulator, synthetic data only.");
     }catch(Throwable e){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(e));try{shot("failure");}catch(Exception ignored){}}
-    finally{try{for(Activity a:opened)if(!a.isFinishing())ui(a::finish);VelaSessions.prefs(context).edit().clear().commit();context.getSharedPreferences("plex",0).edit().remove("accountToken").commit();VelaEdition.prefs(context).edit().clear().commit();context.getSharedPreferences("personalization",0).edit().clear().commit();}catch(Exception ignored){}}
+    finally{try{for(Activity a:opened)if(!a.isFinishing())ui(a::finish);VelaSessions.prefs(context).edit().clear().commit();context.getSharedPreferences("plex",0).edit().remove("accountToken").commit();VelaEdition.prefs(context).edit().clear().commit();context.getSharedPreferences("personalization",0).edit().clear().commit();VelaLayout.prefs(context).edit().remove("document").remove("previous").commit();}catch(Exception ignored){}}
     finish(result.containsKey("error")?1:-1,result);}
 }

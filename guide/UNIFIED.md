@@ -1,6 +1,6 @@
 # One Vela, two modes
 
-**Vela 2.0 uses one APK.** Choose Full or Lite on the first launch, or change it later in **Settings → System → Launcher mode**.
+**Vela uses one APK.** On first launch, choose Full or Lite and pick a Home layout. Change modes later in **Settings → System → Launcher mode**. Both modes offer Television and HDMI and apps. Full also offers Library.
 
 | | Full | Lite |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ On Android 8–10, the Full card explains its Android 11 requirement and cannot 
 
 ## Updating an existing Full installation
 
-Update to **Vela 2.0.0 Preview** from Vela or install the unified APK over the existing app. The package and signing identity are unchanged. An already configured Full installation keeps Full automatically, with its accounts and profiles intact. Open Launcher mode whenever you want to try Lite.
+Update from Vela or install the latest unified APK from [GitHub Releases](https://github.com/LucasLG92/vela-tv/releases) over the existing app. The package and signing identity are unchanged. An already configured Full installation keeps Full automatically, with its accounts and profiles intact. Open Launcher mode whenever you want to try Lite.
 
 ## Moving from the old standalone Lite app
 

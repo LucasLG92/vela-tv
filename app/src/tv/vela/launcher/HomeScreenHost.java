@@ -48,7 +48,7 @@ final class HomeScreenHost extends FrameLayout implements VelaScreen.Navigation 
     }
     private Intent safe(Intent input){
         Intent out=new Intent();if(input.getComponent()!=null)out.setComponent(input.getComponent());else out.setAction(input.getAction());
-        for(String flag:new String[]{"returnToCaller","fromSetup","plex","screensaver","sources"})if(input.hasExtra(flag))out.putExtra(flag,input.getBooleanExtra(flag,false));
+        for(String flag:new String[]{"returnToCaller","fromSetup","plex","screensaver","sources","velaHome"})if(input.hasExtra(flag))out.putExtra(flag,input.getBooleanExtra(flag,false));
         if(input.hasExtra("page"))out.putExtra("page",input.getIntExtra("page",0));if(out.getComponent()!=null&&out.getComponent().getClassName().equals(UpdatesActivity.class.getName()))out.setClass(activity,SettingsActivity.class).putExtra("page",23);return out;
     }
     int navigationIndex(){return navigationIndex;}
@@ -62,7 +62,7 @@ final class HomeScreenHost extends FrameLayout implements VelaScreen.Navigation 
     void root(Intent intent){history.clear();show(safe(intent),null,0,++sequence);}
     private VelaScreen create(Intent intent){
         if(APPS.equals(intent.getAction()))return new AppsScreen(activity,this);
-        if(INPUTS.equals(intent.getAction()))return new InputsScreen(activity,this,((HomeActivity)activity).createInputsSource());
+        if(INPUTS.equals(intent.getAction()))return new InputsScreen(activity,this,((HomeActivity)activity).createInputsSource(),intent.getBooleanExtra("velaHome",false));
         String name=intent.getComponent().getClassName();
         if(name.equals(SettingsActivity.class.getName()))return new SettingsScreen(activity,this);
         if(name.equals(UpdatesActivity.class.getName()))return new UpdatesScreen(activity,this);
@@ -74,7 +74,7 @@ final class HomeScreenHost extends FrameLayout implements VelaScreen.Navigation 
     }
     private String title(VelaScreen value){
         if(value instanceof AppsScreen)return Ui.tr("Seus apps","Your apps","Tus apps");
-        if(value instanceof InputsScreen)return Ui.tr("Entradas HDMI","HDMI inputs","Entradas HDMI");
+        if(value instanceof InputsScreen)return ((InputsScreen)value).home?L10n.text("Home"):Ui.tr("Entradas HDMI","HDMI inputs","Entradas HDMI");
         if(value instanceof UpdatesScreen)return Ui.tr("Atualizações","Updates","Actualizaciones");
         if(value instanceof PlexLinkScreen)return "Plex";
         if(value instanceof JellyfinLinkScreen)return "Jellyfin";
@@ -86,7 +86,7 @@ final class HomeScreenHost extends FrameLayout implements VelaScreen.Navigation 
     private void detach(){VelaScreen previous=screen;screen=null;if(previous!=null)previous.destroy();pane.removeAllViews();lastFocus=null;if(full){full=false;pane.setLayoutParams(contentBounds(false));actions.fullscreen(false);}}
     private void show(Intent intent,Bundle state,int focus,long id){
         detach();if(closed)return;route=intent;token=id;sequence=Math.max(sequence,id);screen=create(intent);
-        navigationIndex=screen instanceof AppsScreen?4:screen instanceof InputsScreen?5:7;actions.title(title(screen));
+        navigationIndex=screen instanceof AppsScreen?4:screen instanceof InputsScreen?(((InputsScreen)screen).home?0:5):7;actions.title(title(screen));
         VelaScreen current=screen;current.navigationToken=token;current.create(intent,state);if(screen!=current)return;
         if(active)current.resume();if(screen==current){focus(focus);pane.post(()->{if(!closed&&screen==current)focus(focus);});}
     }

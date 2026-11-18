@@ -48,6 +48,10 @@ Lite is a mode in the **unified Vela app**. It leaves Full's multimedia Home, Pl
 
 Choose Lite on first launch, or switch from **Settings → System → Launcher mode**. Android 8–10 supports Lite; Android 11+ can also use Full. Both modes check and download the same signed GitHub update. Android confirms installation, and Vela clears completed updater downloads afterwards.
 
+Choose **Television** to start in the antenna guide, or **HDMI and apps** for your connected devices and app shortcuts. Both layouts are available under **Edit home sections → Home layouts**, where you can also restore the previous layout.
+
+[![Choose a Home layout in Vela Lite](../gallery/previews/156-lite-home-layout.webp)](../gallery/156-lite-home-layout.webp)
+
 Already using the separate old Lite app? Its [0.18.6 transition update](https://github.com/LucasLG92/vela-tv/releases/tag/lite-v0.18.6-preview) supports an explicit import into unified Vela. [Migration steps](../guide/UNIFIED.md#moving-from-the-old-standalone-lite-app).
 
 **[Install Lite](INSTALL.md)** · [Hardware limits](../guide/COMPATIBILITY.md) · [Development](DEVELOPMENT.md) · [Privacy](../guide/PRIVACY.md)
