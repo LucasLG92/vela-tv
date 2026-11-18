@@ -48,7 +48,7 @@ final class VelaWidgets {
         private final Map<String,ImageView> icons=new HashMap<>();
         private State state;private TextView clock,temperature,city;private ImageView icon;
         private AmbientWeather weather;private AmbientWeather.Snapshot snapshot;private String symbol="",message="",signature="";
-        private boolean active;private SharedPreferences selectedPrefs;
+        private boolean active,ambient;private SharedPreferences selectedPrefs;
         private final Handler main=new Handler(Looper.getMainLooper());
         private final Runnable redraw=()->{if(active)refresh();};
         private final SharedPreferences.OnSharedPreferenceChangeListener selectionChanged=(p,k)->{main.removeCallbacks(redraw);main.post(redraw);};
@@ -56,6 +56,18 @@ final class VelaWidgets {
         private final SharedPreferences.OnSharedPreferenceChangeListener weatherChanged=(p,k)->{if(Arrays.asList("mode","city","lat","lon","zone").contains(k)){main.removeCallbacks(weatherRestart);main.postDelayed(weatherRestart,60);}};
         private final SharedPreferences.OnSharedPreferenceChangeListener showsChanged=(p,k)->{if(active&&state.has("programme"))updateClock();};
         Strip(Context c){super(c);setFocusable(false);setClipChildren(false);line=new LinearLayout(c);line.setOrientation(LinearLayout.HORIZONTAL);line.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);addView(line,new LayoutParams(-2,72,Gravity.RIGHT));refresh();}
+        void ambient(boolean enabled){
+            if(ambient==enabled)return;
+            ambient=enabled;
+            for(Map.Entry<String,FrameLayout> entry:cards.entrySet()){
+                FrameLayout card=entry.getValue();
+                card.setBackground(background(entry.getKey(),card.hasFocus()));
+            }
+        }
+        private Drawable background(String id,boolean focused){
+            if(ambient&&!focused&&(id.equals("clock")||id.equals("weather")))return null;
+            return plate(focused);
+        }
         void host(Host value){host=value;}
         void returnTo(View view){down=view;for(FrameLayout card:cards.values())card.setNextFocusDownId(view.getId());}
         boolean focusFirst(){if(cards.isEmpty())return false;cards.values().iterator().next().requestFocus();return true;}
@@ -69,14 +81,14 @@ final class VelaWidgets {
                 boolean wasFocused=hasFocus();signature=key;state=next;line.removeAllViews();cards.clear();values.clear();details.clear();icons.clear();clock=null;temperature=null;city=null;icon=null;symbol="";
                 for(String id:state.items){
                     int width=id.equals("clock")?180:id.equals("weather")?224:id.equals("date")?184:id.equals("programme")?300:208;
-                    FrameLayout card=new FrameLayout(getContext());card.setId(View.generateViewId());card.setFocusable(true);card.setFocusableInTouchMode(true);card.setDefaultFocusHighlightEnabled(false);card.setBackground(plate(false));
+                    FrameLayout card=new FrameLayout(getContext());card.setId(View.generateViewId());card.setFocusable(true);card.setFocusableInTouchMode(true);card.setDefaultFocusHighlightEnabled(false);card.setBackground(background(id,false));
                     LinearLayout.LayoutParams bounds=new LinearLayout.LayoutParams(width,72);if(!cards.isEmpty())bounds.leftMargin=12;line.addView(card,bounds);cards.put(id,card);
                     boolean weatherCard=id.equals("weather"),withIcon=weatherCard||id.equals("programme")||id.equals("shortcut");int inset=weatherCard?66:withIcon?52:18,detailInset=weatherCard?inset:18;
                     TextView value=text(id.equals("clock")?30:weatherCard?26:20,VelaTheme.WHITE),detail=text(14,VelaTheme.SECONDARY);put(card,value,inset,10,width-inset-16,32);put(card,detail,detailInset,44,width-detailInset-(weatherCard?16:18),20);values.put(id,value);details.put(id,detail);
                     if(withIcon){ImageView image=new ImageView(getContext());image.setScaleType(ImageView.ScaleType.FIT_CENTER);image.setColorFilter(VelaTheme.WHITE);put(card,image,18,weatherCard?18:16,weatherCard?36:24,weatherCard?36:24);icons.put(id,image);if(id.equals("programme"))icon(image,"bell");else if(id.equals("shortcut"))icon(image,state.shortcut.equals("inputs")?"hdmi":state.shortcut.equals("tv")?"live_tv":"apps");}
                     if(id.equals("clock")){clock=value;clock.setFontFeatureSettings("tnum");clock.setGravity(Gravity.CENTER);clock.setHorizontallyScrolling(false);clock.setAutoSizeTextTypeUniformWithConfiguration(20,Math.round(30*VelaReading.scale(getContext())),1,TypedValue.COMPLEX_UNIT_PX);FrameLayout.LayoutParams clockBounds=(FrameLayout.LayoutParams)clock.getLayoutParams();clockBounds.topMargin=0;clockBounds.height=72;clock.setLayoutParams(clockBounds);detail.setVisibility(GONE);}if(id.equals("weather")){temperature=value;city=detail;icon=icons.get(id);}
                     card.setOnClickListener(v->{if(host!=null)host.activate(id.equals("shortcut")?state.shortcut:id);});
-                    card.setOnFocusChangeListener((v,f)->{card.setBackground(plate(f));value.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);detail.setTextColor(f?VelaTheme.INK:VelaTheme.SECONDARY);if(icons.get(id)!=null)icons.get(id).setColorFilter(f?VelaTheme.INK:VelaTheme.WHITE);if(f&&host!=null)host.focused();});
+                    card.setOnFocusChangeListener((v,f)->{card.setBackground(background(id,f));value.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);detail.setTextColor(f?VelaTheme.INK:VelaTheme.SECONDARY);if(icons.get(id)!=null)icons.get(id).setColorFilter(f?VelaTheme.INK:VelaTheme.WHITE);if(f&&host!=null)host.focused();});
                     card.setOnKeyListener((v,k,e)->{if(k==KeyEvent.KEYCODE_DPAD_UP)return true;if(k==KeyEvent.KEYCODE_DPAD_DOWN){if(e.getAction()==KeyEvent.ACTION_DOWN&&(down==null||!down.isShown()||!down.requestFocus())&&host!=null)host.navigation();return true;}if(k==KeyEvent.KEYCODE_DPAD_LEFT&&cards.values().iterator().next()==v&&host!=null){if(e.getAction()==KeyEvent.ACTION_DOWN)host.navigation();return true;}return false;});
                 }
                 List<FrameLayout> ordered=new ArrayList<>(cards.values());for(int i=0;i<ordered.size();i++){FrameLayout card=ordered.get(i);card.setNextFocusRightId(ordered.get(Math.min(i+1,ordered.size()-1)).getId());if(i>0)card.setNextFocusLeftId(ordered.get(i-1).getId());if(down!=null)card.setNextFocusDownId(down.getId());}

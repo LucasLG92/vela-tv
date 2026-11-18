@@ -29,11 +29,21 @@ final class VelaLayout {
     static String title(Context c,String key){return title(read(c),key);}
     static String title(JSONObject j,String key){JSONObject titles=j.optJSONObject("titles");return titles==null?label(key):titles.optString(key,label(key));}
     static String rowSource(Context c,String key){JSONObject sources=read(c).optJSONObject("sources");String choice=sources==null?"home":sources.optString(key,"home");return choice.equals("home")?source(c):choice;}
-    static String hero(Context c){return read(c).optString("hero","cinema");}
+    static final List<String> PRESENTATIONS=Arrays.asList("night","cinema","compact","rows");
+    static String hero(JSONObject layout){return layout.optString("hero","night");}
+    static String hero(Context c){return hero(read(c));}
+    static String presentationName(String key){
+        switch(key){
+            case "night": return L10n.text("Night cinema");
+            case "compact": return L10n.text("Compact");
+            case "rows": return L10n.text("Rows only");
+            default: return L10n.text("Cinema");
+        }
+    }
     static boolean clearFocus(Context c){return read(c).optString("focus","soft").equals("clear");}
     static JSONObject validate(JSONObject j)throws IOException,JSONException{
         for(Iterator<String> it=j.keys();it.hasNext();)if(!Arrays.asList("order","hidden","sizes","folders","appsOrder","extraRowsConfigured","librarySource","appResume","resumeServices","titles","sources","hero","focus","start").contains(it.next()))throw new IOException("Unknown layout field");
-        if(j.has("hero")&&(!(j.get("hero") instanceof String)||!Arrays.asList("cinema","compact","rows").contains(j.getString("hero")))||j.has("focus")&&(!(j.get("focus") instanceof String)||!Arrays.asList("soft","clear").contains(j.getString("focus"))))throw new IOException("Invalid home appearance");
+        if(j.has("hero")&&(!(j.get("hero") instanceof String)||!PRESENTATIONS.contains(j.getString("hero")))||j.has("focus")&&(!(j.get("focus") instanceof String)||!Arrays.asList("soft","clear").contains(j.getString("focus"))))throw new IOException("Invalid home appearance");
         if(j.has("start")&&(!(j.get("start") instanceof String)||!Arrays.asList(LIBRARY,TELEVISION,DEVICES).contains(j.getString("start"))))throw new IOException("Invalid Home layout");
         JSONArray services=j.optJSONArray("resumeServices");if(j.has("resumeServices")&&services==null||services!=null&&services.length()>128)throw new IOException("Invalid resume services");Set<String> serviceKeys=new HashSet<>();for(int i=0;services!=null&&i<services.length();i++){String key=services.getString(i);if(key.length()>256||!key.matches("[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+")||!serviceKeys.add(key))throw new IOException("Invalid service");}
         for(String field:Arrays.asList("titles","sources")){JSONObject values=j.optJSONObject(field);if(j.has(field)&&values==null)throw new IOException("Invalid section preferences");if(values!=null)for(Iterator<String> it=values.keys();it.hasNext();){String key=it.next();if(!ROWS.contains(key)||!(values.get(key) instanceof String))throw new IOException("Invalid section preference");String value=values.getString(key);if(field.equals("titles")?(value.isEmpty()||value.length()>40||!value.equals(VelaWorkspace.clean(value,40))||value.contains("://")):!Arrays.asList("home","current","plex","jellyfin","both").contains(value))throw new IOException("Invalid section preference");}}
@@ -59,7 +69,7 @@ final class VelaLayout {
             for(String row:Arrays.asList("inputs","tv","apps"))if(contains(from.optJSONArray("hidden"),row))hidden.add(row);
             if(!next.has("librarySource"))next.put("librarySource","both");
             next.put("order",new JSONArray(featured)).put("hidden",new JSONArray(hidden))
-                .put("hero","cinema").put("extraRowsConfigured",true);
+                .put("hero",hero(from)).put("extraRowsConfigured",true);
         }
         return validate(next);
     }

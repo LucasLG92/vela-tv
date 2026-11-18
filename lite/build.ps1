@@ -23,6 +23,8 @@ Copy-Item -LiteralPath (Join-Path $repo 'app/res/xml/searchable.xml') -Destinati
 # Whitelist the shared resources. Full Vela assets, settings, clients and media never enter this APK.
 foreach($name in @('icon','banner','vela_mark')){Copy-Item -LiteralPath (Join-Path $repo "app/res/drawable/$name.xml") -Destination 'out/res/drawable'}
 Get-ChildItem -LiteralPath (Join-Path $repo 'app/res/drawable') -Filter 'device_*.xml' | Copy-Item -Destination 'out/res/drawable'
+Get-ChildItem -LiteralPath (Join-Path $repo 'app/res/drawable') -Filter 'nav_*.xml' | Copy-Item -Destination 'out/res/drawable'
+Copy-Item -LiteralPath (Join-Path $repo "app/assets/licenses/Lucide.txt") -Destination "out/assets/licenses"
 foreach($name in @('device-icons.txt','device-icons.json','simple-icons-CC0.txt','simple-icons-DISCLAIMER.txt')){Copy-Item -LiteralPath (Join-Path $repo "app/assets/licenses/$name") -Destination 'out/assets/licenses'}
 Copy-Item -LiteralPath (Join-Path $repo 'LICENSE') -Destination 'out/assets/licenses/LICENSE.txt'
 Copy-Item -LiteralPath (Join-Path $repo 'app/assets/fonts/InterVariable.ttf') -Destination 'out/assets/fonts'

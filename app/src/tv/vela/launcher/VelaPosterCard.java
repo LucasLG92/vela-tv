@@ -8,11 +8,12 @@ import android.widget.FrameLayout;
 /** A short, bounded focus transition. No resident clock, blur layer, texture or extra artwork. */
 final class VelaPosterCard extends FrameLayout {
     private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);private final RectF rect=new RectF();
-    private ValueAnimator motion;private float emphasis,shade;private boolean focused,dimmed;private final int pictureHeight,accent;private final boolean clear;
-    VelaPosterCard(Context c,int height){super(c);pictureHeight=height;accent=VelaReading.accent(c);clear=VelaLayout.clearFocus(c)||VelaReading.prefs(c).getBoolean("contrast",false);setClipChildren(false);}
+    private ValueAnimator motion;private float emphasis,shade;private boolean focused,dimmed;private final int pictureHeight,accent;private final boolean clear,night;
+    VelaPosterCard(Context c,int height,boolean night){super(c);this.night=night;pictureHeight=height;accent=VelaReading.accent(c);clear=VelaLayout.clearFocus(c)||VelaReading.prefs(c).getBoolean("contrast",false);setClipChildren(false);}
     void focus(boolean yes){
         focused=yes;animate().cancel();boolean reduced=VelaFocus.reduced(getContext());
-        animate().scaleX(yes&&!reduced?1.055f:1).scaleY(yes&&!reduced?1.055f:1).translationY(0).translationZ(yes?12:0).setDuration(reduced?0:160).setInterpolator(new android.view.animation.DecelerateInterpolator(1.5f)).start();transition();
+        float scale=yes&&!reduced?(night&&!clear?1.018f:1.055f):1;
+        animate().scaleX(scale).scaleY(scale).translationY(0).translationZ(yes?12:0).setDuration(reduced?0:160).setInterpolator(new android.view.animation.DecelerateInterpolator(1.5f)).start();transition();
     }
     void context(boolean dim){if(dimmed==dim)return;dimmed=dim;transition();}
     private void transition(){
@@ -22,7 +23,7 @@ final class VelaPosterCard extends FrameLayout {
     }
     protected void dispatchDraw(Canvas c){super.dispatchDraw(c);
         // Draw a small tint over existing pixels: no view-alpha layer or duplicate artwork bitmap.
-        if(shade>0){rect.set(0,0,getWidth(),pictureHeight);paint.setStyle(Paint.Style.FILL);paint.setColor(Color.BLACK);paint.setAlpha(Math.round(48*shade));c.drawRoundRect(rect,14,14,paint);}
+        if(shade>0){rect.set(0,0,getWidth(),pictureHeight);paint.setStyle(Paint.Style.FILL);paint.setColor(Color.BLACK);paint.setAlpha(Math.round((night?20:48)*shade));c.drawRoundRect(rect,14,14,paint);}
         if(emphasis<=0)return;paint.setStyle(Paint.Style.STROKE);
         float inset=clear?3:1;rect.set(-inset,-inset,getWidth()+inset,pictureHeight+inset);paint.setColor(0xFF090A0D);paint.setAlpha(Math.round((clear?242:160)*emphasis));paint.setStrokeWidth(clear?11:5);c.drawRoundRect(rect,14+inset,14+inset,paint);
         paint.setColor(clear?Color.WHITE:accent);paint.setAlpha(Math.round((clear?255:220)*emphasis));paint.setStrokeWidth(clear?5:2.2f);c.drawRoundRect(rect,14+inset,14+inset,paint);

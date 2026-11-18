@@ -10,6 +10,10 @@ These are real production Android views captured in an owned emulator, with orig
 
 ## Your own Home
 
+| Night cinema | The expanded sidebar |
+| --- | --- |
+| [![Night cinema Home with real library posters](previews/157-night-cinema.webp)](157-night-cinema.webp) | [![Live TV focused in the graphite sidebar](previews/158-navigation-capsule.webp)](158-navigation-capsule.webp) |
+
 Preview your Home with the remote. Choose the Library layout in Full, or start in Television or HDMI and apps in either mode. [Watch the 29-second setup walkthrough](../media/home/vela-home-layouts.mp4).
 
 | Library | Television | HDMI and apps |

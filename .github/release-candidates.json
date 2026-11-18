@@ -3,17 +3,17 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "2.4.0-preview",
-      "code": 84,
-      "tag": "v2.4.0-preview",
-      "title": "Vela 2.4.0 Preview - Start with what you watch",
-      "file": "Vela-2.4.0-preview.apk",
-      "size": 5031707,
-      "sha256": "e5fe8d6ae70f8713eecbaefe8cffde17f9eb75c4fa32b5d800e0035c1bb03f37",
-      "blob_sha": "cd40534bcb5051c8ccfd568e7553429eb9065f2e",
+      "version": "2.5.0-preview",
+      "code": 85,
+      "tag": "v2.5.0-preview",
+      "title": "Vela 2.5.0 Preview — Night cinema",
+      "file": "Vela-2.5.0-preview.apk",
+      "size": 5052909,
+      "sha256": "6c24cf9c21060407974f3794e62c696970f8289c013d83e84d678af7df202c0e",
+      "blob_sha": "e380c40aa8748830ef99cd0788352ee4ff90a348",
       "chunks": [
         {
-          "sha": "cc36c6066f28dd349d12b9e3878394358acf4ba2",
+          "sha": "47354f9b3bf722dd8b9a8354b453702819fa75ba",
           "size": 262144
         },
         {
@@ -29,71 +29,71 @@
           "size": 262144
         },
         {
-          "sha": "1e426f2deef23500977203493bb5819056227593",
+          "sha": "ef734e6a4c8bca12d4d5a09a667072dbb4848651",
           "size": 262144
         },
         {
-          "sha": "f004f6f38945eee53f4cd8b69c7580d64109db97",
+          "sha": "88b0af715a60c7abd1927ded75c77885f8c7276b",
           "size": 262144
         },
         {
-          "sha": "daa72ade1e742baffb52bc962336a41d8e4ca90b",
+          "sha": "f4a163b39c99e87d14279fcca609cc8ada3e3ec3",
           "size": 262144
         },
         {
-          "sha": "49ba2062608ae2da1f3734d2d88eb1a4afa3bfc5",
+          "sha": "d999d39b674a54bd7d9f9cee3315c4a89fc33914",
           "size": 262144
         },
         {
-          "sha": "0d06971261700ff7a215161412f44d9583cd2ad4",
+          "sha": "5f31b30fcf3b00f3546d1a0ff4486d4f8e1010e7",
           "size": 262144
         },
         {
-          "sha": "b90621a9799efc579c2ebcab7900ba34c1c873f7",
+          "sha": "369199f68b1b58bfffb459ffa3a980d20b70ed4d",
           "size": 262144
         },
         {
-          "sha": "a053ddaf59842d51b70b5b03f637f4700be1c389",
+          "sha": "1edd838f86b4f2c0c433951e4ef9949dce6a6f43",
           "size": 262144
         },
         {
-          "sha": "9def3c0020e1a3ba39c13fc127cad60b38e20c73",
+          "sha": "6dd8ab0425d6f3f72b21e723f355449475146c29",
           "size": 262144
         },
         {
-          "sha": "261effe8de1fd45beed1fea1c1ad0ddd867674c7",
+          "sha": "670632da875d56be8f63fd6950cb81204817775d",
           "size": 262144
         },
         {
-          "sha": "488d81b113dfb98aa412127634c7d1de3d503079",
+          "sha": "4b34c3b82ddcb6fac61d9c4eb1c1b4908dad16a6",
           "size": 262144
         },
         {
-          "sha": "346c62e32382e99589988461858f7694a3fa1835",
+          "sha": "a46c4dc84df0a8fc88a3ca75377ea76e506c8cf1",
           "size": 262144
         },
         {
-          "sha": "e1c496392752f5bff7999659d50663d6edfcc47a",
+          "sha": "e8e06d43b5a4e98f3deaf0f0cd2a9fb5e3c08717",
           "size": 262144
         },
         {
-          "sha": "e390b5219b590ac5964f4d344b23fb603a05cd79",
+          "sha": "34c0832df13ea172b741c236f4cd3a5c6d78d06b",
           "size": 262144
         },
         {
-          "sha": "2d69e0216aeccb08a16488d0751fd59828802ba6",
+          "sha": "49d3fc4cc000e714b59e84cd1bd0532a1f8c3ba0",
           "size": 262144
         },
         {
-          "sha": "55de1271424d16d20f18a11e24bd8ba2714b633b",
+          "sha": "e36afe60eee9daa95d6ada7fc9d58c0d64408c2e",
           "size": 262144
         },
         {
-          "sha": "0b0f967491ed27a486405a6aee6f01d2aded2e52",
-          "size": 50971
+          "sha": "18c8419ac6ce9dc8c1f596e8bd165c1bc634306e",
+          "size": 72173
         }
       ],
-      "notes": "guide/releases/2.4.0-preview.md"
+      "notes": "guide/releases/2.5.0-preview.md"
     }
   ]
 }

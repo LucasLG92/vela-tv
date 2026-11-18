@@ -196,7 +196,7 @@ final class VelaVoiceSearch {
         Signal(VoiceColors colors){
             super(activity);setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);edge=new LinearGradient(0,0,0,1,colors.rim(),new float[]{0,.34f,.68f,1},Shader.TileMode.MIRROR);
         }
-        private float radius(){return compact?bar.height()/2:32;}
+        private float radius(){return compact?bar.height()/2:VelaNavigation.RADIUS;}
         private void shape(){bar.set(14,14,getWidth()-14,getHeight()-14);clip.rewind();clip.addRoundRect(bar,radius(),radius(),Path.Direction.CW);}
         void compact(boolean value){if(compact!=value){compact=value;shape();invalidate();}}
         protected void onSizeChanged(int w,int h,int ow,int oh){shape();}

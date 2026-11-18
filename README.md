@@ -10,7 +10,7 @@ Your films, live channels, apps and HDMI devices — together in a home screen y
 
 **Free & open source · Android TV / Google TV · One APK, Full or Lite · Six languages**
 
-[![Vela Home with real library artwork, Continue watching and recently added films](gallery/previews/112-home.webp)](gallery/112-home.webp)
+[![Vela Home with real library artwork, Continue watching and recently added films](gallery/previews/157-night-cinema.webp)](gallery/157-night-cinema.webp)
 
 </div>
 
@@ -33,6 +33,8 @@ Choose a layout when you first open Vela. Preview it with the remote and start u
 [Watch the 29-second walkthrough](media/home/vela-home-layouts.mp4) · [See all Home layouts](gallery/README.md#your-own-home)
 
 Hold OK on **Home** in the sidebar (or **HDMI** in Lite) to open the editor, then choose **Home layouts**. Choose **Restore previous Home**, then **Save layout**, to go back. Each profile keeps its own layout.
+
+**Night cinema** puts your latest posters below the featured title. Open the sidebar to browse without moving the scene. Press **OK** to enter a section or **Right** to return to your poster. [See the expanded sidebar](gallery/158-navigation-capsule.webp).
 
 ## Your collection takes centre stage
 

@@ -24,3 +24,5 @@ Device icons derive from Simple Icons 9.21.0, converted into Android vectors and
 The local QR generator uses [Nayuki's QR Code generator](https://github.com/nayuki/QR-Code-generator/tree/3c6d0b3cefb4e049dc337e82237c9644399716a8/java), MIT; [copyright and licence](app/assets/licenses/qr-generator-MIT.txt). It does not contact a QR service.
 
 Full's optional local HLS pause includes AndroidX Media3 1.11.1, Apache 2.0, with checksum-pinned dependencies. [Dependency inventory](app/assets/licenses/media3-dependencies.txt), [Apache 2.0](app/assets/licenses/Apache-2.0.txt), [Checker Framework MIT](app/assets/licenses/checker-qual-MIT.txt). Lite does not include this playback engine.
+
+The sidebar uses Lucide and Feather icons under the ISC and MIT licences. [Copyright and licence texts](app/assets/licenses/Lucide.txt).

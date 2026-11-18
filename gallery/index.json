@@ -1880,5 +1880,27 @@
     "height": 2160,
     "version": "2.4.0-preview",
     "sha256": "f7304d6587a0b43effd319ae186cbff8827e3862e7a4f1bd412767d75131d7c3"
+  },
+  {
+    "file": "157-night-cinema.webp",
+    "title": "Night cinema Home",
+    "source": "Native Android capture using the release APK and an isolated demo library. The films and application artwork are supplied by the library and installed apps.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.5.0-preview",
+    "sha256": "175ecffbaf6d323d110c842a0ba4c9f20309bedb57f79806b91d368a97b4d222"
+  },
+  {
+    "file": "158-navigation-capsule.webp",
+    "title": "The navigation capsule",
+    "source": "Native Android capture using the release APK and an isolated demo library. The films and application artwork are supplied by the library and installed apps.",
+    "language": "en",
+    "personal_data": false,
+    "width": 3840,
+    "height": 2160,
+    "version": "2.5.0-preview",
+    "sha256": "dc3b9e23f8b45d392ce6a0e410eb37f3c55ad9b521c9b47ef3c5415d40fb9ba7"
   }
 ]

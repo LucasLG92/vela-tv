@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.0-preview
+
+- Full adds the Night cinema presentation to the Library Home editor. Recently added posters and landscape resume cards use existing library artwork and playback progress.
+- Full and Lite share the new graphite navigation capsule. Opening it keeps the content stationary. Right and Back return focus to content, and OK opens a section. The YouTube shortcut retains its video shelf on Right.
+- Navigation uses native vector icons and a short outline reveal. The menu honours the profile focus colour and reduced motion.
+
 ## 2.3.1-preview / Lite transition 0.18.6-preview
 
 - Both modes: keep guide programme bounds, title baselines and schedule baselines unchanged when focus enters or leaves the current or next broadcast. Keep progress inside the same card.
