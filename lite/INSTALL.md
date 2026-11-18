@@ -1,6 +1,6 @@
 # Use Vela Lite
 
-Download the [unified Vela APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.4.0-preview), install it and choose **Lite** on first launch. Android 8.0+ is supported. The Full option requires Android 11+.
+Download the [unified Vela APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.5.0-preview), install it and choose **Lite** on first launch. Android 8.0+ is supported. The Full option requires Android 11+.
 
 Open **Settings → System → Home screen** and select **Vela** as Android’s Home. HDMI and antenna playback depend on the inputs and tuner exposed by your television.
 

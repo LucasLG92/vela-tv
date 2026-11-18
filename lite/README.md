@@ -4,7 +4,7 @@
 
 **HDMI, antenna television and apps**, in the same visual language as Full Vela. Lite is for the television that mainly serves a TV box, console or computer.
 
-**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.4.0-preview)** · **[See the Lite gallery](gallery/README.md)** · [Installation](INSTALL.md) · [Full Vela](../README.md)
+**[Download Vela — choose Lite](https://github.com/LucasLG92/vela-tv/releases/tag/v2.5.0-preview)** · **[See the Lite gallery](gallery/README.md)** · [Installation](INSTALL.md) · [Full Vela](../README.md)
 
 **Android TV / Google TV · Android 8.0+ · Six languages · Free & open source · Preview**
 
