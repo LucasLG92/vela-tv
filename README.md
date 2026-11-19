@@ -62,7 +62,7 @@ Your **M3U, Xtream or antenna channels**, in the same place as the rest of your 
 | --- | --- |
 | [![Channel information over the live picture](gallery/previews/160-on-air.webp)](gallery/160-on-air.webp) | [![Playback controls](gallery/previews/161-live-controls.webp)](gallery/161-live-controls.webp) |
 
-The guide opens on categories while channels load. The selected programme fills the guide header when the listings provide artwork. A soft fade keeps the channel, title and times legible. Portrait posters keep their full height. Press **OK** inside a channel for its schedule, **Left** for playback controls and **Right** for the channel list. Demo footage and stills from *Sintel* by the Blender Foundation. [Film](https://durian.blender.org/) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+The guide opens on categories while channels load. When a listing has artwork, the guide shows the complete photo beside the programme details. Colours from the picture fade behind the time ruler and into the first channel row. Press **OK** inside a channel for its schedule, **Left** for playback controls and **Right** for the channel list. Demo footage and stills from *Sintel* by the Blender Foundation. [Film](https://durian.blender.org/) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
 
 **Playback that adapts.** Automatic engine selection remembers working HLS/TS formats, with Fast, Balanced and Stable buffer profiles and bounded recovery. M3U headers follow their own signal. [Playback options and limits](guide/PLAYBACK.md).
 
