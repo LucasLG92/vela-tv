@@ -6,7 +6,7 @@
 
 Your films, live channels, apps and HDMI devices — together in a home screen you control.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.5.0-preview)** · **[See it in action](gallery/README.md)** · [Get started](guide/INSTALL.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.6.1-preview)** · **[See it in action](gallery/README.md)** · [Get started](guide/INSTALL.md)
 
 **Free & open source · Android TV / Google TV · One APK, Full or Lite · Six languages**
 
@@ -56,7 +56,13 @@ YouTube, Prime Video and other services can contribute the rows or Watch Next it
 
 Your **M3U, Xtream or antenna channels**, in the same place as the rest of your TV. A horizontal guide gives programmes room to breathe, with familiar channel logos, progress, remaining time and what comes next.
 
-[![Vela's integrated horizontal television guide](gallery/previews/123-tv-guide.webp)](gallery/123-tv-guide.webp)
+[![Artwork from the selected programme in the TV guide](gallery/previews/159-programme-art-guide.webp)](gallery/159-programme-art-guide.webp)
+
+| On air and coming up | Audio, subtitles and picture |
+| --- | --- |
+| [![Channel information over the live picture](gallery/previews/160-on-air.webp)](gallery/160-on-air.webp) | [![Playback controls](gallery/previews/161-live-controls.webp)](gallery/161-live-controls.webp) |
+
+The guide shows programme artwork when supplied by the listings. Press **OK** inside a channel for its schedule, **Left** for playback controls and **Right** for the channel list. Demo footage and stills from *Sintel* by the Blender Foundation. [Film](https://durian.blender.org/) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
 
 **Playback that adapts.** Automatic engine selection remembers working HLS/TS formats, with Fast, Balanced and Stable buffer profiles and bounded recovery. M3U headers follow their own signal. [Playback options and limits](guide/PLAYBACK.md).
 
@@ -123,7 +129,7 @@ Lite leaves Full's multimedia Home, library clients and IPTV player inactive. Bo
 
 ## Start in a few minutes
 
-1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.5.0-preview)** and install it on your Android TV or Google TV device.
+1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.6.1-preview)** and install it on your Android TV or Google TV device.
 2. **Choose Full or Lite**, then pick your Home layout. Link your media accounts and add your TV sources when you are ready.
 3. **Make it yours.** Choose your Home shelves and sidebar apps, then use Vela's Home-screen setting if you want it as your default launcher.
 

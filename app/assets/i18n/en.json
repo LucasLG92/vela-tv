@@ -1,4 +1,8 @@
 {
+  "Signal and playback": "Signal and playback",
+  "Starts in %s": "Starts in %s",
+  "Picture": "Picture",
+  "More": "More",
   "": "",
   "\nOK watch\nHold OK · Options": "\nOK watch\nHold OK · Options",
   " MB. Cleared when you leave Home. No videos or animated backgrounds play on Home.": " MB. Cleared when you leave Home. No videos or animated backgrounds play on Home.",
@@ -442,6 +446,7 @@
   "Keep your layout, favourites and preferences. Accounts, URLs, tokens and passwords are excluded.": "Keep your layout, favourites and preferences. Accounts, URLs, tokens and passwords are excluded.",
   "Kids": "Kids",
   "LANGUAGE": "LANGUAGE",
+  "REPLAY": "REPLAY",
   "LIVE": "LIVE",
   "LIVE NOW": "LIVE NOW",
   "LIVE TV": "LIVE TV",

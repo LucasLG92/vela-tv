@@ -9,7 +9,7 @@ final class XmlTvGuide {
         File file=new File(context.getCacheDir(),"tv-guide/xmltv.db");String address=url();if(address.isEmpty()||!file.isFile())return Collections.emptyList();Map<String,String> names=new HashMap<>();for(String name:tuned.values()){String key="name:"+TvChannelNames.match(name);names.putIfAbsent(key,TvChannelNames.display(name));}
         try(SQLiteDatabase db=open();Cursor meta=db.rawQuery("SELECT source FROM meta WHERE id=1",null)){if(!meta.moveToFirst()||!meta.getString(0).equals(LiveTvData.hash(address)))return Collections.emptyList();return VelaGuideSearch.readWindow(context,db,names,"alias",query,page,signal,System.currentTimeMillis()/1000,System.currentTimeMillis()/1000+48*3600,0);}
     }
-    static final String DEFAULT_URL="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiatv.xml";
+    static final String DEFAULT_URL="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiafanart.xml.gz";
     static final int MAX_BYTES=64*1024*1024,MAX_DB=24*1024*1024;
     private final Context context;private final SharedPreferences settings;private final TvPrivateData secrets;
     XmlTvGuide(Context c){context=c.getApplicationContext();settings=c.getSharedPreferences("xmltv",0);secrets=new TvPrivateData(c);}
@@ -31,7 +31,7 @@ final class XmlTvGuide {
     static String exact(String text){return "id:"+TvCatalogCache.normalize(text.trim());}
     void importGuide(InputStream raw,String source,long now)throws Exception{
         try(PushbackInputStream peek=new PushbackInputStream(raw,2)){int a=peek.read(),b=peek.read();if(b>=0)peek.unread(b);if(a>=0)peek.unread(a);InputStream decoded=a==31&&b==139?new GZIPInputStream(peek):peek;
-            XmlPullParser parser=Xml.newPullParser();parser.setInput(new M3uClient.LimitedInput(decoded,MAX_BYTES),null);
+            XmlPullParser parser=Xml.newPullParser();parser.setInput(new M3uClient.LimitedInput(decoded,128*1024*1024),null);
             try(SQLiteDatabase db=open();SQLiteStatement alias=db.compileStatement("INSERT OR IGNORE INTO aliases(alias,channel) VALUES (?,?)");SQLiteStatement programme=db.compileStatement("INSERT INTO programmes(channel,start,end,title,category,event_id,description,image) VALUES (?,?,?,?,?,?,?,?)")){
                 db.beginTransaction();try{db.delete("aliases",null,null);db.delete("programmes",null,null);db.delete("logos",null,null);String channel="",title="",kind="",description="",programmeImage="",category="",eventId="",eventSystem="",eventValue="";long start=0,end=0;boolean keep=false,inTitle=false,inName=false,inCategory=false,inEvent=false,inDescription=false;StringBuilder name=new StringBuilder();int channels=0,events=0,programmes=0,inserted=0,names=0,descriptionBudget=2*1024*1024,imageBudget=4*1024*1024;
                     for(int event=parser.nextToken();event!=XmlPullParser.END_DOCUMENT;event=parser.nextToken()){

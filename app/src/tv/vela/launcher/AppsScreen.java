@@ -24,7 +24,9 @@ final class AppsScreen extends VelaScreen {
             place(recent,720,8,640,78);recent.setNextFocusLeftId(hint.getId());hint.setNextFocusRightId(recent.getId());
             recent.setOnKeyListener((v,k,e)->{if(e.getAction()==KeyEvent.ACTION_DOWN&&k==KeyEvent.KEYCODE_DPAD_DOWN){if(grid!=null)grid.requestFocus();return true;}return false;});
         }
-        grid=new InstalledAppsGrid(this,Arrays.asList(SidebarApps.slots(this)),recent==null?hint:recent,status,count,app->{Intent intent=HomeApps.launchIntent(getPackageManager(),app.pkg);if(intent!=null)startActivity(intent);},false);place(grid,26,90,1738,810);grid.initialSelection(selection);setContentView(root);
+        VelaSpotlight.App feature=new VelaSpotlight.App(this);
+        place(feature,58,88,1650,310);
+        grid=new InstalledAppsGrid(this,Arrays.asList(SidebarApps.slots(this)),recent==null?hint:recent,status,count,app->{Intent intent=HomeApps.launchIntent(getPackageManager(),app.pkg);if(intent!=null)startActivity(intent);},false);place(grid,26,420,1738,500);grid.spotlight(feature);grid.initialSelection(selection);setContentView(root);
     }
     private TextView label(String text,int size){TextView v=new TextView(this);v.setText(text);v.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,size);v.setTextColor(VelaTheme.SECONDARY);v.setTypeface(Ui.medium);return v;}
     private void place(View v,int x,int y,int w,int h){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;root.addView(v,p);}

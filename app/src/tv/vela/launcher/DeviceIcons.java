@@ -50,6 +50,7 @@ final class DeviceIcons {
         case R.drawable.device_atari:return 0xFFE4202E;
         default:return VelaTheme.CARD;}}
     private static int mix(int a,int b,float t){int r=(int)(((a>>16)&255)*(1-t)+((b>>16)&255)*t),g=(int)(((a>>8)&255)*(1-t)+((b>>8)&255)*t),bl=(int)((a&255)*(1-t)+(b&255)*t);return 0xFF000000|(r<<16)|(g<<8)|bl;}
+    int lightColor(String model){return brandColor(resource(model));}
     GradientDrawable surface(String model,boolean focus,int radius){int color=brandColor(resource(model));GradientDrawable d=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{mix(color,0xFFFFFFFF,focus?.18f:.07f),mix(color,0xFF000000,.22f)});d.setCornerRadius(radius);d.setStroke(focus?2:1,focus?Appearance.accent(context):0x20FFFFFF);return d;}
     void load(String model,ImageView view){load(model,view,false);}
     void load(String model,ImageView view,boolean hero){if(closed)return;int id=resource(model);Drawable drawable=null;try{if(id!=0)drawable=context.getDrawable(id);}catch(android.content.res.Resources.NotFoundException unavailable){}view.setImageDrawable(drawable);view.setTag(model);bound.add(view);}

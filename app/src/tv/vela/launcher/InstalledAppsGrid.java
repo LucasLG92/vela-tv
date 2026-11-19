@@ -28,6 +28,8 @@ final class InstalledAppsGrid extends GridView {
     private final AppsAdapter adapter=new AppsAdapter();
     private volatile boolean released;
     private int initialPosition;
+    private VelaSpotlight.App spotlight;
+    void spotlight(VelaSpotlight.App value){spotlight=value;highlight();}
 
     InstalledAppsGrid(Context context,List<String> featured,View close,TextView status,TextView count,Consumer<SidebarApps.Choice> open){
         this(context,featured,close,status,count,open,true);
@@ -61,7 +63,7 @@ final class InstalledAppsGrid extends GridView {
                 found.addAll(remaining.values());List<String> custom=VelaLayout.apps(context);if(!custom.isEmpty())found.sort(Comparator.comparingInt(choice->{int at=custom.indexOf(choice.pkg);return at<0?10000:at;}));
             }catch(RuntimeException ignored){}
             main.post(()->{
-                if(released)return;choices.addAll(found);adapter.notifyDataSetChanged();
+                if(released)return;choices.addAll(found);adapter.notifyDataSetChanged();updateSpotlight();
                 count.setText(choices.size()+Ui.tr(" aplicativos"," apps"," apps"));
                 status.setText(Ui.tr("Nenhum aplicativo disponível.","No apps available.","No hay aplicaciones disponibles."));
                 if(choices.isEmpty())close.requestFocus();else{setSelection(Math.min(initialPosition,choices.size()-1));requestFocus();}
@@ -87,7 +89,19 @@ final class InstalledAppsGrid extends GridView {
 
     private void highlight(){
         int selected=getSelectedItemPosition();
+        updateSpotlight();
         for(int i=0;i<getChildCount();i++)((Tile)getChildAt(i)).selected(hasFocus()&&getFirstVisiblePosition()+i==selected);
+    }
+
+    private int previewPosition(){
+        int selected=getSelectedItemPosition();
+        return selected>=0?selected:Math.min(initialPosition,choices.size()-1);
+    }
+    private void updateSpotlight(){
+        int selected=previewPosition();
+        if(spotlight!=null&&selected>=0&&selected<choices.size()){
+            SidebarApps.Choice app=choices.get(selected);spotlight.bind(app.label,favorites.contains(app.pkg),icons.get(app.pkg));
+        }
     }
 
     private void icon(Tile tile,SidebarApps.Choice choice){
@@ -100,7 +114,7 @@ final class InstalledAppsGrid extends GridView {
             if(released)return;Bitmap bitmap=loadIcon(choice.pkg);
             main.post(()->{
                 pending.remove(choice.pkg);if(released){if(bitmap!=null)bitmap.recycle();return;}
-                if(bitmap==null)return;icons.put(choice.pkg,bitmap);
+                if(bitmap==null)return;icons.put(choice.pkg,bitmap);int preview=previewPosition();if(preview>=0&&preview<choices.size()&&choices.get(preview).pkg.equals(choice.pkg))updateSpotlight();
                 for(int i=0;i<getChildCount();i++){Tile visible=(Tile)getChildAt(i);if(choice.pkg.equals(visible.pkg)){visible.image.setImageBitmap(bitmap);visible.initial.setVisibility(GONE);}}
             });
         });}catch(RejectedExecutionException full){pending.remove(choice.pkg);}
@@ -134,7 +148,7 @@ final class InstalledAppsGrid extends GridView {
     void release(){
         if(released)return;released=true;worker.shutdownNow();main.removeCallbacksAndMessages(null);pending.clear();
         for(int i=0;i<getChildCount();i++)((Tile)getChildAt(i)).image.setImageDrawable(null);
-        setAdapter(null);icons.evictAll();choices.clear();
+        setAdapter(null);spotlight=null;icons.evictAll();choices.clear();
     }
 
     private final class AppsAdapter extends BaseAdapter {
@@ -169,8 +183,8 @@ final class InstalledAppsGrid extends GridView {
         void selected(boolean value){
             if(styled&&focused==value)return;styled=true;focused=value;
             VelaFocus.card(artwork,focused);
-            artwork.setForeground(null);
-            label.setTextColor(focused?VelaTheme.WHITE:VelaTheme.SECONDARY);label.setBackground(focused?VelaTheme.shape(VelaTheme.RAISED,12):null);
+            artwork.setForeground(focused?VelaTheme.artworkFocus(Appearance.accent(getContext()),43):null);
+            label.setTextColor(focused?VelaTheme.WHITE:VelaTheme.SECONDARY);label.setTypeface(focused?Ui.displaySemibold:Ui.medium);
         }
     }
     private static GradientDrawable shape(int color,int radius){GradientDrawable shape=new GradientDrawable();shape.setColor(color);shape.setCornerRadius(radius);return shape;}

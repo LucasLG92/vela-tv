@@ -2,7 +2,7 @@
 
 Native 4K captures across Vela Full, Lite and shared tools. Open an image for its full 3840 × 2160 view.
 
-**[Download](https://github.com/LucasLG92/vela-tv/releases/tag/v2.5.0-preview)** · [Home](#your-own-home) · [Library](#your-library) · [Television](#television-in-the-same-home) · [Personalisation](#the-details-that-make-it-yours) · **[Lite gallery](../lite/gallery/README.md)**
+**[Download](https://github.com/LucasLG92/vela-tv/releases/tag/v2.6.1-preview)** · [Home](#your-own-home) · [Library](#your-library) · [Television](#television-in-the-same-home) · [Personalisation](#the-details-that-make-it-yours) · **[Lite gallery](../lite/gallery/README.md)**
 
 These are real production Android views captured in an owned emulator, with original artwork and demonstration profiles, progress, schedules, HDMI/tuner connections and weather. Menus are in English; original artwork and service-supplied titles keep their own language. No private account, provider credential or personal location is shown. [Credits](CREDITS.md) · [Capture manifest](index.json).
 
@@ -64,7 +64,13 @@ Choose automatic playback or a compatibility engine, and balance startup against
 
 Programme names and times in this tour are synthetic, with original channel logos. The screenshots demonstrate Vela's interface; they do not represent a broadcaster's real schedule or certify physical antenna reception.
 
-[![Integrated horizontal programme guide](previews/123-tv-guide.webp)](123-tv-guide.webp)
+[![Artwork from the selected programme in the TV guide](previews/159-programme-art-guide.webp)](159-programme-art-guide.webp)
+
+| On air and coming up | Audio, subtitles and picture |
+| --- | --- |
+| [![Channel information over the live picture](previews/160-on-air.webp)](160-on-air.webp) | [![Playback controls](previews/161-live-controls.webp)](161-live-controls.webp) |
+
+The guide shows programme artwork when supplied by the listings. Press **OK** inside a channel for its schedule, **Left** for playback controls and **Right** for the channel list. Demo footage and stills from *Sintel* by the Blender Foundation. [Film](https://durian.blender.org/) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
 
 | Your channel order | Something to watch now |
 | --- | --- |

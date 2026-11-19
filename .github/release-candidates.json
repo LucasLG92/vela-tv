@@ -3,97 +3,121 @@
   "releases": [
     {
       "package": "tv.vela.launcher",
-      "version": "2.5.0-preview",
-      "code": 85,
-      "tag": "v2.5.0-preview",
-      "title": "Vela 2.5.0 Preview — Night cinema",
-      "file": "Vela-2.5.0-preview.apk",
-      "size": 5052909,
-      "sha256": "6c24cf9c21060407974f3794e62c696970f8289c013d83e84d678af7df202c0e",
-      "blob_sha": "e380c40aa8748830ef99cd0788352ee4ff90a348",
+      "version": "2.6.1-preview",
+      "code": 90,
+      "tag": "v2.6.1-preview",
+      "title": "Vela 2.6.1 Preview \u2014 The programme guide and live player",
+      "file": "Vela-2.6.1-preview.apk",
+      "size": 5081581,
+      "sha256": "228557c67e1aae540feed0b772153e58449b68634c4a5cff683ded4a4fd750a2",
+      "blob_sha": "6ab831144c70d3c80fb160cb33fdd45747d1139a",
       "chunks": [
         {
-          "sha": "47354f9b3bf722dd8b9a8354b453702819fa75ba",
-          "size": 262144
+          "sha": "014d84ddcd334763c48d1c99cd14d24f3eba3e7a",
+          "size": 196608
         },
         {
-          "sha": "517b778f64b0189c3c7316056e879a0bddf1a9bb",
-          "size": 262144
+          "sha": "a32ca64ae974d3a4d09b0d8180124c4a9458b535",
+          "size": 196608
         },
         {
-          "sha": "a1631b632954e1d82e7feb67c590dc902c12a80f",
-          "size": 262144
+          "sha": "7d50ff94aae3bfdacf0a495bbc0ba1908a723a9a",
+          "size": 196608
         },
         {
-          "sha": "795a4159fbc0ea89530c829a082a03825a678946",
-          "size": 262144
+          "sha": "b3bc5af72093bc61ed46d7b0f7518e135e746a43",
+          "size": 196608
         },
         {
-          "sha": "ef734e6a4c8bca12d4d5a09a667072dbb4848651",
-          "size": 262144
+          "sha": "006743fafd8a7741d01068d0a4a2cf7cd8760ebd",
+          "size": 196608
         },
         {
-          "sha": "88b0af715a60c7abd1927ded75c77885f8c7276b",
-          "size": 262144
+          "sha": "5555a03dfab1bee04ca082482fa5640ed678cd9c",
+          "size": 196608
         },
         {
-          "sha": "f4a163b39c99e87d14279fcca609cc8ada3e3ec3",
-          "size": 262144
+          "sha": "71a0825bd2bd374b4bb6023948bfc0bd335dc1d6",
+          "size": 196608
         },
         {
-          "sha": "d999d39b674a54bd7d9f9cee3315c4a89fc33914",
-          "size": 262144
+          "sha": "1b9c6053ed14d103eb865d08ecb4a3ed2403698e",
+          "size": 196608
         },
         {
-          "sha": "5f31b30fcf3b00f3546d1a0ff4486d4f8e1010e7",
-          "size": 262144
+          "sha": "eea8e54cbf865f77ce22a0d873d1392e4ff9a182",
+          "size": 196608
         },
         {
-          "sha": "369199f68b1b58bfffb459ffa3a980d20b70ed4d",
-          "size": 262144
+          "sha": "0747198338070630798f7588e7f51f800a3d3d4e",
+          "size": 196608
         },
         {
-          "sha": "1edd838f86b4f2c0c433951e4ef9949dce6a6f43",
-          "size": 262144
+          "sha": "0086dcd2b3c21943f37aac3e54aa92df5539b216",
+          "size": 196608
         },
         {
-          "sha": "6dd8ab0425d6f3f72b21e723f355449475146c29",
-          "size": 262144
+          "sha": "828265c7cf41288a6060f551e5f87187b3ea161e",
+          "size": 196608
         },
         {
-          "sha": "670632da875d56be8f63fd6950cb81204817775d",
-          "size": 262144
+          "sha": "0836184f48843c8b0c38c52c23e891855697e19b",
+          "size": 196608
         },
         {
-          "sha": "4b34c3b82ddcb6fac61d9c4eb1c1b4908dad16a6",
-          "size": 262144
+          "sha": "ef674417d067521eabf2bbef3ec558c04f80bcc3",
+          "size": 196608
         },
         {
-          "sha": "a46c4dc84df0a8fc88a3ca75377ea76e506c8cf1",
-          "size": 262144
+          "sha": "80732b86aa79febe330ac979811327ed7af20346",
+          "size": 196608
         },
         {
-          "sha": "e8e06d43b5a4e98f3deaf0f0cd2a9fb5e3c08717",
-          "size": 262144
+          "sha": "e2f3ee131bea02be8afde48e4f5ff8f720097f4e",
+          "size": 196608
         },
         {
-          "sha": "34c0832df13ea172b741c236f4cd3a5c6d78d06b",
-          "size": 262144
+          "sha": "4d552a5401e5c83975890623368427a9d9e61d6c",
+          "size": 196608
         },
         {
-          "sha": "49d3fc4cc000e714b59e84cd1bd0532a1f8c3ba0",
-          "size": 262144
+          "sha": "6bdb5c461b709fd7b5141c664d34eb579065aca3",
+          "size": 196608
         },
         {
-          "sha": "e36afe60eee9daa95d6ada7fc9d58c0d64408c2e",
-          "size": 262144
+          "sha": "3c7a5dbc69fa4e5e6033e01e5a75c6452b0ac039",
+          "size": 196608
         },
         {
-          "sha": "18c8419ac6ce9dc8c1f596e8bd165c1bc634306e",
-          "size": 72173
+          "sha": "6a8c90606112ebcf426b54ab8b6ba8bdd7eb014b",
+          "size": 196608
+        },
+        {
+          "sha": "83951e29efa5c76cbe5529a56056943d7c28d858",
+          "size": 196608
+        },
+        {
+          "sha": "853890abddd4dd31b57acba1dfd160a93700d02b",
+          "size": 196608
+        },
+        {
+          "sha": "34c45d38f260732c905e269fcd5461dba1a7c300",
+          "size": 196608
+        },
+        {
+          "sha": "b466ab578b6a5ed4e516189103b2d525b446113d",
+          "size": 196608
+        },
+        {
+          "sha": "bf80aa4300bbc457d8e64c5e0ef774419f5fc471",
+          "size": 196608
+        },
+        {
+          "sha": "eef43e207cc0586a20a2acdf46226b8b373166d6",
+          "size": 166381
         }
       ],
-      "notes": "guide/releases/2.5.0-preview.md"
+      "notes": "guide/releases/2.6.1-preview.md"
     }
   ]
 }

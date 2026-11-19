@@ -1902,5 +1902,38 @@
     "height": 2160,
     "version": "2.5.0-preview",
     "sha256": "dc3b9e23f8b45d392ce6a0e410eb37f3c55ad9b521c9b47ef3c5415d40fb9ba7"
+  },
+  {
+    "file": "159-programme-art-guide.webp",
+    "title": "Programme artwork in the guide",
+    "source": "Native Android emulator capture. Synthetic listings and Sintel by the Blender Foundation, CC BY 3.0.",
+    "language": "es",
+    "personal_data": false,
+    "width": 1920,
+    "height": 1080,
+    "version": "2.6.1-preview",
+    "sha256": "34c176b2e6004b5a58cd9dbc3765fc943819cad570cde052f89e7f0dcf52ee6e"
+  },
+  {
+    "file": "160-on-air.webp",
+    "title": "Current and next on the live picture",
+    "source": "Native Android emulator capture. Synthetic listings and Sintel by the Blender Foundation, CC BY 3.0.",
+    "language": "es",
+    "personal_data": false,
+    "width": 1920,
+    "height": 1080,
+    "version": "2.6.1-preview",
+    "sha256": "8eeb98ae96f66f492e06e1da2c74845853830430010cc401dfc6bf18995eb6b5"
+  },
+  {
+    "file": "161-live-controls.webp",
+    "title": "Playback controls over live television",
+    "source": "Native Android emulator capture. Synthetic listings and Sintel by the Blender Foundation, CC BY 3.0.",
+    "language": "es",
+    "personal_data": false,
+    "width": 1920,
+    "height": 1080,
+    "version": "2.6.1-preview",
+    "sha256": "255b69f9836e041bba74efd4c7ef2d036239ff5155c5b370e555c4076c7eafb4"
   }
 ]

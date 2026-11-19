@@ -20,12 +20,15 @@ if a.lite and a.test=='auto-tune':cls='LiteAutoTuneTest'
 if a.lite and a.test=='tv-fixes':cls='LiteTvRegressionTest'
 if a.lite and a.test=='recent-channel':cls='LiteRecentChannelTest'
 out=root/('out/refinement-'+a.test);(out/'classes').mkdir(parents=True,exist_ok=True)
-assets=out/'assets';assets.mkdir(exist_ok=True)
-if a.art:
+schedule_fixture=a.test in ('discovery','guide-focus')
+assets=out/('schedule-assets' if schedule_fixture else 'assets');assets.mkdir(exist_ok=True)
+if a.art and not schedule_fixture:
  for path in a.art.iterdir():
   if re.fullmatch(r'(?:poster-[0-9]+|backdrop-[0-9]+)\.jpg|catalog\.json',path.name) or a.test=='home-composition' and path.name in ('youtube-dune.jpg','youtube-moon.jpg','prime-reacher.jpg'):
    assert path.stat().st_size<16*1024*1024;shutil.copyfile(path,assets/path.name)
 
+if a.test=='discovery':
+ shutil.copyfile(repo/'tests/gallery/assets/backdrop.jpg',assets/'sintel-guide.jpg')
 if a.test in ('discovery','search-ux'):
  for logo in ['24h-es.png','antena-3-es.png','cuatro-es.png','lasexta-es.png','telecinco-es.png','real-madrid-tv-es.png']:
   shutil.copyfile(repo/'lite/assets/channel-logos'/logo,assets/logo)

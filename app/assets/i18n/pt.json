@@ -1,4 +1,8 @@
 {
+  "Signal and playback": "Sinal e reprodução",
+  "Starts in %s": "Começa em %s",
+  "Picture": "Imagem",
+  "More": "Mais",
   "": "de ",
   "\nOK watch\nHold OK · Options": "\nOK ver\nManter OK · Opções",
   " MB. Cleared when you leave Home. No videos or animated backgrounds play on Home.": " MB. Limpo ao sair do Início. Não há vídeos nem fundos animados no Início.",
@@ -442,6 +446,7 @@
   "Keep your layout, favourites and preferences. Accounts, URLs, tokens and passwords are excluded.": "Guarde seu layout, favoritos e preferências. Contas, URLs, tokens e senhas ficam de fora.",
   "Kids": "Infantil",
   "LANGUAGE": "IDIOMA",
+  "REPLAY": "ARQUIVO",
   "LIVE": "AO VIVO",
   "LIVE NOW": "EM DIRETO",
   "LIVE TV": "TV EM DIRETO",

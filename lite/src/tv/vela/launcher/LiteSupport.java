@@ -8,8 +8,8 @@ import java.util.Locale;
 
 /** The small contracts used by the shared HDMI resolver and vectors. No full Vela runtime. */
 final class Ui {
-    static Typeface regular,medium,displaySemibold;
-    static synchronized void init(Context context){L10n.init(context,"auto");if(medium!=null)return;try{regular=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 14, 'wght' 400").build();medium=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 14, 'wght' 500").build();displaySemibold=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 32, 'wght' 600").build();}catch(RuntimeException unavailable){regular=Typeface.create("sans-serif",0);medium=Typeface.create("sans-serif-medium",0);displaySemibold=Typeface.create("sans-serif",Typeface.BOLD);}}
+    static Typeface regular,medium,displayMedium,displaySemibold,semibold;
+    static synchronized void init(Context context){L10n.init(context,"auto");if(medium!=null)return;try{regular=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 14, 'wght' 400").build();medium=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 14, 'wght' 500").build();displayMedium=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 32, 'wght' 500").build();displaySemibold=new Typeface.Builder(context.getAssets(),"fonts/InterVariable.ttf").setFontVariationSettings("'opsz' 32, 'wght' 600").build();}catch(RuntimeException unavailable){regular=Typeface.create("sans-serif",0);medium=Typeface.create("sans-serif-medium",0);displayMedium=medium;displaySemibold=Typeface.create("sans-serif",Typeface.BOLD);}semibold=displaySemibold;}
     static Locale locale(){return L10n.locale();}
     static String tr(String pt,String en,String es){return L10n.tr(pt,en,es);}
 }

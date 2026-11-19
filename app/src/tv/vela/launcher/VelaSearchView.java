@@ -46,7 +46,7 @@ final class VelaSearchView extends FrameLayout {
     private TextView button(String s,Runnable action){TextView v=label(s,23,VelaTheme.WHITE);v.setGravity(Gravity.CENTER);v.setSingleLine();v.setEllipsize(TextUtils.TruncateAt.END);v.setFocusable(true);v.setFocusableInTouchMode(true);v.setDefaultFocusHighlightEnabled(false);v.setBackground(VelaTheme.shape(VelaTheme.PANEL,18));v.setOnClickListener(w->action.run());v.setOnFocusChangeListener((w,f)->{if(f)host.focused();v.setBackground(VelaTheme.shape(f?VelaReading.accent(activity):VelaTheme.PANEL,18));v.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);if(Arrays.asList(filters).contains(v))paintFilters();});return v;}
     private void put(FrameLayout parent,View v,int x,int y,int w,int h){LayoutParams p=new LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;parent.addView(v,p);}
     static int kind(VelaHub.Hit h){return h.value instanceof Intent?3:h.value instanceof TvInputs.Entry?4:h.value instanceof LiveTvData.Channel||h.value instanceof VelaShows.Airing?2:1;}
-    private void paintFilters(){for(int i=0;i<filters.length;i++){TextView v=(TextView)filters[i];if(v==null)continue;boolean focus=v.hasFocus();v.setBackground(VelaTheme.shape(focus?VelaReading.accent(activity):i==filter?VelaTheme.RAISED:VelaTheme.PANEL,18));v.setTextColor(focus?VelaTheme.INK:VelaTheme.WHITE);}}
+    private void paintFilters(){for(int i=0;i<filters.length;i++){TextView v=(TextView)filters[i];if(v==null)continue;boolean focus=v.hasFocus();v.setBackground(VelaTheme.shape(focus?VelaTheme.pearl(VelaReading.accent(activity)):i==filter?VelaTheme.RAISED:Color.TRANSPARENT,24));v.setTextColor(focus?VelaTheme.INK:VelaTheme.WHITE);}}
     void loading(String query){if(!query.equals(lastQuery)){filter=0;paintFilters();lastQuery=query;}loading=true;all.clear();visible.clear();input.setText(query);releaseCards();empty.setText(L10n.text("Searching…"));empty.setVisibility(VISIBLE);count.setText("");pager();}
     void idle(){loading=false;more=false;localPage=backendPage=0;releaseCards();all.clear();visible.clear();empty.setText(L10n.text("Search your library, channels, apps and inputs."));empty.setVisibility(VISIBLE);count.setText("");pager();}
     void error(){loading=false;empty.setText(L10n.text("Could not search. Try again."));empty.setVisibility(VISIBLE);pager();}
@@ -63,14 +63,15 @@ final class VelaSearchView extends FrameLayout {
         count.setText(visible.isEmpty()?L10n.text("No results"):L10n.text("Results")+" "+(start+1)+"–"+Math.min(start+pageSize,visible.size())+" / "+visible.size()+"  ·  "+L10n.text("Page ")+(backendPage+1));pager();if(focus&&!tiles.isEmpty()&&isShown())tiles.get(0).requestFocus();
     }
     private void addCard(VelaHub.Hit hit,int i){
-        FrameLayout tile=new FrameLayout(activity);tile.setFocusable(true);tile.setFocusableInTouchMode(true);tile.setDefaultFocusHighlightEnabled(false);tile.setBackground(VelaTheme.panel());tile.setPadding(0,0,0,0);
+        FrameLayout tile=new FrameLayout(activity);tile.setFocusable(true);tile.setFocusableInTouchMode(true);tile.setDefaultFocusHighlightEnabled(false);tile.setBackground(VelaTheme.shape(VelaTheme.PANEL,20));tile.setClipToOutline(true);tile.setPadding(0,0,0,0);
         int typeId=kind(hit),tileHeight=pageSize==4?280:184;boolean library=typeId==1;
         ResultArt icon=new ResultArt(activity,typeId);icon.setScaleType(ImageView.ScaleType.FIT_CENTER);icon.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);Drawable image=null;
         if(hit.value instanceof Intent)try{Intent intent=(Intent)hit.value;if(intent.getComponent()!=null)image=activity.getPackageManager().getActivityIcon(intent.getComponent());}catch(Exception unavailable){}
         icon.setImageDrawable(image);
-        int artWidth=library?104:typeId==2?112:76,artHeight=library?156:artWidth;
-        if(hit.value instanceof VelaShows.Airing&&!((VelaShows.Airing)hit.value).image.isEmpty()){artWidth=144;artHeight=100;icon.setScaleType(ImageView.ScaleType.CENTER_CROP);}
-        icon.setBackground(VelaTheme.shape(VelaTheme.CARD,14));icon.setClipToOutline(true);put(tile,icon,24,(tileHeight-artHeight)/2,artWidth,artHeight);
+        int artWidth=library?tileHeight*2/3:174,artHeight=tileHeight;
+        if(!library)icon.setPadding(22,28,22,28);
+        if(hit.value instanceof VelaShows.Airing&&!((VelaShows.Airing)hit.value).image.isEmpty()){artWidth=226;artHeight=tileHeight;icon.setPadding(0,0,0,0);icon.setScaleType(ImageView.ScaleType.CENTER_CROP);}
+        icon.setBackgroundColor(VelaTheme.CARD);put(tile,icon,0,0,artWidth,artHeight);
         if(hit.value instanceof LiveTvData.Channel){if(programmeArt==null)programmeArt=new VelaProgrammeArt(activity,this);programmeArt.bind(icon,((LiveTvData.Channel)hit.value).logo,artWidth,artHeight);}
         else if(hit.value instanceof VelaShows.Airing){VelaShows.Airing airing=(VelaShows.Airing)hit.value;if(programmeArt==null)programmeArt=new VelaProgrammeArt(activity,this);programmeArt.bind(icon,airing.image.isEmpty()?airing.logo:airing.image,artWidth,artHeight);}
         else if(library){Runnable cancel=host.artwork(hit,icon,artWidth,artHeight);if(cancel!=null)imageRequests.add(cancel);}
@@ -79,7 +80,7 @@ final class VelaSearchView extends FrameLayout {
         TextView name=label(hit.title,29,VelaTheme.WHITE);name.setMaxLines(2);name.setEllipsize(TextUtils.TruncateAt.END);name.setTypeface(Ui.displaySemibold);put(tile,name,textLeft,52,textWidth,pageSize==4?154:90);
         TextView detail=label(hit.detail,20,VelaTheme.SECONDARY);detail.setSingleLine();detail.setEllipsize(TextUtils.TruncateAt.END);put(tile,detail,textLeft,pageSize==4?232:146,textWidth,pageSize==4?38:30);
         tile.setContentDescription(hit.title+", "+hit.kind+", "+hit.detail);tile.setOnClickListener(v->host.open(hit));tile.setOnLongClickListener(v->{host.save(hit);return true;});
-        tile.setOnFocusChangeListener((v,f)->{if(f)host.focused();tile.setBackground(f?VelaTheme.shape(VelaReading.accent(activity),VelaTheme.PANEL_RADIUS):VelaTheme.panel());name.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);type.setTextColor(f?0xFF555A65:secondary(VelaTheme.MUTED));detail.setTextColor(f?0xFF555A65:secondary(VelaTheme.SECONDARY));icon.placeholder.color(VelaTheme.WHITE);});
+        tile.setOnFocusChangeListener((v,f)->{if(f)host.focused();tile.setForeground(f?VelaTheme.artworkFocus(VelaReading.accent(activity),20):null);tile.setBackground(VelaTheme.shape(f?VelaTheme.RAISED:VelaTheme.PANEL,20));name.setTextColor(VelaTheme.WHITE);type.setTextColor(secondary(VelaTheme.MUTED));detail.setTextColor(secondary(VelaTheme.SECONDARY));icon.placeholder.color(VelaTheme.WHITE);});
         final int index=i;tile.setOnKeyListener((v,key,event)->{if(key<KeyEvent.KEYCODE_DPAD_UP||key>KeyEvent.KEYCODE_DPAD_RIGHT)return false;if(event.getAction()!=KeyEvent.ACTION_DOWN)return true;
             if(key==KeyEvent.KEYCODE_DPAD_DOWN){if(index+2<tiles.size())tiles.get(index+2).requestFocus();else if(next.isEnabled())next.requestFocus();else previous.requestFocus();return true;}
             if(key==KeyEvent.KEYCODE_DPAD_UP){if(index>=2)tiles.get(index-2).requestFocus();else filters[filter].requestFocus();return true;}

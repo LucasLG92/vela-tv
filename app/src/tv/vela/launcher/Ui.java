@@ -36,7 +36,7 @@ final class Ui {
         boolean full=VelaEdition.mode(c).equals("full");
         if(loaded&&full==fullFonts)return;
         fullFonts=full;
-        if(!full){AssetManager fonts=c.getAssets();regular=font(fonts,14,400);medium=font(fonts,14,500);displaySemibold=font(fonts,32,600);thin=light=displayMedium=semibold=null;loaded=true;return;}
+        if(!full){AssetManager fonts=c.getAssets();regular=font(fonts,14,400);medium=font(fonts,14,500);displaySemibold=font(fonts,32,600);displayMedium=font(fonts,32,500);semibold=displaySemibold;thin=light=null;loaded=true;return;}
         loaded = true;
         AssetManager a = c.getAssets();
         thin = font(a, 32, 200);

@@ -17,7 +17,7 @@ import java.util.*;
 
 /** The bounded Media3 network engine; never runs alongside MediaPlayer. */
 final class VelaDvrPlayer {
-    interface Events {void ready();void frame();void size(int height);void failed();default void failed(VelaPlaybackRecovery.Failure reason){failed();}void captions(String text);default void ended(){}}
+    interface Events {void ready();void frame();void size(int height);void failed();default void failed(VelaPlaybackRecovery.Failure reason){failed();}void captions(String text);default void ended(){}default void tracksChanged(){}}
     private final ExoPlayer engine;private final Context context;private final String channel;private boolean ready;private volatile boolean closed;int seeks;
     private final Handler main=new Handler(Looper.getMainLooper());
     private final VelaFrameRate frameRate;
@@ -46,7 +46,7 @@ final class VelaDvrPlayer {
             @Override public void onPlayerError(PlaybackException error){if(closed)return;if(error.errorCode==PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW&&engine.getPlayWhenReady()&&liveWindowRecoveries++==0){try{engine.seekToDefaultPosition();engine.prepare();engine.play();return;}catch(RuntimeException unavailable){events.failed(VelaPlaybackRecovery.Failure.NETWORK);return;}}events.failed(classify(error));}
             @Override public void onCues(CueGroup cues){StringBuilder text=new StringBuilder();for(androidx.media3.common.text.Cue cue:cues.cues)if(cue.text!=null){if(text.length()>0)text.append('\n');if(text.length()<4096)text.append(cue.text);}if(!closed)events.captions(text.toString());}
             @Override public void onPositionDiscontinuity(Player.PositionInfo oldPosition,Player.PositionInfo newPosition,int reason){if(reason==Player.DISCONTINUITY_REASON_SEEK)seeks++;}
-            @Override public void onTracksChanged(Tracks tracks){if(closed)return;restore();if(frameRate!=null&&audioOnly()){timingUnavailable=true;frameRate.unknown();}}
+            @Override public void onTracksChanged(Tracks tracks){if(closed)return;restore();events.tracksChanged();if(frameRate!=null&&audioOnly()){timingUnavailable=true;frameRate.unknown();}}
             @Override public void onIsPlayingChanged(boolean playing){if(!closed&&playing&&audioOnly())events.frame();}
             @Override public void onPlayWhenReadyChanged(boolean playWhenReady,int reason){matchingState();}
         });
@@ -90,8 +90,8 @@ final class VelaDvrPlayer {
         TrackSelectionParameters updated=next.build();if(!before.equals(updated))engine.setTrackSelectionParameters(updated);
     }
     void items(List<VelaPlaybackPanel.Item> items){
-        Set<String> formats=new LinkedHashSet<>();for(Tracks.Group group:engine.getCurrentTracks().getGroups()){int type=group.getType();for(int i=0;i<group.length;i++){final int index=i;Format f=group.getTrackFormat(i);if(f.sampleMimeType!=null)formats.add(f.sampleMimeType);if((type!=C.TRACK_TYPE_AUDIO&&type!=C.TRACK_TYPE_TEXT)||!group.isTrackSupported(i))continue;String language=f.language==null?"und":f.language;String label=language.equals("und")?L10n.text("Default"):new java.util.Locale(language).getDisplayLanguage(Ui.locale());items.add(new VelaPlaybackPanel.Item((group.isTrackSelected(i)?"✓ ":"")+(type==C.TRACK_TYPE_AUDIO?L10n.text("Audio"):L10n.text("Subtitles"))+" · "+label,"",()->{engine.setTrackSelectionParameters(engine.getTrackSelectionParameters().buildUpon().setOverrideForType(new TrackSelectionOverride(group.getMediaTrackGroup(),index)).setTrackTypeDisabled(type,false).build());VelaPlaybackPanel.prefs(context).edit().putString(VelaPlaybackPanel.key(channel,type==C.TRACK_TYPE_AUDIO?"audio":"sub"),"lang:"+language).apply();}));}}
-        items.add(new VelaPlaybackPanel.Item(L10n.text("Turn subtitles off"),"",()->{engine.setTrackSelectionParameters(engine.getTrackSelectionParameters().buildUpon().setTrackTypeDisabled(C.TRACK_TYPE_TEXT,true).build());VelaPlaybackPanel.prefs(context).edit().putString(VelaPlaybackPanel.key(channel,"sub"),"off").apply();}));
+        boolean subtitles=false;Set<String> formats=new LinkedHashSet<>();for(Tracks.Group group:engine.getCurrentTracks().getGroups()){int type=group.getType();for(int i=0;i<group.length;i++){final int index=i;Format f=group.getTrackFormat(i);if(f.sampleMimeType!=null)formats.add(f.sampleMimeType);if((type!=C.TRACK_TYPE_AUDIO&&type!=C.TRACK_TYPE_TEXT)||!group.isTrackSupported(i))continue;subtitles|=type==C.TRACK_TYPE_TEXT;String language=f.language==null?"und":f.language;String label=language.equals("und")?L10n.text("Default"):new java.util.Locale(language).getDisplayLanguage(Ui.locale());items.add(new VelaPlaybackPanel.Item(type==C.TRACK_TYPE_AUDIO?VelaPlaybackPanel.Group.AUDIO:VelaPlaybackPanel.Group.SUBTITLES,f.label==null?label:f.label,group.isTrackSelected(i),()->{engine.setTrackSelectionParameters(engine.getTrackSelectionParameters().buildUpon().setOverrideForType(new TrackSelectionOverride(group.getMediaTrackGroup(),index)).setTrackTypeDisabled(type,false).build());VelaPlaybackPanel.prefs(context).edit().putString(VelaPlaybackPanel.key(channel,type==C.TRACK_TYPE_AUDIO?"audio":"sub"),"lang:"+language).apply();}));}}
+        if(subtitles)items.add(new VelaPlaybackPanel.Item(VelaPlaybackPanel.Group.SUBTITLES,L10n.text("Off"),!engine.getCurrentTracks().isTypeSelected(C.TRACK_TYPE_TEXT),()->{engine.setTrackSelectionParameters(engine.getTrackSelectionParameters().buildUpon().setTrackTypeDisabled(C.TRACK_TYPE_TEXT,true).build());VelaPlaybackPanel.prefs(context).edit().putString(VelaPlaybackPanel.key(channel,"sub"),"off").apply();}));
         items.add(new VelaPlaybackPanel.Item(L10n.text("Video signal"),width()+" × "+height()+" · "+android.text.TextUtils.join(" · ",formats),null));
     }
 }

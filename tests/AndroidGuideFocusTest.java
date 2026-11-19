@@ -41,10 +41,10 @@ public final class AndroidGuideFocusTest extends Instrumentation {
         if(lite){constructor=LiveTvData.Channel.class.getDeclaredConstructor(long.class,String.class,String.class,String.class,boolean.class,boolean.class,boolean.class);constructor.setAccessible(true);return (LiveTvData.Channel)constructor.newInstance(1L,"fixture.input","1","Demo",false,true,false);}
         constructor=LiveTvData.Channel.class.getDeclaredConstructor(String.class,String.class,String.class,String.class,List.class);constructor.setAccessible(true);return (LiveTvData.Channel)constructor.newInstance("demo","Demo","Demo","",Collections.emptyList());
     }
-    public void onCreate(Bundle args){super.onCreate(args);start();}
+    private boolean unifiedLite;private String priorMode;public void onCreate(Bundle args){super.onCreate(args);unifiedLite="unified-lite".equals(args.getString("fixture"));start();}
     public void onStart(){context=getTargetContext();try{
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){check(in.read()=='1',"Owned emulator required");}
-        boolean lite=context.getPackageName().endsWith(".lite");previous=VelaWorkspace.active(context);profile=VelaWorkspace.create(context,"Guide test");VelaWorkspace.select(context,profile);VelaEdition.select(context,lite?"lite":"full");
+        boolean lite=unifiedLite||context.getPackageName().endsWith(".lite");priorMode=VelaEdition.mode(context);previous=VelaWorkspace.active(context);profile=VelaWorkspace.create(context,"Guide test");VelaWorkspace.select(context,profile);VelaEdition.select(context,lite?"lite":"full");
         if(!lite){Class<?> setup=Class.forName("tv.vela.launcher.Personalization");for(String name:new String[]{"prepare","complete"}){Method method=setup.getDeclaredMethod(name,Context.class);method.setAccessible(true);method.invoke(null,context);}}
         L10n.choose(context,"en");Ui.init(context);context.getSharedPreferences("updates",0).edit().putBoolean("automatic",false).commit();
         activity=startActivitySync(new Intent().setClassName(context.getPackageName(),"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -67,9 +67,14 @@ public final class AndroidGuideFocusTest extends Instrumentation {
             ui(parking::requestFocus);Text unfocused=draw().timing(239);check(timing.y==unfocused.y,"Reading preference reintroduced a focus jump");
         }
         ui(()->{VelaReading.prefs(context).edit().putInt("text",0).commit();timeline.rowHeight(106);timeline.requestFocus();});
+        phase="live rollover versus manual browsing";
+        ui(()->{timeline.data(Collections.singletonList(channel),schedule,from,channel,false);timeline.followNow(current.end-1);timeline.minute(current.end);});
+        check(timeline.programme()==next,"Live selection did not follow the programme boundary");
+        ui(()->{timeline.cursor(current.end-1);timeline.minute(current.end);});
+        check(timeline.programme()==current,"Clock tick stole a manual selection");
         phase="honest empty guide";ui(()->timeline.data(Collections.singletonList(channel),Collections.emptyMap(),from,channel,false));check(timeline.programme()==null&&described==null,"Completed empty guide retained stale listings");
         phase="new time window";ui(()->timeline.data(Collections.singletonList(channel),Collections.emptyMap(),from+5400,channel,true));check(timeline.programme()==null,"New window borrowed old guide data");
         phase="rebound channel isolation";LiveTvData.Channel rebound=demo(lite);ui(()->{timeline.data(Collections.singletonList(channel),schedule,from,channel,false);timeline.data(Collections.singletonList(rebound),Collections.emptyMap(),from,rebound,true);});check(timeline.programme()==null,"Rebound channel records borrowed the previous guide");
         result.putString("result","PASS current/next focus geometry, unchanged programme footprint, idle minute/redraw stability, retained selection during same-window refresh, honest completed gaps and new-window isolation. Shared native guide, synthetic metadata, no stream or tuner opened.");
-    }catch(Throwable error){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(error));}finally{try{if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}}catch(Exception ignored){}}finish(result.containsKey("error")?1:-1,result);}
+    }catch(Throwable error){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(error));}finally{try{if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);if(priorMode!=null&&!priorMode.isEmpty())VelaEdition.select(context,priorMode);}}catch(Exception ignored){}}finish(result.containsKey("error")?1:-1,result);}
 }

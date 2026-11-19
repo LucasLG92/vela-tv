@@ -19,7 +19,7 @@ final class InputsScreen extends VelaScreen {
     private final Runnable refresh=()->{if(this.active&&!this.picking)render();};
     private DeviceIcons icons;
     private FrameLayout root;private final List<View> cards=new ArrayList<>();
-    private FrameLayout heroWell;private ImageView heroIcon;private TextView heroName,heroPort,open;private TvInputs.Entry heroEntry;
+    private VelaSpotlight inputLight;private FrameLayout heroWell;private ImageView heroIcon;private TextView heroName,heroPort,open;private TvInputs.Entry heroEntry;
     private boolean active,picking,consumeConfirmUp;private String selected="";private int column;
     InputsScreen(Activity owner,Navigation navigation,TvInputs.Source source){this(owner,navigation,source,false);}
     InputsScreen(Activity owner,Navigation navigation,TvInputs.Source source,boolean home){super(owner,navigation);this.source=source;this.home=home;}
@@ -37,7 +37,7 @@ final class InputsScreen extends VelaScreen {
     private void systemSettings(){try{startActivity(new Intent(Settings.ACTION_SETTINGS));}catch(RuntimeException unavailable){Toast.makeText(this,t("Ajustes indisponíveis","Settings unavailable","Ajustes no disponibles"),Toast.LENGTH_SHORT).show();}}
     private void launch(TvInputs.Entry entry){if(entry==null)return;try{startActivity(new Intent(Intent.ACTION_VIEW,TvContract.buildChannelUriForPassthroughInput(entry.inputId)));}catch(RuntimeException unavailable){Toast.makeText(this,t("Entrada indisponível","Input unavailable","Entrada no disponible"),Toast.LENGTH_SHORT).show();}}
     private void feature(TvInputs.Entry entry){
-        heroEntry=entry;if(icons!=null)heroWell.setBackground(icons.surface(entry.model,false,62));heroName.setText(entry.title);heroPort.setText(entry.port+"  ·  "+TvInputs.status(entry.state));
+        heroEntry=entry;if(icons!=null)inputLight.tint(icons.lightColor(entry.model));heroName.setText(entry.title);heroPort.setText(entry.port+"  ·  "+TvInputs.status(entry.state));
         boolean named=!entry.model.equals("other")&&entry.state==TvInputs.CONNECTED;
         open.setText(L10n.text("Open")+"  →");
         if(icons!=null)icons.load(entry.model,heroIcon,true);else heroIcon.setImageDrawable(null);
@@ -46,14 +46,15 @@ final class InputsScreen extends VelaScreen {
         picking=false;boolean navFocus=navigation.navigationTarget(this)!=null&&navigation.navigationTarget(this).hasFocus();
         if(icons!=null)icons.clearViews();root=new FrameLayout(this);cards.clear();
 
-        View featureSurface=new View(this);featureSurface.setBackground(VelaTheme.panel());place(root,featureSurface,64,14,1654,342);heroName=text("",52,VelaTheme.WHITE);place(root,heroName,104,52,900,92);heroPort=text("",24,VelaTheme.SECONDARY);place(root,heroPort,106,150,860,45);
-        open=action("",()->launch(heroEntry));place(root,open,106,236,300,60);open.setOnLongClickListener(v->{if(heroEntry!=null){consumeConfirmUp=true;choose(heroEntry);}return true;});
-        open.setBackground(rounded(Appearance.accent(this),VelaTheme.CONTROL_RADIUS));open.setTextColor(VelaTheme.INK);open.setOnFocusChangeListener((v,f)->{open.setBackground(rounded(Appearance.accent(this),VelaTheme.CONTROL_RADIUS));VelaFocus.card(open,f);});
-        heroWell=new FrameLayout(this);GradientDrawable heroSurface=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{0xFF363842,0xFF17181E});heroSurface.setCornerRadius(62);heroSurface.setStroke(1,0x20FFFFFF);heroWell.setBackground(heroSurface);place(root,heroWell,1230,42,288,288);heroIcon=new InputArtwork(this,"other");place(heroWell,heroIcon,50,50,188,188);
-        place(root,text(t("Suas conexões","Your connections","Tus conexiones"),29,VelaTheme.WHITE),64,386,1000,54);
+        inputLight=new VelaSpotlight(this);inputLight.tint(0xff849792);place(root,inputLight,0,0,1790,490);heroName=text("",82,VelaTheme.WHITE);heroName.setSingleLine();heroName.setAutoSizeTextTypeUniformWithConfiguration(42,82,2,android.util.TypedValue.COMPLEX_UNIT_PX);heroName.setTypeface(Ui.displayMedium);place(root,heroName,82,85,940,116);heroPort=text("",24,VelaTheme.SECONDARY);place(root,heroPort,86,40,900,43);
+        open=action("",()->launch(heroEntry));place(root,open,86,238,270,60);open.setOnLongClickListener(v->{if(heroEntry!=null){consumeConfirmUp=true;choose(heroEntry);}return true;});
+        open.setOnFocusChangeListener((v,f)->{open.setBackground(rounded(f?VelaTheme.pearl(Appearance.accent(this)):VelaTheme.CARD,30));open.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);VelaFocus.card(open,f);});open.setBackground(rounded(VelaTheme.CARD,30));
+        heroWell=new FrameLayout(this);place(root,heroWell,1050,10,520,360);heroIcon=new InputArtwork(this,"other");place(heroWell,heroIcon,70,16,380,328);
+        List<TvInputs.Entry> entries=source.read();
+        if(!entries.isEmpty())place(root,text(t("Suas conexões","Your connections","Tus conexiones"),29,VelaTheme.WHITE),64,386,1000,54);
         HorizontalScrollView scroll=new HorizontalScrollView(this);scroll.setHorizontalScrollBarEnabled(false);scroll.setClipToPadding(false);scroll.setClipChildren(false);scroll.setFillViewport(false);LinearLayout strip=new LinearLayout(this);strip.setClipChildren(false);strip.setClipToPadding(false);strip.setOrientation(LinearLayout.HORIZONTAL);strip.setPadding(24,20,24,20);scroll.addView(strip);place(root,scroll,40,448,1704,334);
         scroll.setOnScrollChangeListener((v,x,y,ox,oy)->{if(icons!=null)icons.refreshVisible();});
-        List<TvInputs.Entry> entries=source.read();View restore=null;TvInputs.Entry initial=entries.isEmpty()?null:entries.get(0);for(TvInputs.Entry e:entries)if(e.state==TvInputs.CONNECTED&&!e.model.equals("other")){initial=e;break;}
+        View restore=null;TvInputs.Entry initial=entries.isEmpty()?null:entries.get(0);for(TvInputs.Entry e:entries)if(e.state==TvInputs.CONNECTED&&!e.model.equals("other")){initial=e;break;}
         for(int i=0;i<Math.min(32,entries.size());i++){
             TvInputs.Entry entry=entries.get(i);FrameLayout card=new FrameLayout(this);card.setId(View.generateViewId());card.setFocusable(true);card.setFocusableInTouchMode(true);card.setDefaultFocusHighlightEnabled(false);card.setClipChildren(false);LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(232,294);cp.rightMargin=28;strip.addView(card,cp);cards.add(card);int index=i;
             FrameLayout well=new FrameLayout(this);well.setClipChildren(false);place(card,well,8,0,216,216);
@@ -65,13 +66,13 @@ final class InputsScreen extends VelaScreen {
             card.setOnFocusChangeListener((v,f)->{style.accept(f);if(f){selected=entry.key;column=index;feature(entry);}});card.setOnClickListener(v->launch(entry));card.setOnLongClickListener(v->{consumeConfirmUp=true;choose(entry);return true;});
             if(entry.key.equals(selected)){restore=card;initial=entry;}
         }
-        if(initial!=null)feature(initial);else{heroName.setText(t("Suas entradas HDMI","Your HDMI inputs","Tus entradas HDMI"));heroPort.setText(t("Disponíveis quando a TV as compartilha","Available when shared by your TV","Disponibles cuando la TV las comparte"));open.setText(t("Ajustes da televisão","TV settings","Ajustes de la televisión"));open.setOnClickListener(v->systemSettings());}
+        if(initial!=null)feature(initial);else{heroEntry=null;heroName.setText(t("Suas entradas HDMI","Your HDMI inputs","Tus entradas HDMI"));heroPort.setText(t("Disponíveis quando a TV as compartilha","Available when shared by your TV","Disponibles cuando la TV las comparte"));open.setText(t("Ajustes da televisão","TV settings","Ajustes de la televisión"));open.setOnClickListener(v->systemSettings());}
         View appsStrip=null;
         if(home){
             if(apps==null)apps=VelaStartApps.read(this);
             appsStrip=new VelaStartApps(this,apps,()->startActivity(new Intent(HomeScreenHost.APPS)));
             place(root,appsStrip,64,entries.isEmpty()?470:790,1654,70);
-        }else{
+        }else if(!entries.isEmpty()){
             TextView settings=action(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),this::systemSettings);place(root,settings,64,806,420,58);
             place(root,text(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"),20,VelaTheme.MUTED),540,810,1180,40);
         }
