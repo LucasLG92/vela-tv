@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.5-preview
+
+- Keep the entire programme photo in frame across landscape stills and posters. Blend its colours behind the time ruler down to the first channel in Full and Lite.
+- Retry the selected photo once after a temporary network error. Switching listings cancels the retry.
+
 ## 2.6.4-preview
 
 - Keep the selected programme's real photo when combining XMLTV and antenna listings. M3U and supported Xtream listings can also supply programme images.

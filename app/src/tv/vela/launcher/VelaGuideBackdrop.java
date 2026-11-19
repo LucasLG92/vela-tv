@@ -5,11 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ComposeShader;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
@@ -21,7 +19,7 @@ final class VelaGuideBackdrop extends ImageView {
     private static final int INK=0xff090a0d;
     private final Paint paint=new Paint(Paint.FILTER_BITMAP_FLAG);
     private final RectF picture=new RectF();
-    private Shader leftShade,topShade,bottomShade,ambient,portrait;
+    private Shader leftShade,topShade,bottomShade,ambient,photo,edges;
     private Bitmap prepared;
     private int preparedWidth,preparedHeight;
     private VelaProgrammeArt loader;
@@ -44,40 +42,49 @@ final class VelaGuideBackdrop extends ImageView {
         leftShade=new LinearGradient(0,0,w,0,new int[]{0xf7090a0d,0xe5090a0d,0xc5090a0d,0x40090a0d,0x08090a0d},
             new float[]{0,.21f,.47f,.70f,1},Shader.TileMode.CLAMP);
         topShade=new LinearGradient(0,0,0,h*.38f,0xb0090a0d,Color.TRANSPARENT,Shader.TileMode.CLAMP);
-        bottomShade=new LinearGradient(0,h*.75f,0,h,Color.TRANSPARENT,INK,Shader.TileMode.CLAMP);
+        bottomShade=new LinearGradient(0,h*.60f,0,h,new int[]{0x00090a0d,0x32090a0d,0xba090a0d,INK},
+            new float[]{0,.40f,.79f,1},Shader.TileMode.CLAMP);
     }
 
-    private static BitmapShader texture(Bitmap source,float scale,float left,float top){
-        BitmapShader shader=new BitmapShader(source,Shader.TileMode.CLAMP,Shader.TileMode.CLAMP);
-        Matrix matrix=new Matrix();
-        matrix.setScale(scale,scale);
-        matrix.postTranslate(left,top);
-        shader.setLocalMatrix(matrix);
-        return shader;
-    }
-
-    private void frame(Bitmap image,int w,int h){
-        prepared=image;preparedWidth=w;preparedHeight=h;
-        ambient=null;portrait=null;
-        int iw=image.getWidth(),ih=image.getHeight();
-        if(iw>=ih*1.3f){
-            float scale=Math.max((float)w/iw,(float)h/ih);
-            float width=iw*scale,height=ih*scale;
-            // Place the upper third of the still in the upper third of the header.
-            float left=(w-width)*.5f,top=(h-height)*.32f;
-            picture.set(left,top,left+width,top+height);
-            return;
+    private static int edgeTone(Bitmap image, int x) {
+        // The space around the still picks up the edge colours without keeping a second bitmap.
+        if (image.getConfig() == Bitmap.Config.HARDWARE) return INK;
+        int red = 0, green = 0, blue = 0;
+        for (int i = 0; i < 4; i++) {
+            int y = (image.getHeight() - 1) * (2 * i + 1) / 8;
+            int pixel = image.getPixel(x, y);
+            red += Color.red(pixel);
+            green += Color.green(pixel);
+            blue += Color.blue(pixel);
         }
-        // Give a poster its full height. A tiny, filtered copy colours the surrounding space.
-        int sampleW=Math.min(16,iw),sampleH=Math.max(1,Math.min(24,Math.round((float)sampleW*ih/iw)));
-        Bitmap sample=Bitmap.createScaledBitmap(image,sampleW,sampleH,true);
-        float ambientScale=Math.max(w/(float)sampleW,h/(float)sampleH);
-        ambient=texture(sample,ambientScale,(w-sampleW*ambientScale)*.5f,(h-sampleH*ambientScale)*.32f);
-        float scale=(float)h/ih,width=iw*scale,left=w*.79f-width*.5f;
-        picture.set(left,0,left+width,h);
-        Shader fade=new LinearGradient(left,0,left+width,0,new int[]{0,Color.WHITE,Color.WHITE,0},
-            new float[]{0,.10f,.90f,1},Shader.TileMode.CLAMP);
-        portrait=new ComposeShader(texture(image,scale,left,0),fade,PorterDuff.Mode.DST_IN);
+        return Color.rgb((red + Color.red(INK) * 3) / 7,
+            (green + Color.green(INK) * 3) / 7, (blue + Color.blue(INK) * 3) / 7);
+    }
+
+    private void frame(Bitmap image, int w, int h) {
+        prepared = image;
+        preparedWidth = w;
+        preparedHeight = h;
+        int iw = image.getWidth(), ih = image.getHeight();
+        float scale = Math.min(h * .96f / ih, (float) w / iw);
+        float width = Math.min(w, iw * scale);
+        float left = Math.max(0, Math.min(w - width, w * .76f - width / 2));
+        float top = (h - ih * scale) * .5f;
+        picture.set(left, 0, left + width, h);
+
+        Matrix matrix = new Matrix();
+        matrix.setScale(scale, scale);
+        matrix.postTranslate(left, top);
+        BitmapShader texture = new BitmapShader(image, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        texture.setLocalMatrix(matrix);
+        photo = texture;
+
+        int start = edgeTone(image, 0), end = edgeTone(image, iw - 1);
+        ambient = new LinearGradient(left + width * .16f, 0, left + width * .90f, 0,
+            start, end, Shader.TileMode.CLAMP);
+        edges = new LinearGradient(left, 0, left + width, 0,
+            new int[]{start, start & 0xffffff, end & 0xffffff, picture.right < w - 1 ? end : end & 0xffffff},
+            new float[]{0, .16f, .90f, 1}, Shader.TileMode.CLAMP);
     }
 
     @Override protected void onDraw(Canvas canvas){
@@ -90,12 +97,9 @@ final class VelaGuideBackdrop extends ImageView {
         if(drawable instanceof BitmapDrawable&&((BitmapDrawable)drawable).getBitmap()!=null){
             Bitmap image=((BitmapDrawable)drawable).getBitmap();
             if(image!=prepared||w!=preparedWidth||h!=preparedHeight)frame(image,w,h);
-            if(portrait==null){
-                canvas.drawBitmap(image,null,picture,paint);
-            }else{
-                paint.setShader(ambient);canvas.drawRect(0,0,w,h,paint);
-                paint.setShader(portrait);canvas.drawRect(picture,paint);
-            }
+            paint.setShader(ambient);canvas.drawRect(0,0,w,h,paint);
+            paint.setShader(photo);canvas.drawRect(picture,paint);
+            paint.setShader(edges);canvas.drawRect(picture,paint);
         }else super.onDraw(canvas);
         paint.setShader(leftShade);canvas.drawRect(0,0,w,h,paint);
         paint.setShader(topShade);canvas.drawRect(0,0,w,h,paint);
@@ -132,7 +136,7 @@ final class VelaGuideBackdrop extends ImageView {
     }
 
     @Override public void setImageDrawable(Drawable drawable){
-        prepared=null;ambient=null;portrait=null;
+        prepared=null;ambient=null;photo=null;edges=null;
         super.setImageDrawable(drawable);
     }
 }

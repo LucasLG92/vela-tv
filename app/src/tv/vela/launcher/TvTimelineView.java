@@ -12,7 +12,8 @@ import java.util.*;
 /** Six channels and a three-hour window. Programmes are painted, not inflated into a view tree. */
 final class TvTimelineView extends FrameLayout {
     static final int ROWS=6,SECONDS=3*3600,MAX_PROGRAMMES=32;
-    private static final int LABEL=222,HEADER=58,ROW=88;
+    static final int HEADER=58;
+    private static final int LABEL=222,ROW=88;
     interface Actions {
         void selected(LiveTvData.Channel channel,LiveTvData.Programme programme);
         void activate(LiveTvData.Channel channel,LiveTvData.Programme programme);

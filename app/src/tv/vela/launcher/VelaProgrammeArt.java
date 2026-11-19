@@ -20,19 +20,19 @@ final class VelaProgrammeArt implements AutoCloseable {
     private final Map<ImageView,Binding> bindings=new WeakHashMap<>();private final Rect visible=new Rect();private boolean closed,scheduled;
     private final Runnable update=()->{scheduled=false;check();};
     private final ViewTreeObserver.OnScrollChangedListener scroll=this::schedule;private final ViewTreeObserver.OnGlobalLayoutListener layout=this::schedule;
-    private static final class Binding {final String url,key;final int width,height;boolean attempted;Bitmap shown;Future<?> task;final CancellationSignal signal=new CancellationSignal();Binding(String u,int w,int h){url=u;width=w;height=h;key=u+"|"+w+"x"+h;}}
+    private static final class Binding {final String url,key;final int width,height;boolean attempted,mayRetry;Runnable retry;Bitmap shown;Future<?> task;final CancellationSignal signal=new CancellationSignal();Binding(String u,int w,int h,boolean retryOnce){mayRetry=retryOnce;url=u;width=w;height=h;key=u+"|"+w+"x"+h;}}
     VelaProgrammeArt(Context c,View root){context=c.getApplicationContext();this.root=root;root.getViewTreeObserver().addOnScrollChangedListener(scroll);root.getViewTreeObserver().addOnGlobalLayoutListener(layout);}
     static String url(String value){if(value==null||value.length()>2048)return "";try{URI u=new URI(value);if(u.getRawUserInfo()!=null||u.getFragment()!=null)return "";if(("https".equalsIgnoreCase(u.getScheme())||"http".equalsIgnoreCase(u.getScheme()))&&u.getHost()!=null)return value;if("content".equals(u.getScheme())&&"android.media.tv".equals(u.getAuthority()))return value;}catch(Exception ignored){}return "";}
     void bind(ImageView view,String url){bind(view,url,640,360);}
     void bind(ImageView view,String url,int width,int height){
-        bindSized(view,url,Math.max(32,Math.min(640,width)),Math.max(32,Math.min(360,height)));
+        bindSized(view,url,Math.max(32,Math.min(640,width)),Math.max(32,Math.min(360,height)),false);
     }
     void bindBackdrop(ImageView view,String url){
         android.app.ActivityManager manager=context.getSystemService(android.app.ActivityManager.class);
         boolean small=manager!=null&&manager.isLowRamDevice();
-        bindSized(view,url,small?960:1280,small?540:720);
+        bindSized(view,url,small?960:1280,small?540:720,true);
     }
-    private void bindSized(ImageView view,String url,int w,int h){
+    private void bindSized(ImageView view,String url,int w,int h,boolean retryOnce){
         String safe=url(url);
         Binding old=bindings.get(view);
         if(!closed&&old!=null&&old.url.equals(safe)&&old.width==w&&old.height==h){schedule();return;}
@@ -40,32 +40,48 @@ final class VelaProgrammeArt implements AutoCloseable {
         // Recycled programme cards must never keep artwork belonging to the previous programme.
         view.setImageDrawable(null);
         if(closed||safe.isEmpty())return;
-        bindings.put(view,new Binding(safe,w,h));schedule();
+        bindings.put(view,new Binding(safe,w,h,retryOnce));schedule();
     }
-    private void cancel(Binding binding){binding.signal.cancel();if(binding.task!=null){binding.task.cancel(true);if(binding.task instanceof Runnable)worker.remove((Runnable)binding.task);}}
+    private void cancel(Binding binding){if(binding.retry!=null)main.removeCallbacks(binding.retry);binding.signal.cancel();if(binding.task!=null){binding.task.cancel(true);if(binding.task instanceof Runnable)worker.remove((Runnable)binding.task);}}
     private void schedule(){if(!closed&&!scheduled){scheduled=true;main.post(update);}}
     private void check(){
         if(closed)return;
         for(Map.Entry<ImageView,Binding> e:new ArrayList<>(bindings.entrySet())){
             ImageView v=e.getKey();Binding b=e.getValue();
             if(v==null||!v.isAttachedToWindow()||!v.isShown()||!v.getGlobalVisibleRect(visible)){
-                if(v!=null&&(b.shown!=null||b.task!=null&&!b.task.isDone())){cancel(b);v.setImageDrawable(null);bindings.put(v,new Binding(b.url,b.width,b.height));}
+                if(v!=null&&(b.shown!=null||b.task!=null&&!b.task.isDone())){cancel(b);v.setImageDrawable(null);bindings.put(v,new Binding(b.url,b.width,b.height,b.mayRetry));}
                 continue;
             }
             Bitmap hit=cache.get(b.key);if(hit!=null){if(b.shown!=hit){b.shown=hit;v.setImageBitmap(hit);}continue;}
             if(b.attempted)continue;b.attempted=true;
             try{b.task=worker.submit(()->{
-                Bitmap image=null;try{image=decode(load(b.url,b.signal),b.width,b.height);}catch(Exception ignored){}
+                Bitmap image=null;
+                boolean networkFailure=false;
+                try{image=decode(load(b.url,b.signal),b.width,b.height);}
+                catch(FileNotFoundException unavailable){/* The source has no picture here. */}
+                catch(IOException interrupted){networkFailure=true;}
+                catch(RuntimeException unavailable){/* The source or decode was cancelled. */}
                 Bitmap result=image;
+                boolean retry=networkFailure;
                 main.post(()->{
                     if(closed||b.signal.isCanceled()||bindings.get(v)!=b){if(result!=null)result.recycle();return;}
                     if(result!=null){cache.put(b.key,result);b.shown=result;v.setImageBitmap(result);}
+                    else if(retry&&b.mayRetry){
+                        b.mayRetry=false;
+                        b.retry=()->{
+                            if(!closed&&bindings.get(v)==b&&!b.signal.isCanceled()){
+                                b.attempted=false;
+                                schedule();
+                            }
+                        };
+                        main.postDelayed(b.retry,1200);
+                    }
                     schedule();
                 });
             });}catch(RejectedExecutionException busy){b.attempted=false;}
         }
     }
-    private byte[] load(String value,CancellationSignal signal)throws IOException{String target=value;for(int redirects=0;redirects<4;redirects++){signal.throwIfCanceled();if(target.startsWith("content:")){try(InputStream in=context.getContentResolver().openInputStream(Uri.parse(target))){return bytes(in,signal);}}HttpURLConnection c=(HttpURLConnection)new URL(target).openConnection();c.setConnectTimeout(5000);c.setReadTimeout(6000);c.setInstanceFollowRedirects(false);c.setRequestProperty("User-Agent","Vela-Programme-Art");signal.setOnCancelListener(c::disconnect);try{int code=c.getResponseCode();if(code>=300&&code<400){String next=url(new URL(new URL(target),c.getHeaderField("Location")).toString());if(next.isEmpty()||target.startsWith("https:")&&!next.startsWith("https:"))throw new IOException("Invalid image redirect");target=next;continue;}if(code!=200||c.getContentLengthLong()>2*1024*1024)throw new IOException("Image unavailable");try(InputStream in=c.getInputStream()){return bytes(in,signal);}}finally{signal.setOnCancelListener(null);c.disconnect();}}throw new IOException("Image redirects");}
+    private byte[] load(String value,CancellationSignal signal)throws IOException{String target=value;for(int redirects=0;redirects<4;redirects++){signal.throwIfCanceled();if(target.startsWith("content:")){try(InputStream in=context.getContentResolver().openInputStream(Uri.parse(target))){return bytes(in,signal);}}HttpURLConnection c=(HttpURLConnection)new URL(target).openConnection();c.setConnectTimeout(5000);c.setReadTimeout(6000);c.setInstanceFollowRedirects(false);c.setRequestProperty("User-Agent","Vela-Programme-Art");signal.setOnCancelListener(c::disconnect);try{int code=c.getResponseCode();if(code>=300&&code<400){String next=url(new URL(new URL(target),c.getHeaderField("Location")).toString());if(next.isEmpty()||target.startsWith("https:")&&!next.startsWith("https:"))throw new IOException("Invalid image redirect");target=next;continue;}if(code==408||code==429||code>=500)throw new IOException("Image temporarily unavailable");if(code!=200||c.getContentLengthLong()>2*1024*1024)throw new FileNotFoundException("Image unavailable");try(InputStream in=c.getInputStream()){return bytes(in,signal);}}finally{signal.setOnCancelListener(null);c.disconnect();}}throw new IOException("Image redirects");}
     private static byte[] bytes(InputStream in,CancellationSignal signal)throws IOException{if(in==null)throw new IOException();ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] block=new byte[8192];for(int n;(n=in.read(block))!=-1;){signal.throwIfCanceled();if(Thread.currentThread().isInterrupted()||out.size()+n>2*1024*1024)throw new IOException("Image limit");out.write(block,0,n);}return out.toByteArray();}
     private static Bitmap decode(byte[] data,int width,int height){BitmapFactory.Options o=new BitmapFactory.Options();o.inJustDecodeBounds=true;BitmapFactory.decodeByteArray(data,0,data.length,o);if(o.outWidth<=0||o.outHeight<=0||o.outWidth>16384||o.outHeight>16384)return null;o.inSampleSize=1;while(o.outWidth/o.inSampleSize>width||o.outHeight/o.inSampleSize>height)o.inSampleSize*=2;o.inJustDecodeBounds=false;o.inPreferredConfig=Bitmap.Config.RGB_565;return BitmapFactory.decodeByteArray(data,0,data.length,o);}
     void clear(){for(Binding b:bindings.values())cancel(b);for(ImageView v:bindings.keySet())if(v!=null)v.setImageDrawable(null);bindings.clear();scheduled=false;main.removeCallbacks(update);worker.purge();}

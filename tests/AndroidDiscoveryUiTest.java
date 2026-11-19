@@ -36,7 +36,8 @@ public final class AndroidDiscoveryUiTest extends DiscoveryUiContract {
         await(()->art.getDrawable()!=null);
         View tv=(View)field(scene,"liveTv");
         check(art.getLeft()==0&&art.getTop()==0&&art.getWidth()==tv.getWidth(),"Guide artwork does not cover the header");
-        check(rect(art).bottom<=rect(guide).top&&((android.view.ViewGroup)tv).indexOfChild(art)==0,"Artwork covers the schedule or toolbar");
+        int firstChannelY=rect(guide).top+Math.round(TvTimelineView.HEADER*(float)rect(guide).height()/guide.getHeight());
+        check(Math.abs(rect(art).bottom-firstChannelY)<=1&&((android.view.ViewGroup)tv).indexOfChild(art)==0,"Artwork covers the schedule or toolbar");
         shot("guia");
         TvTimelineView grid=(TvTimelineView)guide;LiveTvData.Programme current=grid.programme();
         check(current!=null,"Missing live selection");

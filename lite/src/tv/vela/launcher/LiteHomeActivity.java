@@ -19,6 +19,7 @@ import java.util.concurrent.*;
 
 /** A local television launcher: ports, its tuner and installed apps. No media or network runtime. */
 public class LiteHomeActivity extends Activity implements VelaHub.Owner {
+    static final int CONTENT_TOP=116;
     private boolean channelHeld;private VelaPlaybackPanel channelMenu;private VelaHub hub;private View toolsReturnFocus,contentReturnFocus;private VelaProgrammeRefresh programmes;
     private void scanProgrammes(){if(hub!=null)return;if(programmes==null)programmes=new VelaProgrammeRefresh(this);programmes.check(new LiteToolsData(this){public void activate(VelaHub.Hit hit){}public void closed(boolean changed){}});}
     private boolean destroying;private VelaRemote.Dispatcher remote;
@@ -126,7 +127,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         scene=new FrameLayout(this);scene.setClipChildren(false);put(shell,scene,0,0,1920,1080);
         heading=text("",39,VelaTheme.WHITE);heading.setTypeface(Ui.displayMedium);put(scene,heading,190,50,552,60);heading.setSingleLine();heading.setEllipsize(android.text.TextUtils.TruncateAt.END);
         headerWidgets=new VelaWidgets.Strip(this);headerWidgets.ambient(true);headerWidgets.host(new VelaWidgets.Strip.Host(){public void activate(String id){if(id.equals("apps"))show(APPS,false);else if(id.equals("inputs"))show(INPUTS,false);else if(id.equals("tv"))show(TV,false);else if(id.equals("programme"))widgetProgramme();else tools(id.equals("weather")?VelaHub.WEATHER:VelaHub.WIDGETS);}public void focused(){setSidebar(false);}public void navigation(){navigation[Math.min(section,3)].requestFocus();}});put(scene,headerWidgets,800,42,1040,72);if(visible)headerWidgets.start();
-        content=new FrameLayout(this);content.setClipChildren(false);content.setClipToPadding(false);put(scene,content,112,116,1790,940);
+        content=new FrameLayout(this);content.setClipChildren(false);content.setClipToPadding(false);put(scene,content,112,CONTENT_TOP,1790,940);
         pager=new FrameLayout(this);put(scene,pager,1448,978,392,62);
         footer=text("",20,VelaTheme.MUTED);put(scene,footer,188,988,1100,42);
         scrim=new View(this);scrim.setBackground(VelaNavigation.shade());scrim.setAlpha(0);put(shell,scrim,0,0,870,1080);rail.bringToFront();shell.getViewTreeObserver().addOnGlobalFocusChangeListener(focusListener);shell.getViewTreeObserver().addOnGlobalLayoutListener(reading);

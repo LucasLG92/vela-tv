@@ -14,6 +14,7 @@ import java.util.concurrent.*;
 
 /** Integrated television section. Twelve channel records, one player, the existing indexed TV sources. */
 final class HomeLiveTvView extends FrameLayout {
+    private static final int GUIDE_TOP=194, TIMELINE_TOP=226;
     interface Host {void focusNavigation();void contentFocused(View view);void modal(boolean open);default void guide(){}default boolean ownsFocus(){return true;}default boolean header(View from){focusNavigation();return true;}}
     private static final int BG=0xFF090A0D,WHITE=0xFFF7F7FA,DIM=0xFFB0B2BC;
     private static final String ALL="@all",FAVORITES="@favorites";
@@ -44,7 +45,7 @@ final class HomeLiveTvView extends FrameLayout {
     HomeLiveTvView(Activity activity,FrameLayout videoHost,Host host){this(activity,videoHost,host,false,false);}
     HomeLiveTvView(Activity activity,FrameLayout videoHost,Host host,boolean startPage,boolean forceGuide){
         super(activity);this.startPage=startPage;this.forceGuide=forceGuide;this.activity=activity;this.videoHost=videoHost;this.host=host;xtream=new XtreamClient(activity);m3u=new M3uClient(activity);antenna=new AntennaClient(activity);setClipChildren(false);
-        guideBackdrop=new VelaGuideBackdrop(activity);put(this,guideBackdrop,0,0,1920,414);
+        guideBackdrop=new VelaGuideBackdrop(activity);put(this,guideBackdrop,0,0,1920,GUIDE_TOP+TIMELINE_TOP+TvTimelineView.HEADER);
         origin=button("",19);put(this,origin,194,138,138,46);origin.setOnClickListener(v->sourcePicker());TextView organize=button(t("Organizar","Organize","Organizar"),19);organizeAction=organize;put(this,organize,344,138,200,46);organize.setOnClickListener(v->organize());
         hero=new FrameLayout(activity);put(this,hero,194,220,1646,448);
         TextView live=text(t("EM DIRETO","LIVE NOW","EN DIRECTO"),16,VelaTheme.SECONDARY);live.setLetterSpacing(.15f);put(hero,live,0,0,900,30);
@@ -74,7 +75,7 @@ final class HomeLiveTvView extends FrameLayout {
         emptyChannels=text("",23,DIM);emptyChannels.setFocusable(true);emptyChannels.setId(View.generateViewId());emptyChannels.setMaxLines(3);emptyChannels.setVisibility(GONE);emptyChannels.setOnFocusChangeListener((v,focused)->{if(focused)host.contentFocused(v);});put(channelPane,emptyChannels,12,88,1280,156);
         rail=new HorizontalScrollView(activity){@Override public int getSolidColor(){return BG;}};rail.setHorizontalScrollBarEnabled(false);rail.setClipToPadding(false);rail.setClipChildren(false);rail.setPadding(12,8,20,4);rail.setHorizontalFadingEdgeEnabled(true);rail.setFadingEdgeLength(64);put(channelPane,rail,0,65,1658,325);
         channelRow=new LinearLayout(activity);channelRow.setOrientation(LinearLayout.HORIZONTAL);channelRow.setClipChildren(false);rail.addView(channelRow,new HorizontalScrollView.LayoutParams(-2,310));
-        guidePane=new FrameLayout(activity);guidePane.setVisibility(GONE);put(this,guidePane,182,194,1658,872);
+        guidePane=new FrameLayout(activity);guidePane.setVisibility(GONE);put(this,guidePane,182,GUIDE_TOP,1658,872);
         earlier=button("‹",25);earlier.setContentDescription(t("Horários anteriores","Earlier times","Horarios anteriores"));put(guidePane,earlier,1330,823,58,44);earlier.setOnClickListener(v->shift(-1));
         present=button(t("Agora","Now","Ahora"),20);put(guidePane,present,1400,823,176,44);present.setOnClickListener(v->showPresent());
         later=button("›",25);later.setContentDescription(t("Próximos horários","Later times","Próximos horarios"));put(guidePane,later,1588,823,70,44);later.setOnClickListener(v->shift(1));
@@ -83,10 +84,9 @@ final class HomeLiveTvView extends FrameLayout {
         guideStation=text("",18,DIM);guideStation.setSingleLine();guideStation.setEllipsize(TextUtils.TruncateAt.END);put(guidePane,guideStation,58,14,805,34);
         guideTiming=text("",17,DIM);guideTiming.setSingleLine();guideTiming.setEllipsize(TextUtils.TruncateAt.END);put(guidePane,guideTiming,12,123,668,27);
         detailProgress=new ProgressBar(activity,null,android.R.attr.progressBarStyleHorizontal);detailProgress.setMax(1000);detailProgress.setProgressTintList(android.content.res.ColorStateList.valueOf(Appearance.accent(activity)));detailProgress.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(VelaTheme.RAISED));put(guidePane,detailProgress,12,161,306,3);
-        View rule=new View(activity);rule.setBackgroundColor(0x29FFFFFF);put(guidePane,rule,12,218,1644,1);
         guideNextWhen=text("",17,DIM);put(guidePane,guideNextWhen,12,176,232,32);
         guideNext=text("",24,WHITE);guideNext.setTypeface(Ui.medium);guideNext.setSingleLine();guideNext.setEllipsize(TextUtils.TruncateAt.END);put(guidePane,guideNext,246,173,620,38);
-        timeline=new TvTimelineView(activity,new TvTimelineView.Actions(){public void selected(LiveTvData.Channel ch,LiveTvData.Programme p){selected=ch;detailProgramme=p;updateDetail();}public void activate(LiveTvData.Channel ch,LiveTvData.Programme p){if(p==null||p.current(System.currentTimeMillis()/1000))play(ch);else upcoming(ch,p);}public void options(LiveTvData.Channel ch){selected=ch;channelOptions(ch);}public boolean history(){return VelaReplay.available(selected);}public void correction(LiveTvData.Channel ch){if(activity instanceof VelaHub.Owner)((VelaHub.Owner)activity).toolsGuide(ch.name);}public boolean channels(int direction){return guideMove(direction);}public void time(int direction,long cursor){moveTime(TvTimelineView.windowFor(guideStart,direction,cursor),cursor);}});timeline.rowHeight(528/VelaReading.rows(activity));put(guidePane,timeline,326,226,1332,586);
+        timeline=new TvTimelineView(activity,new TvTimelineView.Actions(){public void selected(LiveTvData.Channel ch,LiveTvData.Programme p){selected=ch;detailProgramme=p;updateDetail();}public void activate(LiveTvData.Channel ch,LiveTvData.Programme p){if(p==null||p.current(System.currentTimeMillis()/1000))play(ch);else upcoming(ch,p);}public void options(LiveTvData.Channel ch){selected=ch;channelOptions(ch);}public boolean history(){return VelaReplay.available(selected);}public void correction(LiveTvData.Channel ch){if(activity instanceof VelaHub.Owner)((VelaHub.Owner)activity).toolsGuide(ch.name);}public boolean channels(int direction){return guideMove(direction);}public void time(int direction,long cursor){moveTime(TvTimelineView.windowFor(guideStart,direction,cursor),cursor);}});timeline.rowHeight(528/VelaReading.rows(activity));put(guidePane,timeline,326,TIMELINE_TOP,1332,586);
         origin.setNextFocusRightId(organizeAction.getId());organizeAction.setNextFocusLeftId(origin.getId());organizeAction.setNextFocusRightId(discoverAction.getId());discoverAction.setNextFocusLeftId(organizeAction.getId());for(View control:new View[]{origin,organizeAction,discoverAction})control.setOnKeyListener((v,k,e)->{if(k!=KeyEvent.KEYCODE_DPAD_UP)return false;if(e.getAction()==KeyEvent.ACTION_DOWN)return host.header(v);return true;});watch.setNextFocusUpId(origin.getId());favorite.setNextFocusUpId(organizeAction.getId());
         if(startPage){
             discoverAction.setNextFocusRightId(homeGuide.getId());
