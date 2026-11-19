@@ -13,7 +13,7 @@ import java.util.*;
 
 /** Actual remote access and launch routing after moving the recent shortcut into Apps. */
 public final class AndroidIdentityTest extends Instrumentation {
-    private Context context;private Activity activity;private String previous,profile,language,phase="setup";private boolean baseline;private String captureLanguage="es";
+    private Context context;private Activity activity;private String previous,profile,language,phase="setup";private boolean baseline,unifiedLite;private String previousMode;private String captureLanguage="es";
     interface Ready{boolean value()throws Exception;}
     static void check(boolean ok,String reason){if(!ok)throw new AssertionError(reason);}
     Object field(Object owner,String name)throws Exception{for(Class<?> type=owner.getClass();type!=null;type=type.getSuperclass())try{Field f=type.getDeclaredField(name);f.setAccessible(true);return f.get(owner);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
@@ -26,11 +26,13 @@ public final class AndroidIdentityTest extends Instrumentation {
     void shot(String name)throws Exception{Thread.sleep(250);Bitmap b=getUiAutomation().takeScreenshot();check(b!=null&&b.getWidth()==3840,"Native 4K capture required");save(b,"identity-"+name+".png");b.recycle();}
     void save(Bitmap b,String name)throws Exception{try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),name))){b.compress(Bitmap.CompressFormat.PNG,100,out);}}
     void logo()throws Exception{Bitmap image=Bitmap.createBitmap(512,512,Bitmap.Config.ARGB_8888);Drawable mark=context.getDrawable(R.drawable.vela_mark);mark.setBounds(0,0,512,512);mark.draw(new Canvas(image));save(image,"identity-logo-"+(baseline?"before":"after")+".png");image.recycle();}
-    @Override public void onCreate(Bundle args){super.onCreate(args);baseline="before".equals(args.getString("fixture"));captureLanguage=args.getString("language","es");start();}
+    @Override public void onCreate(Bundle args){super.onCreate(args);baseline="before".equals(args.getString("fixture"));unifiedLite="unified-lite".equals(args.getString("fixture"));captureLanguage=args.getString("language","es");start();}
     @Override public void onStart(){Bundle result=new Bundle();context=getTargetContext();ActivityMonitor monitor=null;try{
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){check(in.read()=='1',"Owned emulator required");}
         logo();if(baseline){result.putString("result","PASS native original vector render");finish(-1,result);return;}
-        boolean lite=context.getPackageName().endsWith(".lite");previous=VelaWorkspace.active(context);language=L10n.choice();profile=VelaWorkspace.create(context,"Alex");VelaWorkspace.select(context,profile);L10n.choose(context,captureLanguage);Ui.init(context);
+        boolean lite=unifiedLite||context.getPackageName().endsWith(".lite");
+        if(unifiedLite){previousMode=VelaEdition.mode(context);VelaEdition.select(context,"lite");}
+        previous=VelaWorkspace.active(context);language=L10n.choice();profile=VelaWorkspace.create(context,"Alex");VelaWorkspace.select(context,profile);L10n.choose(context,captureLanguage);Ui.init(context);
         context.getSharedPreferences("personalization",0).edit().putBoolean("initialized",true).putBoolean("complete",true).commit();VelaWorkspace.prefs(context,lite?"lite_updates":"updates").edit().putBoolean("automatic",false).commit();VelaRecentActivity.save(context,"app","com.android.settings",context.getPackageManager().getApplicationLabel(context.getPackageManager().getApplicationInfo("com.android.settings",0)).toString(),"");
         activity=startActivitySync(new Intent().setClassName(context.getPackageName(),"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));Object owner=lite?activity:field(activity,"home");
         check(recent(activity.getWindow().getDecorView())==null,"Recent shortcut still overlays Home/Inputs");check(brands(activity.getWindow().getDecorView())==0,"Brand mark remains outside Settings");
@@ -47,7 +49,7 @@ public final class AndroidIdentityTest extends Instrumentation {
         phase="tools";ui(()->((VelaHub.Owner)activity).tools(2));check(brands(activity.getWindow().getDecorView())==0,"Personalisation repeats the Settings mark");shot("05-tools");ui(settingsNav::requestFocus);Thread.sleep(180);shot("06-tools-navigation");
         VelaRecentActivity.save(context,"app","org.example.missing","Unavailable","");Method available=VelaRecentActivity.class.getDeclaredMethod("available",Context.class);available.setAccessible(true);org.json.JSONObject unavailable=(org.json.JSONObject)available.invoke(null,context);check(unavailable.length()==0,"Removed app leaves a broken recent action");
         result.putString("result","PASS clean Home/Inputs, Apps shortcut D-pad routing and original app launch, single Settings identity, unbranded personalisation and native 4K screenshots.");
-    }catch(Throwable failure){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(failure));}finally{try{if(monitor!=null)removeMonitor(monitor);if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}if(language!=null)L10n.choose(context,language);}catch(Exception ignored){}}
+    }catch(Throwable failure){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(failure));}finally{try{if(monitor!=null)removeMonitor(monitor);if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}if(language!=null)L10n.choose(context,language);if(previousMode!=null&&!previousMode.isEmpty())VelaEdition.select(context,previousMode);}catch(Exception ignored){}}
         finish(result.containsKey("error")?1:-1,result);
     }
 }

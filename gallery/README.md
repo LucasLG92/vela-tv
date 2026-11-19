@@ -84,7 +84,7 @@ Full accepts your M3U, Xtream and antenna sources. Lite uses the TV's own tuned 
 
 ## Apps and HDMI
 
-Recognisable app icons and connected-device symbols share the sidebar and graphite theme. App tiles in this demo use the original marks; installed apps and HDMI identities vary by device.
+The app drawer keeps each original icon with its name. In Full, a star marks your sidebar favorites and a fine outline follows the remote. The unified Lite mode uses the same compact layout. [See the Lite app drawer](130-lite-apps.webp).
 
 | Your apps | Your devices |
 | --- | --- |

@@ -6,7 +6,7 @@
 
 Your films, live channels, apps and HDMI devices — together in a home screen you control.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.7.3-preview)** · **[See it in action](gallery/README.md)** · [Get started](guide/INSTALL.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.7.4-preview)** · **[See it in action](gallery/README.md)** · [Get started](guide/INSTALL.md)
 
 **Free & open source · Android TV / Google TV · One APK, Full or Lite · Six languages**
 
@@ -100,7 +100,7 @@ Recognise films by their posters and channels by their logos. Search Plex, Jelly
 
 ## Apps and devices, instantly familiar
 
-Large original app icons, useful folders and a sidebar that opens when you need it. Press OK on a pinned app to launch it; hold OK to rearrange your shortcuts without uninstalling anything.
+Your apps share one compact grid, with folders under **Organize**. In Full, a star beside the name marks each sidebar favorite. Press OK on a pinned app to open it or hold OK on the sidebar to move it.
 
 | Your apps | Your connected devices |
 | --- | --- |
@@ -129,7 +129,7 @@ Lite leaves Full's multimedia Home, library clients and IPTV player inactive. Bo
 
 ## Start in a few minutes
 
-1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.7.3-preview)** and install it on your Android TV or Google TV device.
+1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.7.4-preview)** and install it on your Android TV or Google TV device.
 2. **Choose Full or Lite**, then pick your Home layout. Link your media accounts and add your TV sources when you are ready.
 3. **Make it yours.** Choose your Home shelves and sidebar apps, then use Vela's Home-screen setting if you want it as your default launcher.
 

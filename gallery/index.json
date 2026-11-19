@@ -1084,22 +1084,22 @@
   },
   {
     "file": "117-apps.webp",
-    "title": "Original app icons",
-    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "title": "App drawer and favorite stars",
+    "source": "Native screenshot of the unified Vela app drawer on an Android TV emulator with a demo profile.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "2.2.0-preview",
-    "captured": "2026-11-01",
+    "version": "2.7.4-preview",
+    "captured": "2026-11-19",
     "showcase": true,
     "mode": "full",
-    "sha256": "8669940c1f5154f0965d8e49db1aedbd145897f0eaa84a950ace955c39fb28a0",
+    "sha256": "7fffd00636b54564f636a63697aa4553106d018422141a7cd82174b7b22dc5be",
     "preview": {
       "file": "previews/117-apps.webp",
       "width": 1600,
       "height": 900,
-      "sha256": "65f585a0034277846555ac8bb75f8f1814af9020d6da522d561a1fd7fd74acfc"
+      "sha256": "cb9b38e05284b4a5023da981fc2e5cfcb58d4649b2b8098bb743c41931bc1f0d"
     },
     "available_in": [
       "full",
@@ -1385,22 +1385,22 @@
   },
   {
     "file": "130-lite-apps.webp",
-    "title": "Lite: your apps",
-    "source": "Native production Android views from unified Vela 2.2.0-preview in an owned emulator. Original authorised movie artwork and app/channel/device symbols; synthetic account, progress, schedules, HDMI/tuner and weather data. No private server, credential, personal account or location.",
+    "title": "Lite app drawer",
+    "source": "Native screenshot of the unified Vela app drawer on an Android TV emulator with a demo profile.",
     "language": "en",
     "personal_data": false,
     "width": 3840,
     "height": 2160,
-    "version": "2.2.0-preview",
-    "captured": "2026-11-01",
+    "version": "2.7.4-preview",
+    "captured": "2026-11-19",
     "showcase": true,
     "mode": "lite",
-    "sha256": "a72ea90b1361a45cfacba8a2ea498c88854f4c3207d432a06a77e627c67be676",
+    "sha256": "c6c51fc005995b419729c386e3475843a2c44e9780cae7715f31529573af5dd7",
     "preview": {
       "file": "previews/130-lite-apps.webp",
       "width": 1600,
       "height": 900,
-      "sha256": "07cd58ea094eefa52023fdc047932384a6679fce7687e994bae9a2f146b8aa21"
+      "sha256": "9355904184f0b28d98de7ed0cf8b316abf100e546eaa9f317ca78b24b1e37513"
     },
     "available_in": [
       "lite"

@@ -151,7 +151,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     private void focusFirst(){if(!tiles.isEmpty()){headerWidgets.returnTo(tiles.get(0));tiles.get(0).requestFocus();}else navigation[Math.min(section,3)].requestFocus();}
     private boolean focusHeader(View from){if(headerWidgets==null)return false;headerWidgets.returnTo(from);return headerWidgets.focusFirst();}
     private boolean widgetsUp(View v,int key,KeyEvent event){if(key!=KeyEvent.KEYCODE_DPAD_UP||headerWidgets==null)return false;if(event.getAction()==KeyEvent.ACTION_DOWN){headerWidgets.returnTo(v);return headerWidgets.focusFirst();}return headerWidgets.hasFocus();}
-    private void edgeNavigation(View view,int index,int columns){view.setOnKeyListener((v,key,event)->{if(index<columns&&widgetsUp(v,key,event))return true;if(event.getAction()==KeyEvent.ACTION_DOWN&&key==KeyEvent.KEYCODE_DPAD_LEFT&&index%columns==0){navigation[Math.min(section,3)].requestFocus();return true;}return false;});}
+    private void edgeNavigation(View view,int index,int columns){view.setOnKeyListener((v,key,event)->{if(index<columns&&v.getNextFocusUpId()==View.NO_ID&&widgetsUp(v,key,event))return true;if(event.getAction()==KeyEvent.ACTION_DOWN&&key==KeyEvent.KEYCODE_DPAD_LEFT&&index%columns==0){navigation[Math.min(section,3)].requestFocus();return true;}return false;});}
     private void renderInputs(){renderInputs(false);}
     private void feature(TvInputs.Entry entry){
         featured=entry;heroName.setText(entry.title);heroPort.setText(entry.port+"  ·  "+TvInputs.status(entry.state));heroOpen.setText(L10n.text("Open")+"  →");
@@ -216,7 +216,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         footer.setText(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"));rebuildingInputs=false;
         if(navFocus)navigation[INPUTS].requestFocus();else hdmi.initial.requestFocus();
     }
-    private View recentCard(){org.json.JSONObject item=VelaRecentActivity.available(this);if(item.length()==0)return null;VelaRecentActivity.Card card=new VelaRecentActivity.Card(this,item,()->resumeActivity(item));put(content,card,720,8,640,78);return card;}
+    private View recentCard(){org.json.JSONObject item=VelaRecentActivity.available(this);if(item.length()==0)return null;VelaRecentActivity.Card card=new VelaRecentActivity.Card(this,item,()->resumeActivity(item));put(content,card,1170,6,520,78);return card;}
     private void resumeActivity(org.json.JSONObject item){
         String profile=VelaWorkspace.active(this);if(!profile.equals(item.optString("profile")))return;
         Intent intent=VelaRecentActivity.intent(this,item);if(intent!=null){launch(intent);return;}
@@ -249,13 +249,59 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     }
     private void renderAppsPage(){
         content.removeAllViews();pager.removeAllViews();tiles.clear();for(ImageView image:appImages)image.setImageDrawable(null);appImages.clear();appIcons.evictAll();for(Future<?> job:jobs)job.cancel(true);jobs.clear();generation++;int token=generation;
-        TextView folders=button(L10n.text("▦  Folders and layout"),()->tools(6));folders.setId(View.generateViewId());put(content,folders,80,22,400,52);View recent=recentCard();if(recent!=null){folders.setNextFocusRightId(recent.getId());recent.setNextFocusLeftId(folders.getId());}TextView total=text(apps.size()+" apps",20,VelaTheme.SECONDARY);total.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);put(content,total,1420,22,270,48);
-        VelaSpotlight.App appStage=new VelaSpotlight.App(this);put(content,appStage,58,70,1650,288);
-        int pages=Math.max(1,(apps.size()+11)/12);appPage=Math.min(appPage,pages-1);int start=appPage*12;
+        TextView folders=button(L10n.text("Organize"),()->tools(6));
+        folders.setId(View.generateViewId());
+        folders.setOnKeyListener(this::widgetsUp);
+        put(content,folders,325,18,206,56);
+        View recent=recentCard();
+        if(recent!=null){
+            recent.setOnKeyListener(this::widgetsUp);
+            folders.setNextFocusRightId(recent.getId());
+            recent.setNextFocusLeftId(folders.getId());
+        }
+        TextView total=text(apps.size()+t(" aplicativos"," apps"," apps"),22,VelaTheme.SECONDARY);
+        put(content,total,80,16,230,62);
+
+        int pages=Math.max(1,(apps.size()+11)/12);
+        appPage=Math.min(appPage,pages-1);
+        int start=appPage*12;
+        float cardSize=new float[]{.84f,1f,1.04f}[VelaLayout.size(this,"apps",1)];
         for(int i=start;i<Math.min(start+12,apps.size());i++){
-            LiteCatalog.App app=apps.get(i);int slot=i-start;FrameLayout card=new FrameLayout(this);card.setId(View.generateViewId());card.setFocusable(true);card.setFocusableInTouchMode(true);card.setDefaultFocusHighlightEnabled(false);FrameLayout well=new FrameLayout(this);well.setBackground(plate(VelaTheme.CARD,43));well.setClipToOutline(true);put(card,well,36,10,192,192);ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.FIT_CENTER);put(well,image,0,0,192,192);appImages.add(image);
-            TextView label=text(app.title,21,VelaTheme.WHITE);label.setGravity(Gravity.CENTER);put(card,label,0,224,264,32);put(content,card,38+slot%6*290,348+slot/6*249,264,264);float cardSize=new float[]{.84f,1f,1.04f}[VelaLayout.size(this,"apps",1)];card.setScaleX(cardSize);card.setScaleY(cardSize);card.setContentDescription(app.title);card.setOnClickListener(v->launch(app.intent()));card.setOnFocusChangeListener((v,f)->{if(f)appStage.bind(app.title,false,appIcons.get(app.key));well.setForeground(f?VelaTheme.artworkFocus(VelaReading.accent(this),43):null);label.setTextColor(f?VelaTheme.WHITE:VelaTheme.SECONDARY);VelaFocus.card(well,f);well.setElevation(f?10:0);});if(slot==0)appStage.bind(app.title,false,appIcons.get(app.key));tiles.add(card);edgeNavigation(card,slot,6);if(slot<6)card.setNextFocusUpId((recent!=null&&slot>=2?recent:folders).getId());
-            jobs.add(worker.submit(()->{Bitmap bitmap=appIcons.get(app.key);if(bitmap==null)try{Drawable drawable=getPackageManager().getActivityIcon(app.component);bitmap=Bitmap.createBitmap(128,128,Bitmap.Config.ARGB_8888);Canvas canvas=new Canvas(bitmap);Path mask=new Path();mask.addRoundRect(new RectF(0,0,128,128),28.7f,28.7f,Path.Direction.CW);canvas.clipPath(mask);if(drawable instanceof AdaptiveIconDrawable){AdaptiveIconDrawable adaptive=(AdaptiveIconDrawable)drawable;for(Drawable layer:new Drawable[]{adaptive.getBackground(),adaptive.getForeground()})if(layer!=null){layer.setBounds(-32,-32,160,160);layer.draw(canvas);}}else{drawable.setBounds(0,0,128,128);drawable.draw(canvas);}}catch(PackageManager.NameNotFoundException|RuntimeException unavailable){}Bitmap result=bitmap;if(Thread.currentThread().isInterrupted())return;main.post(()->{if(visible&&section==APPS&&token==generation&&result!=null){appIcons.put(app.key,result);image.setImageBitmap(result);if(card.hasFocus()||(slot==0&&!content.hasFocus()))appStage.bind(app.title,false,result);}});}));
+            LiteCatalog.App app=apps.get(i);
+            int slot=i-start;
+            FrameLayout card=new FrameLayout(this);
+            card.setId(View.generateViewId());
+            card.setFocusable(true);
+            card.setFocusableInTouchMode(true);
+            card.setDefaultFocusHighlightEnabled(false);
+            card.setScaleX(cardSize);
+            card.setScaleY(cardSize);
+            card.setContentDescription(app.title);
+            put(content,card,38+slot%6*290,144+slot/6*253,264,226);
+
+            FrameLayout well=new FrameLayout(this);
+            well.setBackground(plate(VelaTheme.CARD,39));
+            well.setClipToOutline(true);
+            put(card,well,45,10,174,174);
+            ImageView image=new ImageView(this);
+            image.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            put(well,image,0,0,174,174);
+            appImages.add(image);
+            TextView label=text(app.title,24,VelaTheme.SECONDARY);
+            label.setGravity(Gravity.CENTER);
+            put(card,label,0,191,264,32);
+
+            card.setOnClickListener(v->launch(app.intent()));
+            card.setOnFocusChangeListener((v,focused)->{
+                well.setForeground(focused?VelaTheme.artworkFocus(VelaReading.accent(this),39):null);
+                label.setTextColor(focused?VelaTheme.WHITE:VelaTheme.SECONDARY);
+                VelaFocus.card(well,focused);
+                well.setElevation(focused?10:0);
+            });
+            tiles.add(card);
+            edgeNavigation(card,slot,6);
+            if(slot<6)card.setNextFocusUpId((recent!=null&&slot>=2?recent:folders).getId());
+            jobs.add(worker.submit(()->{Bitmap bitmap=appIcons.get(app.key);if(bitmap==null)try{Drawable drawable=getPackageManager().getActivityIcon(app.component);bitmap=Bitmap.createBitmap(128,128,Bitmap.Config.ARGB_8888);Canvas canvas=new Canvas(bitmap);Path mask=new Path();mask.addRoundRect(new RectF(0,0,128,128),28.7f,28.7f,Path.Direction.CW);canvas.clipPath(mask);if(drawable instanceof AdaptiveIconDrawable){AdaptiveIconDrawable adaptive=(AdaptiveIconDrawable)drawable;for(Drawable layer:new Drawable[]{adaptive.getBackground(),adaptive.getForeground()})if(layer!=null){layer.setBounds(-32,-32,160,160);layer.draw(canvas);}}else{drawable.setBounds(0,0,128,128);drawable.draw(canvas);}}catch(PackageManager.NameNotFoundException|RuntimeException unavailable){}Bitmap result=bitmap;if(Thread.currentThread().isInterrupted())return;main.post(()->{if(visible&&section==APPS&&token==generation&&result!=null){appIcons.put(app.key,result);image.setImageBitmap(result);}});}));
         }
         if(!tiles.isEmpty()){folders.setNextFocusDownId(tiles.get(0).getId());if(recent!=null)recent.setNextFocusDownId(tiles.get(0).getId());}else{tiles.add(recent==null?folders:recent);}if(apps.isEmpty())put(content,text(t("Nenhum aplicativo disponível","No apps available","No hay aplicaciones disponibles"),32,VelaTheme.SECONDARY),0,110,1500,60);
         if(pages>1)paging(appPage,pages,()->{appPage--;renderAppsPage();},()->{appPage++;renderAppsPage();});footer.setText(t("OK · Abrir aplicativo","OK · Open app","OK · Abrir aplicación"));focusFirst();

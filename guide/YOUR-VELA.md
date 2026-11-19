@@ -55,7 +55,7 @@ The local device report shows version, Android/device information, current proce
 
 Full Vela can reorder, show/hide and resize its Home rows. Lite can reorder or hide Inputs, Television and Apps; Settings remains accessible. Layout is saved per profile. Choose Edit home sections, or hold OK on Home in Full / a main navigation item in Lite, for an explicit Save/Cancel editor. Changes remain a small in-memory draft until saved.
 
-Create up to twelve folders, each with up to 64 installed-app shortcuts. Open them from Apps → Folders and layout. Original icons are drawn at a small fixed size, twelve apps per page. Removing a shortcut or folder does not uninstall apps.
+Create up to twelve folders, each with up to 64 installed-app shortcuts. Open them from Apps → Organize. Original icons are drawn at a small fixed size, twelve apps per page. Removing a shortcut or folder does not uninstall apps.
 
 The phone interface can also reorder the app drawer. Full Vela additionally supports pinning, unpinning and reordering sidebar apps. User-created names and provider content are never translated automatically.
 

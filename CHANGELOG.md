@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.4-preview
+
+- Full and Lite open Apps directly into a compact grid. In Full, a star beside an app name identifies a sidebar favorite.
+- In Lite, pressing Up from the first row reaches Organize or Recent activity before the header widgets.
+- [App drawer screenshots and release notes](guide/releases/2.7.4-preview.md).
+
 ## 2.7.3-preview
 
 - Programme artwork now fades into the background behind the time ruler and first channel row in both Full and Lite.

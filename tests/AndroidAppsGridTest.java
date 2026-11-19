@@ -30,7 +30,7 @@ public class AndroidAppsGridTest extends Instrumentation {
         try{
             Locale.setDefault(new Locale("es","ES"));Personalization.prepare(c);Personalization.complete(c);
             Map<String,?> account=new HashMap<>(new PlexClient(c).prefs.getAll());
-            List<SidebarApps.Choice> all=SidebarApps.choices(c);List<String> pinned=new ArrayList<>();for(int i=Math.min(7,all.size())-1;i>=0;i--)pinned.add(all.get(i).pkg);
+            List<SidebarApps.Choice> all=SidebarApps.choices(c);List<String> pinned=new ArrayList<>();for(int i=Math.min(7,Math.max(0,all.size()-1))-1;i>=0;i--)pinned.add(all.get(i).pkg);
             sidebar.edit().putString("slots",new org.json.JSONArray(pinned).toString()).commit();visuals.edit().putBoolean("light",false).commit();String[] shortcuts=SidebarApps.slots(c);
             activity=(HomeActivity)startActivitySync(new Intent(c,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));HomeActivity a=activity;
             await(()->a.hasWindowFocus(),"Home did not receive focus");CinemaHomeView home=(CinemaHomeView)field(a,"home");
@@ -41,7 +41,13 @@ public class AndroidAppsGridTest extends Instrumentation {
             check(grid.getChildCount()<=24,"App panel retained an entire large icon grid");
             for(int i=0;i<grid.getChildCount();i++){
                 ImageView image=(ImageView)field(grid.getChildAt(i),"image");Bitmap bitmap=((BitmapDrawable)image.getDrawable()).getBitmap();
-                check(bitmap.getWidth()==192&&bitmap.getHeight()==192,"Icon exceeds the memory bound");
+                check(bitmap.getWidth()==176&&bitmap.getHeight()==176,"Icon exceeds the memory bound");
+                View tile=grid.getChildAt(i);
+                SidebarApps.Choice choice=(SidebarApps.Choice)grid.getItemAtPosition(grid.getFirstVisiblePosition()+i);
+                boolean favorite=pinned.contains(choice.pkg);
+                String label=((TextView)field(tile,"label")).getText().toString();
+                check(label.startsWith("★")==favorite&&label.endsWith(choice.label),"Wrong favorite mark for "+choice.label);
+                check(tile.getContentDescription().toString().equals(choice.label+(favorite?", "+L10n.text("Favorite"):"")),"Wrong spoken favorite state");
                 check(image.getColorFilter()==null,"Original app icon was tinted");
                 check(android.graphics.Color.alpha(bitmap.getPixel(0,0))==0,"Icon is missing its rounded square mask");
                 check(grid.getChildAt(i).getBackground()==null,"App cell reintroduced a full gray card");
@@ -72,7 +78,7 @@ public class AndroidAppsGridTest extends Instrumentation {
             ui(()->{try{Bitmap small=((BitmapDrawable)((ImageView)field(reopened.getChildAt(0),"image")).getDrawable()).getBitmap();check(small.getWidth()==128,"Light mode did not reduce artwork");check(((LruCache<?,?>)field(reopened,"icons")).maxSize()==512*1024,"Light cache budget was not reduced");reopened.trim();check(((LruCache<?,?>)field(reopened,"icons")).size()==0,"Memory pressure did not clear cache");}catch(Exception e){throw new RuntimeException(e);}});
             ui(()->home.pause());check(grid(home)==null,"Pause retained the apps grid");ui(()->home.resume());
             check(account.equals(new PlexClient(c).prefs.getAll())&&Arrays.equals(shortcuts,SidebarApps.slots(c)),"App grid changed accounts or shortcuts");
-            result.putString("result","PASS rounded original square icons, no full gray cards, one library without duplicate favorites, seven favorites preserve order, 192px normal / 128px light artwork, 1MiB / 512KiB caches, recycled cells, actual remote navigation and selected-app launch, Back/reopen/pause cleanup, trim and worker shutdown. Accounts and shortcuts preserved.");
+            result.putString("result","PASS rounded original square icons, no full gray cards, one library without duplicate favorites, favorite stars and custom order, 176px normal / 128px light artwork, 1MiB / 512KiB caches, recycled cells, actual remote navigation and selected-app launch, Back/reopen/pause cleanup, trim and worker shutdown. Accounts and shortcuts preserved.");
         }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));}
         finally{if(monitor!=null)removeMonitor(monitor);if(activity!=null){HomeActivity a=activity;ui(()->a.finish());}restore(preferences,saved);restore(sidebar,savedSidebar);restore(visuals,savedVisuals);}
         finish(result.containsKey("error")?1:-1,result);

@@ -68,7 +68,7 @@ public final class AndroidLibraryDesignTest extends Instrumentation {
                 InstalledAppsGrid grid=(InstalledAppsGrid)field(field(host,"screen"),"grid");
                 await(()->grid.getCount()>0);ui(()->{grid.requestFocus();grid.setSelection(0);});
                 key(KeyEvent.KEYCODE_DPAD_RIGHT);ui(()->{grid.requestFocus();grid.setSelection(0);});
-                await(()->grid.hasFocus()&&field(field(grid,"spotlight"),"shown")!=null);
+                await(()->grid.hasFocus()&&grid.getSelectedView()!=null&&((ImageView)field(grid.getSelectedView(),"image")).getDrawable()!=null);
             }
             shot(section==4?"aplicaciones":"entradas");
         }
