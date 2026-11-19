@@ -33,8 +33,17 @@ public final class AndroidTvLogoTest extends Instrumentation {
         source.recycle();LiveTvLogos.LogoView[] view={null},cancelled={null};Bitmap canvas=Bitmap.createBitmap(134,68,Bitmap.Config.ARGB_8888);
         runOnMainSync(()->{Ui.init(c);view[0]=new LiveTvLogos.LogoView(c,"Fixture");view[0].layout(0,0,134,68);view[0].draw(new Canvas(canvas));loader[0]=new LiveTvLogos(c);});
         check(pixels(canvas)>0,"Missing-logo initials disappeared");
-        runOnMainSync(()->loader[0].load(new LiveTvData.Channel("fixture","Fixture","Tests",url,Collections.emptyList(),"1","fixture"),view[0]));
+        ImageView[] header={null};
+        LiveTvData.Channel channel=new LiveTvData.Channel("fixture","Fixture","Tests",url,Collections.emptyList(),"1","fixture");
+        runOnMainSync(()->{
+            header[0]=new ImageView(c);
+            loader[0].load(channel,view[0]);
+            loader[0].load(channel,header[0]);
+        });
         await(()->view[0].getDrawable()!=null);Bitmap decoded=((BitmapDrawable)view[0].getDrawable()).getBitmap();
+        await(()->header[0].getDrawable()!=null);
+        check(((ThreadPoolExecutor)field(loader[0],"io")).getTaskCount()==1,"The header and row decoded the same channel twice");
+        check(((BitmapDrawable)header[0].getDrawable()).getBitmap()==decoded,"The header and row retained different bitmaps for the same logo");
         check(decoded.getWidth()<=128&&decoded.getHeight()<=128,"Oversized decoded logo retained");
         canvas.eraseColor(Color.TRANSPARENT);runOnMainSync(()->view[0].draw(new Canvas(canvas)));check(pixels(canvas)==0,"Initials bleed through transparent artwork");canvas.recycle();
         check(((android.util.LruCache<?,?>)field(loader[0],"cache")).size()<=768,"Artwork cache budget changed");

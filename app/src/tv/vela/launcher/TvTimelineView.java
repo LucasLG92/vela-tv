@@ -29,6 +29,8 @@ final class TvTimelineView extends FrameLayout {
     private final List<LiveTvData.Channel> channels=new ArrayList<>();
     private Map<String,List<LiveTvData.Programme>> programmes=Collections.emptyMap();
     private final Actions actions;
+    private final String[] names=new String[ROWS],qualities=new String[ROWS];
+    private String dateLabel="";
     private long start,cursor,now;
     private int row,rowHeight=ROW;
     private boolean followClock=true;
@@ -47,7 +49,17 @@ final class TvTimelineView extends FrameLayout {
     void rowHeight(int pixels){rowHeight=Math.max(ROW,Math.min(180,pixels));requestLayout();invalidate();}
     void data(List<LiveTvData.Channel> visible,Map<String,List<LiveTvData.Programme>> values,long from,LiveTvData.Channel selected,boolean waiting){
         int count=Math.min(VelaReading.rows(getContext()),visible.size());boolean pageChanged=channels.size()!=count,sameRecords=!pageChanged;for(int i=0;i<Math.min(channels.size(),count);i++){pageChanged|=!channels.get(i).id.equals(visible.get(i).id);sameRecords&=channels.get(i)==visible.get(i);}
-        boolean changed=from!=start;Map<String,List<LiveTvData.Programme>> retained=waiting&&sameRecords&&!changed&&values.isEmpty()?programmes:values;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,count));programmes=retained;setFocusable(!channels.isEmpty());
+        boolean changed=from!=start;
+        if(changed||dateLabel.isEmpty()){stamp.setTime(from*1000);dateLabel=date.format(stamp);}
+        if(!sameRecords){
+            for(int i=0;i<count;i++){
+                LiveTvData.Channel channel=visible.get(i);
+                names[i]=LiveTvActivity.displayName(channel.name);
+                qualities[i]=channel.antenna()?channel.number:TvChannelNames.quality(channel.name);
+            }
+            Arrays.fill(names,count,ROWS,null);Arrays.fill(qualities,count,ROWS,null);
+        }
+        Map<String,List<LiveTvData.Programme>> retained=waiting&&sameRecords&&!changed&&values.isEmpty()?programmes:values;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,count));programmes=retained;setFocusable(!channels.isEmpty());
         row=pageChanged?0:Math.max(0,Math.min(row,channels.size()-1));if(selected!=null)for(int i=0;i<channels.size();i++)if(channels.get(i).id.equals(selected.id))row=i;
         if(cursor<start||cursor>=start+SECONDS)cursor=Math.max(start,Math.min(start+SECONDS-1,now));
         invalidate();notifySelection();
@@ -72,7 +84,7 @@ final class TvTimelineView extends FrameLayout {
     }
     private List<LiveTvData.Programme> schedule(){return channels.isEmpty()?Collections.emptyList():programmes.getOrDefault(channels.get(row).id,Collections.emptyList());}
     LiveTvData.Programme programme(){for(LiveTvData.Programme p:schedule())if(p.start<=cursor&&p.end>cursor)return p;return null;}
-    private void describe(){if(channels.isEmpty())return;LiveTvData.Programme p=programme();LiveTvData.Channel c=channels.get(row);setContentDescription((favoriteIds.contains(c.id)?"★ ":"")+LiveTvActivity.displayName(c.name)+" · "+(p==null?Ui.tr("Sem programação","No programme information","Sin programación"):p.title+" · "+time(p.start)+"–"+time(p.end)));}
+    private void describe(){if(channels.isEmpty())return;LiveTvData.Programme p=programme();LiveTvData.Channel c=channels.get(row);setContentDescription((favoriteIds.contains(c.id)?"★ ":"")+names[row]+" · "+(p==null?Ui.tr("Sem programação","No programme information","Sin programación"):p.title+" · "+time(p.start)+"–"+time(p.end)));}
     private void notifySelection(){if(channels.isEmpty())return;describe();actions.selected(channels.get(row),programme());}
     private final android.util.LruCache<Long,String> times=new android.util.LruCache<>(96);
     private final Date stamp=new Date();
@@ -99,10 +111,26 @@ final class TvTimelineView extends FrameLayout {
     private float x(long value){return LABEL+(getWidth()-LABEL)*(value-start)/(float)SECONDS;}
     private float textScale=1f;
     private int focusColor;
-    private void label(Canvas c,String value,float x,float baseline,float width,int size,int color,Typeface font){if(width<12)return;paint.setTypeface(font);paint.setTextSize(size*textScale);paint.setColor(color);c.drawText(TextUtils.ellipsize(value,paint,width,TextUtils.TruncateAt.END).toString(),x,baseline,paint);}
+    private static final class Label {
+        String value,display;float width,size;Typeface font;
+    }
+    private final ArrayList<Label> labels=new ArrayList<>();
+    private int labelCursor;
+    private void label(Canvas c,String value,float x,float baseline,float width,int size,int color,Typeface font){
+        if(width<12)return;
+        float pixels=size*textScale;
+        paint.setTypeface(font);paint.setTextSize(pixels);paint.setColor(color);
+        if(labelCursor==labels.size())labels.add(new Label());
+        Label cached=labels.get(labelCursor++);
+        if(cached.width!=width||cached.size!=pixels||cached.font!=font||!value.equals(cached.value)){
+            cached.width=width;cached.size=pixels;cached.font=font;cached.value=value;
+            cached.display=TextUtils.ellipsize(value,paint,width,TextUtils.TruncateAt.END).toString();
+        }
+        c.drawText(cached.display,x,baseline,paint);
+    }
     @Override protected void onDraw(Canvas c){
         super.onDraw(c);textScale=VelaReading.scale(getContext());focusColor=VelaTheme.pearl(Appearance.accent(getContext()));int w=getWidth();
-        label(c,date.format(new Date(start*1000)),12,31,LABEL-24,18,VelaTheme.SECONDARY,Ui.medium);
+        labelCursor=0;label(c,dateLabel,12,31,LABEL-24,18,VelaTheme.SECONDARY,Ui.medium);
         boolean onAir=now>=start&&now<start+SECONDS&&!channels.isEmpty();
         float hand=onAir?x(now):-200;
         float tag=Math.min(w-88,Math.max(LABEL+4,hand-40));
@@ -111,8 +139,8 @@ final class TvTimelineView extends FrameLayout {
             float top=HEADER+i*rowHeight;boolean focused=hasFocus()&&row==i;paint.setColor(0x16FFFFFF);c.drawRect(0,top+rowHeight-4,w,top+rowHeight-3,paint);
             if(focused){paint.setColor(0x13FFFFFF);c.drawRoundRect(0,top,LABEL-7,top+rowHeight-8,12,12,paint);paint.setColor(focusColor);c.drawRoundRect(0,top+18,3,top+rowHeight-24,1.5f,1.5f,paint);}
             if(favoriteIds.contains(channels.get(i).id))label(c,"★",LABEL-31,top+22,22,12,VelaTheme.SECONDARY,Ui.medium);
-            label(c,LiveTvActivity.displayName(channels.get(i).name),80,top+36+(rowHeight-ROW)/2f,LABEL-106,21,VelaTheme.WHITE,Ui.medium);
-            String quality=channels.get(i).antenna()?channels.get(i).number:TvChannelNames.quality(channels.get(i).name);label(c,quality,80,top+60+(rowHeight-ROW)/2f,LABEL-106,13,VelaTheme.MUTED,Ui.medium);
+            label(c,names[i],80,top+36+(rowHeight-ROW)/2f,LABEL-106,21,VelaTheme.WHITE,Ui.medium);
+            label(c,qualities[i],80,top+60+(rowHeight-ROW)/2f,LABEL-106,13,VelaTheme.MUTED,Ui.medium);
             List<LiveTvData.Programme> list=programmes.getOrDefault(channels.get(i).id,Collections.emptyList());long edge=start;
             c.save();c.clipRect(LABEL,top,w,top+rowHeight-2);
             for(LiveTvData.Programme p:list){if(p.end<=start||p.start>=start+SECONDS)continue;if(p.start>edge)block(c,edge,Math.min(p.start,start+SECONDS),top,null,focused);block(c,Math.max(start,p.start),Math.min(start+SECONDS,p.end),top,p,focused);edge=Math.max(edge,p.end);}
@@ -130,6 +158,7 @@ final class TvTimelineView extends FrameLayout {
                 c.drawRect(px-1,bottom-7,px+1,bottom-1,paint);
             }
         }
+        while(labels.size()>labelCursor)labels.remove(labels.size()-1);
     }
     private void block(Canvas c,long from,long to,float top,LiveTvData.Programme p,boolean focused){
         if(to<=from)return;float left=Math.max(LABEL,x(from))+3,right=Math.min(getWidth(),x(to))-3;if(right-left<3){

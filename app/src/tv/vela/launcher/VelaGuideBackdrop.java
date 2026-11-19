@@ -108,6 +108,7 @@ final class VelaGuideBackdrop extends ImageView {
     }
 
     void show(String url) {
+        if (requested.equals(url)) return;
         String next = VelaProgrammeArt.url(url);
         if (next.equals(requested)) return;
         requested = next;

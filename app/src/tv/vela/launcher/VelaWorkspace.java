@@ -13,12 +13,59 @@ final class VelaWorkspace {
     static final String DEFAULT="default";
     private VelaWorkspace(){}
     static SharedPreferences registry(Context c){return c.getSharedPreferences("vela-workspace",0);}
-    static String active(Context c){String id=registry(c).getString("active",DEFAULT);return id.matches("[a-f0-9]{16}")&&profiles(c).containsKey(id)?id:DEFAULT;}
+    private static final String CHANNEL_PREFS="tv-personal-";
+    private static final class ProfileLookup {
+        final String id, catalogue, resolved;
+        ProfileLookup(String id,String catalogue){
+            this.id=id;this.catalogue=catalogue;
+            resolved=readProfiles(catalogue).containsKey(id)?id:DEFAULT;
+        }
+    }
+    private static volatile ProfileLookup lastProfile;
+
+    private static boolean lowerHex(String value,int start,int digits){
+        if(value.length()!=start+digits)return false;
+        for(int i=start;i<value.length();i++){
+            char c=value.charAt(i);
+            if((c<'0'||c>'9')&&(c<'a'||c>'f'))return false;
+        }
+        return true;
+    }
+    private static String catalogue(SharedPreferences registry){
+        try{return registry.getString("profiles","[]");}
+        catch(ClassCastException invalid){return "[]";}
+    }
+    static String active(Context c){
+        SharedPreferences registry=registry(c);
+        String id=registry.getString("active",DEFAULT);
+        if(!lowerHex(id,0,16))return DEFAULT;
+        String catalogue=catalogue(registry);
+        ProfileLookup lookup=lastProfile;
+        if(lookup==null||!id.equals(lookup.id)||!catalogue.equals(lookup.catalogue)){
+            lookup=new ProfileLookup(id,catalogue);lastProfile=lookup;
+        }
+        return lookup.resolved;
+    }
     static String physical(Context c,String name){String id=active(c);return DEFAULT.equals(id)?name:"vp-"+id+"-"+name;}
     static String channelSource(Context c,String source){if(!source.startsWith("xtream:"))return source;SharedPreferences account=c.getSharedPreferences("xtream",0);String portable=account.getString("portable-source","");return portable.matches("[a-f0-9]{64}")&&source.equals("xtream:"+account.getString("id",""))?"xtream:"+portable:source;}
     static synchronized SharedPreferences channelPrefs(Context c,String source){String portable=channelSource(c,source),name="tv-personal-"+LiveTvData.hash(portable);SharedPreferences target=prefs(c,name);if(!portable.equals(source)){String legacy="tv-personal-"+LiveTvData.hash(source);SharedPreferences old=prefs(c,legacy);if(!old.getAll().isEmpty()){SharedPreferences.Editor edit=target.edit();for(Map.Entry<String,?> e:old.getAll().entrySet())if(!target.contains(e.getKey())&&e.getValue() instanceof String)edit.putString(e.getKey(),(String)e.getValue());if(edit.commit()){old.edit().clear().commit();c.deleteSharedPreferences(physical(c,legacy));String key="names-"+active(c);Set<String> names=new HashSet<>(registry(c).getStringSet(key,Collections.emptySet()));names.remove(legacy);registry(c).edit().putStringSet(key,names).commit();}}}return target;}
-    static SharedPreferences prefs(Context c,String name){if(name.matches("tv-personal-[a-f0-9]{64}")){String key="names-"+active(c);SharedPreferences registry=registry(c);Set<String> saved=new HashSet<>(registry.getStringSet(key,Collections.emptySet()));if(saved.size()<96&&saved.add(name))registry.edit().putStringSet(key,saved).commit();}return c.getSharedPreferences(physical(c,name),0);}
-    static LinkedHashMap<String,String> profiles(Context c){LinkedHashMap<String,String> out=new LinkedHashMap<>();out.put(DEFAULT,t("Main","Principal"));try{JSONArray a=new JSONArray(registry(c).getString("profiles","[]"));for(int i=0;i<Math.min(a.length(),MAX_PROFILES-1);i++){JSONObject p=a.getJSONObject(i);String id=p.getString("id"),name=clean(p.getString("name"),32);if(id.matches("[a-f0-9]{16}")&&!name.isEmpty())out.put(id,name);}}catch(JSONException|ClassCastException ignored){}return out;}
+    static SharedPreferences prefs(Context c,String name){
+        String id=active(c);
+        if(name.startsWith(CHANNEL_PREFS)&&lowerHex(name,CHANNEL_PREFS.length(),64)){
+            SharedPreferences registry=registry(c);
+            String key="names-"+id;
+            synchronized(VelaWorkspace.class){
+                Set<String> saved=registry.getStringSet(key,Collections.emptySet());
+                if(saved.size()<96&&!saved.contains(name)){
+                    Set<String> updated=new HashSet<>(saved);updated.add(name);
+                    registry.edit().putStringSet(key,updated).commit();
+                }
+            }
+        }
+        return c.getSharedPreferences(DEFAULT.equals(id)?name:"vp-"+id+"-"+name,0);
+    }
+    static LinkedHashMap<String,String> profiles(Context c){return readProfiles(catalogue(registry(c)));}
+    private static LinkedHashMap<String,String> readProfiles(String catalogue){LinkedHashMap<String,String> out=new LinkedHashMap<>();out.put(DEFAULT,t("Main","Principal"));try{JSONArray a=new JSONArray(catalogue);for(int i=0;i<Math.min(a.length(),MAX_PROFILES-1);i++){JSONObject p=a.getJSONObject(i);String id=p.getString("id"),name=clean(p.getString("name"),32);if(lowerHex(id,0,16)&&!name.isEmpty())out.put(id,name);}}catch(JSONException|ClassCastException ignored){}return out;}
     static synchronized String create(Context c,String name)throws IOException{LinkedHashMap<String,String> all=profiles(c);name=clean(name,32);if(name.isEmpty()||all.size()>=MAX_PROFILES)throw new IOException(t("Choose a name; at most six profiles.","Elige un nombre; máximo seis perfiles."));for(String n:all.values())if(normal(n).equals(normal(name)))throw new IOException(t("That name is already in use.","Ese nombre ya existe."));String id=UUID.randomUUID().toString().replace("-","").substring(0,16);all.put(id,name);saveProfiles(c,all);return id;}
     private static void saveProfiles(Context c,Map<String,String> all)throws IOException{JSONArray a=new JSONArray();try{for(Map.Entry<String,String> e:all.entrySet())if(!e.getKey().equals(DEFAULT))a.put(new JSONObject().put("id",e.getKey()).put("name",e.getValue()));if(!registry(c).edit().putString("profiles",a.toString()).commit())throw new IOException("Save failed");}catch(JSONException bad){throw new IOException(bad);}}
     static synchronized void select(Context c,String id)throws IOException{if(!profiles(c).containsKey(id)||!registry(c).edit().putString("active",id).commit())throw new IOException("Unknown profile");}

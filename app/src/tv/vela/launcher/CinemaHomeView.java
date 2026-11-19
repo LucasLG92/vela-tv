@@ -231,7 +231,12 @@ final class CinemaHomeView extends FrameLayout {
     private Drawable symbol(String name,int size){try(java.io.InputStream in=activity.getAssets().open("symbols/"+name+".png")){Bitmap b=BitmapFactory.decodeStream(in);if(b==null)return null;Drawable d=new BitmapDrawable(getResources(),b);d.setBounds(0,0,size,size);d.setTint(0xFFE1E1E8);return d;}catch(java.io.IOException ignored){return null;}}
     private Drawable brand(int index){
         if(index==0)return activity.getDrawable(R.drawable.logo_plex);int b=index-1;
-        if(brandBitmaps[b]==null)try(java.io.InputStream in=activity.getAssets().open("brands/"+(index==1?"youtube":"prime")+".png")){BitmapFactory.Options o=new BitmapFactory.Options();o.inSampleSize=2;brandBitmaps[b]=BitmapFactory.decodeStream(in,null,o);}catch(java.io.IOException ignored){}
+        if(brandBitmaps[b]==null)try(java.io.InputStream in=activity.getAssets().open("brands/"+(index==1?"youtube":"prime")+".png")){// The widest badge is 82 design pixels. Keep enough source pixels at the TV's actual resolution.
+            int target=Math.max(82,(int)Math.ceil(82d*getResources().getDisplayMetrics().widthPixels/1920));
+            int visibleWidth=index==1?1294:1040;
+            BitmapFactory.Options o=new BitmapFactory.Options();o.inSampleSize=1;
+            while(visibleWidth/(2*o.inSampleSize)>=target)o.inSampleSize*=2;
+            brandBitmaps[b]=BitmapFactory.decodeStream(in,null,o);}catch(java.io.IOException ignored){}
         Bitmap bitmap=brandBitmaps[b];if(bitmap==null)return null;if(index!=1)return new BitmapDrawable(getResources(),bitmap);
         // Ignore the official file's transparent canvas without allocating a second bitmap.
         Rect source=new Rect(Math.round(bitmap.getWidth()*204f/1705),Math.round(bitmap.getHeight()*141f/573),Math.round(bitmap.getWidth()*1498f/1705),Math.round(bitmap.getHeight()*430f/573));

@@ -142,7 +142,7 @@ final class HomeLiveTvView extends FrameLayout {
         if(logos==null)logos=new LiveTvLogos(activity);logos.page();for(ImageView i:logosOnScreen)i.setImageDrawable(null);logosOnScreen.clear();cards.clear();programmeLabels.clear();times.clear();bars.clear();channelRow.removeAllViews();timeline.removeAllViews();timelineLogos.clear();heroLogo.setImageDrawable(null);detailLogo.setImageDrawable(null);detailLogoId="";detailProgramme=null;
         section.setText(group.equals(FAVORITES)?t("Seus favoritos","Your favorites","Tus favoritos"):displayGroup(groupName(groups,group)));emptyChannels.setVisibility(channels.isEmpty()?VISIBLE:GONE);emptyChannels.setText(t("Não há canais nesta categoria. Use ↑ ↓ para mudar de lista.","No channels in this category. Use ↑ ↓ to change lists.","No hay canales en esta categoría. Usa ↑ ↓ para cambiar de lista."));pages.setText(total==0?"0 / 0":(page+1)+" / "+((total+11)/12));previous.setEnabled(page>0);previous.setAlpha(page>0?1:.3f);next.setEnabled((page+1)*12<total);next.setAlpha(next.isEnabled()?1:.3f);watch.setEnabled(selected!=null);favorite.setEnabled(selected!=null);
         status.setText(channels.isEmpty()?t("Não há canais nesta seleção. Escolha outra categoria.","No channels in this selection. Choose another category.","No hay canales en esta selección. Elige otra categoría."):t("↑ ↓ Categoria   ·   OK Ver   ·   Manter OK Favorito","↑ ↓ Category   ·   OK Watch   ·   Hold OK Favorite","↑ ↓ Categoría   ·   OK Ver   ·   Mantener OK Favorito"));
-        if(guideMode){updateHero();updateDetail();loadTimeline(focus&&!headerFocused());return;}
+        if(guideMode){loadTimeline(focus&&!headerFocused());return;}
         for(int index=0;index<channels.size();index++){
             LiveTvData.Channel ch=channels.get(index);FrameLayout card=new FrameLayout(activity);card.setId(View.generateViewId());card.setFocusable(true);card.setClickable(true);card.setDefaultFocusHighlightEnabled(false);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(220,304);p.rightMargin=14;channelRow.addView(card,p);cards.add(card);
             TvLogoTile tile=new TvLogoTile(activity);put(card,tile,8,0,204,172);LiveTvLogos.LogoView logo=new LiveTvLogos.LogoView(activity,TvChannelNames.display(ch.name));logo.setColorListener(tile::color);logo.setScaleType(ImageView.ScaleType.FIT_CENTER);put(tile,logo,24,24,156,124);logosOnScreen.add(logo);logos.load(ch,logo);
@@ -194,7 +194,32 @@ final class HomeLiveTvView extends FrameLayout {
     private void showPresent(){long now=System.currentTimeMillis()/1000;guideStart=TvTimelineView.present(now);loadTimeline(true);timeline.followNow(now);}
     private void moveTime(long next,long cursor){long present=TvTimelineView.present(System.currentTimeMillis()/1000);guideStart=Math.max(present-(VelaReplay.available(selected)?24*3600:0),Math.min(present+45*3600,next));loadTimeline(true);timeline.cursor(cursor);}
     private void loadTimeline(boolean focus){
-        if(!active||closed||!guideMode)return;if(timelineJob!=null)timelineJob.cancel(true);int timelineToken=++timelineEpoch;for(ImageView old:timelineLogos){old.setImageDrawable(null);logosOnScreen.remove(old);}timelineLogos.clear();detailLogoId="";detailLogo.setImageDrawable(null);detailProgramme=null;guideOffset=Math.min(guideOffset,Math.max(0,(channels.size()-1)/VelaReading.rows(activity)*VelaReading.rows(activity)));guideChannels=new ArrayList<>(channels.subList(guideOffset,Math.min(channels.size(),guideOffset+VelaReading.rows(activity))));timeline.removeAllViews();if(logos==null)logos=new LiveTvLogos(activity);logos.page();for(int i=0;i<guideChannels.size();i++){LiveTvLogos.LogoView logo=new LiveTvLogos.LogoView(activity,TvChannelNames.display(guideChannels.get(i).name));logo.setScaleType(ImageView.ScaleType.FIT_CENTER);put(timeline,logo,10,timeline.logoY(i),60,60);logosOnScreen.add(logo);timelineLogos.add(logo);logos.load(guideChannels.get(i),logo);}Set<String> starred=new HashSet<>();for(LiveTvData.Channel c:guideChannels)if(TvChannelNames.favorite(c,favorites))starred.add(c.id);timeline.favorites(starred);timeline.data(guideChannels,Collections.emptyMap(),guideStart,selected,true);updateDetail();if(focus&&!guideChannels.isEmpty()&&host.ownsFocus()&&!headerFocused())timeline.requestFocus();int generation=epoch;long from=guideStart;List<LiveTvData.Channel> snapshot=new ArrayList<>(guideChannels);Map<String,LiveTvData.Guide> fallback=new HashMap<>(guide);
+        if(!active||closed||!guideMode)return;
+        if(timelineJob!=null)timelineJob.cancel(true);
+        int timelineToken=++timelineEpoch;
+        int rows=VelaReading.rows(activity);
+        guideOffset=Math.min(guideOffset,Math.max(0,(channels.size()-1)/rows*rows));
+        List<LiveTvData.Channel> visible=channels.subList(guideOffset,Math.min(channels.size(),guideOffset+rows));
+        if(logos==null)logos=new LiveTvLogos(activity);
+        if(timelineLogos.size()!=visible.size()||!guideChannels.equals(visible)){
+            for(ImageView old:timelineLogos){old.setImageDrawable(null);logosOnScreen.remove(old);}
+            timelineLogos.clear();
+            timeline.removeAllViews();
+            detailLogoId="";
+            detailLogo.setImageDrawable(null);
+            detailProgramme=null;
+            logos.page();
+            guideChannels=new ArrayList<>(visible);
+            for(int i=0;i<guideChannels.size();i++){
+                LiveTvLogos.LogoView logo=new LiveTvLogos.LogoView(activity,TvChannelNames.display(guideChannels.get(i).name));
+                logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                put(timeline,logo,10,timeline.logoY(i),60,60);
+                logosOnScreen.add(logo);
+                timelineLogos.add(logo);
+            }
+        }
+        for(int i=0;i<guideChannels.size();i++)logos.load(guideChannels.get(i),timelineLogos.get(i));
+        Set<String> starred=new HashSet<>();for(LiveTvData.Channel c:guideChannels)if(TvChannelNames.favorite(c,favorites))starred.add(c.id);timeline.favorites(starred);timeline.data(guideChannels,Collections.emptyMap(),guideStart,selected,true);updateDetail();if(focus&&!guideChannels.isEmpty()&&host.ownsFocus()&&!headerFocused())timeline.requestFocus();int generation=epoch;long from=guideStart;List<LiveTvData.Channel> snapshot=new ArrayList<>(guideChannels);Map<String,LiveTvData.Guide> fallback=new HashMap<>(guide);
         final boolean tuner="antenna".equals(mode);
         timelineJob=io.submit(()->{
             Map<String,List<LiveTvData.Programme>> result=new HashMap<>();

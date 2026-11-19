@@ -57,7 +57,7 @@ final class VelaProgrammeArt implements AutoCloseable {
             try{b.task=worker.submit(()->{
                 Bitmap image=null;
                 boolean networkFailure=false;
-                try{image=decode(load(b.url,b.signal),b.width,b.height);}
+                try{image=load(b.url,b.signal,b.width,b.height);}
                 catch(FileNotFoundException unavailable){/* The source has no picture here. */}
                 catch(IOException interrupted){networkFailure=true;}
                 catch(RuntimeException unavailable){/* The source or decode was cancelled. */}
@@ -65,7 +65,7 @@ final class VelaProgrammeArt implements AutoCloseable {
                 boolean retry=networkFailure;
                 main.post(()->{
                     if(closed||b.signal.isCanceled()||bindings.get(v)!=b){if(result!=null)result.recycle();return;}
-                    if(result!=null){cache.put(b.key,result);b.shown=result;v.setImageBitmap(result);}
+                    if(result!=null){if(result.getAllocationByteCount()<=cache.maxSize())cache.put(b.key,result);b.shown=result;v.setImageBitmap(result);}
                     else if(retry&&b.mayRetry){
                         b.mayRetry=false;
                         b.retry=()->{
@@ -81,9 +81,62 @@ final class VelaProgrammeArt implements AutoCloseable {
             });}catch(RejectedExecutionException busy){b.attempted=false;}
         }
     }
-    private byte[] load(String value,CancellationSignal signal)throws IOException{String target=value;for(int redirects=0;redirects<4;redirects++){signal.throwIfCanceled();if(target.startsWith("content:")){try(InputStream in=context.getContentResolver().openInputStream(Uri.parse(target))){return bytes(in,signal);}}HttpURLConnection c=(HttpURLConnection)new URL(target).openConnection();c.setConnectTimeout(5000);c.setReadTimeout(6000);c.setInstanceFollowRedirects(false);c.setRequestProperty("User-Agent","Vela-Programme-Art");signal.setOnCancelListener(c::disconnect);try{int code=c.getResponseCode();if(code>=300&&code<400){String next=url(new URL(new URL(target),c.getHeaderField("Location")).toString());if(next.isEmpty()||target.startsWith("https:")&&!next.startsWith("https:"))throw new IOException("Invalid image redirect");target=next;continue;}if(code==408||code==429||code>=500)throw new IOException("Image temporarily unavailable");if(code!=200||c.getContentLengthLong()>2*1024*1024)throw new FileNotFoundException("Image unavailable");try(InputStream in=c.getInputStream()){return bytes(in,signal);}}finally{signal.setOnCancelListener(null);c.disconnect();}}throw new IOException("Image redirects");}
-    private static byte[] bytes(InputStream in,CancellationSignal signal)throws IOException{if(in==null)throw new IOException();ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] block=new byte[8192];for(int n;(n=in.read(block))!=-1;){signal.throwIfCanceled();if(Thread.currentThread().isInterrupted()||out.size()+n>2*1024*1024)throw new IOException("Image limit");out.write(block,0,n);}return out.toByteArray();}
-    private static Bitmap decode(byte[] data,int width,int height){BitmapFactory.Options o=new BitmapFactory.Options();o.inJustDecodeBounds=true;BitmapFactory.decodeByteArray(data,0,data.length,o);if(o.outWidth<=0||o.outHeight<=0||o.outWidth>16384||o.outHeight>16384)return null;o.inSampleSize=1;while(o.outWidth/o.inSampleSize>width||o.outHeight/o.inSampleSize>height)o.inSampleSize*=2;o.inJustDecodeBounds=false;o.inPreferredConfig=Bitmap.Config.RGB_565;return BitmapFactory.decodeByteArray(data,0,data.length,o);}
+    private static final int MAX_ENCODED=2*1024*1024;
+    private Bitmap load(String value,CancellationSignal signal,int width,int height)throws IOException{
+        String target=value;
+        for(int redirects=0;redirects<4;redirects++){
+            signal.throwIfCanceled();
+            if(target.startsWith("content:")){
+                try(InputStream in=context.getContentResolver().openInputStream(Uri.parse(target))){
+                    return readBitmap(in,-1,signal,width,height);
+                }
+            }
+            HttpURLConnection c=(HttpURLConnection)new URL(target).openConnection();
+            c.setConnectTimeout(5000);c.setReadTimeout(6000);c.setInstanceFollowRedirects(false);
+            c.setRequestProperty("User-Agent","Vela-Programme-Art");signal.setOnCancelListener(c::disconnect);
+            try{
+                int code=c.getResponseCode();
+                if(code>=300&&code<400){
+                    String next=url(new URL(new URL(target),c.getHeaderField("Location")).toString());
+                    if(next.isEmpty()||target.startsWith("https:")&&!next.startsWith("https:"))throw new IOException("Invalid image redirect");
+                    target=next;continue;
+                }
+                if(code==408||code==429||code>=500)throw new IOException("Image temporarily unavailable");
+                long length=c.getContentLengthLong();
+                if(code!=200||length>MAX_ENCODED)throw new FileNotFoundException("Image unavailable");
+                try(InputStream in=c.getInputStream()){return readBitmap(in,length,signal,width,height);}
+            }finally{signal.setOnCancelListener(null);c.disconnect();}
+        }
+        throw new IOException("Image redirects");
+    }
+    static Bitmap readBitmap(InputStream in,long expected,CancellationSignal signal,int width,int height)throws IOException{
+        if(in==null||expected>MAX_ENCODED)throw new IOException("Image unavailable");
+        byte[] data=new byte[expected>0?(int)expected:8192];
+        int length=0;
+        while(true){
+            signal.throwIfCanceled();
+            if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();
+            if(length==data.length){
+                int next=in.read();
+                if(next<0)break;
+                if(length==MAX_ENCODED)throw new IOException("Image limit");
+                data=Arrays.copyOf(data,Math.min(MAX_ENCODED,Math.max(8192,length*2)));
+                data[length++]=(byte)next;
+            }else{
+                int n=in.read(data,length,Math.min(16384,data.length-length));
+                if(n<0)break;
+                if(n==0)throw new IOException("Image stream stalled");
+                length+=n;
+            }
+        }
+        BitmapFactory.Options o=new BitmapFactory.Options();
+        o.inJustDecodeBounds=true;BitmapFactory.decodeByteArray(data,0,length,o);
+        if(o.outWidth<=0||o.outHeight<=0||o.outWidth>16384||o.outHeight>16384)return null;
+        o.inSampleSize=1;
+        while(o.outWidth/o.inSampleSize>width||o.outHeight/o.inSampleSize>height)o.inSampleSize*=2;
+        o.inJustDecodeBounds=false;o.inPreferredConfig=Bitmap.Config.RGB_565;
+        return BitmapFactory.decodeByteArray(data,0,length,o);
+    }
     void clear(){for(Binding b:bindings.values())cancel(b);for(ImageView v:bindings.keySet())if(v!=null)v.setImageDrawable(null);bindings.clear();scheduled=false;main.removeCallbacks(update);worker.purge();}
     public void close(){if(closed)return;closed=true;clear();worker.shutdownNow();cache.evictAll();if(root.getViewTreeObserver().isAlive()){root.getViewTreeObserver().removeOnScrollChangedListener(scroll);root.getViewTreeObserver().removeOnGlobalLayoutListener(layout);}}
 }

@@ -16,7 +16,24 @@ final class XmlTvGuide {
     String url()throws Exception{return settings.getBoolean("native",false)?"":settings.contains("url")?secrets.decode(settings.getString("url","")):DEFAULT_URL;}
     void configure(String value)throws Exception{String address=value.trim();if(!address.isEmpty()&&!LiveTvData.https(address))throw new IOException("HTTPS XMLTV required");SharedPreferences.Editor e=settings.edit().putBoolean("native",address.isEmpty()).remove("attempt").remove("attempt-source");if(address.isEmpty())e.remove("url");else e.putString("url",secrets.encode(address));if(!e.commit())throw new IOException("Could not save guide");}
     void invalidate(){settings.edit().putBoolean("refresh",true).remove("attempt").remove("attempt-source").apply();}
-    private SQLiteDatabase open(){File folder=new File(context.getCacheDir(),"tv-guide");folder.mkdirs();SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(new File(folder,"xmltv.db"),null);try{db.setMaximumSize(MAX_DB);db.execSQL("CREATE TABLE IF NOT EXISTS meta (id INTEGER PRIMARY KEY, source TEXT, updated INTEGER)");db.execSQL("CREATE TABLE IF NOT EXISTS aliases (alias TEXT, channel TEXT, PRIMARY KEY(alias,channel))");db.execSQL("CREATE TABLE IF NOT EXISTS programmes (channel TEXT, start INTEGER, end INTEGER, title TEXT)");db.execSQL("CREATE TABLE IF NOT EXISTS logos (channel TEXT PRIMARY KEY, image TEXT)");if(db.getVersion()<3){boolean category=false;try(Cursor columns=db.rawQuery("PRAGMA table_info(programmes)",null)){while(columns.moveToNext())if("category".equals(columns.getString(1)))category=true;}if(!category){db.execSQL("ALTER TABLE programmes ADD COLUMN category TEXT NOT NULL DEFAULT ''");db.execSQL("UPDATE meta SET updated=0");}db.setVersion(3);}if(db.getVersion()<4){db.execSQL("UPDATE meta SET updated=0");db.setVersion(4);}VelaDiscovery.ensureEvents(db);VelaDiscovery.ensureArtwork(db);db.execSQL("CREATE INDEX IF NOT EXISTS programme_time ON programmes(channel,start,end)");return db;}catch(RuntimeException e){db.close();throw e;}}
+    private SQLiteDatabase open(){
+        File folder=new File(context.getCacheDir(),"tv-guide");folder.mkdirs();SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(new File(folder,"xmltv.db"),null);
+        try{
+            db.setMaximumSize(MAX_DB);
+            VelaDatabase.ensureSchema(db,5,XmlTvGuide::migrate);
+            return db;
+        }catch(RuntimeException error){db.close();throw error;}
+    }
+    private static void migrate(SQLiteDatabase db){
+        db.execSQL("CREATE TABLE IF NOT EXISTS meta (id INTEGER PRIMARY KEY, source TEXT, updated INTEGER)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS aliases (alias TEXT, channel TEXT, PRIMARY KEY(alias,channel))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS programmes (channel TEXT, start INTEGER, end INTEGER, title TEXT)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS logos (channel TEXT PRIMARY KEY, image TEXT)");if(db.getVersion()<3){boolean category=false;try(Cursor columns=db.rawQuery("PRAGMA table_info(programmes)",null)){while(columns.moveToNext())if("category".equals(columns.getString(1)))category=true;}if(!category){db.execSQL("ALTER TABLE programmes ADD COLUMN category TEXT NOT NULL DEFAULT ''");
+        db.execSQL("UPDATE meta SET updated=0");}db.setVersion(3);}if(db.getVersion()<4){db.execSQL("UPDATE meta SET updated=0");db.setVersion(4);}
+        VelaDiscovery.ensureEvents(db);
+        VelaDiscovery.ensureArtwork(db);
+        db.execSQL("CREATE INDEX IF NOT EXISTS programme_time ON programmes(channel,start,end)");
+    }
     Map<String,LiveTvData.Guide> guide(List<LiveTvData.Channel> visible)throws Exception{
         String address=url();if(address.isEmpty()||visible.isEmpty())return Collections.emptyMap();String source=LiveTvData.hash(address),attemptSource="titles-v2|"+source;synchronized(XmlTvGuide.class){
             long now=System.currentTimeMillis(),updated=0;String cached="";try(SQLiteDatabase db=open();Cursor row=db.rawQuery("SELECT source,updated FROM meta WHERE id=1",null)){if(row.moveToFirst()){cached=row.getString(0);updated=row.getLong(1);}}

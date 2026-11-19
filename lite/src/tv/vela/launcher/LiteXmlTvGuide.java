@@ -26,7 +26,25 @@ final class LiteXmlTvGuide {
     LiteXmlTvGuide(Context c,String name){context=c.getApplicationContext();File folder=new File(context.getCacheDir(),"antenna-epg");folder.mkdirs();file=new File(folder,name);}
     private boolean enabled(){return VelaWorkspace.prefs(context,"lite_tv").getBoolean("online_guide",true);}
     void invalidate(){context.getSharedPreferences("lite_xmltv",0).edit().remove("attempt").putBoolean("refresh",true).apply();}
-    private SQLiteDatabase open(){SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(file,null);db.setMaximumSize(MAX_DB);db.execSQL("CREATE TABLE IF NOT EXISTS meta (id INTEGER PRIMARY KEY, catalog TEXT, updated INTEGER)");db.execSQL("CREATE TABLE IF NOT EXISTS aliases (name TEXT, channel TEXT, PRIMARY KEY(name,channel))");db.execSQL("CREATE TABLE IF NOT EXISTS logos (channel TEXT PRIMARY KEY, image TEXT)");db.execSQL("CREATE TABLE IF NOT EXISTS programmes (channel TEXT, start INTEGER, end INTEGER, title TEXT, description TEXT)");db.execSQL("CREATE TABLE IF NOT EXISTS guide_options(channel TEXT PRIMARY KEY,name TEXT)");boolean hasCategory=false;try(Cursor cols=db.rawQuery("PRAGMA table_info(programmes)",null)){while(cols.moveToNext())if(cols.getString(1).equals("category"))hasCategory=true;}if(!hasCategory){db.execSQL("ALTER TABLE programmes ADD COLUMN category TEXT NOT NULL DEFAULT ''");db.execSQL("UPDATE meta SET updated=0");}VelaDiscovery.ensureEvents(db);VelaDiscovery.ensureArtwork(db);db.execSQL("CREATE INDEX IF NOT EXISTS schedule ON programmes(channel,start,end)");return db;}
+    private SQLiteDatabase open(){
+        SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(file,null);
+        try{
+            db.setMaximumSize(MAX_DB);
+            VelaDatabase.ensureSchema(db,1,LiteXmlTvGuide::migrate);
+            return db;
+        }catch(RuntimeException error){db.close();throw error;}
+    }
+    private static void migrate(SQLiteDatabase db){
+        db.execSQL("CREATE TABLE IF NOT EXISTS meta (id INTEGER PRIMARY KEY, catalog TEXT, updated INTEGER)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS aliases (name TEXT, channel TEXT, PRIMARY KEY(name,channel))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS logos (channel TEXT PRIMARY KEY, image TEXT)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS programmes (channel TEXT, start INTEGER, end INTEGER, title TEXT, description TEXT)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS guide_options(channel TEXT PRIMARY KEY,name TEXT)");boolean hasCategory=false;try(Cursor cols=db.rawQuery("PRAGMA table_info(programmes)",null)){while(cols.moveToNext())if(cols.getString(1).equals("category"))hasCategory=true;}if(!hasCategory){db.execSQL("ALTER TABLE programmes ADD COLUMN category TEXT NOT NULL DEFAULT ''");
+        db.execSQL("UPDATE meta SET updated=0");}
+        VelaDiscovery.ensureEvents(db);
+        VelaDiscovery.ensureArtwork(db);
+        db.execSQL("CREATE INDEX IF NOT EXISTS schedule ON programmes(channel,start,end)");
+    }
     static String match(String value){String n=java.text.Normalizer.normalize(value,java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").toLowerCase(Locale.ROOT).replaceFirst("\\.tv$","").replaceAll("\\b(uhd|fhd|hd|sd|4k|8k|720p?|1080p?)\\b","").replaceAll("[^a-z0-9+]","");switch(n){case "a3series":return "atreseries";case "bemadtv":return "bemad";case "realmadridtv":return "realmadrid";case "tdp":return "teledeporte";case "24horas":return "24h";case "hdcastillalamancha":case "cmm":return "castillalamancha";case "factoriadeficcion":return "fdf";case "13tv":case "trecetv":return "trece";default:return n;}}
     private Set<String> wanted(List<LiveTvData.Channel> channels){Set<String> keys=new TreeSet<>();for(LiveTvData.Channel c:channels){keys.add(match(c.name));String id=VelaGuideFix.alias(context,c.name);if(!id.isEmpty())keys.add(match(id));}return keys;}
     private static String signature(Set<String> keys){return LiveTvData.hash("titles-v2|"+URL+"|"+keys);}

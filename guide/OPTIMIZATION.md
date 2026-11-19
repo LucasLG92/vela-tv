@@ -1,5 +1,9 @@
 # Optimisation: artwork, playback and shared controls
 
+## Home and programme guide
+
+[Vela 2.7.0 measurements](releases/2.7.0-preview.md) cover process memory on Home and in the guide, navigation timings and the cost of redrawing a six-channel schedule.
+
 ## Network playback — Vela 2.3.0 Preview
 
 [Playback controls and exact limits](PLAYBACK.md). Automatic playback and the existing disk-backed HLS pause share one active engine. No new dependency or background service is added. The encoded buffer targets are 2/4/8 MiB, with a 4 MiB clamp in light/Android low-RAM mode; they are not a process RAM cap.

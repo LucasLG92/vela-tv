@@ -117,6 +117,49 @@ public final class AndroidEfficiencyTest extends Instrumentation {
         result.putBoolean("empty_programme_cleared",cleared[0]);result.putBoolean("changed_programme_cleared",cleared[1]);
         result.putBoolean("same_programme_reused",reused[0]);if(!baseline)check(cleared[0]&&cleared[1]&&reused[0],"New/empty programme retained old artwork or an unchanged binding was restarted");
     }
+    void guideImageStream()throws Exception{
+        phase="programme image stream bounds";
+        byte[] image=png(320,180,false);
+        for(long declared:new long[]{image.length,-1,4,image.length+32}){
+            Bitmap decoded=VelaProgrammeArt.readBitmap(new ByteArrayInputStream(image),declared,new android.os.CancellationSignal(),160,90);
+            check(decoded!=null&&decoded.getWidth()==160&&decoded.getHeight()==90,"Programme image dimensions changed");
+            decoded.recycle();
+        }
+        byte[] large=new byte[2*1024*1024+1];
+        for(long declared:new long[]{large.length,-1}){
+            try{VelaProgrammeArt.readBitmap(new ByteArrayInputStream(large),declared,new android.os.CancellationSignal(),160,90);throw new AssertionError("Oversized image accepted");}
+            catch(IOException expected){}
+        }
+        android.os.CancellationSignal stopped=new android.os.CancellationSignal();
+        stopped.cancel();
+        try{VelaProgrammeArt.readBitmap(new ByteArrayInputStream(image),image.length,stopped,160,90);throw new AssertionError("Cancelled image decoded");}
+        catch(android.os.OperationCanceledException expected){}
+    }
+    void profileLookup()throws Exception{
+        phase="active profile catalogue";
+        String previous=VelaWorkspace.active(context);
+        String id=VelaWorkspace.create(context,"Profile lookup test");
+        android.content.SharedPreferences registry=VelaWorkspace.registry(context);
+        String catalogue=registry.getString("profiles","[]");
+        try{
+            VelaWorkspace.select(context,id);
+            check(VelaWorkspace.active(context).equals(id),"Named profile not selected");
+            VelaLayout.save(context,new org.json.JSONObject().put("hidden",new org.json.JSONArray().put("apps")));
+            check(!VelaLayout.visible(context,"apps"),"Saved layout not visible");
+            VelaLayout.read(context).remove("hidden");
+            check(!VelaLayout.visible(context,"apps"),"An unsaved editor changed the active layout");
+            VelaLayout.prefs(context).edit().putString("document","{}").commit();
+            check(VelaLayout.visible(context,"apps"),"Restored layout not recognised");
+            registry.edit().putString("profiles","[]").commit();
+            check(VelaWorkspace.active(context).equals(VelaWorkspace.DEFAULT),"Stale profile after removal");
+            registry.edit().putString("profiles",catalogue).commit();
+            check(VelaWorkspace.active(context).equals(id),"Restored profile not recognised");
+        }finally{
+            registry.edit().putString("profiles",catalogue).commit();
+            VelaWorkspace.select(context,previous);
+            VelaWorkspace.delete(context,id);
+        }
+    }
     void clockFit()throws Exception{
         phase="clock format bounds";String document=VelaWidgets.prefs(context).getString("document",null),language=L10n.choice();int clipped=0;
         try{
@@ -137,6 +180,7 @@ public final class AndroidEfficiencyTest extends Instrumentation {
     }
     @Override public void onCreate(Bundle args){super.onCreate(args);baseline="baseline".equals(args.getString("fixture"));start();}
     @Override public void onStart(){context=getTargetContext();try{
+        if(!baseline){guideImageStream();profileLookup();}
         if(android.os.Build.VERSION.SDK_INT<30){programmeRebind();clockFit();result.putString("result",baseline?"BASELINE shared programme/clock behaviour recorded":"PASS shared programme rebinding and six-language clock bounds on Android "+android.os.Build.VERSION.SDK_INT);finish(-1,result);return;}
         check(!new PlexClient(context).connected()&&!new JellyfinClient(context).connected(),"Synthetic test requires an account-free emulator");
         CinemaImages.purgeDisk(context);poster=png(2048,3072,false);panorama=png(4096,256,false);alpha=png(2000,400,true);

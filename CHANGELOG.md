@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.7.0-preview
+
+- Home decodes YouTube and Prime Video marks for the TV resolution and reuses validated layout and profile preferences while navigating.
+- Full and Lite reuse measured guide labels. Full also keeps channel logo views when the same rows stay on screen and shares matching logo requests.
+- Channel catalogues and guide databases migrate once. Programme pictures use a bounded input buffer, including on sources that omit the file size.
+- [Measurements and test conditions](guide/releases/2.7.0-preview.md).
+
 ## 2.6.6-preview
 
 - Remove the previous, Now and next controls from the programme guide. The channel rows use the extra height. Press Back when browsing the schedule to return to live on the selected channel.
