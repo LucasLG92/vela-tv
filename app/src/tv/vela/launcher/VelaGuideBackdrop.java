@@ -8,7 +8,10 @@ import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.RectF;
+import android.graphics.ComposeShader;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.os.Build;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -18,8 +21,9 @@ import android.widget.ImageView;
 final class VelaGuideBackdrop extends ImageView {
     private static final int INK=0xff090a0d;
     private final Paint paint=new Paint(Paint.FILTER_BITMAP_FLAG);
-    private final RectF picture=new RectF();
-    private Shader leftShade,topShade,bottomShade,ambient,photo,edges;
+    private static final float FADE_START = .53f;
+    private static final PorterDuffXfermode KEEP_ALPHA = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
+    private Shader leftShade, topShade, fade, photo, edges, composite;
     private Bitmap prepared;
     private int preparedWidth,preparedHeight;
     private VelaProgrammeArt loader;
@@ -42,8 +46,9 @@ final class VelaGuideBackdrop extends ImageView {
         leftShade=new LinearGradient(0,0,w,0,new int[]{0xf7090a0d,0xe5090a0d,0xc5090a0d,0x40090a0d,0x08090a0d},
             new float[]{0,.21f,.47f,.70f,1},Shader.TileMode.CLAMP);
         topShade=new LinearGradient(0,0,0,h*.38f,0xb0090a0d,Color.TRANSPARENT,Shader.TileMode.CLAMP);
-        bottomShade=new LinearGradient(0,h*.60f,0,h,new int[]{0x00090a0d,0x32090a0d,0xba090a0d,INK},
-            new float[]{0,.40f,.79f,1},Shader.TileMode.CLAMP);
+        fade = new LinearGradient(0, 0, 0, h,
+            new int[]{0xffffffff, 0xeeffffff, 0xabffffff, 0x4fffffff, 0x12ffffff, 0x00ffffff},
+            new float[]{FADE_START, .62f, .73f, .84f, .93f, .985f}, Shader.TileMode.CLAMP);
     }
 
     private static int edgeTone(Bitmap image, int x) {
@@ -70,7 +75,6 @@ final class VelaGuideBackdrop extends ImageView {
         float width = Math.min(w, iw * scale);
         float left = Math.max(0, Math.min(w - width, w * .76f - width / 2));
         float top = (h - ih * scale) * .5f;
-        picture.set(left, 0, left + width, h);
 
         Matrix matrix = new Matrix();
         matrix.setScale(scale, scale);
@@ -80,31 +84,64 @@ final class VelaGuideBackdrop extends ImageView {
         photo = texture;
 
         int start = edgeTone(image, 0), end = edgeTone(image, iw - 1);
-        ambient = new LinearGradient(left + width * .16f, 0, left + width * .90f, 0,
-            start, end, Shader.TileMode.CLAMP);
         edges = new LinearGradient(left, 0, left + width, 0,
-            new int[]{start, start & 0xffffff, end & 0xffffff, picture.right < w - 1 ? end : end & 0xffffff},
+            new int[]{start, start & 0xffffff, end & 0xffffff, left + width < w - 1 ? end : end & 0xffffff},
             new float[]{0, .16f, .90f, 1}, Shader.TileMode.CLAMP);
+        if (Build.VERSION.SDK_INT >= 28) {
+            Shader art = new ComposeShader(photo, edges, PorterDuff.Mode.SRC_OVER);
+            art = new ComposeShader(art, leftShade, PorterDuff.Mode.SRC_OVER);
+            art = new ComposeShader(art, topShade, PorterDuff.Mode.SRC_OVER);
+            composite = new ComposeShader(art, fade, PorterDuff.Mode.DST_IN);
+        }
     }
 
-    @Override protected void onDraw(Canvas canvas){
-        Drawable drawable=getDrawable();
-        if(drawable==null)return;
-        int w=getWidth(),h=getHeight();
-        if(w<=0||h<=0)return;
-        int checkpoint=canvas.save();
-        canvas.clipRect(0,0,w,h);
-        if(drawable instanceof BitmapDrawable&&((BitmapDrawable)drawable).getBitmap()!=null){
-            Bitmap image=((BitmapDrawable)drawable).getBitmap();
-            if(image!=prepared||w!=preparedWidth||h!=preparedHeight)frame(image,w,h);
-            paint.setShader(ambient);canvas.drawRect(0,0,w,h,paint);
-            paint.setShader(photo);canvas.drawRect(picture,paint);
-            paint.setShader(edges);canvas.drawRect(picture,paint);
-        }else super.onDraw(canvas);
-        paint.setShader(leftShade);canvas.drawRect(0,0,w,h,paint);
-        paint.setShader(topShade);canvas.drawRect(0,0,w,h,paint);
-        paint.setShader(bottomShade);canvas.drawRect(0,0,w,h,paint);
-        paint.setShader(null);canvas.restoreToCount(checkpoint);
+    private void fill(Canvas canvas, Shader shader, int w, int h) {
+        paint.setShader(shader);
+        canvas.drawRect(0, 0, w, h, paint);
+    }
+
+    private void drawContent(Canvas canvas, int w, int h) {
+        if (photo == null) {
+            super.onDraw(canvas);
+        } else {
+            fill(canvas, photo, w, h);
+            fill(canvas, edges, w, h);
+        }
+        fill(canvas, leftShade, w, h);
+        fill(canvas, topShade, w, h);
+    }
+
+    // Older TV GPUs cannot nest shaders. Isolate just the fading strip to
+    // multiply the artwork's alpha without changing the underlying guide.
+    private void drawInStrips(Canvas canvas, int w, int h) {
+        int split = (int) (h * FADE_START);
+        int upper = canvas.save();
+        canvas.clipRect(0, 0, w, split);
+        drawContent(canvas, w, h);
+        canvas.restoreToCount(upper);
+
+        int lower = canvas.save();
+        canvas.clipRect(0, split, w, h);
+        canvas.saveLayer(0, split, w, h, null);
+        drawContent(canvas, w, h);
+        paint.setXfermode(KEEP_ALPHA);
+        fill(canvas, fade, w, h);
+        paint.setXfermode(null);
+        canvas.restoreToCount(lower);
+    }
+
+    @Override protected void onDraw(Canvas canvas) {
+        Drawable drawable = getDrawable();
+        int w = getWidth(), h = getHeight();
+        if (drawable == null || w <= 0 || h <= 0) return;
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap image = ((BitmapDrawable) drawable).getBitmap();
+            if (image != null && (image != prepared || w != preparedWidth || h != preparedHeight))
+                frame(image, w, h);
+        }
+        if (composite != null) fill(canvas, composite, w, h);
+        else drawInStrips(canvas, w, h);
+        paint.setShader(null);
     }
 
     void show(String url) {
@@ -137,7 +174,7 @@ final class VelaGuideBackdrop extends ImageView {
     }
 
     @Override public void setImageDrawable(Drawable drawable){
-        prepared=null;ambient=null;photo=null;edges=null;
+        prepared=null;photo=null;edges=null;composite=null;
         super.setImageDrawable(drawable);
     }
 }

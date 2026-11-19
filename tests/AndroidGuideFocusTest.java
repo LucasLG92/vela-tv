@@ -115,13 +115,24 @@ public final class AndroidGuideFocusTest extends Instrumentation {
         banner.draw(new Canvas(rendered));
         check(rendered.getPixel(w/2,h+30)==Color.TRANSPARENT,"Programme still spilled over the timetable");
         int left=Color.red(rendered.getPixel(w/5,h/2)),right=Color.red(rendered.getPixel(w*78/100,h/2));
-        check(left<55&&right>190&&Color.red(rendered.getPixel(w-2,h-1))<22,"Header does not fade behind text or into the grid");
+        check(left<55&&right>190,"Header text or programme picture lost contrast");
+        for(int col:new int[]{0,w/4,w/2,3*w/4,w-1}){
+            check(Color.alpha(rendered.getPixel(col,h-1))==0,"Opaque seam above the first channel");
+            check(Color.alpha(rendered.getPixel(col,h-8))<12,"Abrupt end to the header fade");
+        }
         Rect shape=new Rect();int[] scan=new int[w];
         for(int row=1;row<h-1;row++){
             rendered.getPixels(scan,0,w,0,row,w,1);
-            for(int col=w/2;col<w;col++)if(Color.green(scan[col])-Color.red(scan[col])>50)shape.union(col,row,col+1,row+1);
+            for(int col=w/2;col<w;col++)if(Color.alpha(scan[col])>128&&Color.green(scan[col])-Color.red(scan[col])>50)shape.union(col,row,col+1,row+1);
         }
         check(shape.width()>7&&Math.abs(shape.width()-shape.height())<3&&shape.centerY()<h/4,"Programme picture stretched or lost its focal point: "+shape);
+        // An intrinsic-size-free drawable also exercises the bounded-layer fallback.
+        banner.setImageDrawable(new android.graphics.drawable.ColorDrawable(0xff303642));
+        Canvas themed=new Canvas(rendered);
+        themed.drawColor(0xff273348);
+        banner.draw(themed);
+        check(rendered.getPixel(w/2,h/2)!=0xff273348,"Fallback drawable did not render");
+        check(rendered.getPixel(w/2,h-1)==0xff273348,"Fallback left a seam on a coloured theme");
         banner.release();rendered.eraseColor(Color.TRANSPARENT);banner.draw(new Canvas(rendered));
         check(rendered.getPixel(w/2,h/2)==Color.TRANSPARENT,"Missing EPG image left a stale backdrop");
         rendered.recycle();source.recycle();

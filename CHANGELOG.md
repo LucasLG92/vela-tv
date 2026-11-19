@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.7.3-preview
+
+- Programme artwork now fades into the background behind the time ruler and first channel row in both Full and Lite.
+- [Programme guide artwork](guide/releases/2.7.3-preview.md).
+
 ## 2.7.2-preview
 
 - Fix the previous channel’s programme appearing over live TV after switching channels with Right on the remote. The current title, remaining time and upcoming programme now follow the channel being played across guide refreshes.
