@@ -1,5 +1,19 @@
 [
   {
+    "tag_name": "v2.6.2-preview",
+    "draft": false,
+    "prerelease": true,
+    "assets": [
+      {
+        "name": "Vela-2.6.2-preview.apk",
+        "state": "uploaded",
+        "size": 5097965,
+        "digest": "sha256:6e782e0c4a7ed32ef84a9626c50fb65a45e1b2ada2c080f5815593145b7bad32",
+        "browser_download_url": "https://github.com/LucasLG92/vela-tv/releases/download/v2.6.2-preview/Vela-2.6.2-preview.apk"
+      }
+    ]
+  },
+  {
     "tag_name": "v2.6.1-preview",
     "draft": false,
     "prerelease": true,
