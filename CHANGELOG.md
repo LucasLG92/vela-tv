@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.7.2-preview
+
+- Fix the previous channel’s programme appearing over live TV after switching channels with Right on the remote. The current title, remaining time and upcoming programme now follow the channel being played across guide refreshes.
+- [Live TV channel switching hotfix](guide/releases/2.7.2-preview.md).
+
 ## 2.7.1-preview
 
 - Fix blank programme artwork on TVs configured with the public dobleM text guide. Vela fetches the artwork edition on the next guide refresh and keeps the previous listings available while it updates.

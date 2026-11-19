@@ -84,7 +84,7 @@ public class LiveTvActivity extends Activity {
         groupList.setAdapter(groupAdapter);groupList.setOnItemClickListener((parent,view,position,id)->{group=groups.get(position).id;page=0;query="";timelineOffset=0;selected=null;renderPage(0,false);});
         grid=new FrameLayout(this);grid.setClipChildren(false);put(stage,grid,452,278,1392,594);
         timeline=new TvTimelineView(this,new TvTimelineView.Actions(){
-            public void selected(LiveTvData.Channel ch,LiveTvData.Programme p){LiveTvActivity.this.selected=ch;timelineSelection(ch,p);}
+            public void selected(LiveTvData.Channel ch,LiveTvData.Programme p){if(playback!=null)return;LiveTvActivity.this.selected=ch;timelineSelection(ch,p);}
             public void activate(LiveTvData.Channel ch,LiveTvData.Programme p){if(p==null||p.current(System.currentTimeMillis()/1000))play(ch);else showUpcoming(ch,p);}
             public void options(LiveTvData.Channel ch){toggleFavorite(ch);}
             public boolean channels(int direction){return timelineChannels(direction,true);}
@@ -252,7 +252,12 @@ public class LiveTvActivity extends Activity {
     }
     private void updateSelection(){updateSelection(System.currentTimeMillis()/1000);}
     private void updateSelection(long now){
-        if(timelineMode&&playback==null&&selected!=null){timelineSelection(selected,timeline.programme());return;}if(selected==null){selection.setText("");nowNext.setText("");return;}selection.setText(displayName(selected.name)+" · "+categoryName(selected.group));LiveTvData.Guide entry=guide.get(selected.id);LiveTvData.Programme current=entry==null?null:entry.current(now);
+        LiveTvData.Channel channel=playback==null?selected:playback.selected;
+        if(channel==null){selection.setText("");nowNext.setText("");return;}
+        if(timelineMode&&playback==null){timelineSelection(channel,timeline.programme());return;}
+        selection.setText(displayName(channel.name)+" · "+categoryName(channel.group));
+        LiveTvData.Guide entry=guide.get(channel.id);
+        LiveTvData.Programme current=entry==null?null:entry.current(now);
         String line=current!=null?time(current.start)+"–"+time(current.end)+"  "+current.title:t("Programação não disponível","Programme guide unavailable","Programación no disponible");
         if(entry!=null&&entry.next!=null&&entry.next.start>now)line+="   ·   "+time(entry.next.start)+"  "+entry.next.title;nowNext.setText(line);
         if(playback!=null){playback.metadata(current,entry==null?null:entry.next);if(entry!=null&&entry.next!=null&&entry.next.start<=now&&!guideLoading&&SystemClock.elapsedRealtime()-guideAt>=15000)loadGuide();}
