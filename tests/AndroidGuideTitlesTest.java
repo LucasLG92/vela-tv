@@ -85,13 +85,43 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             ByteArrayOutputStream bytes=new ByteArrayOutputStream();
             try(GZIPOutputStream gzip=new GZIPOutputStream(bytes)){gzip.write(raw);}
             int[] calls={0};
-            RefinementHttp.install(url->{calls[0]++;return bytes.toByteArray();},Collections.singleton("raw.githubusercontent.com"));
+            boolean[] failFanart={false};
+            List<String> requests=new ArrayList<>();
+            RefinementHttp.install(url->{
+                calls[0]++;requests.add(url.toString());
+                if(failFanart[0]&&url.toString().equals(XmlTvGuide.DEFAULT_URL))return null;
+                return bytes.toByteArray();
+            },Collections.singleton("raw.githubusercontent.com"));
             equal(expected[0],full.guide(channels).get(channels.get(0).id).now.title);
             if(!lite.refresh(channels,new CancellationSignal()))throw new AssertionError("Legacy antenna cache stayed fresh");
             equal(expected[0],lite.read(channels,now,now+900,new CancellationSignal()).get(channels.get(0).id).get(0).title);
             full.guide(channels);lite.refresh(channels,new CancellationSignal());
             if(calls[0]!=2)throw new AssertionError("Unexpected refresh count "+calls[0]);
-            result.putString("result","PASS three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
+            String plain="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiatv.xml";
+            equal(XmlTvGuide.DEFAULT_URL,XmlTvGuide.artworkFeed(plain+".gz"));
+            for(String custom:Arrays.asList("",plain+"?key=example","https://example.invalid/guiatv.xml",XmlTvGuide.DEFAULT_URL))
+                equal(custom,XmlTvGuide.artworkFeed(custom));
+            full.configure(plain);
+            String station=channels.get(0).id;
+            full.importGuide(new ByteArrayInputStream(raw),LiveTvData.hash(plain),now);
+            try(SQLiteDatabase db=SQLiteDatabase.openDatabase(fullDb.getPath(),null,SQLiteDatabase.OPEN_READWRITE)){
+                db.execSQL("UPDATE programmes SET image=''");
+            }
+            requests.clear();failFanart[0]=true;
+            equal(expected[0],full.guide(channels).get(station).now.title);
+            equal("",full.window(channels,now).get(station).get(0).image);
+            full.guide(channels);
+            if(!requests.equals(Collections.singletonList(XmlTvGuide.DEFAULT_URL)))throw new AssertionError("Warm cache or retry throttle lost");
+            failFanart[0]=false;full.invalidate();
+            equal(image,full.guide(channels).get(station).now.image);
+            equal(image,full.window(channels,now).get(station).get(0).image);
+            full.guide(channels);
+            if(requests.size()!=2)throw new AssertionError("Unnecessary second artwork import");
+            failFanart[0]=true;requests.clear();full.configure(plain+".gz");
+            equal(expected[0],full.guide(channels).get(station).now.title);
+            if(!requests.equals(Arrays.asList(XmlTvGuide.DEFAULT_URL,plain+".gz")))throw new AssertionError("Missing cold-cache schedule fallback");
+            equal(plain+".gz",full.url());
+            result.putString("result","PASS legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
         }catch(Exception|AssertionError failure){result.putString("error",android.util.Log.getStackTraceString(failure));}
         finally{
             SQLiteDatabase.deleteDatabase(fullDb);SQLiteDatabase.deleteDatabase(liteDb);

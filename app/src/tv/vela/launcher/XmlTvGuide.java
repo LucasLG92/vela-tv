@@ -34,14 +34,57 @@ final class XmlTvGuide {
         VelaDiscovery.ensureArtwork(db);
         db.execSQL("CREATE INDEX IF NOT EXISTS programme_time ON programmes(channel,start,end)");
     }
+    private static final String PLAIN_GUIDE="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiatv.xml";
+    static String artworkFeed(String configured){
+        // Only these public schedules are known to share channel IDs and programme times.
+        return PLAIN_GUIDE.equals(configured)||(PLAIN_GUIDE+".gz").equals(configured)?DEFAULT_URL:configured;
+    }
+    private void downloadGuide(String address,String source,long now)throws Exception{
+        File folder=new File(context.getCacheDir(),"tv-guide");
+        File file=File.createTempFile("xmltv-",".part",folder);
+        try{
+            LiveTvData.download(address,file,MAX_BYTES);
+            try(InputStream input=new FileInputStream(file)){importGuide(input,source,now/1000);}
+        }finally{file.delete();}
+    }
     Map<String,LiveTvData.Guide> guide(List<LiveTvData.Channel> visible)throws Exception{
-        String address=url();if(address.isEmpty()||visible.isEmpty())return Collections.emptyMap();String source=LiveTvData.hash(address),attemptSource="titles-v2|"+source;synchronized(XmlTvGuide.class){
-            long now=System.currentTimeMillis(),updated=0;String cached="";try(SQLiteDatabase db=open();Cursor row=db.rawQuery("SELECT source,updated FROM meta WHERE id=1",null)){if(row.moveToFirst()){cached=row.getString(0);updated=row.getLong(1);}}
-            boolean fresh=!settings.getBoolean("refresh",false)&&cached.equals(source)&&now-updated>=0&&now-updated<4*3600_000L;
-            if(!fresh&&(!attemptSource.equals(settings.getString("attempt-source",""))||now-settings.getLong("attempt",0)>15*60_000||now<settings.getLong("attempt",0))){
-                settings.edit().putBoolean("refresh",false).putString("attempt-source",attemptSource).putLong("attempt",now).commit();File[] leftover=new File(context.getCacheDir(),"tv-guide").listFiles((folder,name)->(name.startsWith("xmltv-")||name.startsWith("fetch-"))&&name.endsWith(".part"));if(leftover!=null)for(File old:leftover)if(old.isFile())old.delete();File file=File.createTempFile("xmltv-",".part",new File(context.getCacheDir(),"tv-guide"));try{LiveTvData.download(address,file,MAX_BYTES);try(InputStream input=new FileInputStream(file)){importGuide(input,source,now/1000);}cached=source;}catch(Exception failed){if(Thread.currentThread().isInterrupted()){settings.edit().putBoolean("refresh",true).remove("attempt").remove("attempt-source").commit();throw failed;}}finally{file.delete();}
+        String address=url();
+        if(address.isEmpty()||visible.isEmpty())return Collections.emptyMap();
+        String preferred=artworkFeed(address),source=LiveTvData.hash(address);
+        boolean upgrade=!address.equals(preferred);
+        String attemptSource=(upgrade?"fanart-v1|":"titles-v2|")+source;
+        synchronized(XmlTvGuide.class){
+            long now=System.currentTimeMillis(),updated=0;
+            String cached="";
+            try(SQLiteDatabase db=open();Cursor row=db.rawQuery("SELECT source,updated FROM meta WHERE id=1",null)){
+                if(row.moveToFirst()){cached=row.getString(0);updated=row.getLong(1);}
             }
-            if(!cached.equals(source))return Collections.emptyMap();return read(visible,now/1000);
+            boolean recent=cached.equals(source)&&now>=updated&&now-updated<4*3600_000L;
+            boolean needsArtwork=upgrade&&!source.equals(settings.getString("artwork-source",""));
+            long lastAttempt=settings.getLong("attempt",0);
+            boolean retry=!attemptSource.equals(settings.getString("attempt-source",""))||now-lastAttempt>15*60_000||now<lastAttempt;
+            if((!recent||needsArtwork||settings.getBoolean("refresh",false))&&retry){
+                settings.edit().putBoolean("refresh",false).putString("attempt-source",attemptSource).putLong("attempt",now).commit();
+                File[] leftover=new File(context.getCacheDir(),"tv-guide").listFiles((folder,name)->(name.startsWith("xmltv-")||name.startsWith("fetch-"))&&name.endsWith(".part"));
+                if(leftover!=null)for(File old:leftover)if(old.isFile())old.delete();
+                try{
+                    try{
+                        downloadGuide(preferred,source,now);
+                        if(upgrade)settings.edit().putString("artwork-source",source).apply();
+                    }catch(Exception unavailable){
+                        if(!upgrade||recent||Thread.currentThread().isInterrupted())throw unavailable;
+                        downloadGuide(address,source,now);
+                        settings.edit().remove("artwork-source").apply();
+                    }
+                    cached=source;
+                }catch(Exception failed){
+                    if(Thread.currentThread().isInterrupted()){
+                        settings.edit().putBoolean("refresh",true).remove("attempt").remove("attempt-source").commit();
+                        throw failed;
+                    }
+                }
+            }
+            return cached.equals(source)?read(visible,now/1000):Collections.emptyMap();
         }
     }
     private static void bind(SQLiteStatement statement,String alias,String channel){statement.bindString(1,alias);statement.bindString(2,channel);statement.executeInsert();}

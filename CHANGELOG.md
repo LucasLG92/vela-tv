@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.7.1-preview
+
+- Fix blank programme artwork on TVs configured with the public dobleM text guide. Vela fetches the artwork edition on the next guide refresh and keeps the previous listings available while it updates.
+- [Guide artwork hotfix](guide/releases/2.7.1-preview.md).
+
 ## 2.7.0-preview
 
 - Home decodes YouTube and Prime Video marks for the TV resolution and reuses validated layout and profile preferences while navigating.
