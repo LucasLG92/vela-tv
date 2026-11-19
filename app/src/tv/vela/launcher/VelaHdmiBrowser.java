@@ -110,12 +110,6 @@ final class VelaHdmiBrowser extends FrameLayout {
         }
         initial=rows.get(choice);select(entries.get(choice),initial);
     }
-    void connectLayoutButton(View button){
-        button.setId(View.generateViewId());
-        button.setNextFocusDownId(initial.getId());
-        if(cinema){for(View row:rows)row.setNextFocusUpId(button.getId());}
-        else rows.get(0).setNextFocusUpId(button.getId());
-    }
     private void shade(GradientDrawable.Orientation direction,int[] colors){
         View scrim=new View(getContext());scrim.setBackground(new GradientDrawable(direction,colors));preview.addView(scrim,preview.indexOfChild(placeholder),new LayoutParams(-1,-1));
     }

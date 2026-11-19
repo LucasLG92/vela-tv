@@ -39,14 +39,18 @@ class LiteAntennaData {
         Map<String,List<LiveTvData.Programme>> result=new HashMap<>();
         for(LiveTvData.Channel channel:channels){
             if(cancel.isCanceled()||Thread.currentThread().isInterrupted())throw new InterruptedIOException();
-            long offset=VelaGuideFix.offset(context,channel.name);Uri uri=TvContract.buildProgramsUriForChannel(TvContract.buildChannelUri(channel.providerId),(from-offset)*1000,(to-offset)*1000);List<LiveTvData.Programme> rows=new ArrayList<>();
-            try(Cursor cursor=context.getContentResolver().query(uri,new String[]{"start_time_utc_millis","end_time_utc_millis","title","short_description"},null,null,"start_time_utc_millis ASC",cancel)){
-                for(int scanned=0;cursor!=null&&cursor.moveToNext()&&scanned++<128&&rows.size()<MAX_PROGRAMMES;){long start=cursor.getLong(0)/1000+offset,end=cursor.getLong(1)/1000+offset;String title=cursor.getString(2);if(start<to&&end>from&&end>start&&title!=null&&!title.trim().isEmpty())rows.add(new LiveTvData.Programme(start,end,trim(title,512),trim(cursor.getString(3),1600)));}
+            long offset=VelaGuideFix.offset(context,channel.name);
+            try{
+                result.put(channel.id,VelaAntennaListings.read(context.getContentResolver(),channel.providerId,from,to,offset,MAX_PROGRAMMES,cancel));
+            }catch(SecurityException unavailable){
+                // Some TVs allow channel tuning but restrict programme metadata.
             }
-            result.put(channel.id,rows);
         }
         Map<String,List<LiveTvData.Programme>> online=new LiteXmlTvGuide(context).read(channels,from,to,cancel);
-        for(LiveTvData.Channel channel:channels){List<LiveTvData.Programme> extra=online.get(channel.id);if(extra==null||extra.isEmpty())continue;List<LiveTvData.Programme> merged=new ArrayList<>(extra);for(LiveTvData.Programme nativeProgramme:result.getOrDefault(channel.id,Collections.emptyList())){boolean overlap=false;for(LiveTvData.Programme p:extra)if(p.start<nativeProgramme.end&&p.end>nativeProgramme.start){overlap=true;break;}if(!overlap)merged.add(nativeProgramme);}merged.sort(Comparator.comparingLong(p->p.start));result.put(channel.id,new ArrayList<>(merged.subList(0,Math.min(MAX_PROGRAMMES,merged.size()))));}
+        for(LiveTvData.Channel channel:channels){
+            List<LiveTvData.Programme> extra=online.get(channel.id);
+            if(extra!=null&&!extra.isEmpty())result.put(channel.id,VelaAntennaListings.merge(extra,result.getOrDefault(channel.id,Collections.emptyList()),MAX_PROGRAMMES));
+        }
         return result;
     }
     private static String trim(String value,int limit){if(value==null)return "";return value.substring(0,Math.min(value.length(),limit)).replaceAll("[\\p{Cntrl}&&[^\\n]]"," ").trim();}

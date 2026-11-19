@@ -44,6 +44,28 @@ public final class AndroidUnifiedTest extends Instrumentation {
         View target=control;check(target.isClickable(),"Inactive option "+label);
         ui(target::requestFocus);sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);waitForIdleSync();
     }
+    void chooseHdmi(Activity activity,TvInputs.Layout target)throws Exception{
+        View root=activity.findViewById(android.R.id.content);
+        check(title(root,"HDMI layout")==null,"The old Inputs layout button is still visible");
+        boolean lite=activity instanceof LiteHomeActivity;
+        CinemaHomeView home=lite?null:(CinemaHomeView)field(activity,"home");
+        Method show=LiteHomeActivity.class.getDeclaredMethod("show",int.class,boolean.class);show.setAccessible(true);
+        if(lite)ui(()->{try{show.invoke(activity,3,false);}catch(Exception e){throw new RuntimeException(e);}});
+        else ui(home::settings);
+        Object page=lite?field(activity,"settingsView"):field(((HomeScreenHost)field(home,"panels")).screen,"view");
+        View[] categories=(View[])field(page,"categories");
+        ui(categories[1]::requestFocus);
+        for(int key:new int[]{KeyEvent.KEYCODE_DPAD_RIGHT,KeyEvent.KEYCODE_DPAD_DOWN,KeyEvent.KEYCODE_DPAD_CENTER}){
+            sendKeyDownUpSync(key);waitForIdleSync();
+        }
+        int at=TvInputs.Layout.selected(context).ordinal(),goal=target.ordinal();
+        for(int i=0;i<Math.abs(at-goal);i++)sendKeyDownUpSync(goal>at?KeyEvent.KEYCODE_DPAD_DOWN:KeyEvent.KEYCODE_DPAD_UP);
+        sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);waitForIdleSync();
+        check(TvInputs.Layout.selected(context)==target,"Choosing a layout from Appearance did not save");
+        check(title(activity.getCurrentFocus(),"HDMI layout")!=null,"Focus did not return to the HDMI setting");
+        if(lite)ui(()->{try{show.invoke(activity,0,false);}catch(Exception e){throw new RuntimeException(e);}});
+        else ui(()->home.navigateSection(5));
+    }
     void verifyLiveStyle(Activity activity,VelaHdmiBrowser browser,boolean cinema)throws Exception{
         check(browser!=null&&browser.rows.size()==2,"Missing HDMI layout");
         ui(browser.rows.get(0)::requestFocus);
@@ -91,7 +113,7 @@ public final class AndroidUnifiedTest extends Instrumentation {
         check(priorArt||!new File(context.getCacheDir(),"plex-art").exists(),"Lite initialized multimedia artwork");for(Activity a:opened)if(a instanceof HomeActivity)check(field(a,"home")==null,"Lite constructed the Full home controller");
         Method preview=LiteHomeActivity.class.getDeclaredMethod("show",int.class,boolean.class);preview.setAccessible(true);final Activity previewLite=lite;ui(()->{try{preview.invoke(previewLite,0,false);}catch(Exception e){throw new RuntimeException(e);}});shot("02-lite");
         phase="hdmi-window";verifyLiveStyle(lite,(VelaHdmiBrowser)field(lite,"hdmi"),false);
-        press(lite,"HDMI layout");press(lite,"Cinema backdrop");
+        chooseHdmi(lite,TvInputs.Layout.CINEMA);
         phase="hdmi-cinema";verifyLiveStyle(lite,(VelaHdmiBrowser)field(lite,"hdmi"),true);
         check(TvInputs.Layout.selected(context)==TvInputs.Layout.CINEMA,"HDMI layout did not persist");
         VelaWorkspace.prefs(context,"lite_home").edit().putInt("start_section",2).commit();VelaWorkspace.prefs(context,"vela-remote").edit().putInt("voice_key",KeyEvent.KEYCODE_F6).commit();
@@ -109,11 +131,11 @@ public final class AndroidUnifiedTest extends Instrumentation {
             phase="full-hdmi";InputsScreen input=(InputsScreen)((HomeScreenHost)field(cinema,"panels")).screen;
             check(field(input,"hdmi")!=null,"Mode switch lost the selected HDMI layout");
             verifyLiveStyle(full,(VelaHdmiBrowser)field(input,"hdmi"),true);
-            press(full,"HDMI layout");press(full,"Preview window");
+            chooseHdmi(full,TvInputs.Layout.MONITOR);
             CinemaHomeView windowHome=(CinemaHomeView)field(full,"home");
             InputsScreen window=(InputsScreen)((HomeScreenHost)field(windowHome,"panels")).screen;
             verifyLiveStyle(full,(VelaHdmiBrowser)field(window,"hdmi"),false);
-            press(full,"HDMI layout");press(full,"Device cards");
+            chooseHdmi(full,TvInputs.Layout.CARDS);
             CinemaHomeView restored=(CinemaHomeView)field(full,"home");
             InputsScreen classic=(InputsScreen)((HomeScreenHost)field(restored,"panels")).screen;
             check(field(classic,"hdmi")==null&&TvInputs.Layout.selected(context)==TvInputs.Layout.CARDS,"Cards kept a preview session");

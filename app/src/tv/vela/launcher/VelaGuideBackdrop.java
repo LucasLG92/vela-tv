@@ -112,6 +112,13 @@ final class VelaGuideBackdrop extends ImageView {
         if (!next.isEmpty()) postDelayed(fetch, 140);
     }
 
+    @Override protected void onVisibilityChanged(android.view.View changed,int visibility){
+        super.onVisibilityChanged(changed,visibility);
+        if(fetch!=null&&visibility==VISIBLE&&requested!=null&&!requested.isEmpty()&&getDrawable()==null){
+            removeCallbacks(fetch);postDelayed(fetch,140);
+        }
+    }
+
     void release() {
         requested = "";
         removeCallbacks(fetch);

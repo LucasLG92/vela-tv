@@ -38,6 +38,7 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             String[] names={"La 2","Telecinco","24 horas"};
             String[] expected={"Serás para siempre","Love Shopping TV","Noticias 24H"};
             String next="Bora Bora & música";
+            String image="https://vela-fixture.invalid/art/programme.jpg";
             List<LiveTvData.Channel> channels=new ArrayList<>();StringBuilder xml=new StringBuilder("<tv>");
             for(int i=0;i<names.length;i++){
                 channels.add(new LiveTvData.Channel(i+1,"test",""+(i+1),names[i],false,true,false));
@@ -46,7 +47,7 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             Set<String> ids=new HashSet<>();
             for(int i=0;i<names.length;i++){
                 String id="c"+i;ids.add(id);
-                xml.append(programme(id,now-300,now+300,"<title lang='en'>"+expected[i]+"</title><title lang='es'>"+expected[i]+"</title>"));
+                xml.append(programme(id,now-300,now+300,"<title lang='en'>"+expected[i]+"</title><title lang='es'>"+expected[i]+"</title><icon src='"+image+"'/><rating><icon src='https://vela-fixture.invalid/age.png'/></rating>"));
                 xml.append(programme(id,now+300,now+900,"<title>  </title><title>Bora <![CDATA[Bora]]> &amp; [COLOR tomato]música[/COLOR]</title><title lang='fr'>Autre titre</title>"));
             }
             xml.append("</tv>");String document=xml.toString();byte[] raw=document.getBytes(StandardCharsets.UTF_8);
@@ -58,6 +59,14 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             Map<String,List<LiveTvData.Programme>> antenna=lite.read(channels,now,now+900,new CancellationSignal());
             for(int i=0;i<channels.size();i++){
                 String id=channels.get(i).id;LiveTvData.Guide guide=playlist.get("c"+i);
+                equal(image,guide.now.image);equal("",guide.next.image);
+                equal(image,antenna.get(id).get(0).image);
+                List<LiveTvData.Programme> listings=timetable.get(id);
+                LiveTvData.Programme nativeOnly=new LiveTvData.Programme(listings.get(0).start,listings.get(0).end,listings.get(0).title);
+                equal(image,VelaAntennaListings.merge(listings,Collections.singletonList(nativeOnly),32).get(0).image);
+                equal(image,VelaAntennaListings.merge(Collections.singletonList(nativeOnly),listings,32).get(0).image);
+                LiveTvData.Programme different=new LiveTvData.Programme(nativeOnly.start,nativeOnly.end,"Different show","",image);
+                equal("",VelaAntennaListings.merge(Collections.singletonList(nativeOnly),Collections.singletonList(different),32).get(0).image);
                 equal(expected[i],guide.now.title);equal(next,guide.next.title);
                 equal(expected[i],timetable.get(id).get(0).title);equal(next,timetable.get(id).get(1).title);
                 equal(expected[i],antenna.get(id).get(0).title);equal(next,antenna.get(id).get(1).title);

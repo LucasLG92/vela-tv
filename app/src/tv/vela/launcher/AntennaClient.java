@@ -48,20 +48,18 @@ final class AntennaClient {
     Map<String,LiveTvData.Guide> guide(List<LiveTvData.Channel> channels){
         Map<String,LiveTvData.Guide> result=new HashMap<>();long now=System.currentTimeMillis()/1000;int count=0;
         for(LiveTvData.Channel channel:channels){if(++count>LiveTvData.PAGE_SIZE||Thread.currentThread().isInterrupted())break;
-            try{long offset=VelaGuideFix.offset(context,channel.name);Uri uri=TvContract.buildProgramsUriForChannel(TvContract.buildChannelUri(Long.parseLong(channel.epgId)),(now-offset)*1000,(now+24*3600-offset)*1000);
-                try(Cursor c=context.getContentResolver().query(uri,new String[]{"start_time_utc_millis","end_time_utc_millis","title"},null,null,"start_time_utc_millis ASC")){
-                    LiveTvData.Guide entry=new LiveTvData.Guide();int scanned=0;while(c!=null&&c.moveToNext()&&scanned++<64){String title=c.getString(2);if(title!=null)entry.add(new LiveTvData.Programme(c.getLong(0)/1000+offset,c.getLong(1)/1000+offset,title.substring(0,Math.min(512,title.length()))),now);}
-                    if(entry.now!=null||entry.next!=null)result.put(channel.id,entry);
-                }
+            try{long offset=VelaGuideFix.offset(context,channel.name);
+                LiveTvData.Guide entry=new LiveTvData.Guide();
+                for(LiveTvData.Programme p:VelaAntennaListings.read(context.getContentResolver(),Long.parseLong(channel.epgId),now,now+24*3600,offset,64,null))entry.add(p,now);
+                if(entry.now!=null||entry.next!=null)result.put(channel.id,entry);
             }catch(Exception unavailable){/* A missing EPG never prevents tuning. */}
         }return result;
     }
     Map<String,List<LiveTvData.Programme>> window(List<LiveTvData.Channel> visible,long start){
         Map<String,List<LiveTvData.Programme>> result=new HashMap<>();int count=0;for(LiveTvData.Channel channel:visible){if(++count>TvTimelineView.ROWS||Thread.currentThread().isInterrupted())break;
-            try{long offset=VelaGuideFix.offset(context,channel.name);Uri uri=TvContract.buildProgramsUriForChannel(TvContract.buildChannelUri(Long.parseLong(channel.epgId)),(start-offset)*1000,(start+TvTimelineView.SECONDS-offset)*1000);
-                try(Cursor c=context.getContentResolver().query(uri,new String[]{"start_time_utc_millis","end_time_utc_millis","title"},null,null,"start_time_utc_millis ASC")){
-                    List<LiveTvData.Programme> list=new ArrayList<>();int scanned=0;while(c!=null&&scanned++<64&&list.size()<TvTimelineView.MAX_PROGRAMMES&&!Thread.currentThread().isInterrupted()&&c.moveToNext()){String title=c.getString(2);long from=c.getLong(0)/1000+offset,to=c.getLong(1)/1000+offset;if(title!=null&&to>start&&from<start+TvTimelineView.SECONDS&&to>from)list.add(new LiveTvData.Programme(from,to,title.substring(0,Math.min(512,title.length()))));}if(!list.isEmpty())result.put(channel.id,list);
-                }
+            try{long offset=VelaGuideFix.offset(context,channel.name);
+                List<LiveTvData.Programme> list=VelaAntennaListings.read(context.getContentResolver(),Long.parseLong(channel.epgId),start,start+TvTimelineView.SECONDS,offset,TvTimelineView.MAX_PROGRAMMES,null);
+                if(!list.isEmpty())result.put(channel.id,list);
             }catch(Exception unavailable){}
         }return result;
     }

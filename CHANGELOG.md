@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.4-preview
+
+- Keep the selected programme's real photo when combining XMLTV and antenna listings. M3U and supported Xtream listings can also supply programme images.
+- Choose the HDMI layout with the remote in Settings → Appearance in either mode. Remove the extra layout button from Inputs and fix focus cleanup when leaving the device cards.
+
 ## 2.6.3-preview
 
 - Full and Lite give the programme guide a full-width artwork header. A gradient protects the programme information and the schedule stays clear below it.
