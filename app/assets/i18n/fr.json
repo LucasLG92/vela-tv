@@ -1513,5 +1513,14 @@
   "On now, favourite channels, the previous channel and the full programme guide.": "En cours, chaînes favorites, chaîne précédente et guide complet.",
   "Connected HDMI devices and shortcuts to your installed apps.": "Appareils HDMI connectés et raccourcis vers vos applications installées.",
   "Continue watching and recently added titles from Plex and Jellyfin.": "Reprenez vos lectures et découvrez les ajouts récents sur Plex et Jellyfin.",
-  "All apps": "Toutes les applications"
+  "All apps": "Toutes les applications",
+  "HDMI layout": "Présentation des entrées HDMI",
+  "Choose how HDMI inputs appear for this profile.": "Choisissez la présentation des entrées HDMI pour ce profil.",
+  "Device cards": "Cartes des appareils",
+  "Browse inputs with their device icons.": "Repérez chaque appareil grâce à son icône.",
+  "Preview window": "Aperçu en fenêtre",
+  "Choose an input beside its live picture.": "Choisissez une entrée pour voir son image à côté.",
+  "Cinema backdrop": "Fond cinéma",
+  "Browse ports over the selected input’s picture.": "Parcourez les entrées avec l’image sélectionnée en arrière-plan.",
+  "Preview unavailable": "Aperçu indisponible"
 }

@@ -1,5 +1,5 @@
 package tv.vela.launcher;
-import android.app.*;import android.content.*;import android.view.*;import java.util.*;
+import android.widget.ListView;import android.app.*;import android.content.*;import android.view.*;import java.util.*;
 public final class AndroidDiscoveryUiTest extends DiscoveryUiContract {
     private String priorMode;private HomeActivity home;private CinemaHomeView scene;private final List<LiveTvData.Channel> stations=new ArrayList<>();
     public void finish(int code,android.os.Bundle results){if("lite".equals(priorMode))VelaEdition.select(context,"lite");super.finish(code,results);}
@@ -33,7 +33,9 @@ public final class AndroidDiscoveryUiTest extends DiscoveryUiContract {
         await(()->!((Map<?,?>)field(guide,"programmes")).isEmpty());
         ui(guide::requestFocus);
         android.widget.ImageView art=(android.widget.ImageView)field(field(scene,"liveTv"),"guideBackdrop");
-        await(()->art.getDrawable()!=null);shot("guia");
+        await(()->art.getDrawable()!=null);
+        check(art.getScaleType()==android.widget.ImageView.ScaleType.FIT_CENTER&&art.getWidth()*9==art.getHeight()*16,"Programme artwork cropped in the guide");
+        shot("guia");
         TvTimelineView grid=(TvTimelineView)guide;LiveTvData.Programme current=grid.programme();
         check(current!=null,"Missing live selection");
         sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT);
@@ -45,6 +47,12 @@ public final class AndroidDiscoveryUiTest extends DiscoveryUiContract {
     }
     private void galleryTvMode(boolean guide){LiveTvData.guideView(context,guide);try{((HomeLiveTvView)field(scene,"liveTv")).resume();}catch(Exception error){throw new RuntimeException(error);}}
     protected void television(){scene.navigateSection(6);}
+    protected void verifyGuideEntry()throws Exception{
+        ListView categories=(ListView)field(field(scene,"liveTv"),"categoryList");
+        check(categories.hasFocus(),"Guide stole focus from categories during startup");
+        key(KeyEvent.KEYCODE_DPAD_DOWN);check(categories.hasFocus(),"Cannot browse categories");
+        key(KeyEvent.KEYCODE_DPAD_UP);
+    }
     protected View discoverButton()throws Exception{Object tv=field(scene,"liveTv");return tv==null?null:(View)field(tv,"discoverAction");}
     protected View timeline()throws Exception{return (View)field(field(scene,"liveTv"),"timeline");}
     protected VelaWidgets.Strip widgets()throws Exception{return (VelaWidgets.Strip)field(scene,"headerStatus");}

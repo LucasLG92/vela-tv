@@ -15,24 +15,60 @@ import org.json.*;
 public final class AndroidUnifiedTest extends Instrumentation {
     private Context context;private final Bundle result=new Bundle();private String phase="setup";
     private final List<Activity> opened=new ArrayList<>();
-    public static final class Lite extends LiteHomeActivity {
-        protected boolean allowAutomaticChecks(){return false;}
-        protected TvInputs.Source createInputsSource(){return new TvInputs.Source(){
+    static TvInputs.Source fixtureInputs(){return new TvInputs.Source(){
             public List<TvInputs.Entry> read(){return Arrays.asList(new TvInputs.Entry("fixture-hdmi-1","fixture-hdmi-1","HDMI 1","Nintendo Switch","switch",TvInputs.CONNECTED,false),new TvInputs.Entry("fixture-hdmi-2","fixture-hdmi-2","HDMI 2","Computer","pc",TvInputs.CONNECTED,false));}
             public void start(Runnable changed){}public void stop(){}
         };}
+    public static final class Lite extends LiteHomeActivity {
+        protected boolean allowAutomaticChecks(){return false;}
+        protected TvInputs.Source createInputsSource(){return fixtureInputs();}
+    }
+    public static final class Full extends HomeActivity {
+        @Override TvInputs.Source createInputsSource(){return fixtureInputs();}
     }
     @Override public Activity newActivity(ClassLoader loader,String name,Intent intent)throws InstantiationException,IllegalAccessException,ClassNotFoundException{
-        Activity a=name.equals(LiteHomeActivity.class.getName())?new Lite():super.newActivity(loader,name,intent);opened.add(a);return a;
+        Activity a=name.equals(LiteHomeActivity.class.getName())?new Lite():name.equals(HomeActivity.class.getName())?new Full():super.newActivity(loader,name,intent);opened.add(a);return a;
     }
     interface Ready{boolean get()throws Exception;}
     void check(boolean value,String detail){if(!value)throw new AssertionError(detail);}
     void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
     void await(Ready ready)throws Exception{long end=SystemClock.elapsedRealtime()+18000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(ready.get())return;Thread.sleep(80);}throw new AssertionError("Timeout "+phase);}
     Object field(Object target,String name)throws Exception{for(Class<?> c=target.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(target);}catch(NoSuchFieldException ignored){}throw new NoSuchFieldException(name);}
-    Activity foreground(String name)throws Exception{final Activity[] found={null};await(()->{for(Activity a:opened)if(a.getClass().getName().equals(name)||a instanceof Lite&&name.equals(LiteHomeActivity.class.getName()))if(a.hasWindowFocus()&&!a.isFinishing()){found[0]=a;return true;}return false;});return found[0];}
-    View title(View root,String text){if(root instanceof TextView&&((TextView)root).getText().toString().equals(text))return root;if(root instanceof ViewGroup)for(int i=0;i<((ViewGroup)root).getChildCount();i++){View v=title(((ViewGroup)root).getChildAt(i),text);if(v!=null)return v;}return null;}
+    Activity foreground(String name)throws Exception{final Activity[] found={null};await(()->{for(Activity a:opened)if(a.getClass().getName().equals(name)||a instanceof Full&&name.equals(HomeActivity.class.getName())||a instanceof Lite&&name.equals(LiteHomeActivity.class.getName()))if(a.hasWindowFocus()&&!a.isFinishing()){found[0]=a;return true;}return false;});return found[0];}
+    View title(View root,String text){if(root instanceof TextView){String value=((TextView)root).getText().toString();if(value.equals(text)||value.startsWith(text+"\n"))return root;}if(root instanceof ViewGroup)for(int i=0;i<((ViewGroup)root).getChildCount();i++){View v=title(((ViewGroup)root).getChildAt(i),text);if(v!=null)return v;}return null;}
     void card(Activity a,String title)throws Exception{View label=title(a.findViewById(android.R.id.content),title);check(label!=null,"Missing card "+title);ui(()->((View)label.getParent()).performClick());}
+    void press(Activity a,String label){
+        View control=title(a.findViewById(android.R.id.content),label);
+        check(control!=null,"Missing option "+label);
+        while(!control.isClickable()&&control.getParent() instanceof View)control=(View)control.getParent();
+        View target=control;check(target.isClickable(),"Inactive option "+label);
+        ui(target::requestFocus);sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);waitForIdleSync();
+    }
+    void verifyLiveStyle(Activity activity,VelaHdmiBrowser browser,boolean cinema)throws Exception{
+        check(browser!=null&&browser.rows.size()==2,"Missing HDMI layout");
+        ui(browser.rows.get(0)::requestFocus);
+        sendKeyDownUpSync(cinema?KeyEvent.KEYCODE_DPAD_RIGHT:KeyEvent.KEYCODE_DPAD_DOWN);waitForIdleSync();
+        check(browser.rows.get(1).hasFocus(),"Input navigation lost focus");
+        await(()->title(activity.findViewById(android.R.id.content),"Preview unavailable")!=null);
+        check(field(browser,"video")==null,"Unsupported input held a session");
+        sendKeyDownUpSync(cinema?KeyEvent.KEYCODE_DPAD_LEFT:KeyEvent.KEYCODE_DPAD_UP);waitForIdleSync();
+        check(browser.rows.get(0).hasFocus(),"Cannot return to first input");
+        await(()->title(activity.findViewById(android.R.id.content),"Preview unavailable")!=null);
+        shot(cinema?"hdmi-cinema":"hdmi-monitor");
+        final Intent[] launched={null};
+        ActivityMonitor open=new ActivityMonitor(){
+            @Override public ActivityResult onStartActivity(Intent intent){
+                launched[0]=intent;return new ActivityResult(Activity.RESULT_CANCELED,null);
+            }
+        };
+        addMonitor(open);
+        try{
+            check(browser.rows.get(0).hasFocus(),"Focus left selected HDMI after preview failure");
+            sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);waitForIdleSync();
+            await(()->launched[0]!=null);
+            check(Intent.ACTION_VIEW.equals(launched[0].getAction())&&android.media.tv.TvContract.buildChannelUriForPassthroughInput("fixture-hdmi-1").equals(launched[0].getData()),"OK opened the wrong HDMI");
+        }finally{removeMonitor(open);}
+    }
     void shot(String name)throws Exception{Thread.sleep(350);Bitmap image=getUiAutomation().takeScreenshot();check(image!=null,"No native screenshot");try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),"unified-api"+Build.VERSION.SDK_INT+"-"+name+".png"))){image.compress(Bitmap.CompressFormat.PNG,100,out);}finally{image.recycle();}}
     @Override public void onCreate(Bundle args){super.onCreate(args);start();}
     @Override public void onStart(){context=getTargetContext();try{
@@ -47,10 +83,17 @@ public final class AndroidUnifiedTest extends Instrumentation {
         check(devices!=null&&devices.isFocusable()&&VelaEdition.mode(context).isEmpty(),"Preview committed a mode early");
         check(title(chooser.findViewById(android.R.id.content),"Library")==null,"Lite offered a media library");
         ui(devices::requestFocus);shot("01b-layout");
-        ui(devices::performClick);check(VelaLayout.DEVICES.equals(VelaLayout.start(context)),"Layout not persisted");
+        ui(devices::performClick);check(VelaEdition.mode(context).isEmpty(),"HDMI layout step committed the install early");
+        sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);waitForIdleSync();press(chooser,"HDMI and apps");
+        check(title(chooser.findViewById(android.R.id.content),"Device cards")!=null,"Classic layout missing in setup");
+        shot("hdmi-choose");press(chooser,"Preview window");check(VelaLayout.DEVICES.equals(VelaLayout.start(context)),"Layout not persisted");
         Activity lite=foreground(LiteHomeActivity.class.getName());check(VelaEdition.lite(context)&&field(lite,"shell")!=null,"Lite controller did not start");
         check(priorArt||!new File(context.getCacheDir(),"plex-art").exists(),"Lite initialized multimedia artwork");for(Activity a:opened)if(a instanceof HomeActivity)check(field(a,"home")==null,"Lite constructed the Full home controller");
         Method preview=LiteHomeActivity.class.getDeclaredMethod("show",int.class,boolean.class);preview.setAccessible(true);final Activity previewLite=lite;ui(()->{try{preview.invoke(previewLite,0,false);}catch(Exception e){throw new RuntimeException(e);}});shot("02-lite");
+        phase="hdmi-window";verifyLiveStyle(lite,(VelaHdmiBrowser)field(lite,"hdmi"),false);
+        press(lite,"HDMI layout");press(lite,"Cinema backdrop");
+        phase="hdmi-cinema";verifyLiveStyle(lite,(VelaHdmiBrowser)field(lite,"hdmi"),true);
+        check(TvInputs.Layout.selected(context)==TvInputs.Layout.CINEMA,"HDMI layout did not persist");
         VelaWorkspace.prefs(context,"lite_home").edit().putInt("start_section",2).commit();VelaWorkspace.prefs(context,"vela-remote").edit().putInt("voice_key",KeyEvent.KEYCODE_F6).commit();
         // Same DVB alias and correction keys as the old Lite package.
         LiveTvData.Channel channel=new LiveTvData.Channel(37,"fixture-input","7","TDP HD",false,true,false,"network:service");
@@ -63,14 +106,25 @@ public final class AndroidUnifiedTest extends Instrumentation {
             CinemaHomeView cinema=(CinemaHomeView)field(full,"home");
             await(()->title(full.findViewById(android.R.id.content),"All apps")!=null);
             check(cinema.navigationDestination()==0,"Full HDMI preset did not stay under Home");
+            phase="full-hdmi";InputsScreen input=(InputsScreen)((HomeScreenHost)field(cinema,"panels")).screen;
+            check(field(input,"hdmi")!=null,"Mode switch lost the selected HDMI layout");
+            verifyLiveStyle(full,(VelaHdmiBrowser)field(input,"hdmi"),true);
+            press(full,"HDMI layout");press(full,"Preview window");
+            CinemaHomeView windowHome=(CinemaHomeView)field(full,"home");
+            InputsScreen window=(InputsScreen)((HomeScreenHost)field(windowHome,"panels")).screen;
+            verifyLiveStyle(full,(VelaHdmiBrowser)field(window,"hdmi"),false);
+            press(full,"HDMI layout");press(full,"Device cards");
+            CinemaHomeView restored=(CinemaHomeView)field(full,"home");
+            InputsScreen classic=(InputsScreen)((HomeScreenHost)field(restored,"panels")).screen;
+            check(field(classic,"hdmi")==null&&TvInputs.Layout.selected(context)==TvInputs.Layout.CARDS,"Cards kept a preview session");
             shot("04-full");
             VelaLayout.save(context,VelaLayout.preset(VelaLayout.read(context),VelaLayout.TELEVISION),true);
             LiveTvData.guideView(context,false);
-            ui(cinema::reset);
+            ui(restored::reset);
             View guide=title(full.findViewById(android.R.id.content),"Programme guide");
-            check(guide!=null&&cinema.navigationDestination()==0,"Television Home has no guide shortcut");
+            check(guide!=null&&restored.navigationDestination()==0,"Television Home has no guide shortcut");
             ui(guide::performClick);
-            check(cinema.navigationDestination()==6&&(Boolean)field(field(cinema,"liveTv"),"guideMode"),"Guide shortcut did not open the guide");
+            check(restored.navigationDestination()==6&&(Boolean)field(field(restored,"liveTv"),"guideMode"),"Guide shortcut did not open the guide");
             check(!LiveTvData.guideView(context),"Guide shortcut changed the TV display preference");
             VelaLayout.save(context,VelaLayout.previous(context),true);
             check(context.getSharedPreferences("plex",0).getString("accountToken","").equals("synthetic-retained-session"),"Mode switch deleted an account");
@@ -92,8 +146,8 @@ public final class AndroidUnifiedTest extends Instrumentation {
         phase="settings-pin";VelaSessions.setPin(context,"2468");VelaSessions.lock();boolean locked=false;try{VelaEdition.select(context,"lite");}catch(IllegalStateException expected){locked=true;}check(locked,"Mode selection bypassed the settings PIN");VelaSessions.unlock(context,"2468");VelaSessions.prefs(context).edit().clear().commit();
         phase="unified-update-channel";String hash=String.join("",Collections.nCopies(64,"a"));JSONObject a=new JSONObject().put("tag_name","v2.0.1-preview").put("draft",false).put("prerelease",true).put("assets",new JSONArray().put(new JSONObject().put("name","Vela-2.0.1-preview.apk").put("browser_download_url",LiteReleaseFeed.REPO+"/releases/download/v2.0.1-preview/Vela-2.0.1-preview.apk").put("state","uploaded").put("size",2000).put("digest","sha256:"+hash)));
         LiteReleaseFeed.Release release=LiteReleaseFeed.newest(new JSONArray().put(a),"2.0.0-preview",true,true);check(release!=null&&release.json().getJSONArray("assets").getJSONObject(0).getString("name").equals("Vela-2.0.1-preview.apk"),"Unified Lite uses the legacy APK");check(LiteReleaseFeed.newest(new JSONArray().put(a),"0.18.0-preview",true)==null,"Legacy Lite accepted another package's feed");check(LiteUpdateManager.authority(context).equals("tv.vela.launcher.lite-updates"),"Installer provider collides with Full");
-        result.putString("result","PASS native first-run choices and saved presets, Home-to-guide routing, Lite controller without multimedia artwork, embedded mode settings, Android 8 Full refusal / modern reversible Full-Lite flow, saved profile/account retention, unchanged antenna identities/EPG fixes, HOME routing and unified-vs-legacy update channel. Owned emulator, synthetic data only.");
+        result.putString("result","PASS three HDMI layouts, remote selection, preview failure and native passthrough, per-profile mode persistence, native first-run choices and saved presets, Home-to-guide routing, Lite controller without multimedia artwork, embedded mode settings, Android 8 Full refusal / modern reversible Full-Lite flow, saved profile/account retention, unchanged antenna identities/EPG fixes, HOME routing and unified-vs-legacy update channel. Owned emulator, synthetic data only.");
     }catch(Throwable e){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(e));try{shot("failure");}catch(Exception ignored){}}
-    finally{try{for(Activity a:opened)if(!a.isFinishing())ui(a::finish);VelaSessions.prefs(context).edit().clear().commit();context.getSharedPreferences("plex",0).edit().remove("accountToken").commit();VelaEdition.prefs(context).edit().clear().commit();context.getSharedPreferences("personalization",0).edit().clear().commit();VelaLayout.prefs(context).edit().remove("document").remove("previous").commit();}catch(Exception ignored){}}
+    finally{try{for(Activity a:opened)if(!a.isFinishing())ui(a::finish);VelaSessions.prefs(context).edit().clear().commit();context.getSharedPreferences("plex",0).edit().remove("accountToken").commit();VelaEdition.prefs(context).edit().clear().commit();context.getSharedPreferences("personalization",0).edit().clear().commit();TvInputs.prefs(context).edit().remove("hdmi_layout").commit();VelaLayout.prefs(context).edit().remove("document").remove("previous").commit();}catch(Exception ignored){}}
     finish(result.containsKey("error")?1:-1,result);}
 }

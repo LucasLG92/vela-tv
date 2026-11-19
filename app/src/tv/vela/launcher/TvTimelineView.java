@@ -36,7 +36,7 @@ final class TvTimelineView extends FrameLayout {
     private Set<String> favoriteIds=Collections.emptySet();
     void favorites(Set<String> ids){favoriteIds=new HashSet<>(ids);invalidate();describe();}
     TvTimelineView(Context context,Actions actions){
-        super(context);this.actions=actions;setWillNotDraw(false);setFocusable(true);setFocusableInTouchMode(true);setClickable(true);setId(View.generateViewId());setDefaultFocusHighlightEnabled(false);
+        super(context);this.actions=actions;setWillNotDraw(false);setFocusableInTouchMode(true);setFocusable(false);setClickable(true);setId(View.generateViewId());setDefaultFocusHighlightEnabled(false);
         remote=new TvRemotePress(this,()->performClick(),()->performLongClick());
         setOnClickListener(v->{if(!channels.isEmpty())actions.activate(channels.get(row),programme());});
         setOnLongClickListener(v->{if(!channels.isEmpty())actions.options(channels.get(row));return true;});
@@ -46,7 +46,7 @@ final class TvTimelineView extends FrameLayout {
     void rowHeight(int pixels){rowHeight=Math.max(ROW,Math.min(180,pixels));requestLayout();invalidate();}
     void data(List<LiveTvData.Channel> visible,Map<String,List<LiveTvData.Programme>> values,long from,LiveTvData.Channel selected,boolean waiting){
         int count=Math.min(VelaReading.rows(getContext()),visible.size());boolean pageChanged=channels.size()!=count,sameRecords=!pageChanged;for(int i=0;i<Math.min(channels.size(),count);i++){pageChanged|=!channels.get(i).id.equals(visible.get(i).id);sameRecords&=channels.get(i)==visible.get(i);}
-        boolean changed=from!=start;Map<String,List<LiveTvData.Programme>> retained=waiting&&sameRecords&&!changed&&values.isEmpty()?programmes:values;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,count));programmes=retained;
+        boolean changed=from!=start;Map<String,List<LiveTvData.Programme>> retained=waiting&&sameRecords&&!changed&&values.isEmpty()?programmes:values;start=from;now=System.currentTimeMillis()/1000;loading=waiting;channels.clear();channels.addAll(visible.subList(0,count));programmes=retained;setFocusable(!channels.isEmpty());
         row=pageChanged?0:Math.max(0,Math.min(row,channels.size()-1));if(selected!=null)for(int i=0;i<channels.size();i++)if(channels.get(i).id.equals(selected.id))row=i;
         if(cursor<start||cursor>=start+SECONDS)cursor=Math.max(start,Math.min(start+SECONDS-1,now));
         invalidate();notifySelection();

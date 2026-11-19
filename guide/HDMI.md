@@ -1,6 +1,6 @@
 # Your HDMI devices, inside Vela
 
-Inputs shares Vela's sidebar, header, graphite palette and remote navigation. The selected device has a prominent brand icon, with connections arranged in a horizontal row.
+Inputs shares Vela's sidebar, header, graphite palette and remote navigation. Choose **Device cards**, **Preview window** or **Cinema backdrop** in **Settings → Appearance → HDMI layout**. The window places the signal beside a vertical list. The cinema view places the port selector over the image. Both preview only the highlighted connection, muted, when the TV shares its HDMI signal with apps. Press **OK** to open the input even when its preview is unavailable.
 
 - **OK:** open the input through Android.
 - **Hold OK:** choose a device family/model or return to Automatic.

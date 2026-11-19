@@ -112,7 +112,13 @@ public class LiveTvActivity extends Activity {
     private void load(boolean force){
         if(!active||closed)return;String now=LiveTvData.source(this);if(!now.equals(source)){
             cancelTimeline();timelineOffset=0;timelineProgrammes=Collections.emptyMap();timelineStart=TvTimelineView.present(System.currentTimeMillis()/1000);savePosition();source=now;mode=LiveTvData.mode(this);catalog=null;selected=null;guide=Collections.emptyMap();firstPage=true;group=LiveTvData.prefs(this).getString("tv-group-"+LiveTvData.hash(source),"");page=LiveTvData.prefs(this).getInt("tv-page-"+LiveTvData.hash(source),0);query="";clearLogos();cards.clear();images.clear();grid.removeAllViews();
-        }tabs();loadPage(page,firstPage,0,force);
+        }tabs();
+        if(firstPage&&timelineMode&&groups.isEmpty()){
+            groups.add(new TvCatalogCache.Group(ALL,t("Todos os canais","All channels","Todos los canales"),0));
+            groups.add(new TvCatalogCache.Group(FAVORITES,"★ "+t("Favoritos","Favorites","Favoritos"),0));
+            groupAdapter.notifyDataSetChanged();groupList.requestFocus();
+        }
+        loadPage(page,firstPage&&!timelineMode,0,force);
     }
     private void renderPage(int requested,boolean focus){loadPage(Math.max(0,requested),focus,0,false);}
     private void loadPage(int requested,boolean focus,int zap,boolean force){

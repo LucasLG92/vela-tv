@@ -18,15 +18,17 @@ public class EditionActivity extends Activity {
     static final int IMPORT=9061;
     private TextView message;
     private String setupMode="";
+    private boolean choosingInputs;
     private final Handler main=new Handler(Looper.getMainLooper());
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private Future<?> importing;private boolean busy;
-    @Override public void onCreate(Bundle state){super.onCreate(state);if(!VelaEdition.mode(this).isEmpty()&&VelaSessions.blocked(this)){startActivity(new Intent().setClassName(getPackageName(),VelaEdition.home(this)).putExtra("velaTools",4));finish();return;}Ui.init(this);setupMode=state==null||!VelaEdition.mode(this).isEmpty()?"":state.getString("setupMode","");render();}
+    @Override public void onCreate(Bundle state){super.onCreate(state);if(!VelaEdition.mode(this).isEmpty()&&VelaSessions.blocked(this)){startActivity(new Intent().setClassName(getPackageName(),VelaEdition.home(this)).putExtra("velaTools",4));finish();return;}Ui.init(this);setupMode=state==null||!VelaEdition.mode(this).isEmpty()?"":state.getString("setupMode","");choosingInputs=!setupMode.isEmpty()&&state!=null&&state.getBoolean("choosingInputs");render();}
     private void render(){
         FrameLayout root=new FrameLayout(this);root.setBackground(VelaTheme.canvas());setContentView(root);
         VelaReading.Stage stage=new VelaReading.Stage(this,1920,1080);root.addView(stage,new FrameLayout.LayoutParams(-1,-1));getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        if(choosingInputs){renderInputStyles(stage);return;}
         if(!setupMode.isEmpty()){
-            VelaHomePresets picker=new VelaHomePresets(this,setupMode.equals("lite"),"",false,this::firstHome,this::backToMode);
+            VelaHomePresets picker=new VelaHomePresets(this,setupMode.equals("lite"),"",false,this::chooseHome,this::backToMode);
             FrameLayout page=new FrameLayout(this);stage.addView(page);
             put(page,picker,65,70,1790,940);picker.focusChoice();
             return;
@@ -51,6 +53,24 @@ public class EditionActivity extends Activity {
     private View button(String text,Runnable action){TextView v=label(text,24);v.setGravity(Gravity.CENTER);v.setFocusable(true);v.setDefaultFocusHighlightEnabled(false);v.setBackground(VelaTheme.row(false,VelaTheme.WHITE));v.setOnFocusChangeListener((w,f)->{v.setBackground(VelaTheme.row(f,VelaTheme.WHITE));v.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);});v.setOnClickListener(w->action.run());return v;}
     private void put(FrameLayout parent,View v,int x,int y,int w,int h){FrameLayout.LayoutParams p=new FrameLayout.LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;parent.addView(v,p);}
     private void backToMode(){setupMode="";render();}
+    private void chooseHome(String preset){
+        if(VelaLayout.DEVICES.equals(preset)){choosingInputs=true;render();}
+        else firstHome(preset);
+    }
+    private void renderInputStyles(VelaReading.Stage stage){
+        FrameLayout page=new FrameLayout(this);stage.addView(page);
+        put(page,label(L10n.text("HDMI layout"),48),160,110,1600,90);
+        put(page,label(L10n.text("Choose how HDMI inputs appear for this profile."),25),164,215,1590,64);
+        TvInputs.Layout current=TvInputs.Layout.selected(this);
+        for(TvInputs.Layout style:TvInputs.Layout.values()){
+            int y=340+style.ordinal()*142;
+            View choice=button(style.label(),()->{style.save(this);firstHome(VelaLayout.DEVICES);});
+            choice.setContentDescription(style.label()+". "+L10n.text(style.detail));
+            put(page,choice,160,y,600,98);
+            put(page,label(L10n.text(style.detail),27),820,y,900,98);
+            if(style==current)choice.requestFocus();
+        }
+    }
     private void firstHome(String preset){
         try{
             VelaLayout.save(this,VelaLayout.preset(VelaLayout.read(this),preset));
@@ -61,7 +81,7 @@ public class EditionActivity extends Activity {
             Toast.makeText(this,L10n.text("Could not save the change."),Toast.LENGTH_SHORT).show();
         }
     }
-    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("setupMode",setupMode);}
+    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("setupMode",setupMode);out.putBoolean("choosingInputs",choosingInputs);}
     private void choose(String mode){if(busy)return;if(VelaEdition.mode(this).isEmpty()){setupMode=mode;render();return;}try{VelaEdition.select(this,mode);if(mode.equals("full")&&!VelaLayout.start(this).isEmpty()){Personalization.prepare(this);Personalization.complete(this);}openHome();}catch(RuntimeException failed){message.setText(L10n.text("Could not save mode. Try again."));}}
     private void openHome(){if(busy)return;String mode=VelaEdition.mode(this);if(mode.isEmpty())return;Intent next=new Intent(getIntent());next.removeExtra("changeMode");next.removeExtra("importLegacy");next.setClassName(getPackageName(),VelaEdition.home(this));next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);startActivity(next);finish();}
     private boolean legacyInstalled(){return getPackageManager().checkSignatures(getPackageName(),"tv.vela.launcher.lite")==PackageManager.SIGNATURE_MATCH;}
@@ -84,6 +104,6 @@ public class EditionActivity extends Activity {
         });
     }
     private boolean pristine(){try{return !VelaEdition.prefs(this).getBoolean("imported",false)&&VelaWorkspace.snapshot(this).getJSONObject("settings").length()==0;}catch(Exception invalid){return false;}}
-    @Override public void onBackPressed(){if(busy)return;if(!setupMode.isEmpty())backToMode();else if(!VelaEdition.mode(this).isEmpty())openHome();}
+    @Override public void onBackPressed(){if(busy)return;if(choosingInputs){choosingInputs=false;render();}else if(!setupMode.isEmpty())backToMode();else if(!VelaEdition.mode(this).isEmpty())openHome();}
     @Override protected void onDestroy(){if(importing!=null)importing.cancel(true);worker.shutdownNow();main.removeCallbacksAndMessages(null);super.onDestroy();}
 }

@@ -99,9 +99,11 @@ final class M3uClient {
         for(int event=p.nextToken();event!=XmlPullParser.END_DOCUMENT;event=p.nextToken()){
             if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(++events>1_000_000||event==XmlPullParser.DOCDECL)throw new IOException("Unsupported XMLTV");
             if(event==XmlPullParser.START_TAG&&p.getName().equals("programme")){id=p.getAttributeValue(null,"channel");keep=wanted.contains(id);title="";if(keep){start=timestamp(p.getAttributeValue(null,"start"));end=timestamp(p.getAttributeValue(null,"stop"));}}
-            else if(keep&&event==XmlPullParser.START_TAG&&p.getName().equals("title"))inTitle=true;
-            else if(keep&&inTitle&&(event==XmlPullParser.TEXT||event==XmlPullParser.ENTITY_REF)&&p.getText()!=null)title=limit(title+p.getText(),512);
-            else if(event==XmlPullParser.END_TAG&&p.getName().equals("title"))inTitle=false;
+            else if(keep&&event==XmlPullParser.START_TAG&&p.getName().equals("title"))inTitle=title.isEmpty();
+            else if(inTitle&&title.length()<512&&(event==XmlPullParser.TEXT||event==XmlPullParser.CDSECT||event==XmlPullParser.ENTITY_REF)){
+                String part=p.getText();if(part!=null)title+=limit(part,512-title.length());
+            }
+            else if(event==XmlPullParser.END_TAG&&inTitle&&p.getName().equals("title")){title=XmlTvTitle.plain(title);inTitle=false;}
             else if(event==XmlPullParser.END_TAG&&p.getName().equals("programme")){if(keep){LiveTvData.Guide entry=result.get(id);if(entry==null){entry=new LiveTvData.Guide();result.put(id,entry);}entry.add(new LiveTvData.Programme(start,end,title),now);}keep=false;inTitle=false;}
         }return result;
     }

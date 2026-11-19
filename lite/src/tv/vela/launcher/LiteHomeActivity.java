@@ -106,7 +106,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);if(voiceSearchUI!=null)voiceSearchUI.cancel();setIntent(intent);if(receiveSearch(intent))return;if(intent.hasExtra("velaTools")){int page=intent.getIntExtra("velaTools",0);intent.removeExtra("velaTools");tools(page);return;}if(hub!=null){hub.close();return;}if(intent.hasCategory(Intent.CATEGORY_HOME)){section=startSection();if(visible)show(section,false);}}
     @Override public void onConfigurationChanged(Configuration configuration){super.onConfigurationChanged(configuration);if(voiceSearchUI!=null)voiceSearchUI.cancel();if(hub!=null){recreate();return;}buildShell();if(visible){show(section==PROFILE?INPUTS:section,false);main.removeCallbacks(tick);tick.run();}}
     private void hideSystemBars(){getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);}
-    private void releaseImages(){generation++;for(Future<?> job:jobs)job.cancel(true);jobs.clear();if(worker!=null){worker.shutdownNow();worker=null;}for(ImageView image:appImages)image.setImageDrawable(null);appImages.clear();appIcons.evictAll();if(devices!=null){devices.close();devices=null;}apps=Collections.emptyList();}
+    private void releaseImages(){closePreview();generation++;for(Future<?> job:jobs)job.cancel(true);jobs.clear();if(worker!=null){worker.shutdownNow();worker=null;}for(ImageView image:appImages)image.setImageDrawable(null);appImages.clear();appIcons.evictAll();if(devices!=null){devices.close();devices=null;}apps=Collections.emptyList();}
     private void resetContent(){contentReturnFocus=null;settingsView=null;closeTelevision();releaseImages();content.removeAllViews();pager.removeAllViews();tiles.clear();footer.setText("");}
     private void closeTelevision(){if(guide!=null){guide.close();guide=null;}if(player!=null){player.close();if(windowRoot!=null)windowRoot.removeView(player);player=null;}if(stage!=null)stage.setVisibility(hub==null?View.VISIBLE:View.INVISIBLE);}
     private TextView text(String value,int size,int color){TextView view=new TextView(this);view.setText(value);view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,size);view.setTextColor(color);view.setTypeface(Ui.medium);view.setIncludeFontPadding(false);view.setGravity(Gravity.CENTER_VERTICAL);view.setSingleLine();view.setEllipsize(android.text.TextUtils.TruncateAt.END);return view;}
@@ -157,11 +157,14 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         if(devices!=null){inputLight.tint(devices.lightColor(entry.model));devices.load(entry.model,heroImage,true);heroPlaceholder.setVisibility(heroImage.getDrawable()==null?View.VISIBLE:View.GONE);}
     }
     private void renderInputs(boolean preserveNavigation){
-        rebuildingInputs=true;final String restorePort=selectedPort;
+        closePreview();rebuildingInputs=true;final String restorePort=selectedPort;
         boolean navFocus=preserveNavigation&&navigation[INPUTS].hasFocus();if(devices==null)devices=new DeviceIcons(this);else devices.clearViews();content.removeAllViews();tiles.clear();pager.removeAllViews();
         List<TvInputs.Entry> entries=inputSource.read();
         boolean appsHome=VelaLayout.DEVICES.equals(VelaLayout.start(this));
+        TvInputs.Layout style=TvInputs.Layout.selected(this);
+        if(!entries.isEmpty()&&style!=TvInputs.Layout.CARDS){liveInputs(entries,style,navFocus,appsHome);return;}
         if(entries.isEmpty()){
+            layoutButton();
             put(content,text(t("Nenhuma entrada compartilhada pela TV","No inputs shared by this TV","La TV no comparte entradas HDMI"),36,VelaTheme.WHITE),64,110,1560,70);
             put(content,text(t("Instale o Vela Lite na televisão, não no aparelho HDMI.","Install Vela Lite on the television, rather than the HDMI box.","Instala Vela Lite en la televisión, en lugar del dispositivo HDMI."),25,VelaTheme.SECONDARY),64,205,1560,60);
             TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,320,570,76);tiles.add(settings);rebuildingInputs=false;if(appsHome)inputApps(450).requestFocus();else focusFirst();return;
@@ -184,7 +187,40 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
             TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,806,420,58);
         }
         FrameLayout.LayoutParams hint=(FrameLayout.LayoutParams)footer.getLayoutParams();hint.leftMargin=652;hint.topMargin=926;hint.width=1180;footer.setLayoutParams(hint);footer.setText(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"));
-        rebuildingInputs=false;if(navFocus)navigation[INPUTS].requestFocus();else if(restored!=null)restored.requestFocus();else if(connected!=null)connected.requestFocus();else focusFirst();
+        layoutButton();rebuildingInputs=false;if(navFocus)navigation[INPUTS].requestFocus();else if(restored!=null)restored.requestFocus();else if(connected!=null)connected.requestFocus();else focusFirst();
+    }
+    private VelaHdmiBrowser hdmi;
+    private void closePreview(){if(hdmi!=null){hdmi.close();hdmi=null;}}
+    private void layoutButton(){
+        TextView style=button(L10n.text("HDMI layout"),()->tools(VelaHub.HDMI_LAYOUT));
+        style.setSingleLine();style.setAutoSizeTextTypeUniformWithConfiguration(18,24,1,android.util.TypedValue.COMPLEX_UNIT_PX);
+        if(hdmi!=null)hdmi.connectLayoutButton(style);
+        put(content,style,1400,hdmi==null&&!tiles.isEmpty()?382:8,292,58);
+    }
+    private void liveInputs(List<TvInputs.Entry> entries,TvInputs.Layout style,boolean navFocus,boolean appsHome){
+        hdmi=new VelaHdmiBrowser(this,style,entries,selectedPort,devices,scene,new VelaHdmiBrowser.Actions(){
+            public void selected(TvInputs.Entry entry){
+                if(!entry.key.equals(selectedPort)){
+                    selectedPort=entry.key;preferences().edit().putString("selected_port",selectedPort).apply();
+                }
+            }
+            public void open(TvInputs.Entry entry){launchInput(entry);}
+            public void identify(TvInputs.Entry entry){consumeOkUp=true;chooseProfile(entry);}
+        });
+        put(content,hdmi,0,0,1790,940);tiles.addAll(hdmi.rows);
+        for(int i=0;i<hdmi.rows.size();i++){
+            final int index=i;
+            hdmi.rows.get(i).setOnKeyListener((v,key,event)->{
+                if(key==KeyEvent.KEYCODE_DPAD_LEFT&&(style==TvInputs.Layout.MONITOR||index==0)){
+                    if(event.getAction()==KeyEvent.ACTION_DOWN)navigation[INPUTS].requestFocus();return true;
+                }
+                return false;
+            });
+        }
+        if(appsHome)inputApps(790);
+        else put(content,button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS)),64,806,420,58);
+        footer.setText(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"));layoutButton();rebuildingInputs=false;
+        if(navFocus)navigation[INPUTS].requestFocus();else hdmi.initial.requestFocus();
     }
     private View recentCard(){org.json.JSONObject item=VelaRecentActivity.available(this);if(item.length()==0)return null;VelaRecentActivity.Card card=new VelaRecentActivity.Card(this,item,()->resumeActivity(item));put(content,card,720,8,640,78);return card;}
     private void resumeActivity(org.json.JSONObject item){
@@ -208,7 +244,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     private void launchInput(TvInputs.Entry entry){launch(new Intent(Intent.ACTION_VIEW,TvContract.buildChannelUriForPassthroughInput(entry.inputId)));}
     private void launch(Intent intent){if(VelaSessions.blocked(this)&&intent.getAction()!=null&&intent.getAction().startsWith("android.settings.")){tools(4);return;}try{startActivity(intent);}catch(ActivityNotFoundException|SecurityException unavailable){Toast.makeText(this,t("A TV não permite abrir esta opção.","This option cannot be opened on this TV.","La TV no permite abrir esta opción."),Toast.LENGTH_SHORT).show();}}
     private void renderTelevision(){
-        heading.setText(VelaLayout.title(this,"tv"));guide=new LiteAntennaGuide(this,createAntennaData(),new LiteAntennaGuide.Host(){public void navigation(){LiteHomeActivity.this.navigation[TV].requestFocus();}public void permission(){requestPermissions(new String[]{"android.permission.READ_TV_LISTINGS"},41);}public void nativeTv(){openNativeTv(null);}public void play(LiveTvData.Channel ch,List<LiveTvData.Channel> channels){playAntenna(ch,channels);}public void longPress(){consumeOkUp=true;}public boolean ownsFocus(){return hub==null&&!sidebarOpen&&stage.getVisibility()==View.VISIBLE;}public boolean header(View from){if(focusHeader(from))return true;navigation();return true;}});put(content,guide,0,0,1790,940);
+        heading.setText(VelaLayout.title(this,"tv"));guide=new LiteAntennaGuide(this,createAntennaData(),new LiteAntennaGuide.Host(){public void navigation(){LiteHomeActivity.this.navigation[TV].requestFocus();}public void permission(){requestPermissions(new String[]{"android.permission.READ_TV_LISTINGS"},41);}public void nativeTv(){openNativeTv(null);}public void play(LiveTvData.Channel ch,List<LiveTvData.Channel> channels){playAntenna(ch,channels);}public void longPress(){consumeOkUp=true;}public boolean ownsFocus(){return hub==null&&!sidebarOpen&&stage.getVisibility()==View.VISIBLE;}public boolean header(View from){if(focusHeader(from))return true;navigation();return true;}});put(content,guide,0,0,1790,940);if(!sidebarOpen)guide.focusContent();
     }
     private void openNativeTv(LiveTvData.Channel channel){if(channel!=null){launch(new Intent(Intent.ACTION_VIEW,TvContract.buildChannelUri(channel.providerId)));return;}LiteCatalog.Tuner tuner=readTuner();if(tuner!=null)launch(tuner.intent);else openSettings(Settings.ACTION_SETTINGS);}
     private void playAntenna(LiveTvData.Channel channel,List<LiveTvData.Channel> channels){if(headerWidgets!=null)headerWidgets.stop();List<LiveTvData.Channel> copy=new ArrayList<>(channels);if(guide!=null){guide.close();guide=null;}content.removeAllViews();setSidebar(false);stage.setVisibility(View.GONE);player=new LiteAntennaPlayer(this,createAntennaData(),channel,copy,new LiteAntennaPlayer.Host(){public void exit(){show(TV,false);}public void nativeTv(LiveTvData.Channel ch){openNativeTv(ch);}});windowRoot.addView(player,new FrameLayout.LayoutParams(-1,-1));}

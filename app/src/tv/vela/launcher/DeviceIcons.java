@@ -1,6 +1,6 @@
 package tv.vela.launcher;
 
-import android.content.Context;import android.graphics.drawable.GradientDrawable;import android.graphics.drawable.Drawable;import android.widget.ImageView;import java.util.*;
+import android.content.Context;import android.graphics.Canvas;import android.graphics.Paint;import android.graphics.RectF;import android.graphics.drawable.GradientDrawable;import android.graphics.drawable.Drawable;import android.widget.ImageView;import java.util.*;
 
 /** Brand paths are native vectors. No photo decoding, cache, worker or network request. */
 final class DeviceIcons {
@@ -54,6 +54,13 @@ final class DeviceIcons {
     GradientDrawable surface(String model,boolean focus,int radius){int color=brandColor(resource(model));GradientDrawable d=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{mix(color,0xFFFFFFFF,focus?.18f:.07f),mix(color,0xFF000000,.22f)});d.setCornerRadius(radius);d.setStroke(focus?2:1,focus?Appearance.accent(context):0x20FFFFFF);return d;}
     void load(String model,ImageView view){load(model,view,false);}
     void load(String model,ImageView view,boolean hero){if(closed)return;int id=resource(model);Drawable drawable=null;try{if(id!=0)drawable=context.getDrawable(id);}catch(android.content.res.Resources.NotFoundException unavailable){}view.setImageDrawable(drawable);view.setTag(model);bound.add(view);}
+    /** A neutral port placeholder; recognized active devices use local brand vectors. */
+    static final class Artwork extends ImageView {
+        private final Paint paint=new Paint(3);private final RectF box=new RectF();
+        Artwork(Context c,String model){super(c);setTag(model);setScaleType(ScaleType.FIT_CENTER);setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
+        protected void onDraw(Canvas c){if(getDrawable()!=null){super.onDraw(c);return;}c.save();float scale=Math.min(getWidth()/150f,getHeight()/100f);c.translate((getWidth()-150*scale)/2,(getHeight()-100*scale)/2);c.scale(scale,scale);paint.setColor(VelaTheme.SECONDARY);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(3);String model=String.valueOf(getTag());
+            if(model.equals("soundbar")||model.equals("receiver")){box.set(15,32,135,72);c.drawRoundRect(box,12,12,paint);c.drawCircle(40,52,11,paint);c.drawCircle(110,52,11,paint);c.drawLine(67,46,83,46,paint);c.drawLine(67,58,83,58,paint);}else if(model.equals("dvd")||model.equals("bluray")){c.drawCircle(75,50,38,paint);c.drawCircle(75,50,10,paint);}else{box.set(17,9,133,81);c.drawRoundRect(box,10,10,paint);c.drawLine(75,82,75,94,paint);c.drawLine(53,94,97,94,paint);paint.setStyle(Paint.Style.FILL);paint.setTypeface(Ui.medium);paint.setTextSize(model.equals("pc")?26:20);c.drawText(model.equals("pc")?"PC":"HDMI",model.equals("pc")?58:47,53,paint);}c.restore();}
+    }
     void refreshVisible(){}
     void clearViews(){for(ImageView view:bound)view.setImageDrawable(null);bound.clear();}
     void close(){closed=true;clearViews();}

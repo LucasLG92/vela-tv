@@ -34,6 +34,20 @@ final class TvInputs {
     }
     static String clean(String value){if(value==null)return "";String text=value.replaceAll("[\\p{Cntrl}]"," ").trim().replaceAll("\\s+"," ");return text.substring(0,Math.min(120,text.length()));}
     static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"input_cards");}
+    enum Layout {
+        CARDS("cards","Device cards","Browse inputs with their device icons."),
+        MONITOR("monitor","Preview window","Choose an input beside its live picture."),
+        CINEMA("cinema","Cinema backdrop","Browse ports over the selected input’s picture.");
+        final String key,title,detail;
+        Layout(String key,String title,String detail){this.key=key;this.title=title;this.detail=detail;}
+        String label(){return L10n.text(title);}
+        static Layout selected(Context c){
+            String key=prefs(c).getString("hdmi_layout","cards");
+            for(Layout layout:values())if(layout.key.equals(key))return layout;
+            return CARDS;
+        }
+        void save(Context c){prefs(c).edit().putString("hdmi_layout",key).apply();}
+    }
     static String preset(Context c,String id){String value=prefs(c).getString("device_"+LiveTvData.hash(id),"auto");return Arrays.asList(PRESETS).contains(value)?value:"auto";}
     static void assign(Context c,String id,String model){if(!Arrays.asList(PRESETS).contains(model))return;SharedPreferences.Editor e=prefs(c).edit();String key="device_"+LiveTvData.hash(id);if(model.equals("auto"))e.remove(key);else e.putString(key,model);e.apply();}
     static String detect(String label){return DeviceProfiles.detect(label);}

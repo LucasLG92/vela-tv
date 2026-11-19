@@ -203,6 +203,7 @@ class SettingsScreen extends VelaScreen {
                 row(L10n.text("Reading and margins"),"›",0,L10n.text("Comfortable from the sofa."),L10n.text("Text size, guide density, contrast and screen margins."),()->tools(2));
                 row(L10n.text("Language"),L10n.name(),0,L10n.text("Vela in your language."),L10n.text("Choose a language or follow this television's system language."),()->render(24));
                 row(L10n.text("Picture and performance"),"›",0,L10n.text("The picture you prefer."),L10n.text("Colour, posters, backgrounds and performance."),()->open(2,7));
+                row(L10n.text("HDMI layout"),TvInputs.Layout.selected(activity).label(),0,L10n.text("HDMI layout"),L10n.text("Choose how HDMI inputs appear for this profile."),()->tools(VelaHub.HDMI_LAYOUT));
                 note(Ui.tr("As mudanças aparecem ao voltar ao início. Sem fundos adicionais, vídeos ou animações permanentes.","Changes appear when you return home. No additional backgrounds, videos or continuous animations.","Los cambios aparecen al volver al inicio. Sin fondos adicionales, vídeos ni animaciones permanentes."),520);
             }else if(page==18||page==19||page==20){
                 String key=page==18?"color":page==19?"size":"backdrop";int current=page==18?Appearance.colorIndex(activity):page==19?Appearance.sizeIndex(activity):Appearance.backdropIndex(activity),count=page==18?6:3;

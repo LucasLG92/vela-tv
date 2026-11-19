@@ -70,7 +70,7 @@ Programme names and times in this tour are synthetic, with original channel logo
 | --- | --- |
 | [![Channel information over the live picture](previews/160-on-air.webp)](160-on-air.webp) | [![Playback controls](previews/161-live-controls.webp)](161-live-controls.webp) |
 
-The guide shows programme artwork when supplied by the listings. Press **OK** inside a channel for its schedule, **Left** for playback controls and **Right** for the channel list. Demo footage and stills from *Sintel* by the Blender Foundation. [Film](https://durian.blender.org/) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+The guide opens on categories and shows the entire programme image in a widescreen preview when the listings provide artwork. Press **OK** inside a channel for its schedule, **Left** for playback controls and **Right** for the channel list. Demo footage and stills from *Sintel* by the Blender Foundation. [Film](https://durian.blender.org/) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
 
 | Your channel order | Something to watch now |
 | --- | --- |
