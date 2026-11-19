@@ -44,6 +44,7 @@ final class HomeLiveTvView extends FrameLayout {
     HomeLiveTvView(Activity activity,FrameLayout videoHost,Host host){this(activity,videoHost,host,false,false);}
     HomeLiveTvView(Activity activity,FrameLayout videoHost,Host host,boolean startPage,boolean forceGuide){
         super(activity);this.startPage=startPage;this.forceGuide=forceGuide;this.activity=activity;this.videoHost=videoHost;this.host=host;xtream=new XtreamClient(activity);m3u=new M3uClient(activity);antenna=new AntennaClient(activity);setClipChildren(false);
+        guideBackdrop=new VelaGuideBackdrop(activity);put(this,guideBackdrop,0,0,1920,414);
         origin=button("",19);put(this,origin,194,138,138,46);origin.setOnClickListener(v->sourcePicker());TextView organize=button(t("Organizar","Organize","Organizar"),19);organizeAction=organize;put(this,organize,344,138,200,46);organize.setOnClickListener(v->organize());
         hero=new FrameLayout(activity);put(this,hero,194,220,1646,448);
         TextView live=text(t("EM DIRETO","LIVE NOW","EN DIRECTO"),16,VelaTheme.SECONDARY);live.setLetterSpacing(.15f);put(hero,live,0,0,900,30);
@@ -74,7 +75,6 @@ final class HomeLiveTvView extends FrameLayout {
         rail=new HorizontalScrollView(activity){@Override public int getSolidColor(){return BG;}};rail.setHorizontalScrollBarEnabled(false);rail.setClipToPadding(false);rail.setClipChildren(false);rail.setPadding(12,8,20,4);rail.setHorizontalFadingEdgeEnabled(true);rail.setFadingEdgeLength(64);put(channelPane,rail,0,65,1658,325);
         channelRow=new LinearLayout(activity);channelRow.setOrientation(LinearLayout.HORIZONTAL);channelRow.setClipChildren(false);rail.addView(channelRow,new HorizontalScrollView.LayoutParams(-2,310));
         guidePane=new FrameLayout(activity);guidePane.setVisibility(GONE);put(this,guidePane,182,194,1658,872);
-        guideBackdrop=new VelaGuideBackdrop(activity);put(this,guideBackdrop,1328,120,512,288);
         earlier=button("‹",25);earlier.setContentDescription(t("Horários anteriores","Earlier times","Horarios anteriores"));put(guidePane,earlier,1330,823,58,44);earlier.setOnClickListener(v->shift(-1));
         present=button(t("Agora","Now","Ahora"),20);put(guidePane,present,1400,823,176,44);present.setOnClickListener(v->showPresent());
         later=button("›",25);later.setContentDescription(t("Próximos horários","Later times","Próximos horarios"));put(guidePane,later,1588,823,70,44);later.setOnClickListener(v->shift(1));
@@ -230,7 +230,7 @@ final class HomeLiveTvView extends FrameLayout {
     }
     private void organizerChrome(boolean open){
         sheet.setBackgroundColor(open?Color.TRANSPARENT:0xFF101219);
-        for(View view:new View[]{origin,organizeAction,discoverAction,hero,channelPane,guidePane,category,categoryViewport,categoryHelp,previous,next,pages,status})view.setVisibility(open?INVISIBLE:VISIBLE);
+        for(View view:new View[]{origin,organizeAction,discoverAction,hero,channelPane,guidePane,guideBackdrop,category,categoryViewport,categoryHelp,previous,next,pages,status})view.setVisibility(open?INVISIBLE:VISIBLE);
         if(!open)applyView();
     }
     private void organize(){

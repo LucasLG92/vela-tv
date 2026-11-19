@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.3-preview
+
+- Full and Lite give the programme guide a full-width artwork header. A gradient protects the programme information and the schedule stays clear below it.
+- Full Home shows Continue watching above Recently added by default. The section editor can append optional shelves while keeping the profile’s saved order.
+
 ## 2.5.0-preview
 
 - Full adds the Night cinema presentation to the Library Home editor. Recently added posters and landscape resume cards use existing library artwork and playback progress.

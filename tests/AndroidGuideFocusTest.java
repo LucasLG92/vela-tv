@@ -17,7 +17,12 @@ public final class AndroidGuideFocusTest extends Instrumentation {
     private Map<String,List<LiveTvData.Programme>> schedule;private long from,now;
     private final Bundle result=new Bundle();private LiveTvData.Programme described;
     static void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
-    void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
+    void ui(Runnable action){
+        Throwable[] failure={null};
+        runOnMainSync(()->{try{action.run();}catch(Throwable t){failure[0]=t;}});
+        waitForIdleSync();
+        if(failure[0]!=null)throw new AssertionError(failure[0]);
+    }
     static final class Text {
         final String value;final float x,y,top,bottom;
         Text(String v,float left,float baseline,Paint paint){value=v;x=left;y=baseline;top=baseline+paint.ascent();bottom=baseline+paint.descent();}
@@ -36,6 +41,44 @@ public final class AndroidGuideFocusTest extends Instrumentation {
         Text ta=before.timing(a.x),tb=after.timing(b.x);check(ta.x==tb.x&&ta.y==tb.y,"Focus moved the schedule baseline: "+ta.y+" -> "+tb.y);
         check(before.blocks.equals(after.blocks),"Focus resized the programme footprint");
     }
+    void liteHeaderPlacement()throws Exception{
+        Method show=activity.getClass().getDeclaredMethod("show",int.class,boolean.class);
+        show.setAccessible(true);
+        Field sceneField=activity.getClass().getDeclaredField("scene");sceneField.setAccessible(true);
+        FrameLayout scene=(FrameLayout)sceneField.get(activity);
+        ui(()->{try{show.invoke(activity,1,false);}catch(Exception e){throw new RuntimeException(e);}});
+        View art=scene.getChildAt(0);
+        check(art instanceof VelaGuideBackdrop&&art.getWidth()==scene.getWidth()&&art.getHeight()==390
+            &&art.getTop()==0,"Lite guide header is inset or above its controls");
+        ui(()->{try{show.invoke(activity,0,false);}catch(Exception e){throw new RuntimeException(e);}});
+        check(art.getParent()==null,"Leaving Lite TV retained its backdrop");
+    }
+    void checkBackdrop(int sw,int sh,int h){
+        int w=1920;
+        VelaGuideBackdrop banner=new VelaGuideBackdrop(context);
+        banner.layout(0,0,w,h);
+        Bitmap source=Bitmap.createBitmap(sw,sh,Bitmap.Config.ARGB_8888);
+        source.eraseColor(Color.WHITE);
+        boolean portrait=sw<sh;
+        Paint marker=new Paint();marker.setColor(Color.GREEN);
+        int x=portrait?sw/2:sw*4/5,y=portrait?sh/2:sh/3;
+        new Canvas(source).drawRect(x-12,y-12,x+12,y+12,marker);
+        banner.setImageBitmap(source);
+        Bitmap rendered=Bitmap.createBitmap(w,h+80,Bitmap.Config.ARGB_8888);
+        banner.draw(new Canvas(rendered));
+        check(rendered.getPixel(w/2,h+30)==Color.TRANSPARENT,"Programme still spilled over the timetable");
+        int left=Color.red(rendered.getPixel(w/5,h/2)),right=Color.red(rendered.getPixel(w*94/100,h/2));
+        check(left<55&&right>210&&Color.red(rendered.getPixel(w-2,h-1))<22,"Header does not fade behind text or into the grid");
+        Rect shape=new Rect();int[] scan=new int[w];
+        for(int row=1;row<h-1;row++){
+            rendered.getPixels(scan,0,w,0,row,w,1);
+            for(int col=w/2;col<w;col++)if(Color.green(scan[col])-Color.red(scan[col])>120)shape.union(col,row,col+1,row+1);
+        }
+        check(shape.width()>8&&Math.abs(shape.width()-shape.height())<3,"Programme picture stretched or lost its focal point: "+shape);
+        banner.release();rendered.eraseColor(Color.TRANSPARENT);banner.draw(new Canvas(rendered));
+        check(rendered.getPixel(w/2,h/2)==Color.TRANSPARENT,"Missing EPG image left a stale backdrop");
+        rendered.recycle();source.recycle();
+    }
     LiveTvData.Channel demo(boolean lite)throws Exception{
         Constructor<?> constructor;
         if(lite){constructor=LiveTvData.Channel.class.getDeclaredConstructor(long.class,String.class,String.class,String.class,boolean.class,boolean.class,boolean.class);constructor.setAccessible(true);return (LiveTvData.Channel)constructor.newInstance(1L,"fixture.input","1","Demo",false,true,false);}
@@ -44,10 +87,13 @@ public final class AndroidGuideFocusTest extends Instrumentation {
     private boolean unifiedLite;private String priorMode;public void onCreate(Bundle args){super.onCreate(args);unifiedLite="unified-lite".equals(args.getString("fixture"));start();}
     public void onStart(){context=getTargetContext();try{
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){check(in.read()=='1',"Owned emulator required");}
-        boolean lite=unifiedLite||context.getPackageName().endsWith(".lite");priorMode=VelaEdition.mode(context);previous=VelaWorkspace.active(context);profile=VelaWorkspace.create(context,"Guide test");VelaWorkspace.select(context,profile);VelaEdition.select(context,lite?"lite":"full");
+        boolean lite=unifiedLite||context.getPackageName().endsWith(".lite");priorMode=VelaEdition.mode(context);previous=VelaWorkspace.active(context);profile=VelaWorkspace.create(context,"Guide "+SystemClock.elapsedRealtime());VelaWorkspace.select(context,profile);VelaEdition.select(context,lite?"lite":"full");
         if(!lite){Class<?> setup=Class.forName("tv.vela.launcher.Personalization");for(String name:new String[]{"prepare","complete"}){Method method=setup.getDeclaredMethod(name,Context.class);method.setAccessible(true);method.invoke(null,context);}}
         L10n.choose(context,"en");Ui.init(context);context.getSharedPreferences("updates",0).edit().putBoolean("automatic",false).commit();
         activity=startActivitySync(new Intent().setClassName(context.getPackageName(),"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        phase="header contrast and aspect ratios";
+        if(lite)liteHeaderPlacement();
+        ui(()->{checkBackdrop(960,540,lite?390:414);checkBackdrop(180,300,lite?390:414);});
         channel=demo(lite);now=System.currentTimeMillis()/1000;from=TvTimelineView.present(now);current=new LiveTvData.Programme(from-3600,from+3600,"Current programme","");next=new LiveTvData.Programme(from+3600,from+7200,"Next programme","");schedule=Collections.singletonMap(channel.id,Arrays.asList(current,next));
         FrameLayout root=new FrameLayout(activity);TextView parking=new TextView(activity);parking.setFocusable(true);parking.setFocusableInTouchMode(true);
         ui(()->{timeline=new TvTimelineView(activity,new TvTimelineView.Actions(){public void selected(LiveTvData.Channel c,LiveTvData.Programme p){described=p;}public void activate(LiveTvData.Channel c,LiveTvData.Programme p){}public void options(LiveTvData.Channel c){}public boolean channels(int n){return false;}public void time(int n,long cursor){}});timeline.rowHeight(106);root.addView(parking,new FrameLayout.LayoutParams(100,40));FrameLayout.LayoutParams placement=new FrameLayout.LayoutParams(1332,710);placement.topMargin=80;root.addView(timeline,placement);activity.setContentView(root);timeline.data(Collections.singletonList(channel),schedule,from,channel,false);parking.requestFocus();});

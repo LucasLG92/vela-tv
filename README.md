@@ -6,7 +6,7 @@
 
 Your films, live channels, apps and HDMI devices — together in a home screen you control.
 
-**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.6.2-preview)** · **[See it in action](gallery/README.md)** · [Get started](guide/INSTALL.md)
+**[Download Vela](https://github.com/LucasLG92/vela-tv/releases/tag/v2.6.3-preview)** · **[See it in action](gallery/README.md)** · [Get started](guide/INSTALL.md)
 
 **Free & open source · Android TV / Google TV · One APK, Full or Lite · Six languages**
 
@@ -34,7 +34,7 @@ Choose a layout when you first open Vela. Preview it with the remote and start u
 
 Hold OK on **Home** in the sidebar (or **HDMI** in Lite) to open the editor, then choose **Home layouts**. Choose **Restore previous Home**, then **Save layout**, to go back. Each profile keeps its own layout.
 
-**Night cinema** puts your latest posters below the featured title. Open the sidebar to browse without moving the scene. Press **OK** to enter a section or **Right** to return to your poster. [See the expanded sidebar](gallery/158-navigation-capsule.webp).
+**Night cinema** opens with Continue watching, followed by Recently added posters. Use **Settings → Edit home sections → Add section** to add another row, then arrange the rows with the remote. Open the sidebar to browse without moving the scene. Press **OK** to enter a section or **Right** to return to your poster. [See the expanded sidebar](gallery/158-navigation-capsule.webp).
 
 ## Your collection takes centre stage
 
@@ -62,7 +62,7 @@ Your **M3U, Xtream or antenna channels**, in the same place as the rest of your 
 | --- | --- |
 | [![Channel information over the live picture](gallery/previews/160-on-air.webp)](gallery/160-on-air.webp) | [![Playback controls](gallery/previews/161-live-controls.webp)](gallery/161-live-controls.webp) |
 
-The guide opens on categories while channels load. The selected programme’s artwork fits in a widescreen preview when supplied by the listings. Press **OK** inside a channel for its schedule, **Left** for playback controls and **Right** for the channel list. Demo footage and stills from *Sintel* by the Blender Foundation. [Film](https://durian.blender.org/) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+The guide opens on categories while channels load. The selected programme fills the guide header when the listings provide artwork. A soft fade keeps the channel, title and times legible. Portrait posters keep their full height. Press **OK** inside a channel for its schedule, **Left** for playback controls and **Right** for the channel list. Demo footage and stills from *Sintel* by the Blender Foundation. [Film](https://durian.blender.org/) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
 
 **Playback that adapts.** Automatic engine selection remembers working HLS/TS formats, with Fast, Balanced and Stable buffer profiles and bounded recovery. M3U headers follow their own signal. [Playback options and limits](guide/PLAYBACK.md).
 
@@ -129,7 +129,7 @@ Lite leaves Full's multimedia Home, library clients and IPTV player inactive. Bo
 
 ## Start in a few minutes
 
-1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.6.2-preview)** and install it on your Android TV or Google TV device.
+1. **[Download the official APK](https://github.com/LucasLG92/vela-tv/releases/tag/v2.6.3-preview)** and install it on your Android TV or Google TV device.
 2. **Choose Full or Lite**, then pick your Home layout. Link your media accounts and add your TV sources when you are ready.
 3. **Make it yours.** Choose your Home shelves and sidebar apps, then use Vela's Home-screen setting if you want it as your default launcher.
 

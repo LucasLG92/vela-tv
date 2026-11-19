@@ -17,7 +17,7 @@ public abstract class DiscoveryUiContract extends Instrumentation {
     interface Ready{boolean ready()throws Exception;}
     protected void await(Ready r)throws Exception{long until=SystemClock.elapsedRealtime()+18000;while(SystemClock.elapsedRealtime()<until){waitForIdleSync();if(r.ready())return;Thread.sleep(60);}throw new AssertionError("Timeout: "+phase);}
     protected View text(View v,String value){if(v instanceof TextView&&((TextView)v).getText().toString().equals(value))return v;if(v instanceof ViewGroup)for(int i=0;i<((ViewGroup)v).getChildCount();i++){View found=text(((ViewGroup)v).getChildAt(i),value);if(found!=null)return found;}return null;}
-    private Rect rect(View v){Rect r=new Rect();check(v.getGlobalVisibleRect(r),"Expected visible control");return r;}
+    protected Rect rect(View v){Rect r=new Rect();check(v.getGlobalVisibleRect(r),"Expected visible control");return r;}
     protected void key(int k){sendKeyDownUpSync(k);waitForIdleSync();}
     protected void verifyLoadingNavigation()throws Exception{}
     protected void verifyGuideEntry()throws Exception{}

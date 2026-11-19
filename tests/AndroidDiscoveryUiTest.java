@@ -34,7 +34,9 @@ public final class AndroidDiscoveryUiTest extends DiscoveryUiContract {
         ui(guide::requestFocus);
         android.widget.ImageView art=(android.widget.ImageView)field(field(scene,"liveTv"),"guideBackdrop");
         await(()->art.getDrawable()!=null);
-        check(art.getScaleType()==android.widget.ImageView.ScaleType.FIT_CENTER&&art.getWidth()*9==art.getHeight()*16,"Programme artwork cropped in the guide");
+        View tv=(View)field(scene,"liveTv");
+        check(art.getLeft()==0&&art.getTop()==0&&art.getWidth()==tv.getWidth(),"Guide artwork does not cover the header");
+        check(rect(art).bottom<=rect(guide).top&&((android.view.ViewGroup)tv).indexOfChild(art)==0,"Artwork covers the schedule or toolbar");
         shot("guia");
         TvTimelineView grid=(TvTimelineView)guide;LiveTvData.Programme current=grid.programme();
         check(current!=null,"Missing live selection");

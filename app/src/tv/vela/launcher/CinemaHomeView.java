@@ -670,10 +670,10 @@ final class CinemaHomeView extends FrameLayout {
         final HorizontalScrollView rail=new HorizontalScrollView(activity);
         final LinearLayout posters=new LinearLayout(activity);
         final List<View> items=new ArrayList<>();final TextView headingLabel,counter;final View marker;private boolean rowActive;private int position=-1;
-        void focus(boolean active,int slot){if(rowActive==active&&(!active||position==slot))return;rowActive=active;position=active?slot:-1;headingLabel.setTextColor(active||nightHome?WHITE:DIM);marker.animate().cancel();counter.animate().cancel();marker.animate().alpha(active?.85f:0).scaleX(active?1:.6f).setDuration(Visuals.duration(activity,130)).start();counter.setText((slot+1)+" / "+items.size());counter.animate().alpha(active?1:0).setDuration(Visuals.duration(activity,130)).start();for(int i=0;i<items.size();i++)((VelaPosterCard)items.get(i)).context(active&&i!=slot);}
+        void focus(boolean active,int slot){if(rowActive==active&&(!active||position==slot))return;rowActive=active;position=active?slot:-1;headingLabel.setTextColor(active||nightHome?VelaTheme.WHITE:DIM);marker.animate().cancel();counter.animate().cancel();marker.animate().alpha(active?.85f:0).scaleX(active?1:.6f).setDuration(Visuals.duration(activity,130)).start();counter.setText((slot+1)+" / "+items.size());counter.animate().alpha(active?1:0).setDuration(Visuals.duration(activity,130)).start();for(int i=0;i<items.size();i++)((VelaPosterCard)items.get(i)).context(active&&i!=slot);}
         Shelf(String heading,int railHeight){
             rail.setTag(heading);
-            TextView label=text(heading,nightHome?31:27,nightHome?WHITE:DIM,Ui.displaySemibold);headingLabel=label;label.setAlpha(sidebarOpen?0f:1f);label.setPadding(16,0,16,0);counter=text("",18,WHITE,Ui.medium);counter.setGravity(Gravity.CENTER);counter.setBackground(round(0xB3161820,12));counter.setAlpha(0);LayoutParams cp=new LayoutParams(92,34);cp.gravity=Gravity.RIGHT;cp.rightMargin=18;cp.topMargin=15;root.addView(counter,cp);marker=new View(activity);marker.setBackground(round(Appearance.accent(activity),2));marker.setAlpha(0);marker.setPivotX(0);LayoutParams mp=new LayoutParams(56,3);mp.leftMargin=28;mp.topMargin=54;root.addView(marker,mp);if(nightHome){marker.setVisibility(GONE);counter.setVisibility(GONE);}label.setSingleLine();label.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams lp=new LayoutParams(Math.min(1500,(int)Math.ceil(label.getPaint().measureText(heading))+32),42);lp.leftMargin=12;lp.topMargin=11;root.addView(label,lp);
+            TextView label=text(heading,nightHome?31:27,nightHome?VelaTheme.WHITE:DIM,Ui.displaySemibold);headingLabel=label;label.setAlpha(sidebarOpen?0f:1f);label.setPadding(16,0,16,0);counter=text("",18,WHITE,Ui.medium);counter.setGravity(Gravity.CENTER);counter.setBackground(round(0xB3161820,12));counter.setAlpha(0);LayoutParams cp=new LayoutParams(92,34);cp.gravity=Gravity.RIGHT;cp.rightMargin=18;cp.topMargin=15;root.addView(counter,cp);marker=new View(activity);marker.setBackground(round(Appearance.accent(activity),2));marker.setAlpha(0);marker.setPivotX(0);LayoutParams mp=new LayoutParams(56,3);mp.leftMargin=28;mp.topMargin=54;root.addView(marker,mp);if(nightHome){marker.setVisibility(GONE);counter.setVisibility(GONE);}label.setSingleLine();label.setEllipsize(android.text.TextUtils.TruncateAt.END);LayoutParams lp=new LayoutParams(Math.min(1500,(int)Math.ceil(label.getPaint().measureText(heading))+32),42);lp.leftMargin=12;lp.topMargin=11;root.addView(label,lp);
             posters.setOrientation(LinearLayout.HORIZONTAL);posters.setClipChildren(false);posters.setClipToPadding(false);posters.setPadding(24,18,40,20);
             rail.setHorizontalScrollBarEnabled(false);rail.setSmoothScrollingEnabled(false);rail.setClipChildren(true);rail.setClipToPadding(true);rail.setOverScrollMode(OVER_SCROLL_NEVER);
             rail.setHorizontalFadingEdgeEnabled(true);rail.setFadingEdgeLength(64);rail.addView(posters,new HorizontalScrollView.LayoutParams(-2,railHeight));
@@ -698,7 +698,7 @@ final class CinemaHomeView extends FrameLayout {
         nightHome=filter==0&&presentation.equals("night")&&hasMedia;
         sectionArtwork=filter!=0&&hasMedia;
         styleSidebar();layoutHero();detailsButton.setVisibility(selected==null?GONE:VISIBLE);
-        int viewport=nightHome?522:filter==0?(presentation.equals("rows")?910:presentation.equals("compact")?650:570):(sectionArtwork&&browsing()?sectionPosterWidth()*3/2:Appearance.posterHeight(activity))+104;LayoutParams shelfBounds=(LayoutParams)shelvesScroll.getLayoutParams();shelfBounds.height=viewport;shelfBounds.topMargin=1080-viewport;shelvesScroll.setLayoutParams(shelfBounds);shelvesScroll.setClipBounds(new Rect(0,0,shelfBounds.width,viewport));
+        int viewport=nightHome?572:filter==0?(presentation.equals("rows")?910:presentation.equals("compact")?650:570):(sectionArtwork&&browsing()?sectionPosterWidth()*3/2:Appearance.posterHeight(activity))+104;LayoutParams shelfBounds=(LayoutParams)shelvesScroll.getLayoutParams();shelfBounds.height=viewport;shelfBounds.topMargin=1080-viewport;shelvesScroll.setLayoutParams(shelfBounds);shelvesScroll.setClipBounds(new Rect(0,0,shelfBounds.width,viewport));
         if(browsing())setBounds(pager,194,shelfBounds.topMargin-64,1646,52);
         libraryApps.setVisibility(GONE);
         rowNote.setVisibility(hasMedia?GONE:VISIBLE);shelvesScroll.setVisibility(hasMedia?VISIBLE:GONE);
@@ -717,24 +717,16 @@ final class CinemaHomeView extends FrameLayout {
             summary.setText(filter==3?L10n.text("Rows shared by YouTube with your television appear here."):displayedLibrary.connected()?L10n.text("No titles are available in this category."):Ui.tr("Conecte Plex ou Jellyfin para ver seus filmes e séries.","Connect Plex or Jellyfin to see your movies and series.","Conecta Plex o Jellyfin para ver tus películas y series."));
             play.setText(filter==3?L10n.text("Open YouTube"):displayedLibrary.connected()?Ui.tr("Abrir ","Open ","Abrir ")+displayedLibrary.provider():Ui.tr("Conectar biblioteca","Connect library","Conectar biblioteca"));layoutPlaybackAction();rowNote.setText(filter==3?L10n.text("Enable access to TV rows from Options."):!displayedLibrary.connected()?L10n.text("Your posters appear automatically when you connect your account."):browsing()&&catalogPage==null?Ui.tr("Carregando bibliotecas…","Loading libraries…","Cargando bibliotecas…"):Ui.tr("Não há títulos nesta página ou biblioteca.","No titles in this page or library.","No hay títulos en esta página o biblioteca."));return;
         }
-        PlexClient.Film featured=null;
         if(filter==0){
             List<PlexClient.Film> continuing=new ArrayList<>(),library=new ArrayList<>(),recent=new ArrayList<>();
             for(PlexClient.Film film:visible)(film.continuing?continuing:film.recentlyAdded?recent:library).add(film);
             continuing.sort((a,b)->Long.compare(b.lastPlayedMs,a.lastPlayedMs));
-            List<String> order=VelaLayout.order(activity);
-            boolean defaultOrder=order.equals(VelaLayout.ROWS);
-            order.removeIf(key->!VelaLayout.visible(activity,key));
-            // When the opening pair is resume + recent, the hero presents resume and
-            // Down opens recent posters. The full multi-service queue follows them.
-            if(nightHome&&defaultOrder&&order.size()>=2&&"resume".equals(order.get(0))&&"recent".equals(order.get(1))
-                &&!continuing.isEmpty()&&!homeRows.getOrDefault("recent",recent).isEmpty()){
-                featured=continuing.get(0);
-                Collections.swap(order,0,1);
-            }
+            org.json.JSONObject layout=VelaLayout.read(activity);
+            List<String> order=VelaLayout.order(layout);
             for(String key:order){
+                if(!VelaLayout.visible(layout,key))continue;
                 List<PlexClient.Film> values=key.equals("resume")?continuing:key.equals("recent")?recent:key.equals("library")?(recent.isEmpty()?library:Collections.emptyList()):homeRows.getOrDefault(key,Collections.emptyList());
-                if(homeRows.containsKey(key))values=homeRows.get(key);if(!values.isEmpty())addShelf(VelaLayout.title(activity,key),values,false,12,key);
+                if(homeRows.containsKey(key))values=homeRows.get(key);if(!values.isEmpty())addShelf(VelaLayout.title(layout,key),values,false,12,key);
                 if(key.equals("library"))for(Map.Entry<LibraryCollection,List<PlexClient.Film>> collection:collectionRows.entrySet())if(!collection.getValue().isEmpty())addShelf(collection.getKey().title,collection.getValue(),false,8,"library");
             }
 
@@ -742,7 +734,6 @@ final class CinemaHomeView extends FrameLayout {
         if(filter==0&&shelves.isEmpty()){emptyHome();return;}
         List<PlexClient.Film> shown=posterFilms.isEmpty()?visible:posterFilms;PlexClient.Film keep=null;
         if(selected!=null)for(PlexClient.Film film:shown)if(filmIdentity(film).equals(filmIdentity(selected)))keep=film;
-        if(keep==null&&featured!=null)keep=featured;
         if(keep==null&&!shown.isEmpty())keep=shown.get(0);if(keep!=null){selectFilm(keep);detailsButton.setVisibility(rowsOnly()?GONE:VISIBLE);}
         shelfList.setPadding(0,0,0,shelves.isEmpty()?0:Math.max(0,viewport-shelves.get(shelves.size()-1).root.getLayoutParams().height));
         for(int r=0;r<shelves.size();r++){

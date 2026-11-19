@@ -89,6 +89,35 @@ public final class AndroidHomePersonalizationTest extends Instrumentation {
         phase="studio-reduced-motion";Visuals.prefs(context).edit().putBoolean("reducedMotion",true).commit();ui(()->{try{cards().get(cards().size()-1).requestFocus();}catch(Exception e){throw new RuntimeException(e);}});View focused=activity.getCurrentFocus();check(focused.getScaleX()==1&&(Float)field(focused,"emphasis")==1&&field(focused,"motion")==null,"Reduced motion lost the static focus indication");check((Float)field(focused,"shade")==0,"Reduced motion shaded the selected card");Visuals.prefs(context).edit().putBoolean("reducedMotion",false).commit();
         phase="studio-empty";ui(activity::finish);JSONObject empty=VelaLayout.read(context).put("hidden",new JSONArray(VelaLayout.ROWS));VelaLayout.save(context,empty);int requestsBefore=rowRequests.get(),resumesBefore=resumeRequests.get();activity=(HomeActivity)startActivitySync(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));home=(CinemaHomeView)field(activity,"home");await(()->field(home,"emptyHome")!=null);Thread.sleep(400);check(((View)field(home,"emptyEdit")).isShown()&&rowRequests.get()==requestsBefore&&resumeRequests.get()==resumesBefore,"Empty Home fetched hidden feeds or lost its editor access");shot("11-empty-home");
     }
+    void addSection()throws Exception{
+        phase="adding a shelf with the remote";
+        JSONObject before=VelaLayout.read(context);
+        JSONObject defaults=new JSONObject(before.toString());
+        defaults.remove("order");
+        VelaLayout.save(context,defaults);
+        VelaHomeEditor editor=openEditor();
+        ui(editor::focusFirst);
+        List<String> keys=(List<String>)field(editor,"keys");
+        int available=keys.indexOf("@add-section");
+        check(available>0&&keys.get(0).equals("resume")&&keys.get(1).equals("recent")&&!keys.contains("recent_movies"),"Default shelves or available sections are out of order");
+        for(int i=0;i<available;i++)remote(KeyEvent.KEYCODE_DPAD_DOWN);
+        remote(KeyEvent.KEYCODE_DPAD_RIGHT);
+        check(((TextView)activity.getCurrentFocus()).getText().toString().equals(VelaLayout.label("recent_movies")),"Remote cannot reach the available rows");
+        shot("add-section");
+        remote(KeyEvent.KEYCODE_DPAD_CENTER);
+        check(editor.list.hasFocus()&&keys.get(editor.list.getSelectedItemPosition()).equals("recent_movies"),"Focus did not follow the added row");
+        check(keys.get(keys.size()-2).equals("recent_movies")&&!VelaLayout.visible(context,"recent_movies"),"New shelf was not appended as a draft");
+        remote(KeyEvent.KEYCODE_DPAD_DOWN);
+        remote(KeyEvent.KEYCODE_DPAD_DOWN);
+        check(editor.save.hasFocus(),"Cannot reach Save after adding a row");
+        remote(KeyEvent.KEYCODE_DPAD_CENTER);
+        check(VelaLayout.visible(context,"recent_movies")&&!VelaLayout.visible(context,"recent_series"),"Saving enabled the wrong feeds");
+        ui(()->((VelaHub)unchecked(activity,"hub")).close());
+        await(()->{home=(CinemaHomeView)field(activity,"home");return ((Map<?,?>)field(home,"homeRows")).containsKey("recent_movies");});
+        List<?> rows=shelves();Object last=rows.get(rows.size()-1);
+        check(((TextView)field(last,"headingLabel")).getText().toString().equals(VelaLayout.label("recent_movies")),"Added shelf did not render after existing rows");
+        VelaLayout.save(context,before);
+    }
     void launch()throws Exception{activity=(HomeActivity)startActivitySync(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));home=(CinemaHomeView)field(activity,"home");await(()->!cards().isEmpty()&&field(home,"heroBitmap")!=null);}
     void titlePresentation()throws Exception{
         phase="exclusive movie title presentation";
@@ -106,7 +135,7 @@ public final class AndroidHomePersonalizationTest extends Instrumentation {
         phase="old-layout-migration";VelaLayout.save(context,new JSONObject().put("order",new JSONArray(Arrays.asList("recent","resume","library"))));
         for(String row:VelaLayout.EXTRA_ROWS)check(!VelaLayout.visible(context,row),"An old profile silently enabled a remote feed");check(VelaLayout.order(context).get(0).equals("recent"),"Migration changed an existing order");
         PlexClient plex=new PlexClient(context);plex.prefs.edit().putString("serverUri","https://vela-fixture.invalid").putString("serverId","home-fixture-"+SystemClock.elapsedRealtime()).putString("serverToken","fixture-session").putString("serverName","Plex · Demo").commit();LibraryClient.activate(context,"Plex");
-        phase="disabled-row-network";launch();Thread.sleep(400);check(rowRequests.get()==0,"Disabled feeds requested the catalogue");ui(activity::finish);
+        phase="disabled-row-network";launch();Thread.sleep(400);check(rowRequests.get()==0,"Disabled feeds requested the catalogue");addSection();ui(activity::finish);rowRequests.set(0);
         phase="profile-draft";JSONObject draft=VelaLayout.read(context);draft.put("librarySource","plex").put("appResume",false).put("hidden",new JSONArray());VelaLayout.save(context,draft);
         check(!VelaLayout.appResume(context)&&VelaLayout.source(context).equals("plex"),"Source/Watch Next choices were not saved");
         String other=VelaWorkspace.create(context,"Other Home");VelaWorkspace.select(context,other);check(VelaLayout.appResume(context)&&VelaLayout.source(context).equals("current")&&!VelaLayout.visible(context,"top_rated"),"Home choices crossed profiles");VelaWorkspace.select(context,profile);VelaWorkspace.delete(context,other);

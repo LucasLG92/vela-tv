@@ -80,8 +80,10 @@ final class VelaLayout {
         if(remember)update.putString("previous",read(c).toString());
         if(!update.commit())throw new IOException("Layout write failed");
     }
-    static List<String> order(Context c){List<String> out=new ArrayList<>();JSONArray a=read(c).optJSONArray("order");for(int i=0;a!=null&&i<a.length();i++)out.add(a.optString(i));for(String key:ROWS)if(!out.contains(key))out.add(key);return out;}
-    static boolean visible(Context c,String key){JSONArray a=read(c).optJSONArray("hidden");for(int i=0;a!=null&&i<a.length();i++)if(key.equals(a.optString(i)))return false;return true;}
+    static List<String> order(Context c){return order(read(c));}
+    static List<String> order(JSONObject layout){List<String> out=new ArrayList<>();JSONArray a=layout.optJSONArray("order");for(int i=0;a!=null&&i<a.length();i++)out.add(a.optString(i));for(String key:ROWS)if(!out.contains(key))out.add(key);return out;}
+    static boolean visible(Context c,String key){return visible(read(c),key);}
+    static boolean visible(JSONObject layout,String key){return !contains(layout.optJSONArray("hidden"),key);}
     static int size(Context c,String key,int fallback){JSONObject j=read(c).optJSONObject("sizes");int base=key.equals("inputs")||key.equals("apps")?VelaStyle.value(c,"size",fallback):fallback;return j==null?base:j.optInt(key,base);}
     static String label(String row){return row.equals("recent_movies")?L10n.text("Recently added movies"):row.equals("recent_series")?L10n.text("Recently added series"):row.equals("unwatched")?L10n.text("Unwatched movies"):row.equals("top_rated")?L10n.text("Top-rated movies"):row.equals("resume")?L10n.text("Continue watching"):row.equals("recent")?L10n.text("Recently added"):row.equals("inputs")?L10n.text("HDMI inputs"):row.equals("tv")?L10n.text("Television"):row.equals("apps")?L10n.text("Apps"):L10n.text("Library");}
     static JSONArray folders(Context c){JSONArray a=read(c).optJSONArray("folders");return a==null?new JSONArray():a;}

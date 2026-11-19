@@ -25,7 +25,15 @@ final class VelaProgrammeArt implements AutoCloseable {
     static String url(String value){if(value==null||value.length()>2048)return "";try{URI u=new URI(value);if(u.getRawUserInfo()!=null||u.getFragment()!=null)return "";if(("https".equalsIgnoreCase(u.getScheme())||"http".equalsIgnoreCase(u.getScheme()))&&u.getHost()!=null)return value;if("content".equals(u.getScheme())&&"android.media.tv".equals(u.getAuthority()))return value;}catch(Exception ignored){}return "";}
     void bind(ImageView view,String url){bind(view,url,640,360);}
     void bind(ImageView view,String url,int width,int height){
-        String safe=url(url);int w=Math.max(32,Math.min(640,width)),h=Math.max(32,Math.min(360,height));
+        bindSized(view,url,Math.max(32,Math.min(640,width)),Math.max(32,Math.min(360,height)));
+    }
+    void bindBackdrop(ImageView view,String url){
+        android.app.ActivityManager manager=context.getSystemService(android.app.ActivityManager.class);
+        boolean small=manager!=null&&manager.isLowRamDevice();
+        bindSized(view,url,small?960:1280,small?540:720);
+    }
+    private void bindSized(ImageView view,String url,int w,int h){
+        String safe=url(url);
         Binding old=bindings.get(view);
         if(!closed&&old!=null&&old.url.equals(safe)&&old.width==w&&old.height==h){schedule();return;}
         bindings.remove(view);if(old!=null)cancel(old);
