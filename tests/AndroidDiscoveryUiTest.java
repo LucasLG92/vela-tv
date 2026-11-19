@@ -43,8 +43,16 @@ public final class AndroidDiscoveryUiTest extends DiscoveryUiContract {
         check(current!=null,"Missing live selection");
         sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT);
         await(()->grid.programme()!=null&&grid.programme().start>=current.end);await(()->art.getDrawable()==null);shot("guia-despues");
-        View nowButton=(View)field(field(scene,"liveTv"),"present");
-        ui(nowButton::performClick);await(()->grid.programme()!=null&&grid.programme().start==current.start&&grid.followsNow());
+        key(KeyEvent.KEYCODE_BACK);
+        await(()->grid.hasFocus()&&grid.programme()!=null&&grid.programme().start==current.start&&grid.followsNow());
+        android.view.ViewGroup pane=(android.view.ViewGroup)field(tv,"guidePane");
+        for(View control:pane.getFocusables(View.FOCUS_FORWARD))
+            check(!(control instanceof android.widget.TextView),"Unexpected focusable guide footer");
+        ui(()->grid.cursor(TvTimelineView.present(System.currentTimeMillis()/1000)+TvTimelineView.SECONDS-1));
+        key(KeyEvent.KEYCODE_DPAD_RIGHT);
+        await(()->(Long)field(tv,"guideStart")>TvTimelineView.present(System.currentTimeMillis()/1000));
+        key(KeyEvent.KEYCODE_BACK);
+        await(()->grid.hasFocus()&&grid.followsNow()&&grid.programme()!=null&&grid.programme().start==current.start);
         ui(()->galleryTvMode(false));await(()->!guide.isShown());shot("canales");
         ui(()->galleryTvMode(true));await(guide::isShown);ui(entry::requestFocus);
     }

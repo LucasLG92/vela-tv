@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.6-preview
+
+- Remove the previous, Now and next controls from the programme guide. The channel rows use the extra height. Press Back when browsing the schedule to return to live on the selected channel.
+- Lower the contrast of the vertical half-hour and programme dividers in Full and Lite.
+
 ## 2.6.5-preview
 
 - Keep the entire programme photo in frame across landscape stills and posters. Blend its colours behind the time ruler down to the first channel in Full and Lite.

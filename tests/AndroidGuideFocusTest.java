@@ -41,15 +41,62 @@ public final class AndroidGuideFocusTest extends Instrumentation {
         Text ta=before.timing(a.x),tb=after.timing(b.x);check(ta.x==tb.x&&ta.y==tb.y,"Focus moved the schedule baseline: "+ta.y+" -> "+tb.y);
         check(before.blocks.equals(after.blocks),"Focus resized the programme footprint");
     }
+    public static final class AntennaHome extends LiteHomeActivity {
+        @Override protected LiteAntennaData createAntennaData(){
+            return new LiteAntennaData(this){
+                boolean permitted(){return true;}
+                boolean refreshGuide(List<LiveTvData.Channel> all,CancellationSignal cancel){return false;}
+                List<LiveTvData.Channel> channels(CancellationSignal cancel){
+                    return Collections.singletonList(new LiveTvData.Channel(1,"test-input","1","Test channel",false,true,false,"dvb:1"));
+                }
+                Map<String,List<LiveTvData.Programme>> programmes(List<LiveTvData.Channel> page,long from,long to,CancellationSignal cancel){
+                    List<LiveTvData.Programme> items=new ArrayList<>();
+                    for(long t=from;t<to;t+=1800)items.add(new LiveTvData.Programme(t,t+1800,"Programme "+t));
+                    return Collections.singletonMap(page.get(0).id,items);
+                }
+            };
+        }
+    }
+    @Override public Activity newActivity(ClassLoader loader,String name,Intent intent)throws InstantiationException,IllegalAccessException,ClassNotFoundException{
+        return name.equals(LiteHomeActivity.class.getName())?new AntennaHome():super.newActivity(loader,name,intent);
+    }
     void liteHeaderPlacement()throws Exception{
-        Method show=activity.getClass().getDeclaredMethod("show",int.class,boolean.class);
+        Method show=LiteHomeActivity.class.getDeclaredMethod("show",int.class,boolean.class);
         show.setAccessible(true);
-        Field sceneField=activity.getClass().getDeclaredField("scene");sceneField.setAccessible(true);
+        Field sceneField=LiteHomeActivity.class.getDeclaredField("scene");sceneField.setAccessible(true);
         FrameLayout scene=(FrameLayout)sceneField.get(activity);
         ui(()->{try{show.invoke(activity,1,false);}catch(Exception e){throw new RuntimeException(e);}});
         View art=scene.getChildAt(0);
         check(art instanceof VelaGuideBackdrop&&art.getWidth()==scene.getWidth()&&art.getHeight()==454
             &&art.getTop()==0,"Lite guide header is inset or above its controls");
+        Field guideField=LiteHomeActivity.class.getDeclaredField("guide");guideField.setAccessible(true);
+        LiteAntennaGuide page=(LiteAntennaGuide)guideField.get(activity);
+        // This fixture supplies programmes directly on emulators without a TV provider.
+        Field observing=LiteAntennaGuide.class.getDeclaredField("observing");observing.setAccessible(true);
+        if(!observing.getBoolean(page)){
+            ui(()->{
+                try{
+                    observing.setBoolean(page,true);
+                    try{page.reload(true);}finally{observing.setBoolean(page,false);}
+                }catch(IllegalAccessException e){throw new AssertionError(e);}
+            });
+        }
+        Field gridField=page.getClass().getDeclaredField("timeline");gridField.setAccessible(true);
+        TvTimelineView grid=null;
+        for(int n=0;n<100;n++){
+            waitForIdleSync();grid=(TvTimelineView)gridField.get(page);
+            if(grid!=null&&grid.programme()!=null)break;
+            SystemClock.sleep(50);
+        }
+        check(grid!=null&&grid.programme()!=null,"Lite antenna fixture did not load");
+        TvTimelineView ready=grid;long start=ready.programme().start;
+        ui(ready::requestFocus);
+        sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT);waitForIdleSync();
+        check(ready.programme().start>start&&!ready.followsNow(),"Right did not browse future antenna programmes");
+        sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);waitForIdleSync();
+        check(ready.hasFocus()&&ready.programme().start==start&&ready.followsNow(),"Back did not return Lite to live");
+        sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);waitForIdleSync();
+        check(ready.hasFocus(),"Down escaped from the last channel into the footer");
         ui(()->{try{show.invoke(activity,0,false);}catch(Exception e){throw new RuntimeException(e);}});
         check(art.getParent()==null,"Leaving Lite TV retained its backdrop");
     }

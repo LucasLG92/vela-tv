@@ -24,7 +24,7 @@ public class LiveTvActivity extends Activity {
     private final ExecutorService io=Visuals.worker(2);
     private FrameLayout root,stage,grid,dialog;
     private TvTimelineView timeline;
-    private TextView gridMode,guideMode,guideNow,guideEarlier,guideLater;
+    private TextView gridMode,guideMode;
     private boolean timelineMode,timelineEnterLast,timelineFollowing=true;
     private int timelineOffset,timelineEpoch;
     private long timelineStart=TvTimelineView.present(System.currentTimeMillis()/1000),timelineCursor=-1;
@@ -70,9 +70,6 @@ public class LiveTvActivity extends Activity {
         timelineMode=LiveTvData.guideView(this);
         gridMode=button(t("Canais","Channels","Canales"));put(stage,gridMode,452,184,152,56);gridMode.setOnClickListener(v->setTimelineMode(false));
         guideMode=button(t("Guia","Guide","Guía"));put(stage,guideMode,616,184,152,56);guideMode.setOnClickListener(v->setTimelineMode(true));
-        guideNow=button(t("Agora","Now","Ahora"));put(stage,guideNow,1000,184,116,56);guideNow.setOnClickListener(v->{timelineFollowing=true;timelineCursor=System.currentTimeMillis()/1000;timelineStart=TvTimelineView.present(timelineCursor);loadTimeline(true);});
-        guideEarlier=button("‹");guideEarlier.setContentDescription(t("Programação anterior","Earlier programmes","Programación anterior"));put(stage,guideEarlier,1132,184,56,56);guideEarlier.setOnClickListener(v->shiftTime(-1,timelineStart-1));
-        guideLater=button("›");guideLater.setContentDescription(t("Próxima programação","Later programmes","Programación posterior"));put(stage,guideLater,1204,184,56,56);guideLater.setOnClickListener(v->shiftTime(1,timelineStart+TvTimelineView.SECONDS));
         tab("m3u","M3U",88);tab("xtream","Xtream",268);tab("antenna",t("Antena","Antenna","Antena"),448);
         sourceSelector=button("");put(stage,sourceSelector,88,184,286,56);sourceSelector.setOnClickListener(v->showSourcePicker());
         searchButton=button(t("Buscar","Search","Buscar"));put(stage,searchButton,1440,184,188,56);searchButton.setOnClickListener(v->showSearch());
@@ -92,7 +89,7 @@ public class LiveTvActivity extends Activity {
             public void options(LiveTvData.Channel ch){toggleFavorite(ch);}
             public boolean channels(int direction){return timelineChannels(direction,true);}
             public void time(int direction,long cursor){shiftTime(direction,cursor);}
-        });put(stage,timeline,452,278,1392,594);timeline.setNextFocusLeftId(groupList.getId());timeline.setNextFocusUpId(guideNow.getId());
+        });put(stage,timeline,452,278,1392,594);timeline.setNextFocusLeftId(groupList.getId());timeline.setNextFocusUpId(sourceSelector.getId());
         empty=text("",29,DIM,Ui.regular);empty.setGravity(Gravity.CENTER);empty.setMaxLines(4);put(stage,empty,540,400,1190,220);
         previous=button("‹ "+t("Anterior","Previous","Anterior"));put(stage,previous,452,890,206,52);previous.setOnClickListener(v->{if(timelineMode)timelineChannels(-1,false);else renderPage(page-1,true);});
         pageLabel=text("",18,DIM,Ui.medium);pageLabel.setGravity(Gravity.CENTER);put(stage,pageLabel,682,890,922,52);
@@ -180,10 +177,8 @@ public class LiveTvActivity extends Activity {
     }
     private void updateViewMode(){
         boolean showing=timelineMode;grid.setVisibility(showing?View.GONE:View.VISIBLE);timeline.setVisibility(showing?View.VISIBLE:View.GONE);
-        for(TextView b:new TextView[]{guideNow,guideEarlier,guideLater})b.setVisibility(showing?View.VISIBLE:View.GONE);
         gridMode.setVisibility(View.GONE);guideMode.setVisibility(View.GONE);gridMode.setSelected(!showing);guideMode.setSelected(showing);
         for(TextView b:new TextView[]{gridMode,guideMode}){b.setOnFocusChangeListener((v,f)->{b.setBackground(round(f?0xFFF3F5FA:b.isSelected()?0xFF3B4E68:0xFF253145,15));b.setTextColor(f?INK:WHITE);});if(!b.hasFocus())b.setBackground(round(b.isSelected()?0xFF3B4E68:0xFF253145,15));}
-        long present=TvTimelineView.present(System.currentTimeMillis()/1000);guideEarlier.setEnabled(timelineStart>present);guideEarlier.setAlpha(timelineStart>present?1:.3f);guideLater.setEnabled(timelineStart<present+45*3600);guideLater.setAlpha(timelineStart<present+45*3600?1:.3f);
     }
     private boolean timelineChannels(int direction,boolean edge){
         if(loading)return true;int offset=timelineOffset+direction*VelaReading.rows(this);
@@ -199,7 +194,7 @@ public class LiveTvActivity extends Activity {
             LiveTvData.Channel ch=timelineChannels.get(i);LiveTvLogos.LogoView logo=new LiveTvLogos.LogoView(this,displayName(ch.name));logo.setScaleType(ImageView.ScaleType.FIT_CENTER);logo.setFocusable(false);logo.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);put(timeline,logo,10,timeline.logoY(i),60,60);images.add(logo);if(playback==null)logos.load(ch,logo);
         }
         timeline.data(timelineChannels,Collections.emptyMap(),timelineStart,selected,true);timelineProgrammes=Collections.emptyMap();updateViewMode();
-        boolean before=page>0||timelineOffset>0,after=page*12+timelineOffset+timelineChannels.size()<total;timeline.setNextFocusDownId(after?next.getId():before?previous.getId():guideNow.getId());
+        boolean before=page>0||timelineOffset>0,after=page*12+timelineOffset+timelineChannels.size()<total;timeline.setNextFocusDownId(after?next.getId():before?previous.getId():timeline.getId());
         previous.setEnabled(before);previous.setFocusable(before);previous.setAlpha(before?1:.3f);next.setEnabled(after);next.setFocusable(after);next.setAlpha(after?1:.3f);
         pageLabel.setText(total==0?"0":(page*12+timelineOffset+1)+"–"+(page*12+timelineOffset+timelineChannels.size())+" / "+total);
         empty.setVisibility(timelineChannels.isEmpty()?View.VISIBLE:View.GONE);empty.setText(t("Não há canais nesta seleção.","No channels in this selection.","No hay canales en esta selección."));
@@ -207,13 +202,17 @@ public class LiveTvActivity extends Activity {
         if(focus&&dialog.getVisibility()!=View.VISIBLE&&playback==null&&!timelineChannels.isEmpty())timeline.requestFocus();loadTimeline(false);
     }
     private void cancelTimeline(){timelineEpoch++;if(timelineJob!=null)timelineJob.cancel(true);}
+    private void showPresent(){
+        timelineFollowing=true;timelineCursor=System.currentTimeMillis()/1000;
+        timelineStart=TvTimelineView.present(timelineCursor);loadTimeline(true);
+    }
     private void shiftTime(int direction,long cursor){
         long present=TvTimelineView.present(System.currentTimeMillis()/1000),nextStart=Math.max(present,Math.min(present+45*3600,timelineStart+direction*90*60));if(nextStart==timelineStart)return;
         timelineFollowing=false;timelineStart=nextStart;timelineCursor=cursor;loadTimeline(true);
     }
     private void loadTimeline(boolean focus){
         if(!active||closed||playback!=null||!timelineMode||timelineChannels.isEmpty())return;cancelTimeline();int token=timelineEpoch,epoch=generation;long from=timelineStart;List<LiveTvData.Channel> visible=new ArrayList<>(timelineChannels);Map<String,LiveTvData.Guide> fallback=new HashMap<>(guide);String currentMode=mode;
-        timeline.data(visible,Collections.emptyMap(),from,selected,true);if(timelineCursor>=0){timeline.cursor(timelineCursor);timelineCursor=-1;}updateViewMode();if(focus)timeline.requestFocus();
+        timeline.data(visible,Collections.emptyMap(),from,selected,true);if(timelineCursor>=0){if(timelineFollowing)timeline.followNow(timelineCursor);else timeline.cursor(timelineCursor);timelineCursor=-1;}updateViewMode();if(focus)timeline.requestFocus();
         timelineJob=io.submit(()->{Map<String,List<LiveTvData.Programme>> result=new HashMap<>();try{result.putAll(new XmlTvGuide(this).window(visible,from));if(currentMode.equals("antenna")){List<LiveTvData.Channel> missing=new ArrayList<>();for(LiveTvData.Channel ch:visible)if(!result.containsKey(ch.id))missing.add(ch);result.putAll(antenna.window(missing,from));}}catch(Exception unavailable){}
             for(LiveTvData.Channel ch:visible){List<LiveTvData.Programme> list=new ArrayList<>(result.getOrDefault(ch.id,Collections.emptyList()));LiveTvData.Guide entry=fallback.get(ch.id);if(entry!=null)for(LiveTvData.Programme p:new LiveTvData.Programme[]{entry.now,entry.next})if(p!=null&&p.end>from&&p.start<from+TvTimelineView.SECONDS){boolean overlaps=false;for(LiveTvData.Programme known:list)if(known.start<p.end&&known.end>p.start){overlaps=true;break;}if(!overlaps)list.add(p);}list.sort((a,b)->Long.compare(a.start,b.start));if(list.size()>TvTimelineView.MAX_PROGRAMMES)list=new ArrayList<>(list.subList(0,TvTimelineView.MAX_PROGRAMMES));result.put(ch.id,list);}
             main.post(()->{if(!active||closed||!timelineMode||epoch!=generation||token!=timelineEpoch)return;timelineProgrammes=result;timeline.data(visible,result,from,selected,false);timeline.minute(System.currentTimeMillis()/1000);});
@@ -249,7 +248,7 @@ public class LiveTvActivity extends Activity {
             int visibility=current==null?View.INVISIBLE:View.VISIBLE;remainingView.setVisibility(visibility);ProgrammeProgress progress=programmeBars.get(i);progress.setVisibility(visibility);progress.value(current==null?0:current.progress(now));
             cards.get(i).setContentDescription(ch.name+(TvChannelNames.favorite(ch,favorites)?" · ★":"")+" · "+title+(remaining.isEmpty()?"":" · "+remaining));
         }
-        if(timelineMode&&playback==null){if(timelineFollowing&&timelineStart!=TvTimelineView.present(now)){timelineStart=TvTimelineView.present(now);timelineCursor=now;loadTimeline(false);}timeline.minute(now);}else updateSelection(now);
+        if(timelineMode&&playback==null){if(timeline.followsNow()&&timelineStart!=TvTimelineView.present(now)){timelineFollowing=true;timelineStart=TvTimelineView.present(now);timelineCursor=now;loadTimeline(false);}timeline.minute(now);}else updateSelection(now);
     }
     private void updateSelection(){updateSelection(System.currentTimeMillis()/1000);}
     private void updateSelection(long now){
@@ -317,5 +316,8 @@ public class LiveTvActivity extends Activity {
             if(progress>0){paint.setColor(accent);canvas.drawRoundRect(0,0,getWidth()*progress/1000f,getHeight(),radius,radius,paint);}
         }
     }
-    @Override public boolean dispatchKeyEvent(KeyEvent event){int key=event.getKeyCode();if(playback!=null&&playback.pairedKey(key)){if(event.getAction()==KeyEvent.ACTION_UP&&consumeUp==key)consumeUp=-1;if(playback.key(event))return true;}if(event.getAction()==KeyEvent.ACTION_UP&&consumeUp==key){consumeUp=-1;return true;}if(event.getAction()==KeyEvent.ACTION_UP&&longOk&&(key==KeyEvent.KEYCODE_DPAD_CENTER||key==KeyEvent.KEYCODE_ENTER)){longOk=false;return true;}if(dialog.getVisibility()==View.VISIBLE){if(key==KeyEvent.KEYCODE_BACK){if(event.getAction()==KeyEvent.ACTION_UP){closeDialog();if(timelineMode)timeline.requestFocus();else sourceButton.requestFocus();}return true;}}else if(playback!=null&&playback.key(event)){if(event.getAction()==KeyEvent.ACTION_DOWN)consumeUp=key;return true;}else if(playback==null&&event.getAction()==KeyEvent.ACTION_DOWN){if(key==KeyEvent.KEYCODE_SEARCH){showSearch();consumeUp=key;return true;}if(key==KeyEvent.KEYCODE_MENU){showSources();consumeUp=key;return true;}if(key==KeyEvent.KEYCODE_CHANNEL_UP||key==KeyEvent.KEYCODE_CHANNEL_DOWN){if(timelineMode)timelineChannels(key==KeyEvent.KEYCODE_CHANNEL_UP?1:-1,false);else renderPage(page+(key==KeyEvent.KEYCODE_CHANNEL_UP?1:-1),true);consumeUp=key;return true;}}return super.dispatchKeyEvent(event);}
+    @Override public boolean dispatchKeyEvent(KeyEvent event){int key=event.getKeyCode();if(playback!=null&&playback.pairedKey(key)){if(event.getAction()==KeyEvent.ACTION_UP&&consumeUp==key)consumeUp=-1;if(playback.key(event))return true;}if(event.getAction()==KeyEvent.ACTION_UP&&consumeUp==key){consumeUp=-1;return true;}if(event.getAction()==KeyEvent.ACTION_UP&&longOk&&(key==KeyEvent.KEYCODE_DPAD_CENTER||key==KeyEvent.KEYCODE_ENTER)){longOk=false;return true;}if(dialog.getVisibility()==View.VISIBLE){if(key==KeyEvent.KEYCODE_BACK){if(event.getAction()==KeyEvent.ACTION_UP){closeDialog();if(timelineMode)timeline.requestFocus();else sourceButton.requestFocus();}return true;}}else if(playback!=null&&playback.key(event)){if(event.getAction()==KeyEvent.ACTION_DOWN)consumeUp=key;return true;}else if(playback==null&&event.getAction()==KeyEvent.ACTION_DOWN){if(key==KeyEvent.KEYCODE_BACK&&timelineMode){
+        if(consumeUp==key)return true;
+        if(event.getRepeatCount()==0&&timeline.backToLive(this::showPresent)){consumeUp=key;return true;}
+    }if(key==KeyEvent.KEYCODE_SEARCH){showSearch();consumeUp=key;return true;}if(key==KeyEvent.KEYCODE_MENU){showSources();consumeUp=key;return true;}if(key==KeyEvent.KEYCODE_CHANNEL_UP||key==KeyEvent.KEYCODE_CHANNEL_DOWN){if(timelineMode)timelineChannels(key==KeyEvent.KEYCODE_CHANNEL_UP?1:-1,false);else renderPage(page+(key==KeyEvent.KEYCODE_CHANNEL_UP?1:-1),true);consumeUp=key;return true;}}return super.dispatchKeyEvent(event);}
 }

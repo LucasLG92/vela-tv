@@ -12,7 +12,7 @@ import java.util.*;
 /** Six channels and a three-hour window. Programmes are painted, not inflated into a view tree. */
 final class TvTimelineView extends FrameLayout {
     static final int ROWS=6,SECONDS=3*3600,MAX_PROGRAMMES=32;
-    static final int HEADER=58;
+    static final int HEADER=58, GUIDE_ROWS_HEIGHT=576;
     private static final int LABEL=222,ROW=88;
     interface Actions {
         void selected(LiveTvData.Channel channel,LiveTvData.Programme programme);
@@ -54,6 +54,13 @@ final class TvTimelineView extends FrameLayout {
     }
     void followNow(long value){setCursor(value,true);}
     boolean followsNow(){return followClock;}
+    boolean backToLive(Runnable reloadLiveWindow){
+        if(!hasFocus()||followClock)return false;
+        long live=System.currentTimeMillis()/1000;
+        if(start==present(live))followNow(live);
+        else reloadLiveWindow.run();
+        return true;
+    }
     void cursor(long value){setCursor(value,false);}
     private void setCursor(long value,boolean live){followClock=live;cursor=Math.max(start,Math.min(start+SECONDS-1,value));invalidate();notifySelection();}
     long cursorTime(){return cursor;}
@@ -99,7 +106,7 @@ final class TvTimelineView extends FrameLayout {
         boolean onAir=now>=start&&now<start+SECONDS&&!channels.isEmpty();
         float hand=onAir?x(now):-200;
         float tag=Math.min(w-88,Math.max(LABEL+4,hand-40));
-        for(int i=0;i<6;i++){float px=LABEL+(w-LABEL)*i/6f;if(!onAir||px+76<tag||px+6>tag+84)label(c,time(start+i*1800),px+10,31,(w-LABEL)/6f-20,18,VelaTheme.SECONDARY,Ui.medium);paint.setColor(0x10FFFFFF);c.drawRect(px,HEADER,px+1,HEADER+channels.size()*rowHeight,paint);}
+        for(int i=0;i<6;i++){float px=LABEL+(w-LABEL)*i/6f;if(!onAir||px+76<tag||px+6>tag+84)label(c,time(start+i*1800),px+10,31,(w-LABEL)/6f-20,18,VelaTheme.SECONDARY,Ui.medium);paint.setColor(0x08FFFFFF);c.drawRect(px,HEADER,px+1,HEADER+channels.size()*rowHeight,paint);}
         for(int i=0;i<channels.size();i++){
             float top=HEADER+i*rowHeight;boolean focused=hasFocus()&&row==i;paint.setColor(0x16FFFFFF);c.drawRect(0,top+rowHeight-4,w,top+rowHeight-3,paint);
             if(focused){paint.setColor(0x13FFFFFF);c.drawRoundRect(0,top,LABEL-7,top+rowHeight-8,12,12,paint);paint.setColor(focusColor);c.drawRoundRect(0,top+18,3,top+rowHeight-24,1.5f,1.5f,paint);}
@@ -117,6 +124,7 @@ final class TvTimelineView extends FrameLayout {
             label(c,time(now),tag+12,30,64,17,VelaTheme.WHITE,Ui.semibold);
             paint.setColor(0xFF97C7BC);
             c.drawRect(px-1,40,px+1,HEADER-4,paint);c.drawCircle(px,HEADER-5,3.5f,paint);
+            paint.setColor(0x5897C7BC);
             for(int i=1;i<=channels.size();i++){
                 float bottom=HEADER+i*rowHeight;
                 c.drawRect(px-1,bottom-7,px+1,bottom-1,paint);
@@ -129,7 +137,7 @@ final class TvTimelineView extends FrameLayout {
             return;
         }
         boolean chosen=focused&&(p==null?cursor>=from&&cursor<to:p.start<=cursor&&p.end>cursor);paint.setColor(chosen?focusColor:p==null?0x044A5558:p.current(now)?0x10455B65:0x076B7B88);c.drawRoundRect(left,top,right,top+rowHeight-8,12,12,paint);
-        if(!chosen){paint.setColor(0x32FFFFFF);c.drawRect(right,top+15,right+1,top+rowHeight-22,paint);}
+        if(!chosen){paint.setColor(0x10FFFFFF);c.drawRect(right,top+15,right+1,top+rowHeight-22,paint);}
         if(right-left<104)return;
         String title=p==null?(loading?Ui.tr("Carregando…","Loading…","Cargando…"):Ui.tr("Sem programação","No programme information","Sin programación")):p.title;
         float reading=textScale,titleBaseline=top+31+(rowHeight-ROW)/2f,timingBaseline=top+rowHeight-20,lineStep=23*reading;
