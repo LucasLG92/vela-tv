@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds Vela.apk without Gradle: aapt2 -> javac -> d8 -> zipalign -> apksigner.
-# Needs a JDK (17+) and the Android SDK command-line tools (build-tools 34+, platform android-36). See README.md.
+# Needs a JDK (17+) and the Android SDK command-line tools (build-tools 36.1+, platform android-36). See README.md.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -85,7 +85,7 @@ LIBS=$(find out/media3/libs -name '*.jar' -print | paste -sd: -)
   -d out/classes $(find app/src out/gen -name '*.java') $(find lite/src -name '*.java' ! -name LiteSupport.java ! -name Config.java ! -name LiteExportActivity.java ! -name LiteMigrationProvider.java)
 "${JAVA_HOME:+$JAVA_HOME/bin/}jar" cf out/classes.jar -C out/classes .
 "${JAVA_HOME:+$JAVA_HOME/bin/}java" -cp "$BT/lib/d8.jar" com.android.tools.r8.R8 --release --min-api 26 --lib "$AJ" --lib "$BT/core-lambda-stubs.jar" --pg-conf out/media3/rules.pro --output out out/classes.jar $(find out/media3/libs -name '*.jar')
-(cd out && zip -qj base.apk classes*.dex)
+(cd out && "${JAVA_HOME:+$JAVA_HOME/bin/}jar" ufM base.apk classes*.dex)
 "$BT/zipalign" -f -p 4 out/base.apk out/aligned.apk
 
 # --- Sign with your own key (created once; updates need the same key, so keep vela.keystore)
