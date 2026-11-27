@@ -37,6 +37,47 @@ public final class AndroidNextTest extends Instrumentation {
         ui(tile::performLongClick);
         check(!VelaWatchlist.contains(context,id),"Holding OK again did not remove the saved broadcast");
     }
+    private void sameSlotEpisodes(long start)throws Exception{
+        VelaShows.Airing first=new VelaShows.Airing("Serial T1 E1","Demo",start,start+1800).onChannel("antenna","channel-one");
+        VelaShows.Airing tenth=new VelaShows.Airing("Serial T1 E10","Demo",start,start+1800,"","Tenth episode","","").onChannel(first.source,first.channelKey);
+        VelaShows.Airing refreshed=new VelaShows.Airing(first.title,"Demo HD",start,start+2700,"","First episode","","").onChannel(first.source,first.channelKey);
+        List<VelaShows.Airing> merged=VelaToolsData.merge(Collections.singletonList(first),Collections.singletonList(tenth));
+        check(merged.size()==2&&merged.get(0).description.isEmpty()&&merged.get(1).description.equals(tenth.description),
+                "Native and online guides merged different episodes in the same slot");
+
+        // The previous ID removed the episode suffix. The saved title still identifies the original.
+        String oldId="tv2:"+LiveTvData.hash("antenna|channel-one|"+start+"|serial");
+        String previousItems=VelaWatchlist.prefs(context).getString("items","[]");
+        VelaHub[] fixture={null};
+        try{
+            JSONObject legacy=VelaWatchlist.airing(first).put("id",oldId);
+            VelaWatchlist.prefs(context).edit().putString("items",new JSONArray().put(legacy).toString()).commit();
+            check(VelaWatchlist.contains(context,VelaWatchlist.airingId(refreshed))&&!VelaWatchlist.contains(context,VelaWatchlist.airingId(tenth)),
+                    "A replacement episode inherited the saved marker from an older build");
+            VelaWatchlist.toggle(context,VelaWatchlist.airing(tenth));
+            check(VelaWatchlist.read(context).size()==2,"Saving a replacement removed the original episode");
+            VelaWatchlist.toggle(context,VelaWatchlist.airing(tenth));
+            ui(()->{
+                fixture[0]=new VelaHub(activity,new VelaHub.Host(){
+                    public List<VelaHub.Hit> search(String q,int page,CancellationSignal signal){return Collections.emptyList();}
+                    public List<VelaShows.Airing> airings(String q,int page,CancellationSignal signal){return Arrays.asList(tenth,refreshed);}
+                    public String broadcastSource(){return first.source;}
+                    public void activate(VelaHub.Hit hit){} public String diagnosis(CancellationSignal signal){return "";}
+                    public void repair(){} public void closed(boolean changed){}
+                },3,true);
+                activity.addContentView(fixture[0],new FrameLayout.LayoutParams(-1,-1));
+                text(fixture[0],L10n.text("Watch later")).performClick();
+                text(fixture[0],first.title).performClick();
+            });
+            await(()->text(fixture[0],refreshed.description)!=null);
+            check(text(fixture[0],tenth.description)==null,"Saved details used the replacement episode's description");
+            ui(()->text(fixture[0],L10n.text("Remove from Watch later")).performClick());
+            check(VelaWatchlist.read(context).isEmpty(),"Removing the migrated broadcast left its legacy reference");
+        }finally{
+            if(fixture[0]!=null)ui(fixture[0]::close);
+            VelaWatchlist.prefs(context).edit().putString("items",previousItems).commit();
+        }
+    }
     private void guestProfileSelection()throws Exception{
         Map<String,String> profiles=VelaWorkspace.profiles(context);
         guestId=VelaSessions.prefs(context).getString("guest","");
@@ -148,6 +189,7 @@ public final class AndroidNextTest extends Instrumentation {
         ui(()->{savedName.setText("Demo section");saved.save.performClick();});
         await(()->"Demo section".equals(VelaLayout.title(context,key)));
         phase="programme-search-watchlist";searchWatchlist(new VelaShows.Airing("Search broadcast · Demo","Demo TV",now+3600,now+7200));
+        phase="same-slot-episodes";sameSlotEpisodes(now+7200);
         phase="watchlist-native";tools(3);click("Watch later");check(text(hub,airing.title)!=null,"Saved airing missing from UI");capture("02-watch-later");
         if(!VelaEdition.lite(context)){
             JSONObject legacy=new JSONObject().put("id","legacy").put("kind","media").put("title","Legacy series").put("provider","Plex");

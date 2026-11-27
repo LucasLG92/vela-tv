@@ -168,7 +168,8 @@ final class VelaHub extends FrameLayout {
     private void airing(VelaShows.Airing p,boolean saved){
         if(page==8&&discovery!=null){discovery.show(p);return;}
         clear();heading.setText(p.title);caption.setText(when(p));programmeHeader(p);
-        row(VelaWatchlist.contains(activity,VelaWatchlist.airingId(p))?L10n.text("Remove from Watch later"):L10n.text("Save for later"),
+        String airingId=VelaWatchlist.airingId(p);
+        row(VelaWatchlist.contains(activity,airingId)?L10n.text("Remove from Watch later"):L10n.text("Save for later"),
                 L10n.text("Saves this broadcast, not a recording"),()->{
             try{VelaWatchlist.toggle(activity,VelaWatchlist.airing(p));airing(p,saved);}
             catch(Exception bad){status.setText(L10n.text("Could not save this item."));}
@@ -189,14 +190,12 @@ final class VelaHub extends FrameLayout {
         row(VelaShows.follows(activity,p.title)?t("Stop following","Dejar de seguir"):t("Follow programme","Seguir programa"),
                 t("Match future broadcasts by title","Encontrar próximas emisiones por título"),()->{VelaShows.toggle(activity,p.title);changed=true;render();});
         row(t("Back","Volver"),"",this::render);first();
-        String lookup=p.source+"|"+p.channelKey+"|"+p.channel+"|"+p.start;
         if(saved&&!identified||identified&&!p.source.equals(host.broadcastSource()))return;
-        if((p.description.isEmpty()||p.image.isEmpty())&&!lookup.equals(detailLookup)){
-            detailLookup=lookup;
+        if((p.description.isEmpty()||p.image.isEmpty())&&!airingId.equals(detailLookup)){
+            detailLookup=airingId;
             work(signal->host.airings(p.title,0,signal),value->{
                 for(VelaShows.Airing more:(List<VelaShows.Airing>)value){
-                    if(identified&&(!p.source.equals(more.source)||!p.channelKey.equals(more.channelKey)))continue;
-                    if(more.start==p.start&&TvChannelNames.match(more.channel).equals(TvChannelNames.match(p.channel))
+                    if(airingId.equals(VelaWatchlist.airingId(more))
                             &&(!more.description.isEmpty()&&p.description.isEmpty()||!more.image.isEmpty()&&p.image.isEmpty())){
                         airing(new VelaShows.Airing(p.title,p.channel,p.start,p.end,p.eventId,
                                 more.description.isEmpty()?p.description:more.description,more.image.isEmpty()?p.image:more.image,

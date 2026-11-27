@@ -4,11 +4,16 @@ import android.app.*;
 import android.content.*;
 import android.os.Build;
 import org.json.*;
+import java.text.Normalizer;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /** Bounded recurring titles and cached airings. One inexact alarm, never a resident service. */
 final class VelaShows {
     static final int MAX_RULES=32,MAX_AIRINGS=128;
+    private static final Pattern EPISODE_SUFFIX=Pattern.compile(
+            "\\s+(?:[ts]\\s*\\d+\\s*e\\s*\\d+|(?:temporada|episodio|cap[ií]tulo)\\s+\\d+)(?:$|[\\s\\p{P}].*$)",
+            Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
     static final class Airing {
         final String title,channel,eventId,description,image,logo,source,channelKey;final long start,end;
         Airing onChannel(String source,String key){
@@ -20,7 +25,10 @@ final class VelaShows {
         Airing(String title,String channel,long start,long end,String id,String description,String image,String logo,String source,String channelKey){this.source=source;this.channelKey=channelKey;this.description=VelaWorkspace.clean(description==null?"":description,1600);this.image=VelaProgrammeArt.url(image);this.logo=VelaProgrammeArt.url(logo);eventId=id==null?"":id;this.title=VelaWorkspace.clean(title,240);this.channel=VelaWorkspace.clean(channel,120);this.start=start;this.end=end;}
     }
     static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"vela-programmes");}
-    static String identity(String title){return VelaWorkspace.normal(title).replaceFirst("\\s+(?:t\\s*\\d+\\s*e\\s*\\d+|s\\d+e\\d+|temporada\\s+\\d+.*|episodio\\s+\\d+.*|cap[ií]tulo\\s+\\d+.*)$","").trim();}
+    private static String seriesTitle(String title){
+        return EPISODE_SUFFIX.matcher(Normalizer.normalize(title,Normalizer.Form.NFC)).replaceFirst("").trim();
+    }
+    static String identity(String title){return VelaWorkspace.normal(seriesTitle(title));}
     static List<String> rules(Context c){List<String> out=new ArrayList<>();try{JSONArray a=new JSONArray(prefs(c).getString("rules","[]"));for(int i=0;i<Math.min(MAX_RULES,a.length());i++){String s=VelaWorkspace.clean(a.getString(i),160);if(!s.isEmpty()&&!out.contains(s))out.add(s);}}catch(JSONException invalid){}return out;}
     static boolean follows(Context c,String title){for(String rule:rules(c))if(identity(rule).equals(identity(title)))return true;return false;}
     static void toggle(Context c,String title){
@@ -29,7 +37,7 @@ final class VelaShows {
             String key=identity(title);
             boolean removed=values.removeIf(s->identity(s).equals(key));
             if(!removed&&values.size()<MAX_RULES&&!key.isEmpty())
-                values.add(VelaWorkspace.clean(title.replaceFirst("(?i)\\s+(?:T\\d+\\s*E\\d+|S\\d+E\\d+).*$",""),160));
+                values.add(VelaWorkspace.clean(seriesTitle(title),160));
             prefs(c).edit().putString("rules",new JSONArray(values).toString()).remove("scan").commit();
         }
         schedule(c);
