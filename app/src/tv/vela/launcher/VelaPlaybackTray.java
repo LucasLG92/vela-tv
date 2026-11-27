@@ -156,7 +156,7 @@ final class VelaPlaybackTray extends FrameLayout {
                 canvas.setVisibility(INVISIBLE);
                 advanced=new VelaPlaybackPanel(getContext(),channel,()->{
                     List<Item> extra=new ArrayList<>();for(Item i:model.items())if(i.group==Group.MORE)extra.add(i);return extra;
-                },()->{advanced=null;if(!closed){canvas.setVisibility(VISIBLE);render();}},L10n.text("More"),L10n.text("Back · Return to programme"));
+                },()->{advanced=null;if(!closed){canvas.setVisibility(VISIBLE);render();}},L10n.text("More"),L10n.text("Back"));
                 addView(advanced,new LayoutParams(-1,-1));return;
             }
             page=group;choiceIndex=0;
@@ -176,7 +176,10 @@ final class VelaPlaybackTray extends FrameLayout {
         int key=e.getKeyCode();boolean down=e.getAction()==KeyEvent.ACTION_DOWN;
         if(key==KeyEvent.KEYCODE_MENU){if(down&&e.getRepeatCount()==0)close();return true;}
         if(key==KeyEvent.KEYCODE_BACK){
-            if(!down){if(page!=null&&key==KeyEvent.KEYCODE_BACK){page=null;render();}else close();}return true;
+            if(e.getAction()==KeyEvent.ACTION_UP&&!e.isCanceled()){
+                if(page!=null){page=null;render();}else close();
+            }
+            return true;
         }
         if(key==KeyEvent.KEYCODE_DPAD_LEFT||key==KeyEvent.KEYCODE_DPAD_RIGHT){
             if(down){
@@ -185,7 +188,11 @@ final class VelaPlaybackTray extends FrameLayout {
                 else{int next=Math.max(0,Math.min(options.size()-1,choiceIndex+delta));if(next/VISIBLE_CHOICES==choiceIndex/VISIBLE_CHOICES)row.getChildAt(next%VISIBLE_CHOICES).requestFocus();else{choiceIndex=next;render();}}
             }return true;
         }
-        if(TvRemotePress.select(key)){if(!down){View focused=row.findFocus();if(focused!=null)focused.performClick();}return true;}
+        if(TvRemotePress.select(key)){
+            View focused=row.findFocus();
+            if(focused!=null)focused.dispatchKeyEvent(e);
+            return true;
+        }
         return key==KeyEvent.KEYCODE_DPAD_UP||key==KeyEvent.KEYCODE_DPAD_DOWN;
     }
     void close(){if(closed)return;closed=true;removeCallbacks(redraw);if(advanced!=null)advanced.close();

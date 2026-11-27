@@ -21,6 +21,14 @@ public final class AndroidBroadcastDesignTest extends Instrumentation {
     private static final String origin="http://127.0.0.1:38421/";
     private static void check(boolean valid,String reason){if(!valid)throw new AssertionError(reason);}
     private void key(int code){runOnMainSync(()->{for(int phase:new int[]{KeyEvent.ACTION_DOWN,KeyEvent.ACTION_UP}){KeyEvent event=new KeyEvent(phase,code);if(!player.key(event))player.dispatchKeyEvent(event);}});waitForIdleSync();}
+    private void cancelKey(int code){
+        long when=SystemClock.uptimeMillis();
+        runOnMainSync(()->{
+            player.key(new KeyEvent(when,when,KeyEvent.ACTION_DOWN,code,0));
+            player.key(new KeyEvent(when,when,KeyEvent.ACTION_UP,code,0,0,-1,0,KeyEvent.FLAG_CANCELED));
+        });
+        waitForIdleSync();
+    }
     private View view(String field)throws Exception{Field f=LiveTvPlayer.class.getDeclaredField(field);f.setAccessible(true);return (View)f.get(player);}
     private void photo(String name)throws Exception{
         waitForIdleSync();Thread.sleep(520);
@@ -31,7 +39,10 @@ public final class AndroidBroadcastDesignTest extends Instrumentation {
     public void onStart(){
         Bundle result=new Bundle();
         try{
-            check(Build.FINGERPRINT.contains("generic")||Build.MODEL.contains("sdk"),"Use an emulator");
+            try(ParcelFileDescriptor property=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");
+                InputStream input=new ParcelFileDescriptor.AutoCloseInputStream(property)){
+                check(input.read()=='1',"Use an emulator");
+            }
             setInTouchMode(false);Context c=getTargetContext();previousMode=VelaEdition.mode(c);VelaEdition.select(c,"full");Ui.init(c);previousLanguage=L10n.choice();L10n.choose(c,"es");Ui.init(c);
             String[] names={"La 1","La 2","Antena 3","Cuatro","laSexta","24h"},logos={"tve-1-es","tve-2-es","antena-3-es","cuatro-es","lasexta-es","24h-es"};
             String[] titles={"El viaje del agua","Sintel","Una noche en el museo","Horizontes","El mundo en imágenes","Diario 24"};
@@ -63,10 +74,19 @@ public final class AndroidBroadcastDesignTest extends Instrumentation {
             key(KeyEvent.KEYCODE_DPAD_RIGHT);key(KeyEvent.KEYCODE_DPAD_CENTER);
             VelaPlaybackTray tray=(VelaPlaybackTray)view("controls");
             check(tray!=null&&tray.findFocus()!=null,"Missing picture choices");
+            View pictureChoice=tray.findFocus();
+            cancelKey(KeyEvent.KEYCODE_DPAD_CENTER);
+            check(tray.findFocus()==pictureChoice,"Cancelled OK activated a picture choice");
+            cancelKey(KeyEvent.KEYCODE_BACK);
+            check(tray.findFocus()==pictureChoice,"Cancelled Back left the picture choices");
             key(KeyEvent.KEYCODE_DPAD_RIGHT);key(KeyEvent.KEYCODE_DPAD_CENTER);
             check(VelaPlaybackPanel.prefs(getTargetContext()).getInt(VelaPlaybackPanel.key(player.selected.name,"aspect"),0)==1,"Picture option did not apply");
             key(KeyEvent.KEYCODE_DPAD_CENTER);key(KeyEvent.KEYCODE_DPAD_LEFT);key(KeyEvent.KEYCODE_DPAD_CENTER);
-            key(KeyEvent.KEYCODE_DPAD_RIGHT);key(KeyEvent.KEYCODE_DPAD_CENTER);key(KeyEvent.KEYCODE_BACK);
+            key(KeyEvent.KEYCODE_DPAD_RIGHT);key(KeyEvent.KEYCODE_DPAD_CENTER);
+            View advancedChoice=tray.findFocus();
+            cancelKey(KeyEvent.KEYCODE_BACK);
+            check(advancedChoice!=null&&tray.findFocus()==advancedChoice,"Cancelled Back closed the advanced panel");
+            key(KeyEvent.KEYCODE_BACK);
             check(view("controls")!=null,"Back from advanced must restore the strip");
             key(KeyEvent.KEYCODE_BACK);
             key(KeyEvent.KEYCODE_DPAD_RIGHT);check(view("quickDrawer").isShown(),"Right should open channel surfing");key(KeyEvent.KEYCODE_DPAD_DOWN);android.widget.ListView rows=(android.widget.ListView)view("quickList");check(rows.hasFocus()&&rows.getSelectedItemPosition()==2&&player.selected==lineup.get(1),"Browsing should move focus without changing the film");photo("05-canales");if(tour)Thread.sleep(2400);key(KeyEvent.KEYCODE_BACK);
