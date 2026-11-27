@@ -29,7 +29,7 @@ public final class AndroidNextTest extends Instrumentation {
         tools(0);
         VelaSearchView search=(VelaSearchView)field(hub,"searchView");
         VelaHub.Hit hit=new VelaHub.Hit(L10n.text("Programme"),airing.title,airing.channel,airing);
-        ui(()->search.results(Collections.singletonList(hit),0,false));
+        ui(()->search.results(Collections.singletonList(hit),0,false,false));
         View tile=((List<View>)field(search,"tiles")).get(0);
         String id=VelaWatchlist.airingId(airing);
         ui(tile::performLongClick);
