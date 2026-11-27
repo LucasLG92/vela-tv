@@ -7,6 +7,7 @@ public class PlexFeedTest {
         links();
         continueWatchingHubs();
         latestResumePosition();
+        refreshEmptyRecent();
         require(PlexClient.avatarAllowed("https://plex.tv/users/example/avatar")&&PlexClient.avatarAllowed("https://secure.gravatar.com/avatar/example"),"Plex avatar sources");
         for(String url:new String[]{"http://plex.tv/users/example/avatar","https://plex.tv.attacker.invalid/avatar","https://user@plex.tv/avatar","https://plex.tv:8080/avatar","file:///avatar.png","https://127.0.0.1/avatar"})require(!PlexClient.avatarAllowed(url),"Unsafe avatar source accepted");
         require(PlexClient.profileKey("").isEmpty(),"Unlinked account must not share a previous avatar");
@@ -88,6 +89,23 @@ public class PlexFeedTest {
         JSONObject finished=new JSONObject(episode.toString()).put("viewOffset",100);PlexClient.mergeContinue(nextHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray().put(finished).put(upcoming))));require(PlexClient.parseHubs(nextHome).size()==1&&PlexClient.parseHubs(nextHome).get(0).key.equals("102"),"finished metadata hid the next pending episode");
         require(PlexClient.watchedPath("102").equals("/:/scrobble?identifier=com.plexapp.plugins.library&key=102"),"watched endpoint");for(String bad:new String[]{"", "../42", "42&key=other", "movie", "999999999999999999999"}){rejected=false;try{PlexClient.watchedPath(bad);}catch(Exception expected){rejected=true;}require(rejected,"unsafe Plex watched item accepted");}
         System.out.println("PASS Plex feed and catalog: real artwork, hub-based continue watching, sections, bounded pages, offset validation, deduplication, unknown totals and empty/last pages");
+    }
+    private static void refreshEmptyRecent()throws Exception{
+        JSONObject deleted=new JSONObject().put("type","movie").put("ratingKey","11");
+        JSONObject watching=new JSONObject().put("type","movie").put("ratingKey","22").put("viewOffset",500);
+        JSONObject home=new JSONObject().put("MediaContainer",new JSONObject().put("Hub",new JSONArray()
+                .put(hub("home.movies.recent",deleted)).put(hub("home.continue",watching))
+                .put(hub("home.recommendations",deleted))));
+        for(JSONObject incomplete:Arrays.asList(new JSONObject(),new JSONObject().put("size",1),
+                new JSONObject().put("size",0.5),new JSONObject().put("size",0).put("Metadata","invalid"))){
+            PlexClient.mergeRecent(home,new JSONObject().put("MediaContainer",incomplete));
+            List<PlexClient.Film> fallback=PlexClient.parseHubs(home);
+            require(fallback.size()==2&&fallback.get(1).key.equals("11"),"Incomplete Plex response erased the recent fallback");
+        }
+        PlexClient.mergeRecent(home,new JSONObject().put("MediaContainer",new JSONObject().put("size",0)));
+        List<PlexClient.Film> refreshed=PlexClient.parseHubs(home);
+        require(refreshed.size()==1&&refreshed.get(0).continuing&&refreshed.get(0).key.equals("22"),
+                "Plex kept a removed recent title after reporting an empty library");
     }
     private static void continueWatchingHubs()throws Exception{
         JSONObject started=new JSONObject().put("type","episode").put("ratingKey","101")

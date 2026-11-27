@@ -324,7 +324,11 @@ class PlexClient {
     }
     static void mergeRecent(JSONObject root,JSONObject response) throws Exception {
         JSONObject container=response.optJSONObject("MediaContainer"),home=root.optJSONObject("MediaContainer");if(container==null||home==null)return;
-        JSONArray metadata=container.optJSONArray("Metadata");if(metadata==null)return;
+        JSONArray metadata=container.optJSONArray("Metadata");
+        if(metadata==null){
+            if(container.has("Metadata")||!"0".equals(container.optString("size")))return;
+            metadata=new JSONArray();
+        }
         if(metadata.length()>PAGE_SIZE)throw new IOException(Ui.problem("The server exceeded the recent additions limit.","El servidor no ha respetado el límite de novedades."));
         JSONArray existing=home.optJSONArray("Hub"),merged=new JSONArray().put(new JSONObject().put("hubIdentifier","vela.recent").put("Metadata",metadata));
         // The dedicated feed replaces recent hubs, avoiding stale fallback titles after removals.
