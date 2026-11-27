@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** Actual native views and persistence, with isolated profiles on an explicitly owned emulator. */
 public final class AndroidNextTest extends Instrumentation {
-    private Activity activity;private Context context;private String phase="setup",previous,profile,other;private VelaHub hub;private final Bundle result=new Bundle();
+    private Activity activity;private Context context;private String phase="setup",previous,profile,other,guestId;private VelaHub hub;private final Bundle result=new Bundle();
     private void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
     private Object field(Object o,String name)throws Exception{for(Class<?> c=o.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private Object quiet(Object o,String name){try{return field(o,name);}catch(Exception e){throw new RuntimeException(e);}}
@@ -36,6 +36,34 @@ public final class AndroidNextTest extends Instrumentation {
         check(VelaWatchlist.contains(context,id),"Holding OK on a programme search result did not save the broadcast");
         ui(tile::performLongClick);
         check(!VelaWatchlist.contains(context,id),"Holding OK again did not remove the saved broadcast");
+    }
+    private void guestProfileSelection()throws Exception{
+        Map<String,String> profiles=VelaWorkspace.profiles(context);
+        guestId=VelaSessions.prefs(context).getString("guest","");
+        String guestName=profiles.get(guestId);
+        tools(4);
+        click(profiles.get(other));
+        tools(4);
+        click(guestName);
+        check(VelaSessions.guest(context),"Selecting the guest profile by name did not enter guest mode");
+        tools(4);
+        EditText pin=(EditText)field(hub,"input");
+        ui(()->pin.setText("2468"));
+        click("Unlock");
+        await(()->field(activity,"hub")==null);
+        check(VelaWorkspace.active(context).equals(other),"Leaving guest returned to the previous guest session's owner");
+        tools(4);
+        click("Remove settings PIN");
+        check(!VelaSessions.prefs(context).contains("guest")&&!VelaSessions.prefs(context).contains("return"),
+                "Removing the PIN retained the protected guest session");
+        click(guestName);
+        // Older versions left this marker behind when the owner removed the PIN.
+        VelaSessions.prefs(context).edit().putString("guest",guestId).putString("return",other).commit();
+        tools(4);
+        check(!VelaSessions.blocked(context)&&text(hub,L10n.text("Protect settings with a PIN"))!=null,
+                "Selecting a former guest profile required a PIN after it was removed");
+        click(profiles.get(profile));
+        check(VelaWorkspace.active(context).equals(profile),"Could not leave the former guest profile");
     }
     private void expiredProgrammeChoice()throws Exception{
         long end=1_900_000_000L;
@@ -105,6 +133,7 @@ public final class AndroidNextTest extends Instrumentation {
         phase="channel-context";ui(hub::close);hub=null;AtomicInteger fav=new AtomicInteger();ui(()->((VelaHub.Owner)activity).channelOptions("La 2 · Demo",fav::incrementAndGet,airing));VelaPlaybackPanel menu=(VelaPlaybackPanel)field(activity,"channelMenu");check(menu!=null&&text(menu,L10n.text("Correct programme guide"))!=null,"Channel correction missing from hold menu");capture("04-channel-menu");ui(()->text(menu,L10n.text("Toggle favourite")).performClick());check(fav.get()==1&&field(activity,"channelMenu")==null,"Favourite menu did not release");
         phase="timer-native";final VelaPlaybackPanel[] panel={null};ui(()->{panel[0]=new VelaPlaybackPanel(activity,"La 2 · Demo",()->{List<VelaPlaybackPanel.Item> items=new ArrayList<>();timer[0].items(items,System.currentTimeMillis()/1000+2700);return items;},()->{});((FrameLayout)activity.findViewById(android.R.id.content)).addView(panel[0],new FrameLayout.LayoutParams(-1,-1));});ui(()->((List<View>)quiet(panel[0],"buttons")).get(0).performClick());capture("05-sleep-timer");ui(panel[0]::close);
         phase="pin-and-guest";tools(4);click("Protect settings with a PIN");List<View> pins=(List<View>)field(hub,"controls");ui(()->{((EditText)pins.get(0)).setText("2468");((EditText)pins.get(1)).setText("2468");});click("Save PIN");await(()->VelaSessions.configured(context)&&text(hub,L10n.text("Enter guest mode"))!=null);String material=VelaSessions.prefs(context).getAll().toString();check(!material.contains("2468")&&!VelaWorkspace.snapshot(context).toString().contains("vela-lock"),"PIN was stored raw or exported");click("Enter guest mode");await(()->VelaSessions.guest(context)&&field(activity,"hub")==null);tools(6);check(hub.page()==4&&text(hub,L10n.text("Guest mode"))!=null,"Guest opened protected editor");capture("06-guest-lock");EditText pin=(EditText)field(hub,"input");ui(()->pin.setText("0000"));click("Unlock");await(()->((TextView)field(hub,"status")).getText().toString().contains(L10n.text("Incorrect PIN. After five attempts, wait 30 seconds.")));check(VelaSessions.guest(context),"Wrong PIN left guest mode");ui(()->pin.setText("2468"));click("Unlock");await(()->!VelaSessions.guest(context)&&field(activity,"hub")==null);check(VelaWorkspace.active(context).equals(profile),"Guest exit restored wrong profile");
+        phase="guest-profile-selection";guestProfileSelection();
         phase="remote-voice-roundtrip";
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("pm grant "+context.getPackageName()+" android.permission.RECORD_AUDIO");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){while(in.read()!=-1){}}
         runOnMainSync(()->activity.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_SEARCH)));
@@ -120,5 +149,5 @@ public final class AndroidNextTest extends Instrumentation {
         check(hub!=null&&hub.page()==0&&((EditText)field(hub,"input")).getText().toString().equals(words),"Voice result did not return to integrated search");
         check(text(hub,L10n.text("Speak"))!=null,"Voice entry missing");capture("07-search");ui(hub::close);hub=null;
         result.putString("result","PASS bounded/profile-isolated Watch later; one-shot/cancelled sleep timer; conditional programme end; multilingual voice parsing and cancellation; safe EPG event IDs; native draft Save/Cancel and D-pad reorder; themed programme/channel/compatibility/PIN panels; salted PIN and denied guest edits; native 4K screenshots. Owned emulator only.");
-    }catch(Throwable error){result.putString("phase",phase);result.putString("error",android.util.Log.getStackTraceString(error));}finally{if(activity!=null)ui(()->{if(hub!=null)hub.close();activity.finish();});String guestId=VelaSessions.prefs(context).getString("guest","");VelaSessions.prefs(context).edit().clear().commit();VelaSessions.lock();try{VelaWorkspace.select(context,previous==null?"default":previous);for(String id:new String[]{profile,other,guestId})if(id!=null&&VelaWorkspace.profiles(context).containsKey(id))VelaWorkspace.delete(context,id);for(Map.Entry<String,String> p:VelaWorkspace.profiles(context).entrySet())if(p.getValue().equals(L10n.text("Guest")))VelaWorkspace.delete(context,p.getKey());}catch(Exception ignored){}}finish(result.containsKey("error")?1:-1,result);}
+    }catch(Throwable error){result.putString("phase",phase);result.putString("error",android.util.Log.getStackTraceString(error));}finally{if(activity!=null)ui(()->{if(hub!=null)hub.close();activity.finish();});if(guestId==null)guestId=VelaSessions.prefs(context).getString("guest","");VelaSessions.prefs(context).edit().clear().commit();VelaSessions.lock();try{VelaWorkspace.select(context,previous==null?"default":previous);for(String id:new String[]{profile,other,guestId})if(id!=null&&VelaWorkspace.profiles(context).containsKey(id))VelaWorkspace.delete(context,id);for(Map.Entry<String,String> p:VelaWorkspace.profiles(context).entrySet())if(p.getValue().equals(L10n.text("Guest")))VelaWorkspace.delete(context,p.getKey());}catch(Exception ignored){}}finish(result.containsKey("error")?1:-1,result);}
 }
