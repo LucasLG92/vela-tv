@@ -25,6 +25,34 @@ public final class AndroidWorkspaceTest extends Instrumentation {
         check(window[0]==java.time.Instant.parse(expectedStart).getEpochSecond()
                 &&window[1]==java.time.Instant.parse(expectedEnd).getEpochSecond(),"Wrong overnight guide at "+instant);
     }
+    private void blockedAlertRemainsPending(){
+        Context blocked=new ContextWrapper(context){
+            @Override public int checkSelfPermission(String permission){
+                if(permission.equals("android.permission.POST_NOTIFICATIONS"))return android.content.pm.PackageManager.PERMISSION_DENIED;
+                return super.checkSelfPermission(permission);
+            }
+            @Override public Object getSystemService(String name){
+                if(Build.VERSION.SDK_INT<33&&Context.NOTIFICATION_SERVICE.equals(name))return null;
+                return super.getSystemService(name);
+            }
+        };
+        long now=System.currentTimeMillis()/1000;
+        VelaShows.toggle(blocked,"Pending alert");
+        VelaShows.replace(blocked,Collections.singletonList(new VelaShows.Airing("Pending alert","Demo",now+60,now+1800)));
+        VelaShows.enabled(blocked,true);
+        try{
+            new VelaReminderReceiver().onReceive(blocked,new Intent(blocked.getPackageName()+".PROGRAMME"));
+            check(VelaShows.prefs(blocked).getLong("shown",0)==0,"Blocked reminder was recorded as already shown");
+            if(VelaShows.permitted(context)){
+                new VelaReminderReceiver().onReceive(context,new Intent(context.getPackageName()+".PROGRAMME"));
+                check(VelaShows.prefs(context).getLong("shown",0)==now+60,"Allowed reminder did not reach Android");
+                ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(704);
+            }
+        }finally{
+            VelaShows.enabled(blocked,false);
+            VelaShows.toggle(blocked,"Pending alert");
+        }
+    }
     private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
     interface Ready{boolean ready()throws Exception;}
     private void await(Ready r)throws Exception{long end=SystemClock.elapsedRealtime()+12000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(r.ready())return;Thread.sleep(30);}throw new AssertionError("Timeout: "+phase);}
@@ -49,6 +77,8 @@ public final class AndroidWorkspaceTest extends Instrumentation {
         tonightWindow("2025-03-29T17:00:00Z","2025-03-29T17:00:00Z","2025-03-30T02:00:00Z");
         tonightWindow("2025-10-25T16:00:00Z","2025-10-25T16:00:00Z","2025-10-26T03:00:00Z");
         phase="recurring-shows";VelaShows.toggle(context,"El café T1 E1");check(VelaShows.follows(context,"El café T1 E9"),"Episode title did not match a recurring programme");long now=System.currentTimeMillis()/1000;VelaShows.remember(context,Arrays.asList(new VelaShows.Airing("El café T1 E9","Canal · Demostración",now+3600,now+5400),new VelaShows.Airing("Otro programa","Otro canal",now+60,now+600)));check(VelaShows.cached(context).size()==1&&!VelaShows.enabled(context),"Unfollowed programme accepted or notifications enabled without consent");VelaShows.toggle(context,"El café T1 E2");check(VelaShows.rules(context).isEmpty()&&VelaShows.cached(context).isEmpty(),"Unfollow left another episode subscribed");
+        phase="blocked programme alerts";
+        blockedAlertRemainsPending();
         phase="antenna-portability";String service=LiveTvData.hash("owned-dvb-service");JSONObject exported=new JSONObject().put("ant-1",new JSONObject().put("service",service).put("name","canal demo").put("radio",false)).put("ant-2",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));Map<String,JSONObject> stations=new HashMap<>();stations.put("ant-90",new JSONObject().put("service",service).put("name","renamed demo").put("radio",false));stations.put("ant-91",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));stations.put("ant-92",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));Map<String,String> matches=VelaAntennaBackup.match(exported,stations);check(matches.get("ant-1").equals("ant-90")&&!matches.containsKey("ant-2"),"Antenna restore guessed a row ID or an ambiguous station name");
         phase="reading-density";for(int n=0;n<3;n++){VelaReading.prefs(context).edit().putInt("text",n).putInt("density",0).commit();check(VelaReading.rows(context)==6-n,"Large text did not reduce guide rows");}VelaReading.prefs(context).edit().clear().commit();
         phase="shortcuts";VelaRemote.assign(context,"search_key",KeyEvent.KEYCODE_PROG_RED);VelaRemote.assign(context,"profiles_key",KeyEvent.KEYCODE_PROG_RED);check(!VelaRemote.prefs(context).contains("search_key")&&VelaRemote.destination(context,new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_PROG_RED))==4,"Shortcut collision was not resolved");check(!VelaRemote.allowed(KeyEvent.KEYCODE_HOME)&&!VelaRemote.allowed(KeyEvent.KEYCODE_VOLUME_UP)&&!VelaRemote.allowed(KeyEvent.KEYCODE_DPAD_CENTER),"Reserved system/navigation key can be remapped");VelaRemote.prefs(context).edit().clear().commit();
