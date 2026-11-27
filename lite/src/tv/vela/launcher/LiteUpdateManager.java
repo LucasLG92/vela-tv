@@ -59,7 +59,39 @@ final class LiteUpdateManager {
     boolean requested(){if(prefs(context).getString("installRequest","").isEmpty())return false;LiteReleaseFeed.Release r=available();String identity=r==null?"":r.tag+"\n"+r.sha256;long age=System.currentTimeMillis()-prefs(context).getLong("installAt",0);boolean valid=!identity.isEmpty()&&identity.equals(prefs(context).getString("installRequest",""))&&age>=0&&age<3600_000L&&ready();if(!valid)prefs(context).edit().remove("installRequest").remove("installAt").apply();return valid;}
     void requestInstall(Activity activity){LiteReleaseFeed.Release r=available();if(r==null||!ready()||busy)return;prefs(context).edit().putString("installRequest",r.tag+"\n"+r.sha256).putLong("installAt",System.currentTimeMillis()).commit();if(!activity.getPackageManager().canRequestPackageInstalls()){Intent permission=new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,Uri.parse("package:"+activity.getPackageName()));if(permission.resolveActivity(activity.getPackageManager())==null)permission=new Intent(Settings.ACTION_SECURITY_SETTINGS);try{activity.startActivity(permission);}catch(ActivityNotFoundException|SecurityException unavailable){status=LiteTvUi.t("Open TV settings and allow Vela Lite to install updates.","Abre los ajustes de la TV y permite instalar actualizaciones a Vela Lite.");changed();}}else install(activity);}
     void resumeInstall(LiteHomeActivity activity){if(requested()&&activity.getPackageManager().canRequestPackageInstalls())install(activity);}
-    private void install(Activity activity){if(busy||!requested())return;LiteReleaseFeed.Release r=available();WeakReference<Activity> owner=new WeakReference<>(activity);begin(LiteTvUi.t("Verifying update…","Verificando actualización…"),()->{try{verify(context,apk(context),r);checkCancelled();}catch(Exception invalid){prefs(context).edit().remove("installRequest").remove("installAt").remove("downloaded").apply();apk(context).delete();throw invalid;}main.post(()->{if(cancelled)return;Activity target=owner.get();if(target==null||target.isFinishing()||target.isDestroyed()||target instanceof LiteHomeActivity&&!((LiteHomeActivity)target).canShowInstaller()||!requested())return;try{target.startActivityForResult(installIntent(target),902);prefs(context).edit().remove("installRequest").remove("installAt").apply();status=LiteTvUi.t("Confirm the installation on your TV.","Confirma la instalación en la TV.");}catch(ActivityNotFoundException|SecurityException missing){status=LiteTvUi.t("Could not open the installer.","No se ha podido abrir el instalador.");}changed();});});}
+    private void install(Activity activity){
+        if(busy||!requested())return;
+        LiteReleaseFeed.Release release=available();
+        WeakReference<Activity> owner=new WeakReference<>(activity);
+        begin(LiteTvUi.t("Verifying update…","Verificando actualización…"),()->{
+            try{
+                verify(context,apk(context),release);
+                checkCancelled();
+            }catch(Exception invalid){
+                prefs(context).edit().remove("installRequest").remove("installAt").remove("downloaded").apply();
+                apk(context).delete();
+                throw invalid;
+            }
+            main.post(()->{
+                Activity target=owner.get();
+                if(cancelled||target==null||target.isFinishing()||target.isDestroyed()
+                        ||target instanceof LiteHomeActivity&&!((LiteHomeActivity)target).canShowInstaller()||!requested())return;
+                // Consume once before the handoff. An unavailable installer requires another user click.
+                if(!prefs(context).edit().remove("installRequest").remove("installAt").commit()){
+                    status=LiteTvUi.t("Could not prepare installation. Please try again.","No se ha podido preparar la instalación. Vuelve a intentarlo.");
+                    changed();
+                    return;
+                }
+                try{
+                    target.startActivityForResult(installIntent(target),902);
+                    status=LiteTvUi.t("Confirm the installation on your TV.","Confirma la instalación en la TV.");
+                }catch(ActivityNotFoundException|SecurityException missing){
+                    status=LiteTvUi.t("Could not open the installer.","No se ha podido abrir el instalador.");
+                }
+                changed();
+            });
+        });
+    }
     static Intent installIntent(Context c){Uri uri=Uri.parse("content://"+authority(c)+"/update.apk");Intent intent=new Intent(Intent.ACTION_VIEW).setDataAndType(uri,"application/vnd.android.package-archive").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).putExtra(Intent.EXTRA_RETURN_RESULT,true);intent.setClipData(ClipData.newRawUri("Vela Lite update",uri));return intent;}
     void cancel(){cancelled=true;HttpURLConnection c=connection;if(c!=null)c.disconnect();status=LiteTvUi.t("Update cancelled.","Actualización cancelada.");}
     private void checkCancelled()throws InterruptedIOException{if(cancelled||Thread.currentThread().isInterrupted())throw new InterruptedIOException();}
