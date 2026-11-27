@@ -99,6 +99,18 @@ public final class AndroidWorkspaceTest extends Instrumentation {
         // The spring and autumn overnight windows have different lengths.
         tonightWindow("2025-03-29T17:00:00Z","2025-03-29T17:00:00Z","2025-03-30T02:00:00Z");
         tonightWindow("2025-10-25T16:00:00Z","2025-10-25T16:00:00Z","2025-10-26T03:00:00Z");
+        phase="following-subtitled-episodes";
+        String firstEpisode="Órbita T1 E1: Despegue";
+        String nextEpisode="Órbita S02E03 — Regreso";
+        VelaShows.toggle(context,firstEpisode);
+        check(VelaShows.follows(context,firstEpisode)&&VelaShows.follows(context,nextEpisode),"Following an episode with a subtitle lost the series");
+        check(!VelaShows.follows(context,"Órbita S2E3X")&&!VelaShows.follows(context,"Órbita extendida"),"A different show was treated as the followed series");
+        long starts=System.currentTimeMillis()/1000+900;
+        VelaShows.Airing subtitled=new VelaShows.Airing(nextEpisode,"Canal orbital",starts,starts+600);
+        VelaShows.remember(context,Collections.singletonList(subtitled));
+        check(VelaShows.cached(context).stream().anyMatch(p->nextEpisode.equals(p.title)),"A followed subtitled episode did not reach the upcoming broadcasts");
+        VelaShows.toggle(context,nextEpisode);
+        check(!VelaShows.follows(context,firstEpisode)&&!VelaShows.rules(context).contains("Órbita"),"Stopping from another episode left a duplicate follow rule");
         phase="recurring-shows";VelaShows.toggle(context,"El café T1 E1");check(VelaShows.follows(context,"El café T1 E9"),"Episode title did not match a recurring programme");long now=System.currentTimeMillis()/1000;VelaShows.remember(context,Arrays.asList(new VelaShows.Airing("El café T1 E9","Canal · Demostración",now+3600,now+5400),new VelaShows.Airing("Otro programa","Otro canal",now+60,now+600)));check(VelaShows.cached(context).size()==1&&!VelaShows.enabled(context),"Unfollowed programme accepted or notifications enabled without consent");VelaShows.toggle(context,"El café T1 E2");check(VelaShows.rules(context).isEmpty()&&VelaShows.cached(context).isEmpty(),"Unfollow left another episode subscribed");
         phase="blocked programme alerts";
         blockedAlertRemainsPending();
