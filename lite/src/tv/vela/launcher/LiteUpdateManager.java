@@ -42,7 +42,37 @@ final class LiteUpdateManager {
     private void changed(){main.post(()->{for(WeakReference<Listener> ref:listeners){Listener l=ref.get();if(l!=null)l.changed();else listeners.remove(ref);}});}
     private synchronized void begin(String message,Job job){if(busy)return;busy=true;cancelled=false;progress=0;status=message;changed();ExecutorService executor=Executors.newSingleThreadExecutor();executor.execute(()->{try{job.run();}catch(Exception failed){if(!cancelled)status=LiteTvUi.t("Could not complete the update. Try again.","No se ha podido completar la actualización. Vuelve a intentarlo.");}finally{HttpURLConnection c=connection;if(c!=null)c.disconnect();connection=null;busy=false;executor.shutdown();changed();}});}
     void automaticCheck(){cleanup();if(!automatic())return;long now=System.currentTimeMillis(),checked=prefs(context).getLong("checked",0),attempt=prefs(context).getLong("attempt",0);if((now<checked||now-checked>=86400_000L)&&(now<attempt||now-attempt>=3600_000L))check();else if(autoDownload()&&available()!=null&&!ready()&&now-prefs(context).getLong("downloadAttempt",0)>=3600_000L)download();}
-    void check(){begin(LiteTvUi.t("Checking GitHub…","Buscando en GitHub…"),()->{prefs(context).edit().putLong("attempt",System.currentTimeMillis()).apply();JSONArray feed;try{feed=readFeed(LiteReleaseFeed.API);}catch(Exception unavailable){checkCancelled();feed=readFeed(fallback());if(LiteReleaseFeed.newest(feed,"0.0.0",true,VelaEdition.unified(context))==null)throw new IOException("Invalid auxiliary release feed");}LiteReleaseFeed.Release release=LiteReleaseFeed.newest(feed,version(context),true,VelaEdition.unified(context));SharedPreferences.Editor edit=prefs(context).edit().putLong("checked",System.currentTimeMillis());if(release==null){edit.remove("release").remove("downloaded");apk(context).delete();status=LiteTvUi.t("No newer Lite release has been published.","No hay una versión Lite más reciente publicada.");}else{edit.putString("release",release.json().toString());status=LiteTvUi.t("Available","Disponible")+" · "+release.version;}edit.commit();if(release!=null&&autoDownload()&&!ready())downloadInside(release);});}
+    void check(){
+        begin(LiteTvUi.t("Checking GitHub…","Buscando en GitHub…"),()->{
+            prefs(context).edit().putLong("attempt",System.currentTimeMillis()).apply();
+            boolean unified=VelaEdition.unified(context);
+            String installed=version(context);
+            LiteReleaseFeed.Release previous=available();
+            LiteReleaseFeed.Release release;
+            try{
+                release=LiteReleaseFeed.newest(readFeed(LiteReleaseFeed.API),installed,true,unified);
+            }catch(Exception unavailable){
+                checkCancelled();
+                LiteReleaseFeed.Release backup=LiteReleaseFeed.newest(readFeed(fallback()),"0.0.0",true,unified);
+                if(backup==null)throw new IOException("Invalid auxiliary release feed");
+                // The auxiliary feed in the repository can lag behind the GitHub API.
+                if(previous!=null&&LiteReleaseFeed.compare(previous.version,backup.version)>=0)release=previous;
+                else release=LiteReleaseFeed.validVersion(installed)&&LiteReleaseFeed.compare(backup.version,installed)>0?backup:null;
+            }
+            SharedPreferences.Editor edit=prefs(context).edit().putLong("checked",System.currentTimeMillis());
+            if(release==null){
+                edit.remove("release").remove("downloaded");
+                status=LiteTvUi.t("No newer Lite release has been published.","No hay una versión Lite más reciente publicada.");
+            }else{
+                if(previous==null||!previous.tag.equals(release.tag)||!previous.sha256.equals(release.sha256))edit.remove("downloaded");
+                edit.putString("release",release.json().toString());
+                status=LiteTvUi.t("Available","Disponible")+" · "+release.version;
+            }
+            if(!edit.commit())throw new IOException("Cannot save release");
+            if(release==null)apk(context).delete();
+            else if(autoDownload()&&!ready())downloadInside(release);
+        });
+    }
     private JSONArray readFeed(String address)throws Exception{try(InputStream in=transport.open(address);ByteArrayOutputStream out=new ByteArrayOutputStream()){copy(in,out,address.equals(fallback())?64*1024:1024*1024,-1);return new JSONArray(new String(out.toByteArray(),"UTF-8"));}}
     void download(){LiteReleaseFeed.Release r=available();if(r!=null)begin(LiteTvUi.t("Downloading…","Descargando…"),()->downloadInside(r));}
     private void downloadInside(LiteReleaseFeed.Release r)throws Exception{status=LiteTvUi.t("Downloading…","Descargando…");changed();File part=partial(context);prefs(context).edit().putLong("downloadAttempt",System.currentTimeMillis()).remove("downloaded").apply();try{try(InputStream in=transport.open(r.url);FileOutputStream out=new FileOutputStream(part)){copy(in,out,LiteReleaseFeed.MAX_APK,r.size);out.getFD().sync();}verify(context,part,r);checkCancelled();if(apk(context).exists()&&!apk(context).delete())throw new IOException();if(!part.renameTo(apk(context)))throw new IOException();prefs(context).edit().putString("downloaded",r.tag).commit();status=LiteTvUi.t("Update ready to install.","Actualización lista para instalar.");progress=0;}finally{part.delete();}}

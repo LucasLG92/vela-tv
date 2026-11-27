@@ -86,8 +86,16 @@ final class Updates {
             prefs(c).edit().putLong("attempt",System.currentTimeMillis()).apply();
             byte[] bytes;try(InputStream in=transport.open(ReleaseFeed.API);ByteArrayOutputStream out=new ByteArrayOutputStream()){copy(in,out,1024*1024,-1);bytes=out.toByteArray();}
             ReleaseFeed.Release release=ReleaseFeed.newest(new JSONArray(new String(bytes,"UTF-8")),version(c),previews(c));
-            SharedPreferences.Editor edit=prefs(c).edit().putLong("checked",System.currentTimeMillis());if(release==null)edit.remove("release");else edit.putString("release",release.json().toString());if(!edit.commit())throw new IOException("Cannot save release");
-            if(release==null){apk(c).delete();prefs(c).edit().remove("downloaded").apply();}
+            ReleaseFeed.Release previous=available(c);
+            SharedPreferences.Editor edit=prefs(c).edit().putLong("checked",System.currentTimeMillis());
+            if(release==null){
+                edit.remove("release").remove("downloaded");
+            }else{
+                if(previous==null||!previous.tag.equals(release.tag)||!previous.sha256.equals(release.sha256))edit.remove("downloaded");
+                edit.putString("release",release.json().toString());
+            }
+            if(!edit.commit())throw new IOException("Cannot save release");
+            if(release==null)apk(c).delete();
             else if(automaticDownload(c)&&!ready(c,release))downloadInside(c,release);
         });
     }
@@ -116,7 +124,13 @@ final class Updates {
     static void install(Activity activity){
         Context c=activity.getApplicationContext();ReleaseFeed.Release release=available(c);if(!installationRequested(c))return;WeakReference<Activity> owner=new WeakReference<>(activity);
         begin(VERIFYING,()->{
-            try{verify(c,apk(c),release);}catch(Exception invalid){clearInstallationRequest(c);throw invalid;}
+            try{
+                verify(c,apk(c),release);
+            }catch(Exception invalid){
+                clearInstallationRequest(c);
+                if(!(invalid instanceof InterruptedIOException))prefs(c).edit().remove("downloaded").apply();
+                throw invalid;
+            }
             main.post(()->{
                 Activity target=owner.get();if(target==null||target.isFinishing()||target.isDestroyed()||(target instanceof UpdatesActivity&&!((UpdatesActivity)target).canShowInstaller())||(target instanceof HomeActivity&&!((HomeActivity)target).canShowInstaller()))return;
                 if(!installationRequested(c))return;

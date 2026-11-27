@@ -29,13 +29,34 @@ public final class AndroidNextTest extends Instrumentation {
         tools(0);
         VelaSearchView search=(VelaSearchView)field(hub,"searchView");
         VelaHub.Hit hit=new VelaHub.Hit(L10n.text("Programme"),airing.title,airing.channel,airing);
-        ui(()->search.results(Collections.singletonList(hit),0,false));
+        ui(()->search.results(Collections.singletonList(hit),0,false,false));
         View tile=((List<View>)field(search,"tiles")).get(0);
         String id=VelaWatchlist.airingId(airing);
         ui(tile::performLongClick);
         check(VelaWatchlist.contains(context,id),"Holding OK on a programme search result did not save the broadcast");
         ui(tile::performLongClick);
         check(!VelaWatchlist.contains(context,id),"Holding OK again did not remove the saved broadcast");
+    }
+    private void expiredProgrammeChoice()throws Exception{
+        long end=1_900_000_000L;
+        long[] wallTime={end*1000-30_000};
+        AtomicInteger stopped=new AtomicInteger();
+        VelaSleepTimer timer=new VelaSleepTimer(stopped::incrementAndGet,()->wallTime[0]);
+        ui(()->{
+            timer.after(35);
+            List<VelaPlaybackPanel.Item> items=new ArrayList<>();
+            timer.items(items,end);
+            items.get(0).action.run();
+            items.clear();
+            timer.items(items,end);
+            VelaPlaybackPanel.Item choice=items.get(3);
+            check(choice.title.equals(L10n.text("At the end of this programme")),"Programme end choice missing");
+            wallTime[0]=end*1000;
+            choice.action.run();
+            check(stopped.get()==0,"Expired choice stopped playback immediately");
+        });
+        await(()->stopped.get()==1);
+        ui(()->check(timer.remaining()==0,"Fired timer retained its deadline"));
     }
     private void capture(String name)throws Exception{Thread.sleep(250);Bitmap image=getUiAutomation().takeScreenshot();check(image!=null&&image.getWidth()==3840,"Native 4K screenshot required");File out=new File(context.getExternalFilesDir(null),"next-"+name+".png");try(OutputStream stream=new FileOutputStream(out)){image.compress(Bitmap.CompressFormat.PNG,100,stream);}image.recycle();}
     @Override public void onCreate(Bundle args){super.onCreate(args);start();}
@@ -44,6 +65,7 @@ public final class AndroidNextTest extends Instrumentation {
         VelaSessions.prefs(context).edit().clear().commit();VelaSessions.lock();previous=VelaWorkspace.active(context);profile=VelaWorkspace.create(context,"Vela · Demo");VelaWorkspace.select(context,profile);L10n.choose(context,"es");Ui.init(context);
         phase="bounded-watchlist";long now=System.currentTimeMillis()/1000;VelaShows.Airing airing=new VelaShows.Airing("Documentales · Planeta azul","La 2 · Demo",now+1800,now+5400);JSONObject ref=VelaWatchlist.airing(airing);VelaWatchlist.toggle(context,ref);check(VelaWatchlist.contains(context,VelaWatchlist.airingId(airing)),"Broadcast not saved");other=VelaWorkspace.create(context,L10n.text("Guest").toLowerCase(Locale.ROOT));VelaWorkspace.select(context,other);check(VelaWatchlist.read(context).isEmpty(),"Watchlist crossed profiles");for(int i=0;i<VelaWatchlist.MAX;i++)VelaWatchlist.toggle(context,new JSONObject().put("id","demo-"+i).put("title","Demo "+i).put("kind","tv"));boolean limited=false;try{VelaWatchlist.toggle(context,new JSONObject().put("id","extra").put("title","Extra"));}catch(IOException expected){limited=true;}check(limited&&VelaWatchlist.read(context).size()==64,"Watchlist is unbounded");VelaWorkspace.select(context,profile);
         phase="sleep-lifecycle";AtomicInteger stopped=new AtomicInteger();VelaSleepTimer[] timer={null};ui(()->{timer[0]=new VelaSleepTimer(stopped::incrementAndGet);timer[0].after(35);});await(()->stopped.get()==1);ui(()->{timer[0].after(50);timer[0].close();});Thread.sleep(90);check(stopped.get()==1&&timer[0].remaining()==0,"Cancelled timer fired");List<VelaPlaybackPanel.Item> options=new ArrayList<>();ui(()->timer[0].items(options,now+3600));check(options.size()==1&&options.get(0).action!=null,"Timer choices must be collapsed");ui(options.get(0).action);options.clear();ui(()->timer[0].items(options,now+3600));check(options.size()==4&&options.get(3).action!=null,"Known programme end not offered");options.clear();ui(()->timer[0].items(options,0));check(options.size()==3,"Unknown end time invented");
+        phase="expired-programme-choice";expiredProgrammeChoice();
         phase="voice-contract";check(VelaVoice.query("Pon La 1").equals("La 1")&&VelaVoice.query("open HDMI 2").equals("HDMI 2")&&VelaVoice.query("ouvre Plex").equals("Plex")&&VelaVoice.query("cerca documentari").equals("documentari"),"Voice command stripping changed query");check(VelaVoice.genre("documentales esta noche")==3&&VelaVoice.genre("documentari")==3&&VelaVoice.genre("Documentales TV")==0,"Voice genre route guessed a channel name");check(VelaVoice.result(Activity.RESULT_CANCELED,new Intent()).isEmpty(),"Voice cancellation produced action");
         phase="epg-identities";check(VelaDiscovery.eventId("dd_progid","SP12345678.0001").equals("dd:SP12345678.0001"),"Stable sports identity not accepted");check(VelaDiscovery.eventId("onscreen","Final").isEmpty()&&VelaDiscovery.eventId("dd_progid","SH12345678.0001").isEmpty(),"Title or series treated as an event identity");try(SQLiteDatabase db=SQLiteDatabase.create(null)){db.execSQL("CREATE TABLE meta(id INTEGER,updated INTEGER)");db.execSQL("CREATE TABLE programmes(channel TEXT,start INTEGER,end INTEGER,title TEXT,category TEXT)");db.execSQL("CREATE TABLE aliases(alias TEXT,channel TEXT)");VelaDiscovery.ensureEvents(db);db.execSQL("INSERT INTO aliases VALUES ('demo','one')");db.execSQL("INSERT INTO programmes VALUES ('one',?,?,?,'Sports',?)",new Object[]{now-600,now+1800,"Final · Demo","dd:SP12345678.0001"});List<VelaShows.Airing> page=VelaGuideSearch.readWindow(context,db,Collections.singletonMap("demo","Demo"),"alias","",0,new CancellationSignal(),now,now+1,2);check(page.size()==1&&page.get(0).eventId.equals("dd:SP12345678.0001"),"Event ID lost in guide query");}
         String cls=context.getPackageName().endsWith(".lite")?"tv.vela.launcher.LiteHomeActivity":"tv.vela.launcher.HomeActivity";activity=startActivitySync(new Intent().setClassName(context.getPackageName(),cls).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("velaTools",6));await(()->field(activity,"hub")!=null);hub=(VelaHub)field(activity,"hub");

@@ -31,7 +31,11 @@ public class AndroidUpdatesTest extends Instrumentation {
     public void onStart(){
         Context c=getTargetContext();Bundle result=new Bundle();UpdatesActivity activity=null;Updates.Transport original=Updates.transport;SharedPreferences p=Updates.prefs(c);Map<String,?> before=new HashMap<>(p.getAll());File future=null,wrongSigner=null,wrongPackage=null;ActivityMonitor installer=null;
         try{
-            check(android.os.Build.MODEL.contains("sdk")||android.os.Build.FINGERPRINT.contains("generic"),"Run only on a clean emulator");check(!new PlexClient(c).connected(),"A private Plex account is linked");Locale.setDefault(new Locale("es","ES"));
+            try(ParcelFileDescriptor property=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");
+                InputStream input=new ParcelFileDescriptor.AutoCloseInputStream(property)){
+                check(input.read()=='1',"Run only on a clean emulator");
+            }
+            check(!new PlexClient(c).connected(),"A private Plex account is linked");Locale.setDefault(new Locale("es","ES"));
             Map<String,?> plex=new HashMap<>(new PlexClient(c).prefs.getAll()),visuals=new HashMap<>(Visuals.prefs(c).getAll()),setup=new HashMap<>(Personalization.prefs(c).getAll());String[] apps=SidebarApps.slots(c);
             idle();p.edit().clear().commit();check(Updates.automaticEnabled(c)&&Updates.automaticDownload(c),"Fresh installs must check and download automatically");
             p.edit().putBoolean("automatic",false).putBoolean("download",false).putBoolean("previews",true).commit();check(!Updates.automaticEnabled(c)&&!Updates.automaticDownload(c),"Explicit opt-outs must override defaults");
@@ -49,6 +53,15 @@ public class AndroidUpdatesTest extends Instrumentation {
             Updates.transport=url->new ByteArrayInputStream(new byte[(int)release.size+1]);Updates.download(c);idle();check(!Updates.ready(c,release),"Oversized download accepted");
             Updates.transport=url->new InputStream(){public int read()throws IOException{try{Thread.sleep(5);}catch(InterruptedException e){throw new IOException(e);}return 0;}public int read(byte[] b,int offset,int count)throws IOException{read();b[offset]=0;return 1;}};Updates.download(c);Thread.sleep(40);Updates.cancel();idle();check(!Updates.ready(c,release)&&!new File(Updates.apk(c).getParentFile(),"incoming.part").exists(),"Cancelled transfer left an installable APK");
             File valid=future;Updates.transport=url->new FileInputStream(valid);Updates.download(c);idle();check(Updates.ready(c,release)&&Updates.error().isEmpty(),"Valid signed download rejected");
+            JSONObject changed=release.json();
+            changed.getJSONArray("assets").getJSONObject(0).put("digest","sha256:"+new String(new char[64]).replace('\0','0'));
+            byte[] changedFeed=new JSONArray().put(changed).toString().getBytes("UTF-8");
+            Updates.transport=url->new ByteArrayInputStream(changedFeed);
+            Updates.check(c);idle();
+            check(!Updates.ready(c,Updates.available(c)),"Replaced asset with the same tag and size was still marked ready");
+            Updates.transport=url->url.equals(ReleaseFeed.API)?new ByteArrayInputStream(feed):new FileInputStream(valid);
+            Updates.check(c);idle();Updates.download(c);idle();
+            check(Updates.ready(c,release),"Verified download did not recover after an asset changed");
             // Cleanup may run in the receiver process: never touch a pending APK or a writer's partial.
             File untouched=new File(c.getCacheDir(),"not-an-update.apk");try(OutputStream out=new FileOutputStream(untouched)){out.write(7);}
             File partial=UpdateFiles.partial(c);try(OutputStream out=new FileOutputStream(partial)){out.write(1);}
@@ -85,6 +98,7 @@ public class AndroidUpdatesTest extends Instrumentation {
             // Same-sized tampering must still fail after permission: ready() alone is not enough.
             try(RandomAccessFile file=new RandomAccessFile(Updates.apk(c),"rw")){file.seek(128);file.write(file.read()^0xff);}
             Updates.requestInstallation(c);activity=recreate(activity);idle();check(installer.getHits()==2&&!Updates.installationRequested(c)&&!Updates.error().isEmpty(),"Tampered APK resumed into installer");
+            check(!Updates.ready(c,release),"Rejected cached APK remained ready instead of allowing a fresh download");
             check(plex.equals(new PlexClient(c).prefs.getAll())&&visuals.equals(Visuals.prefs(c).getAll())&&setup.equals(Personalization.prefs(c).getAll())&&Arrays.equals(apps,SidebarApps.slots(c)),"Updater changed accounts, appearance or apps");
             result.putString("result","PASS real signed future APK accepted; wrong signer, package, downgrade, hash, truncation, oversize and cancellation rejected. Default automatic check/download, explicit opt-outs, daily limits, private read-only installer grant and remote controls verified. Explicit install survives activity recreation after permission; expiry, changed APK, cancellation, retry, duplicate launch and post-permission tampering checked. No system installation confirmed. Accounts, appearance, setup and apps preserved.");
         }catch(Throwable e){result.putString("error",android.util.Log.getStackTraceString(e));}
