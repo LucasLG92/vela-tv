@@ -25,7 +25,27 @@ public final class AndroidWorkspaceTest extends Instrumentation {
         check(window[0]==java.time.Instant.parse(expectedStart).getEpochSecond()
                 &&window[1]==java.time.Instant.parse(expectedEnd).getEpochSecond(),"Wrong overnight guide at "+instant);
     }
-    private void blockedAlertRemainsPending(){
+    private void simultaneousAlerts(NotificationManager manager,long start) throws Exception {
+        List<VelaShows.Airing> airings=new ArrayList<>();
+        for(int i=1;i<=5;i++)airings.add(new VelaShows.Airing("Pending alert","Station "+i,start,start+1800));
+        VelaShows.replace(context,airings);
+        try{
+            new VelaReminderReceiver().onReceive(context,new Intent(context.getPackageName()+".PROGRAMME"));
+            await(()->{
+                for(android.service.notification.StatusBarNotification item:manager.getActiveNotifications()){
+                    Notification notice=item.getNotification();
+                    if(!"vela-programmes".equals(notice.getChannelId())||notice.number!=airings.size())continue;
+                    CharSequence[] lines=notice.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
+                    if(lines!=null&&lines.length==5&&lines[4].toString().contains("Station 5"))return true;
+                }
+                return false;
+            });
+            check(VelaShows.prefs(context).getLong("shown",0)==start,"Combined reminder did not record its broadcasts");
+        }finally{
+            for(int id=703;id<=706;id++)manager.cancel(id);
+        }
+    }
+    private void blockedAlertRemainsPending() throws Exception {
         Context blocked=new ContextWrapper(context){
             @Override public int checkSelfPermission(String permission){
                 if(permission.equals("android.permission.POST_NOTIFICATIONS"))return android.content.pm.PackageManager.PERMISSION_DENIED;
@@ -46,7 +66,10 @@ public final class AndroidWorkspaceTest extends Instrumentation {
             if(VelaShows.permitted(context)){
                 new VelaReminderReceiver().onReceive(context,new Intent(context.getPackageName()+".PROGRAMME"));
                 check(VelaShows.prefs(context).getLong("shown",0)==now+60,"Allowed reminder did not reach Android");
-                ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(704);
+                NotificationManager manager=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+                manager.cancel(704);
+                phase="simultaneous-reminders";
+                simultaneousAlerts(manager,now+90);
             }
         }finally{
             VelaShows.enabled(blocked,false);
