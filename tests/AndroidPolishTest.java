@@ -16,7 +16,12 @@ public final class AndroidPolishTest extends Instrumentation {
     private final Bundle result=new Bundle();
     private void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
     private Object get(Object o,String key)throws Exception{for(Class<?> c=o.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(key);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(key);}
-    private void ui(Runnable r){runOnMainSync(r);waitForIdleSync();}
+    private void ui(Runnable r){
+        Throwable[] failure={null};
+        runOnMainSync(()->{try{r.run();}catch(Throwable e){failure[0]=e;}});
+        waitForIdleSync();
+        if(failure[0]!=null)throw new AssertionError(failure[0]);
+    }
     private interface Ready{boolean ready()throws Exception;}
     private void await(Ready r)throws Exception{long end=SystemClock.elapsedRealtime()+12000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(r.ready())return;Thread.sleep(40);}throw new AssertionError("Timeout: "+phase);}
     private VelaHub hub()throws Exception{return (VelaHub)get(activity,"hub");}
@@ -26,10 +31,46 @@ public final class AndroidPolishTest extends Instrumentation {
     private void shot(String name)throws Exception{Thread.sleep(250);Bitmap b=getUiAutomation().takeScreenshot();check(b!=null&&b.getWidth()==3840,"Native 4K screenshot required");try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),"polish-"+name+".png"))){b.compress(Bitmap.CompressFormat.PNG,100,out);}finally{b.recycle();}}
     private void bounds(View view)throws Exception{Rect rect=new Rect();check(view.getGlobalVisibleRect(rect)&&rect.width()>0&&rect.height()>0,"Invisible control");Rect window=new Rect();activity.getWindow().getDecorView().getGlobalVisibleRect(window);check(window.contains(rect),"Control outside window");}
     @Override public void onCreate(Bundle args){super.onCreate(args);start();}
+    void readingLabels(Context c){
+        SharedPreferences prefs=VelaReading.prefs(c);
+        try{
+            prefs.edit().putInt("text",2).putBoolean("contrast",true).commit();
+            VelaRecentActivity.Card card=new VelaRecentActivity.Card(c,new org.json.JSONObject(),()->{});
+            TextView caption=(TextView)card.getChildAt(1);
+            int original=caption.getCurrentTextColor();
+            VelaReading.apply(card);
+            check(caption.getCurrentTextColor()!=original,"High contrast did not brighten the caption");
+            prefs.edit().putBoolean("contrast",false).commit();
+            VelaReading.apply(card);
+            check(caption.getCurrentTextColor()==original,"Disabling high contrast left the caption recoloured");
+            check(Math.abs(caption.getTextSize()-15*VelaReading.scale(c))<.1f,"Large caption was scaled twice");
+
+            prefs.edit().putInt("text",0).putBoolean("contrast",true).commit();
+            VelaReading.apply(card);
+            check(Math.abs(caption.getTextSize()-15*VelaReading.scale(c))<.1f,"Returning to normal size kept the enlarged caption");
+            check(card.requestFocus(),"Recent activity card did not take focus");
+            int focused=caption.getCurrentTextColor();
+            VelaReading.apply(card);
+            check(caption.getCurrentTextColor()==focused,"High contrast overwrote the caption on the focused card");
+            card.clearFocus();
+            int green=0xFF52B052;
+            caption.setTextColor(green);
+            VelaReading.apply(card);
+            check(caption.getCurrentTextColor()==green,"A theme accent was replaced by the contrast colour");
+            android.content.res.ColorStateList selector=new android.content.res.ColorStateList(
+                    new int[][]{new int[]{android.R.attr.state_focused},new int[0]},new int[]{green,original});
+            caption.setTextColor(selector);
+            VelaReading.apply(card);
+            prefs.edit().putBoolean("contrast",false).commit();
+            VelaReading.apply(card);
+            check(caption.getTextColors()==selector,"Changing contrast discarded the focus or the rebound theme");
+        }finally{prefs.edit().remove("text").remove("contrast").commit();}
+    }
     @Override public void onStart(){super.onStart();context=getTargetContext();lite=context.getPackageName().endsWith(".lite");try{
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){check(in.read()=='1',"Owned emulator required");}
         previous=VelaWorkspace.active(context);profile=VelaWorkspace.create(context,"Vela · Demo");VelaWorkspace.select(context,profile);VelaSessions.prefs(context).edit().clear().commit();VelaSessions.lock();L10n.choose(context,"es");Ui.init(context);if(!lite){Class<?> setup=Class.forName("tv.vela.launcher.Personalization");for(String method:new String[]{"prepare","complete"}){Method m=setup.getDeclaredMethod(method,Context.class);m.setAccessible(true);m.invoke(null,context);}}
         activity=startActivitySync(new Intent().setClassName(context.getPackageName(),"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("velaTools",2));await(()->hub()!=null&&activity.hasWindowFocus());
+        phase="reading-labels";ui(()->readingLabels(context));
         phase="embedded-shell";VelaHub tools=hub();View[] categories=(View[])get(tools,"categories");View gear=nav(7,3);check(tools.getParent()!=activity.findViewById(android.R.id.content),"Tools replaced the launcher shell");bounds(gear);bounds(categories[9]);
         ui(categories[2]::requestFocus);key(KeyEvent.KEYCODE_DPAD_LEFT);check(gear.hasFocus()&&hub()==tools&&(Boolean)get(home(),"sidebarOpen"),"Left did not reach the retained launcher rail");key(KeyEvent.KEYCODE_DPAD_RIGHT);check(categories[2].hasFocus()&&!(Boolean)get(home(),"sidebarOpen"),"Right did not restore the selected tools category");key(KeyEvent.KEYCODE_DPAD_RIGHT);check(((java.util.List<View>)get(tools,"controls")).get(0).hasFocus(),"Right did not enter tools controls");key(KeyEvent.KEYCODE_DPAD_LEFT);check(categories[2].hasFocus(),"Left skipped tool categories");shot("01-reading");
         phase="async-does-not-steal-rail";ui(()->((VelaHub.Owner)activity).tools(0));tools=hub();EditText input=(EditText)get(tools,"input");VelaHub search=tools;ui(()->{input.setText("No matching demo programme");try{Method m=VelaHub.class.getDeclaredMethod("search");m.setAccessible(true);m.invoke(search);}catch(Exception e){throw new RuntimeException(e);}});gear=nav(7,3);ui(gear::requestFocus);Thread.sleep(1600);waitForIdleSync();check(gear.hasFocus()&&hub()==search,"Background result stole focus from the launcher rail");

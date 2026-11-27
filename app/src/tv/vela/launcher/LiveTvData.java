@@ -85,7 +85,25 @@ final class LiveTvData {
         }reader.endArray();return result;
     }
     static Set<String> favorites(Context c,String source){return new LinkedHashSet<>(VelaWorkspace.prefs(c,"live-tv").getStringSet("favorites-"+hash(source),Collections.emptySet()));}
-    static void toggle(Context c,String source,String id){SharedPreferences local=VelaWorkspace.prefs(c,"live-tv");Set<String> chosen=new LinkedHashSet<>(local.getStringSet("favorites-"+hash(source),Collections.emptySet()));if(!chosen.remove(id)){if(chosen.size()>=128)return;chosen.add(id);}local.edit().putStringSet("favorites-"+hash(source),chosen).apply();}
+    static Set<String> toggleFavorite(Context c,String source,Channel channel)throws IOException{
+        List<String> variants=new ArrayList<>();
+        for(Channel variant:TvChannelNames.variants(channel))variants.add(variant.id);
+        return toggleFavorites(c,source,channel.id,variants);
+    }
+    static void toggle(Context c,String source,String id)throws IOException{
+        toggleFavorites(c,source,id,Collections.singleton(id));
+    }
+    private static synchronized Set<String> toggleFavorites(Context c,String source,String id,Collection<String> variants)throws IOException{
+        SharedPreferences prefs=VelaWorkspace.prefs(c,"live-tv");
+        String key="favorites-"+hash(source);
+        Set<String> selected=new LinkedHashSet<>(prefs.getStringSet(key,Collections.emptySet()));
+        if(!selected.removeAll(variants)){
+            if(selected.size()>=128)throw new IOException("Favorite limit");
+            selected.add(id);
+        }
+        prefs.edit().putStringSet(key,selected).apply();
+        return selected;
+    }
     static File cached(Context c,String name){File folder=new File(c.getCacheDir(),"live-tv");folder.mkdirs();return new File(folder,name);}
     static boolean fresh(File file,long limit){long age=System.currentTimeMillis()-file.lastModified();return file.isFile()&&age>=0&&age<limit;}
     static byte[] read(File file,int limit)throws IOException{try(InputStream in=new FileInputStream(file);ByteArrayOutputStream out=new ByteArrayOutputStream()){copy(in,out,limit);return out.toByteArray();}}

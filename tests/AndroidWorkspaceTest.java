@@ -18,6 +18,54 @@ public final class AndroidWorkspaceTest extends Instrumentation {
     private Activity activity;private VelaHub hub;private String phase="setup";private final Bundle result=new Bundle();private Context context;private boolean lite;
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
     private Object get(Object o,String name)throws Exception{for(Class<?> c=o.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
+    private void antennaAcrossModes()throws Exception{
+        String original=VelaWorkspace.active(context);
+        String originalMode=VelaEdition.prefs(context).getString("mode",null);
+        String profile=VelaWorkspace.create(context,"Antenna restore");
+        try{
+            VelaWorkspace.select(context,profile);
+            VelaEdition.select(context,"lite");
+            LiveTvData.Channel dvb=new LiveTvData.Channel(41,"tuner","1","Uno",false,true,false,"TYPE_DVB_T:1:2:3");
+            LiveTvData.Channel unique=new LiveTvData.Channel(42,"tuner","2","Dos",false,true,false);
+            LiveTvData.Channel local=new LiveTvData.Channel(43,"tuner","3","Regional",false,true,false);
+            LiveTvData.Channel namesake=new LiveTvData.Channel(44,"tuner","4","Regional",false,true,false);
+            List<LiveTvData.Channel> lineup=Arrays.asList(dvb,unique,local,namesake);
+            List<String> keys=Arrays.asList(LiteChannelPersonal.key(unique,lineup),LiteChannelPersonal.key(local,lineup),LiteChannelPersonal.key(dvb,lineup));
+            TvPersonalization personal=new TvPersonalization(context,"antenna");
+            personal.order(keys);
+            for(LiveTvData.Channel channel:Arrays.asList(dvb,unique,local))
+                personal.hide(LiteChannelPersonal.key(channel,lineup),channel.name,true);
+
+            VelaEdition.select(context,"full");
+            personal.hide("ant-800000001","Old Full row",true);
+            ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+            VelaWorkspace.write(VelaWorkspace.snapshot(context),bytes);
+            JSONObject backup=VelaWorkspace.read(new ByteArrayInputStream(bytes.toByteArray()));
+            VelaWorkspace.channelPrefs(context,"antenna").edit().clear().commit();
+            personal.hide("ant-800000002","Current Full row",true);
+            VelaWorkspace.apply(context,backup,true);
+            check(personal.order().equals(keys),"Full restore discarded Lite antenna order");
+            check(personal.hiddenKeys().containsAll(keys),"Full restore discarded Lite hidden channels");
+            check(personal.hidden("ant-800000002")&&!personal.hidden("ant-800000001"),
+                    "An unresolved Full row displaced the destination's antenna settings");
+
+            VelaEdition.select(context,"lite");
+            LiveTvData.Channel renamed=new LiveTvData.Channel(51,"tuner","8","Nuevo Uno",false,true,false,"TYPE_DVB_T:1:2:3");
+            LiveTvData.Channel renumbered=new LiveTvData.Channel(52,"tuner","9","Dos",false,true,false);
+            LiveTvData.Channel moved=new LiveTvData.Channel(53,"tuner","10","Regional",false,true,false);
+            List<LiveTvData.Channel> rescanned=Arrays.asList(renamed,renumbered,moved,namesake);
+            check(LiteChannelPersonal.visible(context,rescanned).equals(Arrays.asList(moved,namesake)),
+                    "Retuning lost a hidden DVB or unique-name channel, or guessed an ambiguous station");
+            List<LiveTvData.Channel> sorted=new ArrayList<>(rescanned);
+            LiteChannelPersonal.sort(context,sorted,rescanned);
+            check(sorted.equals(Arrays.asList(renumbered,renamed,moved,namesake)),"Lite order did not survive retuning");
+        }finally{
+            VelaWorkspace.select(context,original);
+            VelaWorkspace.delete(context,profile);
+            VelaEdition.select(context,"lite".equals(originalMode)?"lite":"full");
+            if(originalMode==null)VelaEdition.prefs(context).edit().remove("mode").commit();
+        }
+    }
     private void tonightWindow(String instant,String expectedStart,String expectedEnd){
         Calendar local=Calendar.getInstance(TimeZone.getTimeZone("Europe/Madrid"));
         local.setTimeInMillis(java.time.Instant.parse(instant).toEpochMilli());
@@ -114,6 +162,7 @@ public final class AndroidWorkspaceTest extends Instrumentation {
         phase="recurring-shows";VelaShows.toggle(context,"El café T1 E1");check(VelaShows.follows(context,"El café T1 E9"),"Episode title did not match a recurring programme");long now=System.currentTimeMillis()/1000;VelaShows.remember(context,Arrays.asList(new VelaShows.Airing("El café T1 E9","Canal · Demostración",now+3600,now+5400),new VelaShows.Airing("Otro programa","Otro canal",now+60,now+600)));check(VelaShows.cached(context).size()==1&&!VelaShows.enabled(context),"Unfollowed programme accepted or notifications enabled without consent");VelaShows.toggle(context,"El café T1 E2");check(VelaShows.rules(context).isEmpty()&&VelaShows.cached(context).isEmpty(),"Unfollow left another episode subscribed");
         phase="blocked programme alerts";
         blockedAlertRemainsPending();
+        if(!lite&&VelaEdition.fullAvailable()){phase="antenna-round-trip-across-modes";antennaAcrossModes();}
         phase="antenna-portability";String service=LiveTvData.hash("owned-dvb-service");JSONObject exported=new JSONObject().put("ant-1",new JSONObject().put("service",service).put("name","canal demo").put("radio",false)).put("ant-2",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));Map<String,JSONObject> stations=new HashMap<>();stations.put("ant-90",new JSONObject().put("service",service).put("name","renamed demo").put("radio",false));stations.put("ant-91",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));stations.put("ant-92",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));Map<String,String> matches=VelaAntennaBackup.match(exported,stations);check(matches.get("ant-1").equals("ant-90")&&!matches.containsKey("ant-2"),"Antenna restore guessed a row ID or an ambiguous station name");
         phase="antenna-name-after-rescan";
         JSONObject oldNames=new JSONObject()

@@ -62,7 +62,13 @@ abstract class FullToolsData extends VelaToolsData {
     public org.json.JSONObject mobileState(int page)throws Exception{return super.mobileState(page).put("pinned",new org.json.JSONArray(Arrays.asList(SidebarApps.slots(activity))));}
     void pin(org.json.JSONObject j)throws Exception{String pkg=j.getString("pkg");String[] before=SidebarApps.slots(activity);List<String> order=new ArrayList<>(Arrays.asList(before));int index=order.indexOf(pkg);if(j.getString("op").equals("pin")){if(index>=0)SidebarApps.remove(activity,before,pkg);else if(before.length<128)SidebarApps.add(activity,pkg);else throw new java.io.IOException();}else{int direction=j.getInt("direction");if(index<0||Math.abs(direction)!=1)throw new java.io.IOException();Collections.swap(order,index,Math.max(0,Math.min(order.size()-1,index+direction)));if(!SidebarApps.reorder(activity,before,order.toArray(new String[0])))throw new java.io.IOException();}}
     void source(org.json.JSONObject j)throws Exception{String expected=VelaWorkspace.active(activity);String url=j.getString("url").trim();if(j.getString("kind").equals("Xtream")){XtreamClient client=new XtreamClient(activity);XtreamClient.Account account=client.login(url,j.getString("user"),j.getString("password"),url.startsWith("http://"));synchronized(VelaWorkspace.class){if(!expected.equals(VelaWorkspace.active(activity)))throw new java.io.IOException("Profile changed");client.save(account);}}else if(j.getString("kind").equals("M3U"))new M3uClient(activity).configure(url,"",url.startsWith("http://"));else throw new java.io.IOException();}
-    void favorite(LiveTvData.Channel c)throws Exception{if(!c.xtreamId.isEmpty())new XtreamClient(activity).toggleFavorite(c);else{Set<String> saved=LiveTvData.favorites(activity,LiveTvData.source(activity));Set<String> next=new HashSet<>(saved);if(!next.add(c.id))next.remove(c.id);LiveTvData.prefs(activity).edit().putStringSet("favorites-"+LiveTvData.hash(LiveTvData.source(activity)),next).commit();}}
+    void favorite(LiveTvData.Channel channel)throws Exception{
+        if(!channel.xtreamId.isEmpty()){
+            new XtreamClient(activity).toggleFavorite(channel);
+            return;
+        }
+        LiveTvData.toggleFavorite(activity,LiveTvData.source(activity),channel);
+    }
     public org.json.JSONObject reference(VelaHub.Hit hit)throws Exception{if(hit.value instanceof PlexClient.Film)return new LibraryClient(activity).reference((PlexClient.Film)hit.value);return super.reference(hit);}
     public String broadcastSource(){return LiveTvData.source(activity);}
     public VelaHub.Hit resolve(org.json.JSONObject item,CancellationSignal signal)throws Exception{

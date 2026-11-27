@@ -3,7 +3,6 @@ package tv.vela.launcher;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -44,7 +43,7 @@ final class VelaStartApps extends LinearLayout {
     private void addShortcut(String title, LiteCatalog.App app, int width, Runnable open) {
         TextView button = new TextView(getContext());
         button.setText(title);
-        button.setTextSize(TypedValue.COMPLEX_UNIT_PX, 20 * VelaReading.scale(getContext()));
+        VelaReading.textSize(button,20);
         button.setTypeface(Ui.medium);
         button.setGravity(Gravity.CENTER_VERTICAL);
         button.setSingleLine();

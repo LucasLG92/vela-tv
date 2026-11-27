@@ -32,9 +32,9 @@ final class VelaRecentActivity {
             if(mark!=null)icon.setImageDrawable(mark);
             else if(item.optString("kind").equals("hdmi")){for(TvInputs.Entry entry:TvInputs.list(c))if(entry.key.equals(item.optString("key"))){new DeviceIcons(c).load(entry.model,icon);break;}}
             if(icon.getDrawable()==null){icon.setImageResource(android.R.drawable.ic_media_play);icon.setColorFilter(VelaTheme.SECONDARY);}
-            TextView caption=new TextView(c);caption.setText(L10n.text("Recent activity"));caption.setSingleLine(true);caption.setEllipsize(android.text.TextUtils.TruncateAt.END);caption.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,15*VelaReading.scale(c));caption.setTextColor(VelaTheme.SECONDARY);caption.setTypeface(Ui.medium);caption.setIncludeFontPadding(false);
+            TextView caption=new TextView(c);caption.setText(L10n.text("Recent activity"));caption.setSingleLine(true);caption.setEllipsize(android.text.TextUtils.TruncateAt.END);VelaReading.textSize(caption,15);caption.setTextColor(VelaTheme.SECONDARY);caption.setTypeface(Ui.medium);caption.setIncludeFontPadding(false);
             LayoutParams cp=new LayoutParams(-1,25);cp.leftMargin=78;cp.rightMargin=24;cp.topMargin=8;addView(caption,cp);
-            TextView title=new TextView(c);title.setText(item.optString("title"));title.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,21*VelaReading.scale(c));title.setTypeface(Ui.medium);title.setTextColor(VelaTheme.WHITE);title.setSingleLine(true);title.setEllipsize(android.text.TextUtils.TruncateAt.END);title.setIncludeFontPadding(false);
+            TextView title=new TextView(c);title.setText(item.optString("title"));VelaReading.textSize(title,21);title.setTypeface(Ui.medium);title.setTextColor(VelaTheme.WHITE);title.setSingleLine(true);title.setEllipsize(android.text.TextUtils.TruncateAt.END);title.setIncludeFontPadding(false);
             LayoutParams tp=new LayoutParams(-1,32);tp.leftMargin=78;tp.rightMargin=24;tp.topMargin=35;addView(title,tp);
             setContentDescription(caption.getText()+" · "+title.getText());setOnClickListener(v->open.run());
             setOnFocusChangeListener((v,f)->{setBackground(f?VelaTheme.shape(Appearance.accent(c),VelaTheme.CONTROL_RADIUS):null);caption.setTextColor(f?0xFF626773:VelaTheme.SECONDARY);title.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);});
