@@ -6,6 +6,7 @@ public class PlexFeedTest {
     public static void main(String[] args) throws Exception {
         links();
         continueWatchingHubs();
+        latestResumePosition();
         require(PlexClient.avatarAllowed("https://plex.tv/users/example/avatar")&&PlexClient.avatarAllowed("https://secure.gravatar.com/avatar/example"),"Plex avatar sources");
         for(String url:new String[]{"http://plex.tv/users/example/avatar","https://plex.tv.attacker.invalid/avatar","https://user@plex.tv/avatar","https://plex.tv:8080/avatar","file:///avatar.png","https://127.0.0.1/avatar"})require(!PlexClient.avatarAllowed(url),"Unsafe avatar source accepted");
         require(PlexClient.profileKey("").isEmpty(),"Unlinked account must not share a previous avatar");
@@ -133,6 +134,25 @@ public class PlexFeedTest {
     }
     private static JSONObject hub(String id,JSONObject... films)throws Exception{
         return new JSONObject().put("hubIdentifier",id).put("Metadata",new JSONArray(Arrays.asList(films)));
+    }
+    private static void latestResumePosition()throws Exception{
+        JSONObject oldEpisode=new JSONObject().put("type","episode").put("ratingKey","101")
+                .put("grandparentRatingKey","10").put("viewOffset",80000).put("lastViewedAt",100);
+        JSONObject currentEpisode=new JSONObject(oldEpisode.toString()).put("ratingKey","102")
+                .put("viewOffset",20000).put("lastViewedAt",200);
+        JSONObject oldMovie=new JSONObject().put("type","movie").put("ratingKey","301")
+                .put("viewOffset",90000).put("lastViewedAt",150);
+        JSONObject currentMovie=new JSONObject(oldMovie.toString()).put("viewOffset",10000).put("lastViewedAt",300);
+        JSONObject older=hub("home.ondeck",oldEpisode,oldMovie);
+        JSONObject newer=hub("home.continue",currentEpisode,currentMovie);
+        for(JSONArray hubs:Arrays.asList(new JSONArray().put(older).put(newer),new JSONArray().put(newer).put(older))){
+            JSONObject home=new JSONObject().put("MediaContainer",new JSONObject().put("Hub",hubs));
+            List<PlexClient.Film> row=PlexClient.parseHubs(home);
+            require(row.size()==2&&row.get(0).key.equals("102")&&row.get(0).positionMs==20000,
+                    "Plex resumed an older episode from the same series");
+            require(row.get(1).key.equals("301")&&row.get(1).positionMs==10000,
+                    "Plex discarded the latest position after a movie was rewound");
+        }
     }
     private static void links()throws Exception{
         PlexClient.Film film=new PlexClient.Film();film.key="123";film.type="movie";film.title="Never placed in the URI";String prefix="plex://libraries/demo-server/unmatched/";
