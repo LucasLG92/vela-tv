@@ -22,9 +22,34 @@ final class VelaAntennaBackup {
         if(VelaEdition.lite(c))return;JSONObject data=root.getJSONObject("settings"),personal=data.optJSONObject(SOURCE);JSONArray fav=data.optJSONObject("live-tv")==null?null:data.getJSONObject("live-tv").optJSONArray(FAVOURITES);Set<String> wanted=new HashSet<>();if(fav!=null)for(int i=0;i<fav.length();i++)wanted.add(fav.optString(i));if(personal!=null)for(String key:new String[]{"hidden","order"}){JSONArray rows=new JSONArray(personal.optString(key,"[]"));for(int i=0;i<rows.length();i++){JSONObject row=rows.optJSONObject(i);if(row!=null)wanted.add(row.optString("k"));}}
         JSONObject descriptors=new JSONObject();if(!wanted.isEmpty())for(Map.Entry<String,JSONObject> station:stations(c).entrySet())if(wanted.contains(station.getKey()))descriptors.put(station.getKey(),station.getValue());root.put("antenna",descriptors);
     }
+    private static final java.util.regex.Pattern NAME_SPACES=java.util.regex.Pattern.compile("[\\s\\p{Z}]+");
+
+    private static String nameKey(JSONObject station){
+        String name=NAME_SPACES.matcher(station.optString("name")).replaceAll(" ").trim();
+        return name.isEmpty()?"":station.optBoolean("radio")+":"+name;
+    }
+
     static Map<String,String> match(JSONObject exported,Map<String,JSONObject> available)throws JSONException{
-        Map<String,List<String>> services=new HashMap<>(),names=new HashMap<>();for(Map.Entry<String,JSONObject> e:available.entrySet()){JSONObject d=e.getValue();String service=d.optString("service");if(!service.isEmpty())services.computeIfAbsent(service,k->new ArrayList<>()).add(e.getKey());names.computeIfAbsent(d.optBoolean("radio")+":"+d.optString("name"),k->new ArrayList<>()).add(e.getKey());}
-        Map<String,String> result=new HashMap<>();if(exported==null||exported.length()>512)return result;for(Iterator<String> it=exported.keys();it.hasNext();){String id=it.next();if(!id.matches("ant-[0-9]{1,18}"))continue;JSONObject description=exported.optJSONObject(id);if(description==null)continue;String service=description.optString("service"),name=description.optString("name");List<String> candidates=service.matches("[a-f0-9]{64}")?services.get(service):null;if(candidates==null||candidates.size()!=1)candidates=names.get(description.optBoolean("radio")+":"+name);if(candidates!=null&&candidates.size()==1)result.put(id,candidates.get(0));}return result;
+        Map<String,String> result=new HashMap<>();
+        if(exported==null||exported.length()>512)return result;
+        Map<String,List<String>> services=new HashMap<>(),names=new HashMap<>();
+        for(Map.Entry<String,JSONObject> entry:available.entrySet()){
+            JSONObject station=entry.getValue();
+            String service=station.optString("service"),name=nameKey(station);
+            if(!service.isEmpty())services.computeIfAbsent(service,k->new ArrayList<>()).add(entry.getKey());
+            if(!name.isEmpty())names.computeIfAbsent(name,k->new ArrayList<>()).add(entry.getKey());
+        }
+        for(Iterator<String> it=exported.keys();it.hasNext();){
+            String id=it.next();
+            if(!id.matches("ant-[0-9]{1,18}"))continue;
+            JSONObject description=exported.optJSONObject(id);
+            if(description==null)continue;
+            String service=description.optString("service");
+            List<String> candidates=service.matches("[a-f0-9]{64}")?services.get(service):null;
+            if(candidates==null||candidates.size()!=1)candidates=names.get(nameKey(description));
+            if(candidates!=null&&candidates.size()==1)result.put(id,candidates.get(0));
+        }
+        return result;
     }
     static JSONObject prepare(Context c,JSONObject backup,JSONObject previous)throws JSONException{
         JSONObject data=new JSONObject(backup.getJSONObject("settings").toString());if(VelaEdition.lite(c))return data;
