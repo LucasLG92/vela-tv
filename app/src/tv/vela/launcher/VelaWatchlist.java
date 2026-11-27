@@ -11,7 +11,7 @@ final class VelaWatchlist {
     static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"vela-watchlist");}
     private static String currentId(JSONObject item){
         String id=item.optString("id");
-        if(id.startsWith("tv:")&&"tv".equals(item.optString("kind"))&&item.optLong("start")>0){
+        if((id.startsWith("tv:")||id.startsWith("tv2:"))&&"tv".equals(item.optString("kind"))&&item.optLong("start")>0){
             return airingId(asAiring(item));
         }
         return id;
@@ -45,7 +45,7 @@ final class VelaWatchlist {
     static String airingId(VelaShows.Airing p){
         String channel=p.channelKey.isEmpty()?TvChannelNames.match(p.channel):p.channelKey;
         if(!p.source.isEmpty())channel=p.source+"|"+channel;
-        return "tv2:"+LiveTvData.hash(channel+"|"+p.start+"|"+VelaShows.identity(p.title));
+        return "tv3:"+LiveTvData.hash(channel+"|"+p.start+"|"+VelaWorkspace.normal(p.title));
     }
     static JSONObject broadcastFields(VelaShows.Airing p)throws JSONException{
         JSONObject item=new JSONObject().put("title",p.title).put("channel",p.channel).put("start",p.start).put("end",p.end);
