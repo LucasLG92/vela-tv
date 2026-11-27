@@ -371,7 +371,7 @@ class SettingsScreen extends VelaScreen {
         }
         void locationPermission(boolean allowed){
             if(closed)return;
-            if(allowed)AmbientWeather.prefs(activity).edit().putString("mode","auto").remove("cache").apply();
+            if(allowed)AmbientWeather.prefs(activity).edit().putString("mode","auto").apply();
             render(9);if(!allowed)status.setText(L10n.text("Location permission is unavailable. You can choose a city."));
         }
         private void searchCities(){
