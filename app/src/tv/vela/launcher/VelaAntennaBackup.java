@@ -41,7 +41,7 @@ final class VelaAntennaBackup {
         }
         for(Iterator<String> it=exported.keys();it.hasNext();){
             String id=it.next();
-            if(!id.matches("ant-[0-9]{1,18}"))continue;
+            if(!FULL_KEY.matcher(id).matches())continue;
             JSONObject description=exported.optJSONObject(id);
             if(description==null)continue;
             String service=description.optString("service");
@@ -51,10 +51,48 @@ final class VelaAntennaBackup {
         }
         return result;
     }
+    private static final java.util.regex.Pattern LITE_KEY=java.util.regex.Pattern.compile("(?:dvb|name|local):[a-f0-9]{64}");
+    private static final java.util.regex.Pattern FULL_KEY=java.util.regex.Pattern.compile("ant-[0-9]{1,18}");
+
+    private static void restoreRows(JSONObject personal,String field,Map<String,String> mapping,JSONObject previous)throws JSONException{
+        JSONArray rows=new JSONArray(personal.getString(field)),restored=new JSONArray();
+        boolean unresolvedFull=false,mappedFull=false;
+        for(int i=0;i<rows.length();i++){
+            JSONObject row=rows.optJSONObject(i);
+            if(row==null)continue;
+            String key=row.optString("k"),next=mapping.get(key);
+            if(next!=null){
+                restored.put(row.put("k",next));
+                mappedFull=true;
+            }else if(LITE_KEY.matcher(key).matches()){
+                // Lite resolves its own identity against its complete tuner catalogue when opened.
+                restored.put(row);
+            }else if(FULL_KEY.matcher(key).matches())unresolvedFull=true;
+        }
+
+        if(rows.length()>0&&restored.length()==0){
+            if(previous!=null&&previous.has(field))personal.put(field,previous.getString(field));
+            else personal.remove(field);
+            return;
+        }
+        if(unresolvedFull&&!mappedFull&&previous!=null&&previous.has(field)){
+            // Lite rows can be restored even when Full must keep its destination provider rows.
+            JSONArray local=new JSONArray(previous.getString(field));
+            int limit=field.equals("hidden")?TvPersonalization.MAX_HIDDEN:TvPersonalization.MAX_ORDER;
+            for(int i=0;i<local.length()&&restored.length()<limit;i++){
+                JSONObject row=local.optJSONObject(i);
+                if(row!=null&&FULL_KEY.matcher(row.optString("k")).matches())restored.put(row);
+            }
+        }
+        personal.put(field,restored.toString());
+    }
+
     static JSONObject prepare(Context c,JSONObject backup,JSONObject previous)throws JSONException{
         JSONObject data=new JSONObject(backup.getJSONObject("settings").toString());if(VelaEdition.lite(c))return data;
         Map<String,String> mapping=match(backup.optJSONObject("antenna"),stations(c));JSONObject live=data.optJSONObject("live-tv");if(live!=null&&live.has(FAVOURITES)){JSONArray converted=new JSONArray(),old=live.getJSONArray(FAVOURITES);for(int i=0;i<old.length();i++){String next=mapping.get(old.getString(i));if(next!=null)converted.put(next);}if(converted.length()>0||old.length()==0)live.put(FAVOURITES,converted);else{JSONObject before=previous.optJSONObject("live-tv");if(before!=null&&before.has(FAVOURITES))live.put(FAVOURITES,before.getJSONArray(FAVOURITES));else live.remove(FAVOURITES);}}
-        JSONObject personal=data.optJSONObject(SOURCE);if(personal!=null){JSONObject old=previous.optJSONObject(SOURCE);for(String key:new String[]{"hidden","order"})if(personal.has(key)){JSONArray source=new JSONArray(personal.getString(key)),out=new JSONArray();for(int i=0;i<source.length();i++){JSONObject row=source.optJSONObject(i);if(row==null)continue;String next=mapping.get(row.optString("k"));if(next!=null)out.put(new JSONObject(row.toString()).put("k",next));}if(out.length()>0||source.length()==0)personal.put(key,out.toString());else if(old!=null&&old.has(key))personal.put(key,old.getString(key));else personal.remove(key);}}
+        JSONObject personal=data.optJSONObject(SOURCE);
+        if(personal!=null)for(String field:new String[]{"hidden","order"})
+            if(personal.has(field))restoreRows(personal,field,mapping,previous.optJSONObject(SOURCE));
         return data;
     }
 }
