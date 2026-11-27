@@ -35,24 +35,24 @@ public final class AndroidUnifiedTest extends Instrumentation {
     void check(boolean value,String detail){if(!value)throw new AssertionError(detail);}
     void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
     void openSearch(Activity home)throws Exception{
-        getContext().startActivity(new Intent(Intent.ACTION_SEARCH).setClass(context,HomeActivity.class)
+        context.startActivity(new Intent(Intent.ACTION_SEARCH).setClass(context,HomeActivity.class)
                 .putExtra(SearchManager.QUERY,"HDMI").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         await(()->home.hasWindowFocus()&&field(home,"hub")!=null);
     }
     void verifyRecoveryEntry(Activity full,Intent icon)throws Exception{
-        getContext().startActivity(new Intent(context,SettingsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        context.startActivity(new Intent(context,SettingsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         Activity standalone=foreground(SettingsActivity.class.getName());
         Path crashes=new File(context.getFilesDir(),"home-crashes.txt").toPath();
         byte[] original=Files.exists(crashes)?Files.readAllBytes(crashes):null;
         try{
             String now=Long.toString(System.currentTimeMillis());
             Files.write(crashes,Arrays.asList(now,now,now));
-            getContext().startActivity(icon);
+            context.startActivity(icon);
             await(()->standalone.hasWindowFocus()&&standalone.getIntent().hasCategory(Intent.CATEGORY_LEANBACK_LAUNCHER));
         }finally{
             if(original==null)Files.deleteIfExists(crashes);else Files.write(crashes,original);
         }
-        getContext().startActivity(icon);
+        context.startActivity(icon);
         await(()->standalone.isFinishing()&&full.hasWindowFocus()
                 &&((CinemaHomeView)field(full,"home")).navigationDestination()==7);
     }
@@ -123,7 +123,7 @@ public final class AndroidUnifiedTest extends Instrumentation {
         check(!new PlexClient(context).connected()&&!new JellyfinClient(context).connected(),"Personal accounts forbidden");
         RefinementHttp.install(url->null);L10n.choose(context,"en");Ui.init(context);
         VelaEdition.prefs(context).edit().clear().commit();context.getSharedPreferences("personalization",0).edit().clear().commit();context.getSharedPreferences("updates",0).edit().putBoolean("automatic",false).commit();LiteUpdateManager.prefs(context).edit().putBoolean("automatic",false).commit();
-        boolean priorArt=new File(context.getCacheDir(),"plex-art").exists();phase="first-launch";getContext().startActivity(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));Activity chooser=foreground(EditionActivity.class.getName());check(VelaEdition.mode(context).isEmpty(),"Fresh install silently selected a mode");shot("01-choose");
+        boolean priorArt=new File(context.getCacheDir(),"plex-art").exists();phase="first-launch";context.startActivity(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));Activity chooser=foreground(EditionActivity.class.getName());check(VelaEdition.mode(context).isEmpty(),"Fresh install silently selected a mode");shot("01-choose");
         phase="lite-mode";card(chooser,"Lite");
         View devices=title(chooser.findViewById(android.R.id.content),"HDMI and apps");
         check(devices!=null&&devices.isFocusable()&&VelaEdition.mode(context).isEmpty(),"Preview committed a mode early");
@@ -178,7 +178,7 @@ public final class AndroidUnifiedTest extends Instrumentation {
             openSearch(full);
             Intent icon=context.getPackageManager().getLeanbackLaunchIntentForPackage(context.getPackageName());
             check(icon!=null,"Vela has no TV launcher icon");
-            getContext().startActivity(icon);
+            context.startActivity(icon);
             await(()->full.hasWindowFocus()&&field(full,"hub")==null
                     &&((CinemaHomeView)field(full,"home")).navigationDestination()==7);
             phase="reused-settings-icon";
@@ -203,7 +203,7 @@ public final class AndroidUnifiedTest extends Instrumentation {
         ui(navigation[3]::performClick);
         check(field(activeLite,"settingsView")!=null,"Lite Settings did not open");
         openSearch(activeLite);
-        getContext().startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        context.startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
                 .setClass(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         await(()->activeLite.hasWindowFocus()&&field(activeLite,"hub")==null&&((Integer)field(activeLite,"section"))==0);
         check(VelaEdition.lite(context),"HOME changed selected mode");
