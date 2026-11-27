@@ -134,6 +134,48 @@ public final class AndroidNextTest extends Instrumentation {
             ui(()->{if(panel[0]!=null)panel[0].close();timer.close();});
         }
     }
+    private void guideChangesInOpenControls()throws Exception{
+        long[] end={0};
+        boolean[] bufferAvailable={false};
+        VelaSleepTimer timer=new VelaSleepTimer(()->{});
+        VelaPlaybackTray[] tray={null};
+        String endOption=L10n.text("At the end of this programme");
+        String preset=String.format(Ui.locale(),L10n.text("Stop in %d min"),30);
+        try{
+            ui(()->{
+                tray[0]=new VelaPlaybackTray(activity,"Demo","Demo",null,()->{
+                    List<VelaPlaybackPanel.Item> items=new ArrayList<>();
+                    if(bufferAvailable[0])items.add(new VelaPlaybackPanel.Item(L10n.text("Pause live TV"),"",()->{}));
+                    timer.items(items,end[0]);
+                    return items;
+                },()->{});
+                activity.addContentView(tray[0],new FrameLayout.LayoutParams(-1,-1));
+            });
+            ui(()->{
+                ((View)text(tray[0],L10n.text("More")).getParent()).performClick();
+                text(tray[0],L10n.text("Sleep timer")).performClick();
+                check(text(tray[0],endOption)==null&&text(tray[0],preset).requestFocus(),"Unexpected initial sleep choices");
+                bufferAvailable[0]=true;
+                end[0]=System.currentTimeMillis()/1000+1800;
+                tray[0].tracksChanged();
+            });
+            ui(()->{
+                check(text(tray[0],endOption)!=null&&text(tray[0],L10n.text("Pause live TV"))!=null,
+                        "Open playback controls ignored the updated guide and buffer");
+                check(text(tray[0],preset).hasFocus(),"Inserting a tuner action moved focus away from the timer preset");
+                end[0]+=1800;
+                bufferAvailable[0]=false;
+                tray[0].tracksChanged();
+            });
+            ui(()->{
+                check(text(tray[0],L10n.text("Pause live TV"))==null,"Unavailable tuner action stayed visible");
+                text(tray[0],endOption).performClick();
+                check(timer.remaining()>3500_000&&timer.remaining()<=3600_000,"Timer used the old guide end time");
+            });
+        }finally{
+            ui(()->{if(tray[0]!=null)tray[0].close();timer.close();});
+        }
+    }
     private void expiredProgrammeChoice()throws Exception{
         long end=1_900_000_000L;
         long[] wallTime={end*1000-30_000};
@@ -167,6 +209,7 @@ public final class AndroidNextTest extends Instrumentation {
         phase="epg-identities";check(VelaDiscovery.eventId("dd_progid","SP12345678.0001").equals("dd:SP12345678.0001"),"Stable sports identity not accepted");check(VelaDiscovery.eventId("onscreen","Final").isEmpty()&&VelaDiscovery.eventId("dd_progid","SH12345678.0001").isEmpty(),"Title or series treated as an event identity");try(SQLiteDatabase db=SQLiteDatabase.create(null)){db.execSQL("CREATE TABLE meta(id INTEGER,updated INTEGER)");db.execSQL("CREATE TABLE programmes(channel TEXT,start INTEGER,end INTEGER,title TEXT,category TEXT)");db.execSQL("CREATE TABLE aliases(alias TEXT,channel TEXT)");VelaDiscovery.ensureEvents(db);db.execSQL("INSERT INTO aliases VALUES ('demo','one')");db.execSQL("INSERT INTO programmes VALUES ('one',?,?,?,'Sports',?)",new Object[]{now-600,now+1800,"Final · Demo","dd:SP12345678.0001"});List<VelaShows.Airing> page=VelaGuideSearch.readWindow(context,db,Collections.singletonMap("demo","Demo"),"alias","",0,new CancellationSignal(),now,now+1,2);check(page.size()==1&&page.get(0).eventId.equals("dd:SP12345678.0001"),"Event ID lost in guide query");}
         String cls=context.getPackageName().endsWith(".lite")?"tv.vela.launcher.LiteHomeActivity":"tv.vela.launcher.HomeActivity";activity=startActivitySync(new Intent().setClassName(context.getPackageName(),cls).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("velaTools",6));await(()->field(activity,"hub")!=null);hub=(VelaHub)field(activity,"hub");
         phase="countdown-in-open-panel";countdownInOpenPanel();
+        phase="guide-changes-in-open-controls";guideChangesInOpenControls();
         phase="draft-editor-cancel";
         String original=VelaLayout.read(context).toString();
         click("Edit home sections");
