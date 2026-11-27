@@ -65,6 +65,34 @@ public final class AndroidNextTest extends Instrumentation {
         click(profiles.get(profile));
         check(VelaWorkspace.active(context).equals(profile),"Could not leave the former guest profile");
     }
+    private void countdownInOpenPanel()throws Exception{
+        VelaSleepTimer timer=new VelaSleepTimer(()->{});
+        VelaPlaybackPanel[] panel={null};
+        View[] focused={null};
+        String title=L10n.text("Sleep timer");
+        String pattern=L10n.text("Stops playback in %d min");
+        String twoMinutes=title+"\n"+String.format(Ui.locale(),pattern,2);
+        String oneMinute=title+"\n"+String.format(Ui.locale(),pattern,1);
+        try{
+            ui(()->{
+                timer.after(62_000);
+                panel[0]=new VelaPlaybackPanel(activity,"Demo",()->{
+                    List<VelaPlaybackPanel.Item> items=new ArrayList<>();
+                    timer.items(items,0);
+                    items.add(new VelaPlaybackPanel.Item("Other control","",()->{}));
+                    return items;
+                },()->{});
+                ((FrameLayout)activity.findViewById(android.R.id.content)).addView(panel[0],new FrameLayout.LayoutParams(-1,-1));
+                focused[0]=text(panel[0],"Other control");
+                check(focused[0].requestFocus()&&text(panel[0],twoMinutes)!=null,"Initial visible countdown or focus missing");
+            });
+            boolean[] updated={false};
+            await(()->{runOnMainSync(()->updated[0]=text(panel[0],oneMinute)!=null);return updated[0];});
+            ui(()->check(focused[0].hasFocus(),"Countdown refresh moved D-pad focus"));
+        }finally{
+            ui(()->{if(panel[0]!=null)panel[0].close();timer.close();});
+        }
+    }
     private void expiredProgrammeChoice()throws Exception{
         long end=1_900_000_000L;
         long[] wallTime={end*1000-30_000};
@@ -97,6 +125,7 @@ public final class AndroidNextTest extends Instrumentation {
         phase="voice-contract";check(VelaVoice.query("Pon La 1").equals("La 1")&&VelaVoice.query("open HDMI 2").equals("HDMI 2")&&VelaVoice.query("ouvre Plex").equals("Plex")&&VelaVoice.query("cerca documentari").equals("documentari"),"Voice command stripping changed query");check(VelaVoice.genre("documentales esta noche")==3&&VelaVoice.genre("documentari")==3&&VelaVoice.genre("Documentales TV")==0,"Voice genre route guessed a channel name");check(VelaVoice.result(Activity.RESULT_CANCELED,new Intent()).isEmpty(),"Voice cancellation produced action");
         phase="epg-identities";check(VelaDiscovery.eventId("dd_progid","SP12345678.0001").equals("dd:SP12345678.0001"),"Stable sports identity not accepted");check(VelaDiscovery.eventId("onscreen","Final").isEmpty()&&VelaDiscovery.eventId("dd_progid","SH12345678.0001").isEmpty(),"Title or series treated as an event identity");try(SQLiteDatabase db=SQLiteDatabase.create(null)){db.execSQL("CREATE TABLE meta(id INTEGER,updated INTEGER)");db.execSQL("CREATE TABLE programmes(channel TEXT,start INTEGER,end INTEGER,title TEXT,category TEXT)");db.execSQL("CREATE TABLE aliases(alias TEXT,channel TEXT)");VelaDiscovery.ensureEvents(db);db.execSQL("INSERT INTO aliases VALUES ('demo','one')");db.execSQL("INSERT INTO programmes VALUES ('one',?,?,?,'Sports',?)",new Object[]{now-600,now+1800,"Final · Demo","dd:SP12345678.0001"});List<VelaShows.Airing> page=VelaGuideSearch.readWindow(context,db,Collections.singletonMap("demo","Demo"),"alias","",0,new CancellationSignal(),now,now+1,2);check(page.size()==1&&page.get(0).eventId.equals("dd:SP12345678.0001"),"Event ID lost in guide query");}
         String cls=context.getPackageName().endsWith(".lite")?"tv.vela.launcher.LiteHomeActivity":"tv.vela.launcher.HomeActivity";activity=startActivitySync(new Intent().setClassName(context.getPackageName(),cls).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("velaTools",6));await(()->field(activity,"hub")!=null);hub=(VelaHub)field(activity,"hub");
+        phase="countdown-in-open-panel";countdownInOpenPanel();
         phase="draft-editor-cancel";
         String original=VelaLayout.read(context).toString();
         click("Edit home sections");

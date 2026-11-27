@@ -31,8 +31,18 @@ final class VelaSleepTimer implements AutoCloseable {
         return endSeconds*1000-now;
     }
     long remaining(){return Math.max(0,deadline-SystemClock.elapsedRealtime());}
+    private VelaPlaybackPanel.Item status(){
+        long left=remaining();
+        String title=L10n.text("Sleep timer");
+        Runnable toggle=()->choosing=!choosing;
+        if(left==0)return new VelaPlaybackPanel.Item(title,L10n.text("Off · Vela playback only"),toggle);
+        long minutes=(left+59_999)/60_000;
+        long refreshAt=SystemClock.uptimeMillis()+left-(minutes-1)*60_000;
+        return new VelaPlaybackPanel.Item(title,String.format(Ui.locale(),L10n.text("Stops playback in %d min"),minutes),
+                toggle,refreshAt,this::status);
+    }
     void items(List<VelaPlaybackPanel.Item> items,long programmeEnd){
-        items.add(new VelaPlaybackPanel.Item(L10n.text("Sleep timer"),remaining()>0?String.format(Ui.locale(),L10n.text("Stops playback in %d min"),(remaining()+59_999)/60_000):L10n.text("Off · Vela playback only"),()->choosing=!choosing));
+        items.add(status());
         if(!choosing)return;
         for(int n:new int[]{30,60})items.add(new VelaPlaybackPanel.Item(String.format(Ui.locale(),L10n.text("Stop in %d min"),n),"",()->after(n*60_000L)));
         if(programmeDelay(programmeEnd)>0)items.add(new VelaPlaybackPanel.Item(L10n.text("At the end of this programme"),L10n.text("Uses the current guide's end time"),()->after(programmeDelay(programmeEnd))));
