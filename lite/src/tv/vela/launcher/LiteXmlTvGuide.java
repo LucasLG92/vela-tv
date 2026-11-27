@@ -59,7 +59,16 @@ final class LiteXmlTvGuide {
         db.execSQL("CREATE INDEX IF NOT EXISTS schedule ON programmes(channel,start,end)");
     }
     static String match(String value){String n=java.text.Normalizer.normalize(value,java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").toLowerCase(Locale.ROOT).replaceFirst("\\.tv$","").replaceAll("\\b(uhd|fhd|hd|sd|4k|8k|720p?|1080p?)\\b","").replaceAll("[^a-z0-9+]","");switch(n){case "a3series":return "atreseries";case "bemadtv":return "bemad";case "realmadridtv":return "realmadrid";case "tdp":return "teledeporte";case "24horas":return "24h";case "hdcastillalamancha":case "cmm":return "castillalamancha";case "factoriadeficcion":return "fdf";case "13tv":case "trecetv":return "trece";default:return n;}}
-    private Set<String> wanted(List<LiveTvData.Channel> channels){Set<String> keys=new TreeSet<>();for(LiveTvData.Channel c:channels){keys.add(match(c.name));String id=VelaGuideFix.alias(context,c.name);if(!id.isEmpty())keys.add(match(id));}return keys;}
+    private Set<String> wanted(List<LiveTvData.Channel> channels){
+        Set<String> keys=new TreeSet<>();
+        for(LiveTvData.Channel c:channels){
+            String name=match(c.name);
+            if(!name.isEmpty())keys.add(name);
+            String id=VelaGuideFix.alias(context,c.name);
+            if(!id.isEmpty())keys.add("id:"+id);
+        }
+        return keys;
+    }
     private static String signature(Set<String> keys){return LiveTvData.hash("titles-v2|"+URL+"|"+keys);}
     private static void check(CancellationSignal signal)throws InterruptedIOException{if(signal.isCanceled()||Thread.currentThread().isInterrupted())throw new InterruptedIOException("Cancelled");}
     boolean refresh(List<LiveTvData.Channel> channels,CancellationSignal signal)throws Exception {
@@ -75,24 +84,44 @@ final class LiteXmlTvGuide {
         finally{signal.setOnCancelListener(null);if(connection!=null)connection.disconnect();IMPORT.unlock();}
     }
     static long timestamp(String value){return XmlTvTime.parse(value);}
+    private static boolean indexStation(SQLiteDatabase db,SQLiteStatement alias,Set<String> wanted,String id,Set<String> names){
+        ContentValues option=new ContentValues();
+        option.put("channel",id);option.put("name",names.toString());
+        db.insertWithOnConflict("guide_options",null,option,SQLiteDatabase.CONFLICT_REPLACE);
+        boolean found=wanted.contains("id:"+id);
+        for(String name:names){
+            if(name.isEmpty()||!wanted.contains(name))continue;
+            alias.bindString(1,name);alias.bindString(2,id);alias.executeInsert();
+            found=true;
+        }
+        return found;
+    }
     void importGuide(InputStream raw,List<LiveTvData.Channel> channels,long now,CancellationSignal signal)throws Exception {
-        Set<String> wanted=wanted(channels),ids=new HashSet<>();XmlPullParser xml=Xml.newPullParser();xml.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES,false);xml.setInput(new Limited(raw,MAX_XML,signal),null);
+        Set<String> wanted=wanted(channels),stations=new HashSet<>(),ids=new HashSet<>();XmlPullParser xml=Xml.newPullParser();xml.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES,false);xml.setInput(new Limited(raw,MAX_XML,signal),null);
         try(SQLiteDatabase db=open();SQLiteStatement alias=db.compileStatement("INSERT OR IGNORE INTO aliases(name,channel) VALUES (?,?)");SQLiteStatement programme=db.compileStatement("INSERT INTO programmes(channel,start,end,title,description,category,event_id,image) VALUES (?,?,?,?,?,?,?,?)")){
             db.beginTransaction();try{db.delete("aliases",null,null);db.delete("logos",null,null);db.delete("guide_options",null,null);db.delete("programmes",null,null);String id="",kind="",image="",title="",description="",category="",eventId="",eventSystem="",eventValue="";StringBuilder value=new StringBuilder();Set<String> names=new HashSet<>();boolean inName=false,inTitle=false,inDescription=false,inCategory=false,inEvent=false,keep=false,complete=false;long from=0,to=0;int events=0,declared=0,scanned=0,stored=0;
                 for(int event=xml.nextToken();event!=XmlPullParser.END_DOCUMENT;event=xml.nextToken()){check(signal);if(++events>8_000_000||event==XmlPullParser.DOCDECL)throw new IOException("Unsupported XMLTV");
-                    if(event==XmlPullParser.START_TAG){String tag=xml.getName();if(xml.getDepth()>32||xml.getDepth()==1&&!tag.equals("tv"))throw new IOException("Unsupported XMLTV root");if(tag.equals("channel")){if(++declared>8192)throw new IOException("Channel limit");id=xml.getAttributeValue(null,"id");if(id==null||id.length()>256)throw new IOException("Channel ID limit");kind="channel";names.clear();names.add(match(id));image="";}
+                    if(event==XmlPullParser.START_TAG){String tag=xml.getName();if(xml.getDepth()>32||xml.getDepth()==1&&!tag.equals("tv"))throw new IOException("Unsupported XMLTV root");if(tag.equals("channel")&&xml.getDepth()==2){if(++declared>8192)throw new IOException("Channel limit");id=xml.getAttributeValue(null,"id");if(id==null||id.length()>256||id.trim().isEmpty())throw new IOException("Channel ID limit");
+                            stations.add(id);if(stations.size()>8192)throw new IOException("Channel limit");kind="channel";names.clear();names.add(match(id));image="";}
                         else if(tag.equals("icon")&&kind.equals("channel")){String u=xml.getAttributeValue(null,"src");if(logoUrl(u))image=u;}
                         else if(tag.equals("display-name")&&kind.equals("channel")){inName=true;value.setLength(0);}
-                        else if(tag.equals("programme")){if(++scanned>400000)throw new IOException("Programme limit");id=xml.getAttributeValue(null,"channel");boolean relevant=ids.contains(id);from=relevant?timestamp(xml.getAttributeValue(null,"start")):0;to=relevant?timestamp(xml.getAttributeValue(null,"stop")):0;keep=relevant&&from>0&&to>now-3600&&from<now+48*3600&&to>from;image="";title="";description="";category="";eventId=eventValue=eventSystem="";inEvent=false;kind="programme";}
+                        else if(tag.equals("programme")&&xml.getDepth()==2){
+                            if(++scanned>400000)throw new IOException("Programme limit");
+                            id=xml.getAttributeValue(null,"channel");
+                            if(id!=null&&id.length()<=256&&!id.trim().isEmpty()&&stations.add(id)){
+                                if(stations.size()>8192)throw new IOException("Channel limit");
+                                if(indexStation(db,alias,wanted,id,Collections.singleton(match(id))))ids.add(id);
+                            }
+                            boolean relevant=ids.contains(id);from=relevant?timestamp(xml.getAttributeValue(null,"start")):0;to=relevant?timestamp(xml.getAttributeValue(null,"stop")):0;keep=relevant&&from>0&&to>now-3600&&from<now+48*3600&&to>from;image="";title="";description="";category="";eventId=eventValue=eventSystem="";inEvent=false;kind="programme";}
                         else if(tag.equals("icon")&&kind.equals("programme")&&keep&&xml.getDepth()==3&&image.isEmpty())image=VelaProgrammeArt.url(xml.getAttributeValue(null,"src"));else if(tag.equals("episode-num")&&keep){eventSystem=xml.getAttributeValue(null,"system");eventValue="";inEvent=true;}else if(tag.equals("title")&&keep)inTitle=title.isEmpty();else if(tag.equals("desc")&&keep)inDescription=true;else if(tag.equals("category")&&keep)inCategory=true;
                     }else if(event==XmlPullParser.TEXT||event==XmlPullParser.CDSECT||event==XmlPullParser.ENTITY_REF){String text=xml.getText();if(text!=null){if(inName&&value.length()<160)value.append(text,0,Math.min(160-value.length(),text.length()));if(inTitle&&title.length()<512)title+=text.substring(0,Math.min(512-title.length(),text.length()));if(inEvent&&eventValue.length()<64)eventValue+=text.substring(0,Math.min(text.length(),64-eventValue.length()));if(inCategory&&category.length()<240)category+=text.substring(0,Math.min(240-category.length(),text.length()))+" ";if(inDescription&&description.length()<1000)description+=text.substring(0,Math.min(1000-description.length(),text.length()));}}
                     else if(event==XmlPullParser.END_TAG){String tag=xml.getName();if(tag.equals("tv")&&xml.getDepth()==1)complete=true;if(tag.equals("display-name")){inName=false;if(names.size()<32)names.add(match(value.toString()));}
-                        else if(tag.equals("channel")){ContentValues option=new ContentValues();option.put("channel",id);option.put("name",names.toString());db.insertWithOnConflict("guide_options",null,option,SQLiteDatabase.CONFLICT_REPLACE);boolean found=false;for(String n:names)if(wanted.contains(n)){alias.bindString(1,n);alias.bindString(2,id);alias.executeInsert();found=true;}if(found){ids.add(id);if(!image.isEmpty()){ContentValues row=new ContentValues();row.put("channel",id);row.put("image",image);db.insertWithOnConflict("logos",null,row,SQLiteDatabase.CONFLICT_REPLACE);}}kind="";}
+                        else if(tag.equals("channel")&&xml.getDepth()==2){if(indexStation(db,alias,wanted,id,names)){ids.add(id);if(!image.isEmpty()){ContentValues row=new ContentValues();row.put("channel",id);row.put("image",image);db.insertWithOnConflict("logos",null,row,SQLiteDatabase.CONFLICT_REPLACE);}}kind="";}
                         else if(tag.equals("episode-num")){inEvent=false;String stable=VelaDiscovery.eventId(eventSystem,eventValue.trim());if(!stable.isEmpty())eventId=stable;}else if(tag.equals("title")&&inTitle){title=XmlTvTitle.plain(title);inTitle=false;}else if(tag.equals("desc"))inDescription=false;else if(tag.equals("category"))inCategory=false;
-                        else if(tag.equals("programme")){if(keep&&!title.isEmpty()){if(++stored>16000)throw new IOException("Storage limit");programme.bindString(1,id);programme.bindLong(2,from);programme.bindLong(3,to);programme.bindString(4,title);programme.bindString(5,description);programme.bindString(6,category);programme.bindString(7,eventId);programme.bindString(8,image);programme.executeInsert();}keep=inTitle=inDescription=false;kind="";}
+                        else if(tag.equals("programme")&&xml.getDepth()==2){if(keep&&!title.isEmpty()){if(++stored>16000)throw new IOException("Storage limit");programme.bindString(1,id);programme.bindLong(2,from);programme.bindLong(3,to);programme.bindString(4,title);programme.bindString(5,description);programme.bindString(6,category);programme.bindString(7,eventId);programme.bindString(8,image);programme.executeInsert();}keep=inTitle=inDescription=false;kind="";}
                     }
                 }
-                if(!complete||declared==0||ids.isEmpty()||stored==0)throw new IOException("No complete matching schedule");ContentValues meta=new ContentValues();meta.put("id",1);meta.put("catalog",signature(wanted));meta.put("updated",System.currentTimeMillis());db.insertWithOnConflict("meta",null,meta,SQLiteDatabase.CONFLICT_REPLACE);db.setTransactionSuccessful();
+                if(!complete||stored==0)throw new IOException("No complete matching schedule");ContentValues meta=new ContentValues();meta.put("id",1);meta.put("catalog",signature(wanted));meta.put("updated",System.currentTimeMillis());db.insertWithOnConflict("meta",null,meta,SQLiteDatabase.CONFLICT_REPLACE);db.setTransactionSuccessful();
             }finally{db.endTransaction();}
         }
     }
