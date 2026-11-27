@@ -35,10 +35,43 @@ public class AndroidWeatherTest extends Instrumentation {
         check(((TextView)field(view,"clock")).getText().toString().matches("[0-2][0-9]:[0-5][0-9]"),"Clock missing");
         check(((TextView)field(view,"weatherCity")).getText().toString().equals("Madrid"),"City missing");
     }
-    public void onCreate(Bundle args){super.onCreate(args);start();}
+    private boolean cacheOnly;
+    private void automaticFallbackCache(Context c) {
+        AmbientWeather.Place city=new AmbientWeather.Place("Madrid","Madrid",40.42,-3.70,"Europe/Madrid");
+        String body="{\"current\":{\"temperature_2m\":12,\"weather_code\":3,\"is_day\":1}}";
+        AmbientWeather.select(c,city);
+        AmbientWeather.prefs(c).edit().putString("cache",body).putString("cacheKey",city.key())
+                .putLong("cacheAt",System.currentTimeMillis()).commit();
+        SettingsActivity settings=(SettingsActivity)startActivitySync(new Intent(c,SettingsActivity.class)
+                .putExtra("fromSetup",true).putExtra("page",9).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        Context noProvider=new ContextWrapper(c){
+            @Override public Context getApplicationContext(){return this;}
+            @Override public Object getSystemService(String name){return LOCATION_SERVICE.equals(name)?null:super.getSystemService(name);}
+        };
+        try{
+            runOnMainSync(()->settings.onRequestPermissionsResult(81,new String[]{AmbientWeather.PERMISSION},
+                    new int[]{android.content.pm.PackageManager.PERMISSION_GRANTED}));
+            check("auto".equals(AmbientWeather.mode(c)),"Settings did not enable automatic location");
+            check(body.equals(AmbientWeather.prefs(c).getString("cache","")),
+                    "Enabling automatic location discarded the cached forecast for the fallback city");
+            AmbientWeather.Snapshot[] shown={null};
+            runOnMainSync(()->{
+                AmbientWeather client=new AmbientWeather(noProvider,(snapshot,message)->shown[0]=snapshot);
+                try{client.start();}finally{client.close();}
+            });
+            check(shown[0]!=null&&city.name.equals(shown[0].city)&&shown[0].temperature==12,
+                    "Automatic location without a provider did not show the saved Madrid forecast immediately");
+        }finally{runOnMainSync(settings::finish);}
+    }
+    public void onCreate(Bundle args){super.onCreate(args);cacheOnly=args!=null&&"true".equals(args.getString("cache-only"));start();}
     public void onStart(){
         Bundle result=new Bundle();Context c=getTargetContext();Map<String,?> ambient=new HashMap<>(AmbientPrefs.get(c).getAll()),weather=new HashMap<>(AmbientWeather.prefs(c).getAll());SettingsActivity activity=null;
         try{
+            automaticFallbackCache(c);
+            if(cacheOnly){
+                result.putString("result","PASS automatic location preserves and displays the cached forecast for the fallback city.");
+                return;
+            }
             AmbientPrefs.get(c).edit().clear().commit();check(AmbientPrefs.clock(c)&&AmbientPrefs.weather(c),"Clock/weather not enabled by default");
             AmbientPrefs.get(c).edit().putBoolean("clock",false).commit();check(!AmbientPrefs.clock(c),"Migration overwrote user toggle");
             long now=System.currentTimeMillis();String fixture="{\"timezone\":\"Europe/Madrid\",\"current\":{\"temperature_2m\":-2.4,\"weather_code\":71,\"is_day\":0}}";
@@ -73,7 +106,6 @@ public class AndroidWeatherTest extends Instrumentation {
             }
             result.putString("result","PASS defaults, preserved toggles, live native city search and selection, automatic/manual fallback, real weather, invalid/missing data, cache age, persistent clock/weather on Plex and real aerials, and resource cleanup. Madrid was a test city only.");
         }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));}
-        finally{if(activity!=null){SettingsActivity a=activity;runOnMainSync(()->a.finish());}restore(AmbientPrefs.get(c),ambient);restore(AmbientWeather.prefs(c),weather);}
-        finish(result.containsKey("error")?1:-1,result);
+        finally{if(activity!=null){SettingsActivity a=activity;runOnMainSync(()->a.finish());}restore(AmbientPrefs.get(c),ambient);restore(AmbientWeather.prefs(c),weather);finish(result.containsKey("error")?1:-1,result);}
     }
 }

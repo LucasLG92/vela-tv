@@ -107,7 +107,7 @@ class SetupScreen extends VelaScreen {
     private void finishSetup(){Personalization.complete(this);startActivity(new Intent(this,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NEW_TASK));finish();}
     private void automaticLocation(){
         if(checkSelfPermission(AmbientWeather.PERMISSION)!=PackageManager.PERMISSION_GRANTED){requestPermissions(new String[]{AmbientWeather.PERMISSION},81);return;}
-        AmbientWeather.prefs(this).edit().putString("mode","auto").remove("cache").apply();weatherMessage="";render();
+        AmbientWeather.prefs(this).edit().putString("mode","auto").apply();weatherMessage="";render();
     }
     private void startWeather(){
         if(!active||page!=3||weather!=null)return;
