@@ -19,7 +19,12 @@ public final class AndroidNextTest extends Instrumentation {
     private void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
     private Object field(Object o,String name)throws Exception{for(Class<?> c=o.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
     private Object quiet(Object o,String name){try{return field(o,name);}catch(Exception e){throw new RuntimeException(e);}}
-    private void ui(Runnable r){runOnMainSync(r);waitForIdleSync();}
+    private void ui(Runnable r){
+        Throwable[] error={null};
+        runOnMainSync(()->{try{r.run();}catch(Throwable e){error[0]=e;}});
+        waitForIdleSync();
+        if(error[0]!=null)throw new AssertionError(error[0]);
+    }
     interface Ready{boolean ready()throws Exception;}
     private void await(Ready r)throws Exception{long end=SystemClock.elapsedRealtime()+15000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(r.ready())return;Thread.sleep(40);}throw new AssertionError("Timeout: "+phase);}
     private TextView text(View root,String label){if(root instanceof TextView&&(((TextView)root).getText().toString().equals(label)||((TextView)root).getText().toString().startsWith(label+"\n")))return (TextView)root;if(root instanceof ViewGroup)for(int i=0;i<((ViewGroup)root).getChildCount();i++){TextView found=text(((ViewGroup)root).getChildAt(i),label);if(found!=null)return found;}return null;}
@@ -155,6 +160,9 @@ public final class AndroidNextTest extends Instrumentation {
                 ((View)text(tray[0],L10n.text("More")).getParent()).performClick();
                 text(tray[0],L10n.text("Sleep timer")).performClick();
                 check(text(tray[0],endOption)==null&&text(tray[0],preset).requestFocus(),"Unexpected initial sleep choices");
+            });
+            await(()->text(tray[0],preset).isLaidOut()&&text(tray[0],preset).getHeight()>0);
+            ui(()->{
                 tray[0].dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_DPAD_CENTER));
                 check(text(tray[0],preset).isPressed(),"Timer preset did not receive OK down");
                 bufferAvailable[0]=true;
