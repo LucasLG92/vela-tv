@@ -37,7 +37,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     private AudioFocusRequest audioFocus;private final AudioManager audio;
     LiveTvData.Channel selected;
     boolean active,rendered,prepared;
-    private VelaHlsBuffer buffer;private final Set<String> bufferedSignals=new HashSet<>();private String replayUrl="";private LiveTvData.Programme replayProgramme;
+    private VelaHlsBuffer buffer;private String directOnlySignal="";private String replayUrl="";private LiveTvData.Programme replayProgramme;
     private long programmeEnd;private final VelaSleepTimer sleep;
     private boolean media3Attempt;private String frameworkSignal="";private boolean paused;private VelaPlaybackTray controls;private int controlsKey=-1;private TextView captions;private int timeShiftStatus=TvInputManager.TIME_SHIFT_STATUS_UNSUPPORTED;private long timeShiftStart,timeShiftCurrent;
     private TvSignalFallback signals;
@@ -101,7 +101,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         quickAdapter.notifyDataSetChanged();
     }
     void select(LiveTvData.Channel ch){selectReplay(ch,null,"");}
-    void selectReplay(LiveTvData.Channel ch,LiveTvData.Programme recording,String url){replayUrl=url;replayProgramme=recording;liveBadge.reset(recording!=null);bufferedSignals.clear();frameworkSignal="";if(controls!=null)controls.close();timeShiftStatus=TvInputManager.TIME_SHIFT_STATUS_UNSUPPORTED;timeShiftStart=timeShiftCurrent=0;closeChannels(false);selected=ch;historyNotified=false;panel.artAvailable(false);panel.rail.color(0);metadata(null,null);channelLogo.label(ch.antenna()&&!ch.number.isEmpty()?ch.number:LiveTvActivity.displayName(ch.name));channelLogo.setImageDrawable(null);if(artwork==null)artwork=new LiveTvLogos(activity);artwork.page();artwork.load(ch,channelLogo);intro.setVisibility(VISIBLE);resetNetworkSession();signals=new TvSignalFallback(ch);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(ch,replayUrl);paused=false;panel.channelName((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));showControls();if(active)startSignal();}
+    void selectReplay(LiveTvData.Channel ch,LiveTvData.Programme recording,String url){replayUrl=url;replayProgramme=recording;liveBadge.reset(recording!=null);frameworkSignal="";if(controls!=null)controls.close();timeShiftStatus=TvInputManager.TIME_SHIFT_STATUS_UNSUPPORTED;timeShiftStart=timeShiftCurrent=0;closeChannels(false);selected=ch;historyNotified=false;panel.artAvailable(false);panel.rail.color(0);metadata(null,null);channelLogo.label(ch.antenna()&&!ch.number.isEmpty()?ch.number:LiveTvActivity.displayName(ch.name));channelLogo.setImageDrawable(null);if(artwork==null)artwork=new LiveTvLogos(activity);artwork.page();artwork.load(ch,channelLogo);intro.setVisibility(VISIBLE);resetNetworkSession();signals=new TvSignalFallback(ch);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(ch,replayUrl);paused=false;panel.channelName((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));showControls();if(active)startSignal();}
     void metadata(LiveTvData.Programme current,LiveTvData.Programme next){
         long now=System.currentTimeMillis()/1000;
         programmeEnd=current!=null&&current.current(now)?current.end:0;
@@ -110,8 +110,8 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     }
     void resume(){if(active)return;active=true;if(artwork==null)artwork=new LiveTvLogos(activity);if(selected!=null)artwork.load(selected,channelLogo);signals=new TvSignalFallback(selected);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(selected,replayUrl);resetNetworkSession();setKeepScreenOn(true);if(selected!=null&&(selected.antenna()||video.getHolder().getSurface().isValid()))startSignal();}
     void pause(){sleep.close();if(controls!=null)controls.close();selectPress.cancel();pickerPress.cancel();active=false;main.removeCallbacksAndMessages(null);closeChannels(false);release();intro.setVisibility(GONE);channelLogo.setImageDrawable(null);if(artwork!=null){artwork.close();artwork=null;}setKeepScreenOn(false);}
-    private void resetNetworkSession(){recovery=new VelaPlaybackRecovery();forcedEngine=0;limits=VelaPlaybackPolicy.buffer(activity);lastFailure=VelaPlaybackRecovery.Failure.UNKNOWN;}
-    private void restartNetwork(){signals=new TvSignalFallback(selected);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(selected,replayUrl);bufferedSignals.clear();resetNetworkSession();startSignal();}
+    private void resetNetworkSession(){directOnlySignal="";recovery=new VelaPlaybackRecovery();forcedEngine=0;limits=VelaPlaybackPolicy.buffer(activity);lastFailure=VelaPlaybackRecovery.Failure.UNKNOWN;}
+    private void restartNetwork(){signals=new TvSignalFallback(selected);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(selected,replayUrl);resetNetworkSession();startSignal();}
     private void startSignal(){
         release();if(!active||selected==null||!selected.playable()||!selected.antenna()&&!video.getHolder().getSurface().isValid())return;
         intro.setVisibility(VISIBLE);message.setVisibility(VISIBLE);message.setText(Ui.tr("Conectando a ","Connecting to ","Conectando con ")+LiveTvActivity.displayName(selected.name)+"…");panel.setVisibility(VISIBLE);
@@ -126,7 +126,10 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
             Map<String,String> headers=VelaStreamHeaders.forSignal(signal.channel,signal.url);
             if(headers.isEmpty()&&!replayUrl.isEmpty()&&!signal.channel.streams.isEmpty())headers=VelaStreamHeaders.forSignal(signal.channel,signal.channel.streams.get(0));
             String playback=signal.url;
-            if(replayUrl.isEmpty()&&VelaPlaybackPanel.prefs(activity).getBoolean("timeshift",false)&&VelaPlaybackPolicy.format(playback).equals("hls")&&bufferedSignals.add(LiveTvData.hash(playback)))try{buffer=new VelaHlsBuffer(activity,playback,headers);playback=buffer.url();}catch(java.io.IOException unavailable){}
+            if(replayUrl.isEmpty()&&VelaPlaybackPanel.prefs(activity).getBoolean("timeshift",false)&&VelaPlaybackPolicy.format(playback).equals("hls")&&!directOnlySignal.equals(playback)){
+                try{buffer=new VelaHlsBuffer(activity,playback,headers);playback=buffer.url();}
+                catch(java.io.IOException unavailable){directOnlySignal=signal.url;}
+            }
             currentEngine=buffer!=null?VelaPlaybackPolicy.MEDIA3:forcedEngine!=0?forcedEngine:VelaPlaybackPolicy.chooseEngine(activity,selected);
             if(!recovery.start(LiveTvData.hash(signal.url),currentEngine,SystemClock.elapsedRealtime())){release();unavailable();return;}
             if(currentEngine==VelaPlaybackPolicy.MEDIA3){
@@ -182,7 +185,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         release();if(!active)return;
         if(!replayUrl.isEmpty()){message.setText(L10n.text("The source could not play this programme. Press Back to return to the guide."));message.setVisibility(VISIBLE);showControls();return;}
         if(action==VelaPlaybackRecovery.Action.STOP){unavailable();return;}
-        if(buffered){forcedEngine=engine;message.setText(L10n.text("This signal will play without local pause."));main.postDelayed(retry,250);return;}
+        if(buffered){directOnlySignal=signal.url;forcedEngine=0;message.setText(L10n.text("This signal will play without local pause."));main.postDelayed(retry,250);return;}
         if(action==VelaPlaybackRecovery.Action.RETRY){forcedEngine=engine;message.setText(L10n.text("Reconnecting…"));main.postDelayed(retry,1000);return;}
         if(action==VelaPlaybackRecovery.Action.OTHER_ENGINE){forcedEngine=engine==VelaPlaybackPolicy.MEDIA3?VelaPlaybackPolicy.SYSTEM:VelaPlaybackPolicy.MEDIA3;message.setText(L10n.text("Trying the compatibility player…"));main.postDelayed(retry,250);return;}
         forcedEngine=0;signal=nextSignal();if(signal==null){unavailable();return;}
