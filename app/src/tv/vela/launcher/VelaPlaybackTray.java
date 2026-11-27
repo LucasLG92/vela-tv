@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -81,7 +80,7 @@ final class VelaPlaybackTray extends FrameLayout {
     private TextView label(int size,int color){
         TextView t=new TextView(getContext());t.setSingleLine();t.setEllipsize(TextUtils.TruncateAt.END);
         t.setTypeface(Ui.medium);t.setTextColor(color);t.setGravity(Gravity.CENTER_VERTICAL);t.setIncludeFontPadding(false);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_PX,size*pixels*VelaReading.scale(getContext()));return t;
+        VelaReading.textSize(t,size*pixels);return t;
     }
     private void render(){
         int target=page==null?groupIndex:choiceIndex;List<Item> all=model.items();options.clear();row.removeAllViews();
