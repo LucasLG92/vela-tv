@@ -44,7 +44,19 @@ public final class AndroidStreamPlaybackTest extends Instrumentation {
         Map<String,String> invalid=new HashMap<>();invalid.put("User-Agent","Bad\r\nInjected: value");invalid.put("Authorization","not-allowed");invalid.put("Referer","file:///not-allowed");check(VelaStreamHeaders.clean(invalid).isEmpty(),"Unsafe header accepted");
         new M3uClient(context).configure(base+"/owned.m3u","",true);VelaPlaybackPanel.prefs(context).edit().putInt("engine",VelaPlaybackPolicy.AUTO).commit();
         tune(protectedChannel);long at=SystemClock.elapsedRealtime();decoded();check(player.dvr!=null,"Automatic HLS did not use Media3");result.putLong("protected_hls_first_frame_ms",SystemClock.elapsedRealtime()-at);check(metrics().getJSONObject("denied").length()==0,"Headers were lost on the master, media playlist or segment");stop();
-        phase="headers through local pause";VelaPlaybackPanel.prefs(context).edit().putBoolean("timeshift",true).commit();tune(protectedChannel);decoded();check(field(player,"buffer")!=null,"Local pause did not preserve the source headers");check(metrics().getJSONObject("denied").length()==0,"Disk-ring fetch lost headers");stop();VelaPlaybackPanel.prefs(context).edit().putBoolean("timeshift",false).commit();
+        phase="headers through local pause";VelaPlaybackPanel.prefs(context).edit().putBoolean("timeshift",true).commit();tune(protectedChannel);decoded();check(field(player,"buffer")!=null,"Local pause did not preserve the source headers");check(metrics().getJSONObject("denied").length()==0,"Disk-ring fetch lost headers");stop();
+        phase="local pause after returning to the channel";
+        ui(player::resume);decoded();
+        check(field(player,"buffer")!=null&&player.dvr!=null,"Returning from the background lost local pause on the same working HLS signal");
+        stop();
+        phase="explicit system fallback from local pause";
+        VelaPlaybackPanel.prefs(context).edit().putInt("engine",VelaPlaybackPolicy.SYSTEM).commit();
+        tune(channel("local-pause-fallback","/short.m3u8"));decoded();
+        check(field(player,"buffer")!=null&&player.dvr!=null,"Local pause did not start with its required Media3 engine");
+        // The four-second fixture ends during a live tune, triggering direct recovery on the same URL.
+        await(()->field(player,"buffer")==null&&(player.player!=null||player.dvr!=null));
+        check(player.player!=null&&player.dvr==null,"Direct recovery ignored the explicit System player preference");
+        stop();VelaPlaybackPanel.prefs(context).edit().putBoolean("timeshift",false).commit();
         phase="explicit system compatibility";VelaPlaybackPanel.prefs(context).edit().putInt("engine",VelaPlaybackPolicy.SYSTEM).commit();tune(channel("system","/plain.ts"));decoded();check(player.player!=null&&player.dvr==null,"Explicit compatibility mode opened Media3");stop();
         VelaPlaybackPanel.prefs(context).edit().putInt("engine",VelaPlaybackPolicy.AUTO).commit();
     }

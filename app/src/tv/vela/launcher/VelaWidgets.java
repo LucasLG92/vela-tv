@@ -48,10 +48,12 @@ final class VelaWidgets {
         private final Map<String,ImageView> icons=new HashMap<>();
         private State state;private TextView clock,temperature,city;private ImageView icon;
         private AmbientWeather weather;private AmbientWeather.Snapshot snapshot;private String symbol="",message="",signature="";
-        private boolean active,ambient;private SharedPreferences selectedPrefs;
+        private boolean active,ambient;private SharedPreferences selectedPrefs,showsPrefs;
         private final Handler main=new Handler(Looper.getMainLooper());
         private final Runnable redraw=()->{if(active)refresh();};
-        private final SharedPreferences.OnSharedPreferenceChangeListener selectionChanged=(p,k)->{main.removeCallbacks(redraw);main.post(redraw);};
+        private void queueRefresh(){main.removeCallbacks(redraw);main.post(redraw);}
+        private final SharedPreferences.OnSharedPreferenceChangeListener selectionChanged=(p,k)->queueRefresh();
+        private final SharedPreferences.OnSharedPreferenceChangeListener profileChanged=(p,k)->{if("active".equals(k))queueRefresh();};
         private final Runnable weatherRestart=()->{if(active&&state.has("weather")){stopWeather();startWeather();}};
         private final SharedPreferences.OnSharedPreferenceChangeListener weatherChanged=(p,k)->{if(Arrays.asList("mode","city","lat","lon","zone").contains(k)){main.removeCallbacks(weatherRestart);main.postDelayed(weatherRestart,60);}};
         private final SharedPreferences.OnSharedPreferenceChangeListener showsChanged=(p,k)->{if(active&&state.has("programme"))updateClock();};
@@ -76,6 +78,7 @@ final class VelaWidgets {
         private GradientDrawable plate(boolean focus){GradientDrawable d=new GradientDrawable();d.setColor(focus?VelaReading.accent(getContext()):0xD91B1D25);d.setCornerRadius(18);d.setStroke(1,focus?0x00FFFFFF:0x24FFFFFF);return d;}
         private void icon(ImageView image,String name){try(InputStream in=getContext().getAssets().open("symbols/"+name+".png")){image.setImageDrawable(Drawable.createFromStream(in,null));}catch(java.io.IOException ignored){image.setImageDrawable(null);}}
         private void refresh(){
+            if(active)bindProfile();
             State next=read(getContext());String key=VelaWorkspace.active(getContext())+next.items+next.shortcut+next.format;
             if(!key.equals(signature)){
                 boolean wasFocused=hasFocus();signature=key;state=next;line.removeAllViews();cards.clear();values.clear();details.clear();icons.clear();clock=null;temperature=null;city=null;icon=null;symbol="";
@@ -96,23 +99,63 @@ final class VelaWidgets {
             }
             if(active&&state.has("weather")){if(weather==null)startWeather();}else stopWeather();setVisibility(cards.isEmpty()?GONE:VISIBLE);updateClock();
         }
-        void start(){if(!active){active=true;selectedPrefs=prefs(getContext());selectedPrefs.registerOnSharedPreferenceChangeListener(selectionChanged);AmbientWeather.prefs(getContext()).registerOnSharedPreferenceChangeListener(weatherChanged);VelaShows.prefs(getContext()).registerOnSharedPreferenceChangeListener(showsChanged);}refresh();}
+        private void bindProfile(){
+            SharedPreferences next=prefs(getContext());
+            if(next==selectedPrefs)return;
+            unbindProfile();
+            selectedPrefs=next;
+            showsPrefs=VelaShows.prefs(getContext());
+            selectedPrefs.registerOnSharedPreferenceChangeListener(selectionChanged);
+            showsPrefs.registerOnSharedPreferenceChangeListener(showsChanged);
+        }
+        private void unbindProfile(){
+            if(selectedPrefs!=null)selectedPrefs.unregisterOnSharedPreferenceChangeListener(selectionChanged);
+            if(showsPrefs!=null)showsPrefs.unregisterOnSharedPreferenceChangeListener(showsChanged);
+            selectedPrefs=null;showsPrefs=null;
+        }
+        void start(){
+            if(!active){
+                active=true;
+                VelaWorkspace.registry(getContext()).registerOnSharedPreferenceChangeListener(profileChanged);
+                AmbientWeather.prefs(getContext()).registerOnSharedPreferenceChangeListener(weatherChanged);
+            }
+            refresh();
+        }
         private void startWeather(){if(weather!=null||!active||!state.has("weather"))return;message="";weather=new AmbientWeather(getContext(),(value,status)->{if(!active||!state.has("weather"))return;snapshot=value;message=status;updateClock();});weather.start();}
         private void stopWeather(){if(weather!=null){weather.close();weather=null;}snapshot=null;symbol="";if(icon!=null)icon.setImageDrawable(null);}
         void updateClock(){
-            if(state==null)return;Date now=new Date();boolean twentyFour=state.format==1||state.format==0&&android.text.format.DateFormat.is24HourFormat(getContext());String time=new SimpleDateFormat(twentyFour?"HH:mm":"h:mm a",Ui.locale()).format(now);
-            if(clock!=null)clock.setText(time);
+            if(state==null)return;
+            Date now=new Date();
+            boolean twentyFour=state.format==1||state.format==0&&android.text.format.DateFormat.is24HourFormat(getContext());
+            SimpleDateFormat time=new SimpleDateFormat(twentyFour?"HH:mm":"h:mm a",Ui.locale());
+            if(clock!=null)clock.setText(time.format(now));
             if(state.has("date")){values.get("date").setText(new SimpleDateFormat("EEEE",Ui.locale()).format(now));details.get("date").setText(new SimpleDateFormat("d MMMM",Ui.locale()).format(now));}
-            if(state.has("programme")){VelaShows.Airing next=next(getContext());values.get("programme").setText(next==null?L10n.text("Upcoming"):next.title);details.get("programme").setText(next==null?L10n.text("Follow programmes in the guide"):new SimpleDateFormat("HH:mm",Ui.locale()).format(new Date(next.start*1000))+" · "+next.channel);}
+            if(state.has("programme")){
+                VelaShows.Airing next=next(getContext());
+                values.get("programme").setText(next==null?L10n.text("Upcoming"):next.title);
+                details.get("programme").setText(next==null?L10n.text("Follow programmes in the guide"):time.format(new Date(next.start*1000))+" · "+next.channel);
+            }
             if(state.has("shortcut")){values.get("shortcut").setText(target(state.shortcut));details.get("shortcut").setText(L10n.text("Quick access"));}
-            updateWeather();for(String id:cards.keySet())cards.get(id).setContentDescription(label(id)+", "+values.get(id).getText()+", "+details.get(id).getText());if(cards.containsKey("weather")&&snapshot!=null&&snapshot.usable(System.currentTimeMillis()))cards.get("weather").setContentDescription(cards.get("weather").getContentDescription()+", "+condition(snapshot.code));
+            updateWeather();for(String id:cards.keySet())cards.get(id).setContentDescription(label(id)+", "+values.get(id).getText()+", "+details.get(id).getText());if(cards.containsKey("weather")&&snapshot!=null&&snapshot.usable(System.currentTimeMillis()))cards.get("weather").setContentDescription(cards.get("weather").getContentDescription()+", "+AmbientWeather.condition(snapshot.code));
         }
-        private String condition(int code){if(code==0)return Ui.tr("Céu limpo","Clear","Despejado");if(code<=2)return Ui.tr("Sol e nuvens","Partly cloudy","Sol y nubes");if(code==3)return Ui.tr("Nublado","Cloudy","Nublado");if(code==45||code==48)return Ui.tr("Nevoeiro","Fog","Niebla");if(code>=71&&code<=77||code==85||code==86)return Ui.tr("Neve","Snow","Nieve");if(code>=95)return Ui.tr("Trovoada","Thunderstorm","Tormenta");return Ui.tr("Chuva","Rain","Lluvia");}
         private void updateWeather(){
             if(temperature==null)return;long now=System.currentTimeMillis();
-            if(snapshot!=null&&snapshot.usable(now)){temperature.setText(snapshot.degrees());city.setText(snapshot.city+(snapshot.fresh(now)?"":" · "+L10n.text("Last update")));String name=AmbientWeather.icon(snapshot.code,snapshot.day);if(!name.equals(symbol)){icon(icon,name);symbol=name;}icon.setVisibility(VISIBLE);}
+            if(snapshot!=null&&snapshot.usable(now)){
+                temperature.setText(snapshot.degrees());
+                city.setText(snapshot.city+(snapshot.fresh(now)?"":" · "+L10n.text("Last update")));
+                String name=AmbientWeather.icon(snapshot.code,snapshot.day);
+                if(!name.isEmpty()&&!name.equals(symbol)){icon(icon,name);symbol=name;}
+                icon.setVisibility(name.isEmpty()?GONE:VISIBLE);
+            }
             else{temperature.setText("—");AmbientWeather.Place place=AmbientWeather.manual(getContext());city.setText(place==null?L10n.text("Choose your city"):(message.startsWith(L10n.text("Loading weather for "))?Ui.tr("Consultando…","Loading…","Consultando…"):L10n.text("Weather unavailable"))+" · "+place.name);icon(icon,"cloud");symbol="";icon.setVisibility(VISIBLE);}
         }
-        void stop(){active=false;if(selectedPrefs!=null)selectedPrefs.unregisterOnSharedPreferenceChangeListener(selectionChanged);selectedPrefs=null;AmbientWeather.prefs(getContext()).unregisterOnSharedPreferenceChangeListener(weatherChanged);VelaShows.prefs(getContext()).unregisterOnSharedPreferenceChangeListener(showsChanged);main.removeCallbacksAndMessages(null);stopWeather();}
+        void stop(){
+            active=false;
+            unbindProfile();
+            VelaWorkspace.registry(getContext()).unregisterOnSharedPreferenceChangeListener(profileChanged);
+            AmbientWeather.prefs(getContext()).unregisterOnSharedPreferenceChangeListener(weatherChanged);
+            main.removeCallbacksAndMessages(null);
+            stopWeather();
+        }
     }
 }

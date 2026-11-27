@@ -65,16 +65,38 @@ final class AmbientWeather {
         double t=current.getDouble("temperature_2m");if(!Double.isFinite(t)||t < -100||t > 100)throw new IOException("Temperatura no válida.");
         return new Snapshot(city,root.optString("timezone",""),t,current.getInt("weather_code"),current.optInt("is_day",1)==1,at);
     }
-    static String condition(int code){
-        if(code==0)return "Despejado";if(code==1)return "Poco nuboso";if(code==2)return "Parcialmente nublado";if(code==3)return "Nublado";
-        if(code==45||code==48)return "Niebla";if(code>=51&&code<=57)return "Llovizna";
-        if(code>=61&&code<=67||code>=80&&code<=82)return "Lluvia";if(code>=71&&code<=77||code==85||code==86)return "Nieve";
-        if(code==95||code==96||code==99)return "Tormenta";return "Tiempo local";
+    private enum Condition {
+        CLEAR("Clear","sunny","clear_night"),
+        MOSTLY_CLEAR("Mostly clear","partly_cloudy_day","partly_cloudy_night"),
+        PARTLY_CLOUDY("Partly cloudy","partly_cloudy_day","partly_cloudy_night"),
+        CLOUDY("Cloudy","cloud"), FOG("Fog","foggy"), DRIZZLE("Drizzle","rainy"),
+        RAIN("Rain","rainy"), SNOW("Snow","snowflake"), STORM("Thunderstorm","thunderstorm"),
+        UNKNOWN("Local weather","");
+
+        final String label,dayIcon,nightIcon;
+        Condition(String label,String icon){this(label,icon,icon);}
+        Condition(String label,String dayIcon,String nightIcon){
+            this.label=label;this.dayIcon=dayIcon;this.nightIcon=nightIcon;
+        }
+        static Condition from(int code){
+            switch(code){
+                case 0:return CLEAR;
+                case 1:return MOSTLY_CLEAR;
+                case 2:return PARTLY_CLOUDY;
+                case 3:return CLOUDY;
+                case 45:case 48:return FOG;
+                case 51:case 53:case 55:case 56:case 57:return DRIZZLE;
+                case 61:case 63:case 65:case 66:case 67:case 80:case 81:case 82:return RAIN;
+                case 71:case 73:case 75:case 77:case 85:case 86:return SNOW;
+                case 95:case 96:case 99:return STORM;
+                default:return UNKNOWN;
+            }
+        }
     }
+    static String condition(int code){return L10n.text(Condition.from(code).label);}
     static String icon(int code,boolean day){
-        if(code==0)return day?"sunny":"clear_night";if(code==1||code==2)return day?"partly_cloudy_day":"partly_cloudy_night";
-        if(code==3)return "cloud";if(code==45||code==48)return "foggy";if(code>=71&&code<=77||code==85||code==86)return "snowflake";
-        if(code==95||code==96||code==99)return "thunderstorm";return "rainy";
+        Condition condition=Condition.from(code);
+        return day?condition.dayIcon:condition.nightIcon;
     }
     static String get(String url)throws Exception{
         HttpURLConnection connection=(HttpURLConnection)new URL(url).openConnection();connection.setConnectTimeout(8000);connection.setReadTimeout(8000);connection.setInstanceFollowRedirects(false);connection.setRequestProperty("User-Agent","Vela/1.2.0");

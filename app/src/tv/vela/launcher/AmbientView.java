@@ -144,8 +144,8 @@ final class AmbientView extends FrameLayout implements SurfaceHolder.Callback {
         if(weatherSnapshot!=null&&weatherSnapshot.usable(now)){
             weatherText.setText(weatherSnapshot.degrees()+" · "+AmbientWeather.condition(weatherSnapshot.code));weatherCity.setText(weatherSnapshot.city+(weatherSnapshot.fresh(now)?"":L10n.text(" · Latest saved data")));
             String icon=AmbientWeather.icon(weatherSnapshot.code,weatherSnapshot.day);
-            if(!icon.equals(weatherSymbol))try(java.io.InputStream in=getContext().getAssets().open("symbols/"+icon+".png")){weatherIcon.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));weatherSymbol=icon;}catch(java.io.IOException ignored){}
-            weatherIcon.setVisibility(VISIBLE);
+            if(!icon.isEmpty()&&!icon.equals(weatherSymbol))try(java.io.InputStream in=getContext().getAssets().open("symbols/"+icon+".png")){weatherIcon.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));weatherSymbol=icon;}catch(java.io.IOException ignored){}
+            weatherIcon.setVisibility(icon.isEmpty()?GONE:VISIBLE);
         }else{weatherIcon.setVisibility(GONE);weatherText.setText(weatherMessage.isEmpty()?L10n.text("Weather unavailable"):weatherMessage);AmbientWeather.Place place=AmbientWeather.manual(getContext());weatherCity.setText(place==null?"":place.name);}
     }
     private void message(String text){status.setText(text);status.setVisibility(VISIBLE);veil.setAlpha(currentPhoto==null?1:0);}
