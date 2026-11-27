@@ -57,7 +57,21 @@ final class M3uClient {
             if(current.startsWith("#EXTINF:")){
                 if(++entries>TvCatalogCache.MAX_CHANNELS)throw new IOException("Channel limit");boolean quoted=false;char quote=0;int comma=-1;
                 for(int i=0;i<current.length();i++){char ch=current.charAt(i);if(ch=='\"'||ch=='\''){if(!quoted){quoted=true;quote=ch;}else if(ch==quote)quoted=false;}if(ch==','&&!quoted){comma=i;break;}}
-                name=limit(comma<0?attribute(current,"tvg-name"):current.substring(comma+1).trim(),160);id=limit(attribute(current,"tvg-id"),256);group=limit(attribute(current,"group-title"),120);logo=limit(attribute(current,"tvg-logo"),4096);if(!LiveTvData.httpUrl(logo))logo="";replay=limit(attribute(current,"catchup-source"),4096);replayMode=attribute(current,"catchup");days=attribute(current,"catchup-days");if(replay.isEmpty())replay=defaultReplay;if(replayMode.isEmpty())replayMode=defaultMode;if(days.isEmpty())days=defaultDays;unsupported=false;headers.clear();
+                String metadata=comma<0?current:current.substring(0,comma);
+                String title=comma<0?"":current.substring(comma+1).trim();
+                name=limit(title.isEmpty()?attribute(metadata,"tvg-name").trim():title,160);
+                id=limit(attribute(metadata,"tvg-id"),256);
+                group=limit(attribute(metadata,"group-title"),120);
+                logo=limit(attribute(metadata,"tvg-logo"),4096);
+                if(!LiveTvData.httpUrl(logo))logo="";
+                replay=limit(attribute(metadata,"catchup-source"),4096);
+                replayMode=attribute(metadata,"catchup");
+                days=attribute(metadata,"catchup-days");
+                if(replay.isEmpty())replay=defaultReplay;
+                if(replayMode.isEmpty())replayMode=defaultMode;
+                if(days.isEmpty())days=defaultDays;
+                unsupported=false;
+                headers.clear();
             }else if(current.startsWith("#EXTGRP:"))group=limit(current.substring(8).trim(),120);
             else if(current.startsWith("#EXTVLCOPT:http-user-agent="))VelaStreamHeaders.put(headers,"User-Agent",current.substring(current.indexOf('=')+1));
             else if(current.startsWith("#EXTVLCOPT:http-referrer=")||current.startsWith("#EXTVLCOPT:http-referer="))VelaStreamHeaders.put(headers,"Referer",current.substring(current.indexOf('=')+1));
