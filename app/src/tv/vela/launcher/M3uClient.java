@@ -96,6 +96,9 @@ final class M3uClient {
         }return epg;
     }
     Map<String,LiveTvData.Guide> guide(List<LiveTvData.Channel> channels)throws Exception{
+        Set<String> wanted=new HashSet<>();
+        for(LiveTvData.Channel channel:channels)if(!channel.epgId.isEmpty())wanted.add(channel.epgId);
+        if(wanted.isEmpty())return Collections.emptyMap();
         String data=cache.metadata(identity(context));if(data.isEmpty())return Collections.emptyMap();
         JSONObject metadata=new JSONObject(data);
         String url=epgUrl();
@@ -104,22 +107,21 @@ final class M3uClient {
             if(!metadata.has("playlistEpg")&&!LiveTvData.prefs(context).getBoolean("m3u-guide-edited",false))url=metadata.optString("epg");
         }
         if(url.isEmpty())return metadata.optBoolean("default")?index(channels,LiveTvData.publicGuide(context,channels)):Collections.emptyMap();valid(url,allowHttp());
-        File file=LiveTvData.cached(context,"m3u-epg-"+LiveTvData.hash(url)+".data");
-        if(!LiveTvData.fresh(file,2*3600_000L)){
-            File part=File.createTempFile("fetch-",".part",file.getParentFile());try{
-                try(XtreamClient.Response response=new XtreamClient.Response(url,8*1024*1024);OutputStream out=new FileOutputStream(part)){LiveTvData.copy(response.in,out,8*1024*1024);}
-                java.nio.file.Files.move(part.toPath(),file.toPath(),java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            }catch(Exception failed){if(!LiveTvData.fresh(file,24*3600_000L))throw failed;}finally{part.delete();}
-        }
-        File[] guides=file.getParentFile().listFiles((dir,name)->name.startsWith("m3u-epg-")&&name.endsWith(".data"));if(guides!=null){Arrays.sort(guides,Comparator.comparingLong(File::lastModified).reversed());for(int i=2;i<guides.length;i++)if(!guides[i].equals(file))guides[i].delete();}
-        Set<String> wanted=new HashSet<>();for(LiveTvData.Channel channel:channels)if(!channel.epgId.isEmpty())wanted.add(channel.epgId);
-        if(wanted.isEmpty())return Collections.emptyMap();
+        final String address=url;
+        Map<String,LiveTvData.Guide> byEpg=TvGuideFileCache.load(TvGuideFileCache.playlist(context,address),file->{
+            try(XtreamClient.Response response=new XtreamClient.Response(address,8*1024*1024);OutputStream out=new FileOutputStream(file)){
+                LiveTvData.copy(response.in,out,8*1024*1024);
+            }
+        },file->readGuide(file,wanted));
+        return index(channels,byEpg);
+    }
+    private static Map<String,LiveTvData.Guide> readGuide(File file,Set<String> wanted)throws Exception{
         try(PushbackInputStream in=new PushbackInputStream(new FileInputStream(file),2)){
             int a=in.read(),b=in.read();if(b>=0)in.unread(b);if(a>=0)in.unread(a);
             try(InputStream decoded=a==31&&b==139?new GZIPInputStream(in):in){
                 XmlPullParser parser=Xml.newPullParser();
                 parser.setInput(new LimitedInput(decoded,32*1024*1024),null);
-                return index(channels,xmlGuide(parser,wanted,System.currentTimeMillis()/1000));
+                return xmlGuide(parser,wanted,System.currentTimeMillis()/1000);
             }
         }
     }
@@ -133,7 +135,7 @@ final class M3uClient {
         Map<String,LiveTvData.Guide> result=new HashMap<>();
         String id="",title="",description="",image="";
         long start=0,end=0;
-        boolean keep=false,inTitle=false,inDescription=false;
+        boolean keep=false,inTitle=false,inDescription=false,hasProgramme=false,complete=false;
         int events=0;
         for(int event=parser.nextToken();event!=XmlPullParser.END_DOCUMENT;event=parser.nextToken()){
             if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();
@@ -144,7 +146,7 @@ final class M3uClient {
                 if(depth==1&&!tag.equals("tv"))throw new IOException("Unsupported XMLTV root");
                 if(depth==2&&tag.equals("programme")){
                     id=parser.getAttributeValue(null,"channel");
-                    keep=wanted.contains(id);
+                    keep=id!=null&&!id.isEmpty()&&(!hasProgramme||wanted.contains(id));
                     if(keep){
                         start=timestamp(parser.getAttributeValue(null,"start"));
                         end=timestamp(parser.getAttributeValue(null,"stop"));
@@ -167,12 +169,16 @@ final class M3uClient {
                 if(depth==3&&tag.equals("title")&&inTitle){title=XmlTvTitle.plain(title);inTitle=false;}
                 else if(depth==3&&tag.equals("desc")&&inDescription){description=description.trim();inDescription=false;}
                 else if(depth==2&&tag.equals("programme")){
-                    if(keep&&!title.isEmpty())result.computeIfAbsent(id,key->new LiveTvData.Guide())
-                            .add(new LiveTvData.Programme(start,end,title,description,image),now);
+                    if(keep&&!title.isEmpty()){
+                        hasProgramme=true;
+                        if(wanted.contains(id))result.computeIfAbsent(id,key->new LiveTvData.Guide())
+                                .add(new LiveTvData.Programme(start,end,title,description,image),now);
+                    }
                     keep=inTitle=inDescription=false;
-                }
+                }else if(depth==1&&tag.equals("tv"))complete=true;
             }
         }
+        if(!complete||!hasProgramme)throw new IOException("Invalid XMLTV schedule");
         return result;
     }
     static long timestamp(String value){return XmlTvTime.parse(value);}
