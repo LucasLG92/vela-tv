@@ -2,14 +2,51 @@
 
 No Gradle daemon, library services or native codecs are included. R8 removes unused code.
 """
+from datetime import timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 import hashlib
 import json
+import time
+import urllib.error
 import urllib.request
 import zipfile
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def retry_delay(header, fallback):
+    if header:
+        try:
+            seconds = int(header)
+            return seconds if seconds >= 0 else fallback
+        except ValueError:
+            pass
+        try:
+            deadline = parsedate_to_datetime(header)
+            if deadline.tzinfo is None:
+                deadline = deadline.replace(tzinfo=timezone.utc)
+            return max(0, deadline.timestamp() - time.time())
+        except (ValueError, TypeError, OverflowError, OSError):
+            pass
+    return fallback
+
+
+def download(url):
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as response:
+                return response.read(32 * 1024 * 1024 + 1)
+        except urllib.error.HTTPError as error:
+            with error:
+                if error.code not in (429, 503) or attempt == 3:
+                    raise
+                delay = retry_delay(error.headers.get('Retry-After'), 3 * 2**attempt)
+                if delay > 60:
+                    raise  # Leave long server cooldowns to a later build.
+                print(f'Dependency server returned HTTP {error.code}. Retrying in {delay:.0f}s.', flush=True)
+            time.sleep(delay)
 
 
 def main():
@@ -28,8 +65,7 @@ def main():
         filename = name + '_' + artifact['url'].rsplit('/', 1)[1]
         path = cache / filename
         if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != artifact['sha256']:
-            with urllib.request.urlopen(artifact['url'], timeout=60) as response:
-                content = response.read(32 * 1024 * 1024 + 1)
+            content = download(artifact['url'])
             if len(content) > 32 * 1024 * 1024 or hashlib.sha256(content).hexdigest() != artifact['sha256']:
                 raise RuntimeError('Dependency checksum mismatch: ' + artifact['artifact'])
             path.write_bytes(content)
