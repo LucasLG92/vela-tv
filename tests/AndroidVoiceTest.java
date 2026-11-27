@@ -25,6 +25,11 @@ public final class AndroidVoiceTest extends Instrumentation {
         return (LiveTvData.Channel)(lite?ctor.newInstance(Long.parseLong(id),"owned-fixture","1",name,false,true,false):ctor.newInstance(id,name,"Demo","",Collections.singletonList("http://127.0.0.1:9/never-play.ts")));
     }
     void grammar()throws Exception{
+        parse("Busca el canal Deportes","Deportes",VelaVoice.CHANNEL,false);
+        parse("Busca la aplicación HDMI Control","HDMI Control",VelaVoice.APP,false);
+        parse("Cambia a la entrada 2","HDMI 2",VelaVoice.INPUT,true);
+        VelaVoice.Request library=VelaVoice.parse("Busca deportes en Jellyfin");
+        check(library.target==VelaVoice.MEDIA&&library.query.equals("deportes")&&library.provider.equals("jellyfin"),"An explicit library was replaced by guide discovery");
         parse("Por favor, pon el canal La Uno.","La 1",VelaVoice.CHANNEL,true);parse("Abre la aplicación YouTube, por favor","YouTube",VelaVoice.APP,true);parse("Cambia a HDMI dos","HDMI 2",VelaVoice.INPUT,true);parse("Busca la película Dune","Dune",VelaVoice.MEDIA,false);
         parse("open the app Plex","Plex",VelaVoice.APP,true);parse("ouvre la chaîne La Uno","La 1",VelaVoice.CHANNEL,true);parse("öffne die App Plex","Plex",VelaVoice.APP,true);parse("apri il canale La Uno","La 1",VelaVoice.CHANNEL,true);parse("abrir o canal La Uno","La 1",VelaVoice.CHANNEL,true);
         parse("Búscame la película \"Alien\" en Plex","Alien",VelaVoice.MEDIA,false);check(VelaVoice.parse("busca Alien en Jellyfin").provider.equals("jellyfin"),"Provider name polluted title");
@@ -100,6 +105,11 @@ public final class AndroidVoiceTest extends Instrumentation {
         ui(fixture::close);values=Collections.singletonList(app);createFixture();submit("busca YouTube");await(()->field(fixture,"searchView")!=null&&((List<?>)field(field(fixture,"searchView"),"tiles")).size()>0);check(activated.get()==0&&calls.get()==1,"Search command opened an app instead of showing results");
         Bitmap b=getUiAutomation().takeScreenshot();if(b!=null){try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),"voice-results.png"))){b.compress(Bitmap.CompressFormat.PNG,100,out);}b.recycle();}ui(fixture::close);
         values=Collections.emptyList();createFixture();submit("busca documentales esta noche");await(()->discoveries.get()==1);check(calls.get()==0&&mode==1&&genre==3&&fixture.page()==8,"Discovery wasted a text lookup or lost Tonight");ui(fixture::close);
+        values=Collections.singletonList(new VelaHub.Hit("Channel","Deportes","Demo",channel("43","Deportes")));
+        createFixture();submit("Busca el canal Deportes");
+        await(()->calls.get()==1&&((List<?>)field(field(fixture,"searchView"),"tiles")).size()==1);
+        check(fixture.page()==0&&discoveries.get()==0&&searched.equals("Deportes"),"An explicitly requested channel opened the programme guide");
+        ui(fixture::close);
         TvInputs.Entry off=new TvInputs.Entry("demo","owned-fixture","HDMI 2","HDMI 2","hdmi",TvInputs.DISCONNECTED,false);check(!VelaVoice.exact(VelaVoice.parse("abre HDMI dos"),new VelaHub.Hit("HDMI","HDMI 2","",off)),"Disconnected HDMI auto-opened");
     }
     public void onCreate(Bundle b){super.onCreate(b);arguments=b;start();}
