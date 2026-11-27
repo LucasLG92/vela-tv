@@ -26,6 +26,11 @@ jobs:
         run: |
           python3 tools/audit_publication.py
           python3 tools/check_localization.py
+      - name: Cache checksum-pinned build and test dependencies
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .build-deps
+          key: pinned-${{ hashFiles('tools/media3-deps.json', 'tests/host_deps.py') }}
       - name: Build neutral APK with an ephemeral local signing key
         run: bash build.sh
       - name: Check dependency downloads, recovery, Plex and releases

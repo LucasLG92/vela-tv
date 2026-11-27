@@ -28,6 +28,15 @@ class DependencyDownloadTest(unittest.TestCase):
             self.assertEqual(fetch.call_count, 2)
             sleep.assert_called_once_with(7)
 
+    def test_central_throttling_uses_the_same_artifact_on_the_mirror(self):
+        url = 'https://repo.maven.apache.org/maven2/org/json/json/20240303/json-20240303.jar'
+        with patch.object(prepare_media3.urllib.request, 'urlopen', side_effect=[
+            self.failure(429, '600'), io.BytesIO(b'artifact')
+        ]) as fetch:
+            self.assertEqual(prepare_media3.download(url), b'artifact')
+            self.assertEqual(fetch.call_args_list[1].args[0],
+                             'https://maven-central.storage-download.googleapis.com/maven2/org/json/json/20240303/json-20240303.jar')
+
     def test_http_date_and_invalid_header(self):
         with patch.object(prepare_media3.time, 'time', return_value=0):
             self.assertEqual(prepare_media3.retry_delay('Thu, 01 Jan 1970 00:00:12 GMT', 3), 12)
