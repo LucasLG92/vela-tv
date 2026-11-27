@@ -11,6 +11,9 @@ import java.util.*;
 final class VelaWorkspace {
     static final int MAX_BYTES=512*1024,MAX_PROFILES=6;
     private static final int MAX_SECTIONS=96;
+    private static final List<String> SHARED_SECTIONS=Arrays.asList(
+            "vela-search","vela-widgets","vela-reading","input_cards","vela-remote","vela-layout");
+    static boolean sharedSection(String section){return SHARED_SECTIONS.contains(section);}
     private static final List<String> SETTINGS_SECTIONS=Arrays.asList(
             "visuals","sidebar_apps","input_cards","lite_home","lite_tv","vela-reading","vela-programmes",
             "vela-remote","live-tv","vela-layout","vela-epg-fixes","vela-widgets","vela-search","vela-playback");
@@ -173,7 +176,7 @@ final class VelaWorkspace {
         try{
             validateSnapshot(j);JSONObject current=snapshot(c);
             JSONObject old=current.getJSONObject("settings"),data=VelaAntennaBackup.prepare(c,j,old);boolean same=j.getString("edition").equals(VelaEdition.lite(c)?"lite":"full");Set<String> names=new TreeSet<>();for(Iterator<String> it=old.keys();it.hasNext();)names.add(it.next());for(Iterator<String> it=data.keys();it.hasNext();)names.add(it.next());
-            for(String n:names){if(!same&&!n.equals("vela-search")&&!n.equals("vela-widgets")&&!n.equals("vela-reading")&&!n.equals("input_cards")&&!n.equals("vela-remote")&&!n.equals("vela-layout"))continue;SharedPreferences p=prefs(c,n);destinations.put(n,p);previous.put(n,new HashMap<>(p.getAll()));}
+            for(String n:names){if(!same&&!sharedSection(n))continue;SharedPreferences p=prefs(c,n);destinations.put(n,p);previous.put(n,new HashMap<>(p.getAll()));}
             if(save)saveUndo(c,current);
             for(Map.Entry<String,SharedPreferences> entry:destinations.entrySet()){
                 if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();String n=entry.getKey();SharedPreferences.Editor edit=entry.getValue().edit();for(String k:previous.get(n).keySet())if(allowed(n,k))edit.remove(k);JSONObject values=data.optJSONObject(n);if(values!=null)for(Iterator<String> keys=values.keys();keys.hasNext();){String k=keys.next();put(edit,k,validate(n,k,values.get(k)));}if(!edit.commit())throw new IOException("Write failed");
