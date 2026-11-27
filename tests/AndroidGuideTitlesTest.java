@@ -23,6 +23,35 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
     private static void equal(String expected,String actual){
         if(!expected.equals(actual))throw new AssertionError("Expected ["+expected+"] but got ["+actual+"]");
     }
+    private static void checkTimeFormats(Context c, XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
+        long start=now-now%60-60, end=start+600;
+        DateTimeFormatter minutes=DateTimeFormatter.ofPattern("yyyyMMddHHmm",Locale.ROOT);
+        String begin=minutes.withZone(ZoneOffset.ofHoursMinutes(5,30)).format(Instant.ofEpochSecond(start))+" +0530";
+        String stop=minutes.withZone(ZoneOffset.UTC).format(Instant.ofEpochSecond(end));
+        String british=minutes.withZone(ZoneOffset.ofHours(1)).format(Instant.ofEpochSecond(end))+" BST";
+        String finish=minutes.withZone(ZoneOffset.UTC).format(Instant.ofEpochSecond(end+600))+" UTC";
+        String xml="<tv><channel id='clock'><display-name>Clock TV</display-name></channel>"
+                +"<programme channel='clock' start='"+begin+"' stop='"+stop+"'><title>Now</title></programme>"
+                +"<programme channel='clock' start='"+british+"' stop='"+finish+"'><title>Next</title></programme>"
+                +programme("clock",end+600,end+1200,"<title>Later</title>")+"</tv>";
+        LiveTvData.Channel station=new LiveTvData.Channel(77,"test","77","Clock TV",false,true,false);
+        List<LiveTvData.Channel> stations=Collections.singletonList(station);
+        byte[] bytes=xml.getBytes(StandardCharsets.UTF_8);
+        full.importGuide(new ByteArrayInputStream(bytes),LiveTvData.hash(full.url()),now);
+        lite.importGuide(new ByteArrayInputStream(bytes),stations,now,new CancellationSignal());
+        List<LiveTvData.Programme> fullRows=full.window(stations,now).get(station.id);
+        List<LiveTvData.Programme> liteRows=lite.read(stations,now,end+1200,new CancellationSignal()).get(station.id);
+        LiveTvData.Guide streamed=M3uClient.xmlGuide(new StringReader(xml),Collections.singleton("clock"),now).get("clock");
+        for(List<LiveTvData.Programme> rows:Arrays.asList(fullRows,liteRows,Arrays.asList(streamed.now,streamed.next))){
+            if(rows==null||rows.size()<2||rows.get(0)==null||rows.get(1)==null
+                    ||!rows.get(0).title.equals("Now")||rows.get(0).start!=start||rows.get(0).end!=end
+                    ||!rows.get(1).title.equals("Next")||rows.get(1).start!=end||rows.get(1).end!=end+600)
+                throw new AssertionError("Full, Lite and playlist guides must agree on minute-precision times and explicit zones");
+        }
+        for(String invalid:Arrays.asList("202602300900 +0100","202601010900 +1260","202601010900 BAD","202601010900 +0A00"))
+            if(M3uClient.timestamp(invalid)!=0||LiteXmlTvGuide.timestamp(invalid)!=0)
+                throw new AssertionError("Accepted an invalid programme time: "+invalid);
+    }
     private static void checkSearch(Context c, XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
         String label = "Demo HD";
         List<LiveTvData.Channel> tuned = Collections.singletonList(new LiveTvData.Channel(21,"test","21",label,false,true,false));
@@ -184,6 +213,7 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             if(!requests.equals(Arrays.asList(XmlTvGuide.DEFAULT_URL,plain+".gz")))throw new AssertionError("Missing cold-cache schedule fallback");
             equal(plain+".gz",full.url());
             checkSearch(c,full,lite,now);
+            checkTimeFormats(c,full,lite,now);
             result.putString("result","PASS antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
         }catch(Exception|AssertionError failure){result.putString("error",android.util.Log.getStackTraceString(failure));}
         finally{

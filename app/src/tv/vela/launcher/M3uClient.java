@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.*;
 import java.util.zip.GZIPInputStream;
@@ -122,8 +121,6 @@ final class M3uClient {
             else if(event==XmlPullParser.END_TAG&&p.getName().equals("programme")){if(keep){LiveTvData.Guide entry=result.get(id);if(entry==null){entry=new LiveTvData.Guide();result.put(id,entry);}entry.add(new LiveTvData.Programme(start,end,title,"",image),now);}keep=false;inTitle=false;}
         }return result;
     }
-    /** XMLTV's numeric timestamp and explicit offset, without a formatter/regex per programme. */
-    static long timestamp(String value){try{if(value==null||value.length()>40)return 0;String text=value.trim();int n=0;while(n<text.length()&&text.charAt(n)>='0'&&text.charAt(n)<='9')n++;if(n<12||n>14)return 0;int year=number(text,0,4),month=number(text,4,2),day=number(text,6,2),hour=number(text,8,2),minute=number(text,10,2),second=n>12?(text.charAt(12)-'0')*10+(n==14?text.charAt(13)-'0':0):0;int at=n;while(at<text.length()&&Character.isWhitespace(text.charAt(at)))at++;int offset=0;if(at<text.length()){String zone=text.substring(at);if(!zone.equals("Z")){if(zone.length()!=5||zone.charAt(0)!='+'&&zone.charAt(0)!='-')return 0;int zh=number(zone,1,2),zm=number(zone,3,2);if(zm>59)return 0;offset=(zh*60+zm)*60*(zone.charAt(0)=='-'?-1:1);}}return java.time.LocalDateTime.of(year,month,day,hour,minute,second).toEpochSecond(java.time.ZoneOffset.ofTotalSeconds(offset));}catch(Exception invalid){return 0;}}
-    private static int number(String value,int at,int count){int out=0;for(int i=at;i<at+count;i++){int digit=value.charAt(i)-'0';if(digit<0||digit>9)throw new IllegalArgumentException();out=out*10+digit;}return out;}
+    static long timestamp(String value){return XmlTvTime.parse(value);}
     static final class LimitedInput extends FilterInputStream {int remaining;LimitedInput(InputStream in,int limit){super(in);remaining=limit;}private void count(int n)throws IOException{if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(n>0&&(remaining-=n)<0)throw new IOException("Guide limit");}public int read()throws IOException{int n=super.read();count(n<0?0:1);return n;}public int read(byte[] b,int o,int l)throws IOException{int n=in.read(b,o,l);count(n);return n;}}
 }

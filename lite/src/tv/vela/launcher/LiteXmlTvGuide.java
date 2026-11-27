@@ -8,7 +8,6 @@ import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import java.io.*;
 import java.net.*;
-import java.text.*;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPInputStream;
@@ -75,8 +74,7 @@ final class LiteXmlTvGuide {
         }catch(Exception failed){if(signal.isCanceled()||Thread.currentThread().isInterrupted()||failed instanceof InterruptedIOException)prefs.edit().remove("attempt").apply();throw failed;}
         finally{signal.setOnCancelListener(null);if(connection!=null)connection.disconnect();IMPORT.unlock();}
     }
-    private static final ThreadLocal<SimpleDateFormat> DATES=ThreadLocal.withInitial(()->{SimpleDateFormat d=new SimpleDateFormat("yyyyMMddHHmmss Z",Locale.ROOT);d.setLenient(false);return d;});
-    static long timestamp(String value){if(value==null)return 0;String date=value.trim();if(!date.matches("[0-9]{14}( [+-][0-9]{4})?"))return 0;try{SimpleDateFormat format=DATES.get();return format.parse(date.length()==14?date+" +0000":date).getTime()/1000;}catch(ParseException bad){return 0;}}
+    static long timestamp(String value){return XmlTvTime.parse(value);}
     void importGuide(InputStream raw,List<LiveTvData.Channel> channels,long now,CancellationSignal signal)throws Exception {
         Set<String> wanted=wanted(channels),ids=new HashSet<>();XmlPullParser xml=Xml.newPullParser();xml.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES,false);xml.setInput(new Limited(raw,MAX_XML,signal),null);
         try(SQLiteDatabase db=open();SQLiteStatement alias=db.compileStatement("INSERT OR IGNORE INTO aliases(name,channel) VALUES (?,?)");SQLiteStatement programme=db.compileStatement("INSERT INTO programmes(channel,start,end,title,description,category,event_id,image) VALUES (?,?,?,?,?,?,?,?)")){
