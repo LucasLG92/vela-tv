@@ -264,8 +264,11 @@ public class LiveTvActivity extends Activity {
     }
     private void toggleFavorite(LiveTvData.Channel ch){
         if(catalog==null||loading)return;boolean added=!TvChannelNames.favorite(ch,favorites);if(added&&favorites.size()>=128){Toast.makeText(this,t("Máximo 128 favoritos.","Maximum 128 favorites.","Máximo 128 favoritos."),Toast.LENGTH_SHORT).show();return;}
-        if(mode.equals("xtream"))try{xtream.toggleFavorite(ch);favorites=xtream.favoriteIds();}catch(Exception failed){Toast.makeText(this,t("Não foi possível guardar.","Could not save favorite.","No se ha podido guardar el favorito."),Toast.LENGTH_SHORT).show();return;}
-        else{if(TvChannelNames.favorite(ch,favorites)){for(LiveTvData.Channel v:TvChannelNames.variants(ch))if(favorites.contains(v.id))LiveTvData.toggle(this,catalog.source,v.id);}else LiveTvData.toggle(this,catalog.source,ch.id);favorites=LiveTvData.favorites(this,catalog.source);}
+        try{
+            if(mode.equals("xtream")){xtream.toggleFavorite(ch);favorites=xtream.favoriteIds();}
+            else favorites=LiveTvData.toggleFavorite(this,catalog.source,ch);
+        }catch(Exception failed){Toast.makeText(this,t("Não foi possível guardar.","Could not save favorite.","No se ha podido guardar el favorito."),Toast.LENGTH_SHORT).show();return;}
+        added=TvChannelNames.favorite(ch,favorites);
         if(playback!=null){playback.favorites(favorites);updateSelection();}else if(timelineMode){Set<String> stars=new HashSet<>();for(LiveTvData.Channel item:pageChannels)if(TvChannelNames.favorite(item,favorites))stars.add(item.id);timeline.favorites(stars);}else renderPage(page,true);Toast.makeText(this,added?t("Adicionado aos favoritos","Added to favorites","Añadido a favoritos"):t("Removido dos favoritos","Removed from favorites","Quitado de favoritos"),Toast.LENGTH_SHORT).show();
     }
     void play(LiveTvData.Channel ch){
