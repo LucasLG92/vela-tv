@@ -5,6 +5,7 @@ No Gradle daemon, library services or native codecs are included. R8 removes unu
 from datetime import timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
+from tempfile import TemporaryDirectory
 import hashlib
 import json
 import time
@@ -33,7 +34,7 @@ def retry_delay(header, fallback):
     return fallback
 
 
-def download(url):
+def download_from(url):
     for attempt in range(4):
         try:
             with urllib.request.urlopen(url, timeout=60) as response:
@@ -47,6 +48,31 @@ def download(url):
                     raise  # Leave long server cooldowns to a later build.
                 print(f'Dependency server returned HTTP {error.code}. Retrying in {delay:.0f}s.', flush=True)
             time.sleep(delay)
+
+
+def download(url):
+    central = 'https://repo.maven.apache.org/maven2/'
+    try:
+        return download_from(url)
+    except urllib.error.HTTPError as error:
+        if error.code not in (429, 503) or not url.startswith(central):
+            raise
+    mirror = 'https://maven-central.storage-download.googleapis.com/maven2/'
+    return download_from(mirror + url[len(central):])
+
+
+def pinned_artifact(path, url, digest):
+    if path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == digest:
+        return path
+    content = download(url)
+    if len(content) > 32 * 1024 * 1024 or hashlib.sha256(content).hexdigest() != digest:
+        raise RuntimeError('Dependency checksum mismatch: ' + path.name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(dir=path.parent) as temp:
+        pending = Path(temp) / path.name
+        pending.write_bytes(content)
+        pending.replace(path)
+    return path
 
 
 def main():
@@ -63,12 +89,7 @@ def main():
     for artifact in json.loads((ROOT / 'tools' / 'media3-deps.json').read_text(encoding='utf-8'))['artifacts']:
         name = '_'.join([artifact['group'].replace('.', '_'), artifact['artifact'], artifact['version']])
         filename = name + '_' + artifact['url'].rsplit('/', 1)[1]
-        path = cache / filename
-        if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != artifact['sha256']:
-            content = download(artifact['url'])
-            if len(content) > 32 * 1024 * 1024 or hashlib.sha256(content).hexdigest() != artifact['sha256']:
-                raise RuntimeError('Dependency checksum mismatch: ' + artifact['artifact'])
-            path.write_bytes(content)
+        path = pinned_artifact(cache / filename, artifact['url'], artifact['sha256'])
         output = target / 'libs' / (name + '.jar')
         if artifact['type'] == 'jar':
             output.write_bytes(path.read_bytes())

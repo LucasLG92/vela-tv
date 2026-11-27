@@ -1,13 +1,12 @@
 """Validate Plex's JSON metadata mapping without contacting an account or server."""
 from pathlib import Path
+from host_deps import json_jar
 from android_sdk import compile_jar
-import os, subprocess, hashlib, urllib.request
+import os, subprocess
 root=Path(__file__).resolve().parents[1]
 output=root/'out/plex-tests'
 output.mkdir(parents=True,exist_ok=True)
-library=output/'json.jar'
-if not library.exists(): urllib.request.urlretrieve('https://repo.maven.apache.org/maven2/org/json/json/20240303/json-20240303.jar',library)
-assert hashlib.sha256(library.read_bytes()).hexdigest()=='3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed'
+library = json_jar()
 jdk=Path(os.environ['JAVA_HOME'])/'bin'
 sdk=Path(os.environ.get('ANDROID_HOME',os.environ.get('ANDROID_SDK_ROOT','')))
 android=compile_jar(sdk)
