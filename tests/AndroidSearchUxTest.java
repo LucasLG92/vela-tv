@@ -24,7 +24,16 @@ public final class AndroidSearchUxTest extends Instrumentation {
     void check(boolean b,String s){if(!b)throw new AssertionError(s);}
     void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
     Object field(Object o,String name)throws Exception{for(Class<?> c=o.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException ignored){}throw new NoSuchFieldException(name);}
-    void await(Ready r)throws Exception{long until=SystemClock.elapsedRealtime()+18000;while(SystemClock.elapsedRealtime()<until){waitForIdleSync();if(r.get())return;Thread.sleep(50);}throw new AssertionError("Timeout "+phase);}
+    void await(Ready condition)throws Exception{
+        long until=SystemClock.elapsedRealtime()+18000;
+        while(SystemClock.elapsedRealtime()<until){
+            FutureTask<Boolean> sample=new FutureTask<>(condition::get);
+            runOnMainSync(sample);
+            if(sample.get())return;
+            Thread.sleep(50);
+        }
+        throw new AssertionError("Timeout "+phase);
+    }
     VelaSearchView view()throws Exception{return (VelaSearchView)field(hub,"searchView");}
     java.util.List<View> tiles()throws Exception{return (java.util.List<View>)field(view(),"tiles");}
     void shot(String name)throws Exception{Thread.sleep(450);Bitmap b=getUiAutomation().takeScreenshot();try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),"voice-search-api"+Build.VERSION.SDK_INT+"-"+name+".png"))){b.compress(Bitmap.CompressFormat.PNG,100,out);}finally{b.recycle();}}
@@ -79,22 +88,34 @@ public final class AndroidSearchUxTest extends Instrumentation {
         final android.speech.RecognitionListener[] callback={null};final AtomicInteger destroyed=new AtomicInteger();
         VelaVoiceSearch voice=new VelaVoiceSearch(activity,new VelaVoiceSearch.Host(){public void phrase(String s){}public void keyboard(){}},a->new VelaVoiceSearch.Engine(){public void start(Intent i,android.speech.RecognitionListener listener){callback[0]=listener;}public void stop(){}public void cancel(){}public void destroy(){destroyed.incrementAndGet();}});
         try{
-            ui(voice::start);ui(()->callback[0].onReadyForSpeech(new Bundle()));await(()->!(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));
+            runOnMainSync(voice::start);runOnMainSync(()->callback[0].onReadyForSpeech(new Bundle()));await(()->!(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));
             for(boolean reduced:new boolean[]{false,true}){
-                if(reduced){ui(voice::cancel);ui(()->Visuals.prefs(context).edit().putBoolean("reducedMotion",true).commit());ui(voice::start);ui(()->callback[0].onReadyForSpeech(new Bundle()));}
+                if(reduced){runOnMainSync(voice::cancel);runOnMainSync(()->Visuals.prefs(context).edit().putBoolean("reducedMotion",true).commit());runOnMainSync(voice::start);runOnMainSync(()->callback[0].onReadyForSpeech(new Bundle()));}
                 for(int hidden:new int[]{View.GONE,View.INVISIBLE}){
                     phase="voice hidden="+hidden+" reduced="+reduced;
-                    ui(()->rail.setVisibility(hidden));await(()->(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));
-                    View signal=(View)field(field(voice,"panel"),"signal");check(signal.getHeight()<=120&&signal.getWidth()<=160,"Invisible navigation left a full-height voice border");
-                    if(!reduced&&hidden==View.GONE)shot("06-voice-without-sidebar");ui(()->rail.setVisibility(View.VISIBLE));await(()->!(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));
+                    runOnMainSync(()->rail.setVisibility(hidden));
+                    View signal=(View)field(field(voice,"panel"),"signal");
+                    // The pre-draw callback requests the compact size for the next layout pass.
+                    await(()->(Boolean)field(signal,"compact")&&signal.getHeight()>0&&signal.getHeight()<=120
+                            &&signal.getWidth()>0&&signal.getWidth()<=160);
+                    if(!reduced&&hidden==View.GONE)shot("06-voice-without-sidebar");runOnMainSync(()->rail.setVisibility(View.VISIBLE));await(()->!(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));
                 }
-                phase="voice transparent reduced="+reduced;ui(()->{rail.setAlpha(0);rail.invalidate();});await(()->(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));ui(()->rail.setAlpha(alpha));
-                phase="voice modal reduced="+reduced;ui(()->{((ViewGroup)rail).setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);rail.invalidate();});await(()->(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));ui(()->((ViewGroup)rail).setDescendantFocusability(focusability));
-                ui(()->{ViewGroup.LayoutParams p=rail.getLayoutParams();p.width=276;rail.setLayoutParams(p);});await(()->!(Boolean)field(field(field(voice,"panel"),"signal"),"compact")&&((View)field(field(voice,"panel"),"signal")).getWidth()>=300);
-                ui(()->{ViewGroup.LayoutParams p=rail.getLayoutParams();p.width=width;rail.setLayoutParams(p);});
+                phase="voice transparent reduced="+reduced;runOnMainSync(()->{rail.setAlpha(0);rail.invalidate();});await(()->(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));runOnMainSync(()->rail.setAlpha(alpha));
+                phase="voice modal reduced="+reduced;runOnMainSync(()->{((ViewGroup)rail).setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);rail.invalidate();});await(()->(Boolean)field(field(field(voice,"panel"),"signal"),"compact"));runOnMainSync(()->((ViewGroup)rail).setDescendantFocusability(focusability));
+                phase="voice expanded navigation reduced="+reduced;
+                VelaNavigation.Capsule capsule=(VelaNavigation.Capsule)rail;
+                runOnMainSync(()->capsule.expand(true));
+                await(()->{
+                    View signal=(View)field(field(voice,"panel"),"signal");
+                    Rect nav=new Rect(),border=new Rect();
+                    return !(Boolean)field(signal,"compact")&&rail.getWidth()==VelaNavigation.DRAWER
+                            &&rail.getGlobalVisibleRect(nav)&&signal.getGlobalVisibleRect(border)
+                            &&border.left<=nav.left&&border.right>=nav.right;
+                });
+                runOnMainSync(()->capsule.expand(width==VelaNavigation.DRAWER));
             }
-            Object lastPanel=field(voice,"panel"),lastSignal=field(lastPanel,"signal");ui(voice::cancel);check(!voice.active()&&destroyed.get()==2,"Voice surface change retained a recogniser");check(field(lastPanel,"observer")==null&&field(lastSignal,"pulse")==null,"Closing voice retained a window observer or animation");
-        }finally{ui(()->{voice.cancel();Visuals.prefs(context).edit().putBoolean("reducedMotion",false).commit();rail.setVisibility(visibility);rail.setAlpha(alpha);((ViewGroup)rail).setDescendantFocusability(focusability);ViewGroup.LayoutParams p=rail.getLayoutParams();p.width=width;rail.setLayoutParams(p);});}
+            Object lastPanel=field(voice,"panel"),lastSignal=field(lastPanel,"signal");runOnMainSync(voice::cancel);check(!voice.active()&&destroyed.get()==2,"Voice surface change retained a recogniser");check(field(lastPanel,"observer")==null&&field(lastSignal,"pulse")==null,"Closing voice retained a window observer or animation");
+        }finally{runOnMainSync(()->{voice.cancel();Visuals.prefs(context).edit().putBoolean("reducedMotion",false).commit();rail.setVisibility(visibility);rail.setAlpha(alpha);((ViewGroup)rail).setDescendantFocusability(focusability);ViewGroup.LayoutParams p=rail.getLayoutParams();p.width=width;rail.setLayoutParams(p);});}
     }
     void sources()throws Exception{
         VelaToolsData isolated=new VelaToolsData(activity){
