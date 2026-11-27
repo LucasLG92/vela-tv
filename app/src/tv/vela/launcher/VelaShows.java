@@ -52,7 +52,8 @@ final class VelaShows {
             refreshed.add(namedSlot(p,""));
         }
         merged.removeIf(p->p.channelKey.isEmpty()&&refreshed.contains(namedSlot(p,p.source)));
-        merged.addAll(airings);
+        // replace keeps the first entry in each slot. Prefer corrections to its name or end time.
+        merged.addAll(0,airings);
         replace(c,merged);
     }
     static synchronized void replace(Context c,List<Airing> airings){
