@@ -63,7 +63,14 @@ final class LibraryClient {
     List<LibraryCollection> pinnedCollections(){List<LibraryCollection> out=new ArrayList<>();for(LibraryCollection p:LibraryCollection.pinned(context))if(validCollection(p))out.add(p);return out;}
     List<SectionSource> collectionSources()throws Exception{List<SectionSource> out=new ArrayList<>();if(plex.connected())try{for(PlexClient.Section section:plex.sections())if(out.size()<64)out.add(new SectionSource("plex:"+section.key,"Plex · "+section.title));}catch(Exception unavailable){if(Thread.currentThread().isInterrupted()||!jellyfin.connected())throw unavailable;}if(jellyfin.connected())out.add(new SectionSource("jellyfin:root","Jellyfin"));return out;}
     static final class SectionSource {final String key,title;SectionSource(String key,String title){this.key=key;this.title=title;}}
-    List<LibraryCollection> collections(String source,int page)throws Exception{if(page<0||page>100000)throw new IOException("Invalid page");if(source.equals("jellyfin:root")&&jellyfin.connected())return jellyfin.collections(page*12);if(!source.matches("plex:[0-9]{1,20}")||!plex.connected())throw new IOException("Invalid collection source");String section=source.substring(5);for(PlexClient.Section s:plex.sections())if(s.key.equals(section))return plex.collections(s,page*12);throw new IOException("Collection source unavailable");}
+    LibraryCollection.Page collectionPage(String source,int offset)throws Exception{
+        if(offset<0||offset>1_200_000)throw new IOException("Invalid collection offset");
+        if(source.equals("jellyfin:root")&&jellyfin.connected())return jellyfin.collectionPage(offset);
+        if(!source.matches("plex:[0-9]{1,20}")||!plex.connected())throw new IOException("Invalid collection source");
+        String section=source.substring(5);
+        for(PlexClient.Section s:plex.sections())if(s.key.equals(section))return plex.collectionPage(s,offset);
+        throw new IOException("Collection source unavailable");
+    }
     void toggleCollection(LibraryCollection item)throws Exception{if(!collectionAccountValid(item))throw new IOException("Library account changed");List<LibraryCollection> before=LibraryCollection.pinned(context),valid=new ArrayList<>();for(LibraryCollection p:before)if(collectionAccountValid(p))valid.add(p);if(before.size()!=valid.size()){JSONArray saved=new JSONArray();for(LibraryCollection p:valid)saved.put(p.json());VelaAccountScope.prefs(context,"vela-collections").edit().putString("pins",saved.toString()).commit();}LibraryCollection.toggle(context,item);}
     List<PlexClient.Film> collectionHome(LibraryCollection item)throws Exception{if(!validCollection(item))return Collections.emptyList();PlexClient.LibraryPage p=item.provider.equals("Jellyfin")?jellyfin.collectionItems(item.key,0,8,"Movie,Series"):plex.collectionItems(item.key,0,8);return decorate(p.films);}
     List<PlexClient.Film> homeRow(String row)throws Exception{

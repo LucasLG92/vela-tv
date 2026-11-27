@@ -87,7 +87,23 @@ final class JellyfinClient {
     CatalogFilters.Choices choices(PlexClient.Section section,CatalogFilters.Facet facet,int offset,String search)throws Exception{
         if(!facet.fixed.isEmpty()||facet.path.isEmpty())return CatalogFilters.slice(facet.fixed,offset,search);Session scope=stored();String parent=section.key.split("\\.")[0];if(id(parent).isEmpty()||offset<0||search.length()>80||!Arrays.asList("/Studios","/Persons").contains(facet.path))throw new IOException("Invalid filter options");String path=facet.path+"?userId="+scope.userId+"&parentId="+parent+"&startIndex="+offset+"&limit="+CatalogFilters.CHOICES+"&enableImages=false&enableTotalRecordCount=true"+(facet.path.equals("/Studios")?"&includeItemTypes="+(section.type.equals("show")?"Series":"Movie"):"");if(!search.isEmpty())path+="&searchTerm="+CatalogFilters.encode(search);return CatalogFilters.jellyfinChoices(authenticated(scope,path),offset);
     }
-    List<LibraryCollection> collections(int offset)throws Exception{if(offset<0)throw new IOException("Invalid collection page");Session s=stored();JSONObject root=authenticated(s,"/Items?userId="+s.userId+"&includeItemTypes=BoxSet&recursive=true&startIndex="+offset+"&limit=12&sortBy=SortName&sortOrder=Ascending&enableImages=false");JSONArray a=root.optJSONArray("Items");if(a!=null&&a.length()>12)throw new IOException("Collection page limit");List<LibraryCollection> out=new ArrayList<>();String account=PlexClient.profileKey(identity(s));for(int i=0;a!=null&&i<a.length();i++){JSONObject j=a.getJSONObject(i);if(j.optString("Type").equals("BoxSet"))out.add(new LibraryCollection("Jellyfin",id(j.getString("Id")),j.optString("Name"),account));}return out;}
+    LibraryCollection.Page collectionPage(int offset)throws Exception{
+        if(offset<0)throw new IOException("Invalid collection page");
+        Session session=stored();
+        JSONObject root=authenticated(session,"/Items?userId="+session.userId+"&includeItemTypes=BoxSet&recursive=true&startIndex="+offset+"&limit="+LibraryCollection.PAGE+"&sortBy=SortName&sortOrder=Ascending&enableImages=false");
+        if(root.optInt("StartIndex",offset)!=offset)throw new IOException("Invalid collection offset");
+        JSONArray rows=root.optJSONArray("Items");
+        int received=rows==null?0:rows.length();
+        LibraryCollection.Page result=new LibraryCollection.Page(offset,received,root.optInt("TotalRecordCount",-1));
+        String account=PlexClient.profileKey(identity(session));
+        for(int i=0;i<received;i++){
+            JSONObject item=rows.optJSONObject(i);
+            if(item==null||!"BoxSet".equals(item.optString("Type")))continue;
+            String key=id(item.optString("Id"));
+            if(!key.isEmpty())result.items.add(new LibraryCollection("Jellyfin",key,item.optString("Name"),account));
+        }
+        return result;
+    }
     PlexClient.LibraryPage collectionItems(String key,int offset,int limit,String types)throws Exception{key=id(key);if(key.isEmpty()||offset<0||limit<1||limit>PlexClient.PAGE_SIZE||!Arrays.asList("Movie,Series","Season","Episode").contains(types))throw new IOException("Invalid collection");Session s=stored();JSONObject root=authenticated(s,"/Items?userId="+s.userId+"&parentId="+key+"&recursive=false&includeItemTypes="+types+"&startIndex="+offset+"&limit="+limit+"&fields="+FIELDS+"&enableImages=true&imageTypeLimit=1&enableUserData=true&sortBy=ParentIndexNumber,IndexNumber,SortName&sortOrder=Ascending");JSONArray a=root.optJSONArray("Items");int received=a==null?0:a.length();if(received>limit||root.optInt("StartIndex",offset)!=offset)throw new IOException("Child page limit");return new PlexClient.LibraryPage(parse(a,false,false,limit),offset,root.has("TotalRecordCount")?Math.max(0,root.optInt("TotalRecordCount")):-1,received);}
     PlexClient.LibraryPage children(PlexClient.Film parent,int offset)throws Exception{return collectionItems(parent.key,offset,PlexClient.PAGE_SIZE,parent.type.equals("show")?"Season":"Episode");}
     List<PlexClient.Film> resume()throws Exception{return resume(stored());}

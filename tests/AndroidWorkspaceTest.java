@@ -103,6 +103,19 @@ public final class AndroidWorkspaceTest extends Instrumentation {
         phase="blocked programme alerts";
         blockedAlertRemainsPending();
         phase="antenna-portability";String service=LiveTvData.hash("owned-dvb-service");JSONObject exported=new JSONObject().put("ant-1",new JSONObject().put("service",service).put("name","canal demo").put("radio",false)).put("ant-2",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));Map<String,JSONObject> stations=new HashMap<>();stations.put("ant-90",new JSONObject().put("service",service).put("name","renamed demo").put("radio",false));stations.put("ant-91",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));stations.put("ant-92",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));Map<String,String> matches=VelaAntennaBackup.match(exported,stations);check(matches.get("ant-1").equals("ant-90")&&!matches.containsKey("ant-2"),"Antenna restore guessed a row ID or an ambiguous station name");
+        phase="antenna-name-after-rescan";
+        JSONObject oldNames=new JSONObject()
+                .put("ant-3",new JSONObject().put("name","canal  demo").put("radio",false))
+                .put("ant-4",new JSONObject().put("name","").put("radio",false));
+        Map<String,JSONObject> rescanned=new HashMap<>();
+        rescanned.put("ant-93",new JSONObject().put("name","canal demo").put("radio",false));
+        rescanned.put("ant-94",new JSONObject().put("name","").put("radio",false));
+        rescanned.put("ant-95",new JSONObject().put("name","canal demo").put("radio",true));
+        Map<String,String> recovered=VelaAntennaBackup.match(oldNames,rescanned);
+        check("ant-93".equals(recovered.get("ant-3")),"A spacing change lost a unique antenna station after a rescan");
+        check(!recovered.containsKey("ant-4"),"An empty name identified an unrelated station");
+        rescanned.put("ant-96",new JSONObject().put("name","canal\u00a0demo").put("radio",false));
+        check(!VelaAntennaBackup.match(oldNames,rescanned).containsKey("ant-3"),"Equivalent whitespace hid an ambiguous station name");
         phase="reading-density";for(int n=0;n<3;n++){VelaReading.prefs(context).edit().putInt("text",n).putInt("density",0).commit();check(VelaReading.rows(context)==6-n,"Large text did not reduce guide rows");}VelaReading.prefs(context).edit().clear().commit();
         phase="shortcuts";VelaRemote.assign(context,"search_key",KeyEvent.KEYCODE_PROG_RED);VelaRemote.assign(context,"profiles_key",KeyEvent.KEYCODE_PROG_RED);check(!VelaRemote.prefs(context).contains("search_key")&&VelaRemote.destination(context,new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_PROG_RED))==4,"Shortcut collision was not resolved");check(!VelaRemote.allowed(KeyEvent.KEYCODE_HOME)&&!VelaRemote.allowed(KeyEvent.KEYCODE_VOLUME_UP)&&!VelaRemote.allowed(KeyEvent.KEYCODE_DPAD_CENTER),"Reserved system/navigation key can be remapped");VelaRemote.prefs(context).edit().clear().commit();
         for(String n:new String[]{"plex","jellyfin","xtream","xmltv","updates"})context.getSharedPreferences(n,0).edit().remove("private-test").commit();context.getSharedPreferences("personalization",0).edit().putBoolean("initialized",true).putBoolean("complete",true).commit();context.getSharedPreferences(lite?"lite_updates":"updates",0).edit().putBoolean("automatic",false).commit();
