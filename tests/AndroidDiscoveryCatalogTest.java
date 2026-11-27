@@ -8,6 +8,7 @@ import android.os.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /** Exercise the actual encrypted catalogue/attached EPG query, without a TV, account or network. */
@@ -134,10 +135,38 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
         VelaWatchlist.toggle(c,legacy);
         check(VelaWatchlist.read(c).size()==3,"Removing a legacy reference removed a source-bound broadcast");
     }
+    private static void correctedBroadcastTimes(Context c)throws Exception{
+        long start=System.currentTimeMillis()/1000+3600;
+        VelaShows.Airing first=new VelaShows.Airing("Late edition","Canal Uno",start,start+1800).onChannel("guide-source","channel-one");
+        VelaShows.Airing longer=new VelaShows.Airing(first.title,"Canal 1",start,start+2700).onChannel(first.source,first.channelKey);
+        VelaShows.toggle(c,first.title);
+        VelaShows.remember(c,Collections.singletonList(first));
+        VelaShows.remember(c,Collections.singletonList(longer));
+        List<VelaShows.Airing> followed=VelaShows.cached(c);
+        boolean updated=followed.size()==1&&followed.get(0).end==longer.end&&followed.get(0).channel.equals(longer.channel);
+        VelaShows.toggle(c,first.title);
+
+        // Older builds included the end time in the stored ID, so two copies could already exist.
+        JSONArray legacy=new JSONArray();
+        for(VelaShows.Airing slot:Arrays.asList(longer,first)){
+            String oldId="tv:"+LiveTvData.hash(slot.source+"|"+slot.channelKey+"|"+slot.start+"|"+slot.end+"|"+VelaShows.identity(slot.title));
+            legacy.put(VelaWatchlist.broadcastFields(slot).put("kind","tv").put("id",oldId));
+        }
+        VelaWatchlist.prefs(c).edit().putString("items",legacy.toString()).commit();
+        VelaShows.Airing shortened=new VelaShows.Airing(first.title,longer.channel,start,start+900).onChannel(first.source,first.channelKey);
+        List<JSONObject> saved=VelaWatchlist.read(c);
+        boolean stillSaved=VelaWatchlist.contains(c,VelaWatchlist.airingId(shortened));
+        check(updated&&stillSaved,"Changed end time: followed listing refreshed="+updated+", saved broadcast recognised="+stillSaved);
+        check(saved.size()==1&&saved.get(0).getLong("end")==longer.end,"Duplicate saved airings did not retain the most recent entry");
+        check(!VelaWatchlist.contains(c,VelaWatchlist.airingId(new VelaShows.Airing(first.title,longer.channel,start+1800,start+2700).onChannel(first.source,first.channelKey))),"A later repeat matched an earlier broadcast");
+        VelaWatchlist.toggle(c,VelaWatchlist.airing(shortened));
+        check(VelaWatchlist.read(c).isEmpty(),"Removing the corrected airing left an old copy");
+    }
     public void onCreate(Bundle b){super.onCreate(b);start();}
     public void onStart(){Bundle result=new Bundle();Fixture c=null;try{
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){check(in.read()=='1',"Owned emulator required");}
         RefinementHttp.install(url->null);c=new Fixture(getTargetContext());c.cleanup();c.root.mkdirs();
+        correctedBroadcastTimes(c);
         new M3uClient(c).configure("https://vela-fixture.invalid/discovery-query.m3u","",false);
         String epg="https://vela-fixture.invalid/discovery-query.xml";new XmlTvGuide(c).configure(epg);
         TvCatalogCache cache=new TvCatalogCache(c);String source=LiveTvData.source(c);List<LiveTvData.Channel> known=new ArrayList<>();
