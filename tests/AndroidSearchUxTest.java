@@ -18,6 +18,7 @@ import org.json.*;
 public final class AndroidSearchUxTest extends Instrumentation {
     private Context context;private Activity activity;private VelaHub hub,anchor;private String previous,profile,mode,language,phase="setup";private Bundle args;
     private final AtomicInteger requests=new AtomicInteger(),opened=new AtomicInteger();private volatile java.util.List<VelaHub.Hit> values=Collections.emptyList();private volatile VelaHub.Hit selected;private volatile String scope="fixture";private volatile CountDownLatch gate;private volatile boolean failSearch;
+    private volatile String requestedQuery;private volatile int requestedPage;
     private volatile List<VelaHub.Hit> secondPage=Collections.emptyList();
     public static final class Lite extends LiteHomeActivity {protected boolean allowAutomaticChecks(){return false;}}
     public Activity newActivity(ClassLoader l,String n,Intent i)throws InstantiationException,IllegalAccessException,ClassNotFoundException{return n.equals(LiteHomeActivity.class.getName())?new Lite():super.newActivity(l,n,i);}
@@ -40,7 +41,7 @@ public final class AndroidSearchUxTest extends Instrumentation {
     void shot(String name)throws Exception{Thread.sleep(450);Bitmap b=getUiAutomation().takeScreenshot();try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),"voice-search-api"+Build.VERSION.SDK_INT+"-"+name+".png"))){b.compress(Bitmap.CompressFormat.PNG,100,out);}finally{b.recycle();}}
     void fixture()throws Exception{if(hub!=null)ui(hub::close);requests.set(0);opened.set(0);selected=null;
         VelaHub.Host anchorHost=(VelaHub.Host)field(anchor,"host");ui(()->{hub=new VelaHub(activity,new VelaHub.Host(){
-            public java.util.List<VelaHub.Hit> search(String q,int page,CancellationSignal signal)throws Exception{requests.incrementAndGet();CountDownLatch hold=gate;if(hold!=null)hold.await(10,TimeUnit.SECONDS);signal.throwIfCanceled();if(failSearch)throw new IOException("Provider unavailable");return page==0?values:page==1?secondPage:Collections.emptyList();}
+            public java.util.List<VelaHub.Hit> search(String q,int page,CancellationSignal signal)throws Exception{requestedQuery=q;requestedPage=page;requests.incrementAndGet();CountDownLatch hold=gate;if(hold!=null)hold.await(10,TimeUnit.SECONDS);signal.throwIfCanceled();if(failSearch)throw new IOException("Provider unavailable");return page==0?values:page==1?secondPage:Collections.emptyList();}
             public java.util.List<VelaShows.Airing> airings(String q,int p,CancellationSignal s){return Collections.emptyList();}
             public void activate(VelaHub.Hit h){selected=h;opened.incrementAndGet();}public String diagnosis(CancellationSignal s){return "";}public void repair(){}public void closed(boolean changed){}public String scope(){return scope;}
             public boolean navigation(){return anchorHost.navigation();}public void title(String label){anchorHost.title(label);}public void contentFocused(){anchorHost.contentFocused();}
@@ -136,6 +137,33 @@ public final class AndroidSearchUxTest extends Instrumentation {
         XtreamClient.NetworkBudget slow=new XtreamClient.NetworkBudget(wire,12,5,()->clock[0]);try{slow.read(buffer);throw new AssertionError("Slow wire escaped budget");}catch(InterruptedIOException expected){}
         XtreamClient.NetworkBudget large=new XtreamClient.NetworkBudget(new ByteArrayInputStream(new byte[4]),1,100,()->0);try{large.read(buffer);throw new AssertionError("Byte limit escaped");}catch(IOException expected){}
     }
+    void pendingQuery()throws Exception{
+        VelaHub.Hits first=new VelaHub.Hits();
+        first.add(new VelaHub.Hit("Plex","Alien","",new Object()));
+        first.more=true;
+        values=first;
+        secondPage=Collections.singletonList(new VelaHub.Hit("Plex","Aliens","",new Object()));
+        fixture();
+        search("Alien");
+        await(()->tiles().size()==1);
+        EditText editor=view().input;
+        View next=(View)field(view(),"next");
+        ui(()->{editor.setText("Arrival");next.performClick();});
+        await(()->requests.get()==2&&!(Boolean)field(view(),"loading"));
+        check("Alien".equals(requestedQuery)&&requestedPage==1,"Paging submitted the unfinished text instead of paging the displayed results");
+        check("Arrival".contentEquals(editor.getText()),"Paging erased the unfinished text");
+        gate=new CountDownLatch(1);
+        ui(()->{editor.requestFocus();editor.setSelection(3);hub.resumeSearch();});
+        await(()->requests.get()==3);
+        gate.countDown();gate=null;
+        await(()->!(Boolean)field(view(),"loading"));
+        check("Alien".equals(requestedQuery)&&requestedPage==1,"Resuming submitted the unfinished text");
+        check(editor.hasFocus()&&"Arrival".contentEquals(editor.getText())&&editor.getSelectionStart()==3,"A background refresh interrupted editing");
+        ui(()->editor.onEditorAction(EditorInfo.IME_ACTION_SEARCH));
+        await(()->requests.get()==4&&!(Boolean)field(view(),"loading"));
+        check("Arrival".equals(requestedQuery)&&requestedPage==0,"Submitting the edited text did not start a new search");
+        secondPage=Collections.emptyList();
+    }
     void providerPages(List<VelaHub.Hit> movies,View next)throws Exception{
         String lastTitle=tiles().get(0).getContentDescription().toString();
         secondPage=Collections.singletonList(new VelaHub.Hit("Plex","Next block","Demo",new Object()));
@@ -169,6 +197,7 @@ public final class AndroidSearchUxTest extends Instrumentation {
         try(ParcelFileDescriptor f=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(f)){check(in.read()=='1',"Owned emulator required");}
         RefinementHttp.install(this::providerReply);previous=VelaWorkspace.active(context);language=L10n.choice();mode=VelaEdition.prefs(context).getString("mode","");VelaEdition.select(context,Build.VERSION.SDK_INT<30||args.getString("fixture","").equals("unified-lite")?"lite":"full");profile=VelaWorkspace.create(context,"Search demo");VelaWorkspace.select(context,profile);L10n.choose(context,args.getString("language","en"));Ui.init(context);
         context.getSharedPreferences("updates",0).edit().putBoolean("automatic",false).commit();LiteUpdateManager.prefs(context).edit().putBoolean("automatic",false).commit();activity=startActivitySync(new Intent().setClassName(context.getPackageName(),VelaEdition.home(context)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));ui(()->((VelaHub.Owner)activity).tools(0));anchor=(VelaHub)field(activity,"hub");ui(()->{anchor.pause();anchor.setVisibility(View.GONE);});
+        phase="pending-query";pendingQuery();
         phase="source-isolation-and-global-search";sources();
         artwork();voiceSurfaces();
         phase="defaults-and-ranking";check(!VelaVoice.firstResult(context),"Fresh profile auto-opens voice matches");

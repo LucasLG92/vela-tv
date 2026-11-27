@@ -40,11 +40,16 @@ final class VelaVoice {
         boolean open=false;int target=ANY;Matcher verb=VERB.matcher(q);
         if(verb.matches()){open=!verb.group(1).matches("(?iu)busca(?:r|me)?|búscame|encuentra|search(?: for)?|find|cherche|suche|cerca|pesquisa|procura");q=verb.group(2).trim();Matcher noun=SUBJECT.matcher(q);if(noun.matches()){String kind=VelaWorkspace.normal(noun.group(1));target=kind.matches("aplicacion|app|application")?APP:kind.matches("canal|channel|chaine|sender|canale")?CHANNEL:kind.matches("entrada|input|entree|eingang|ingresso")?INPUT:MEDIA;q=noun.group(2).trim();}}
         String provider="";Matcher service=Pattern.compile("(?iu)^(.+?)\\s+(?:en|on|in|sur|auf|su|no|na)\\s+(plex|jellyfin)$").matcher(q);
-        if(service.matches()){q=service.group(1).trim();provider=service.group(2).toLowerCase(Locale.ROOT);target=MEDIA;}
+        if((target==ANY||target==MEDIA)&&service.matches()){q=service.group(1).trim();provider=service.group(2).toLowerCase(Locale.ROOT);target=MEDIA;}
         if(q.length()>1&&((q.startsWith("\"")&&q.endsWith("\""))||(q.startsWith("“")&&q.endsWith("”"))))q=q.substring(1,q.length()-1).trim();
-        int genre=genre(q);boolean night=tonight(q);String normalized=VelaWorkspace.normal(q);
-        if(genre>0&&!open||normalized.matches("que (?:hay|ver) esta noche|what(?: is|'s) on tonight|ce soir|heute abend|stasera|esta noite"))return new Request(spoken,q,DISCOVERY,false,genre,night);
-        if(target==INPUT||q.matches("(?iu)^hdmi\\s*.*")){target=INPUT;q=inputQuery(q);}
+        if(target==ANY){
+            int genre=genre(q);
+            String normalized=VelaWorkspace.normal(q);
+            if((genre>0&&!open)||normalized.matches("que (?:hay|ver) esta noche|what(?: is|'s) on tonight|ce soir|heute abend|stasera|esta noite")){
+                return new Request(spoken,q,DISCOVERY,false,genre,tonight(q));
+            }
+        }
+        if(target==INPUT||(target==ANY&&q.matches("(?iu)^hdmi\\s*.*"))){target=INPUT;q=inputQuery(q);}
         else if(target==CHANNEL||target==ANY&&open)q=channelQuery(q);
         if(target==APP||target==ANY)if(keyText(q).equals("youtube"))q="YouTube";
         if(target==ANY){String key=appKey(q);if(key.matches("youtube|plex|jellyfin|primevideo|netflix|disneyplus|spotify|kodi"))target=APP;else if(open&&keyText(q).matches("la1|la2|antena3|telecinco|lasexta|cuatro"))target=CHANNEL;}
@@ -54,7 +59,7 @@ final class VelaVoice {
     static String keyText(String text){return VelaWorkspace.normal(text).replaceAll("[^\\p{L}\\p{N}]+","");}
     static String appKey(String text){String key=keyText(text);return key.equals("amazonprimevideo")?"primevideo":key.equals("disney")?"disneyplus":key;}
     static String channelQuery(String text){String key=keyText(text);if(key.equals("launo"))return "La 1";if(key.equals("lados"))return "La 2";if(key.equals("antenatres"))return "Antena 3";if(key.equals("telecinco"))return "Telecinco";if(key.equals("lasexta"))return "La Sexta";return text;}
-    static String inputQuery(String text){String q=VelaWorkspace.normal(text).replaceFirst("^hdmi\\s*","");String[][] names={{"uno","un","one","um","eins","ein","une"},{"dos","two","deux","zwei","due","dois"},{"tres","three","trois","drei","tre"},{"cuatro","four","quatre","vier","quattro","quatro"}};for(int i=0;i<names.length;i++)for(String name:names[i])if(q.equals(name))return "HDMI "+(i+1);return text.matches("(?iu)^hdmi\\s*[1-9]$")?"HDMI "+q:text;}
+    static String inputQuery(String text){String q=VelaWorkspace.normal(text).replaceFirst("^hdmi\\s*","");String[][] names={{"uno","un","one","um","eins","ein","une"},{"dos","two","deux","zwei","due","dois"},{"tres","three","trois","drei","tre"},{"cuatro","four","quatre","vier","quattro","quatro"}};for(int i=0;i<names.length;i++)for(String name:names[i])if(q.equals(name))return "HDMI "+(i+1);return q.matches("[1-9]")?"HDMI "+q:text;}
     static boolean exact(Request r,VelaHub.Hit hit){
         Object value=hit.value;if(value==null||value instanceof VelaShows.Airing)return false;
         boolean app=value instanceof Intent,input=value instanceof TvInputs.Entry,channel=value instanceof LiveTvData.Channel;

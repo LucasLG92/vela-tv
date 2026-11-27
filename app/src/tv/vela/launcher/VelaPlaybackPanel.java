@@ -5,9 +5,11 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.media.*;
 import android.media.tv.*;
+import android.os.SystemClock;
 import android.view.*;
 import android.widget.*;
 import java.util.*;
+import java.util.function.Supplier;
 
 /** Disposable native control centre above the one existing decoder. */
 final class VelaPlaybackPanel extends FrameLayout {
@@ -17,9 +19,14 @@ final class VelaPlaybackPanel extends FrameLayout {
     }
     static final class Item {
         final String title,detail;final Runnable action;final Group group;final boolean selected;
-        Item(String title,String detail,Runnable action){this(Group.MORE,title,detail,false,action);}
-        Item(Group group,String title,boolean selected,Runnable action){this(group,title,"",selected,action);}
-        private Item(Group group,String title,String detail,boolean selected,Runnable action){
+        final long refreshAt;final Supplier<Item> updated;
+        Item(String title,String detail,Runnable action){this(Group.MORE,title,detail,false,action,0,null);}
+        Item(String title,String detail,Runnable action,long refreshAt,Supplier<Item> updated){
+            this(Group.MORE,title,detail,false,action,refreshAt,updated);
+        }
+        Item(Group group,String title,boolean selected,Runnable action){this(group,title,"",selected,action,0,null);}
+        private Item(Group group,String title,String detail,boolean selected,Runnable action,long refreshAt,Supplier<Item> updated){
+            this.refreshAt=refreshAt;this.updated=updated;
             this.group=group;this.title=title;this.detail=detail;this.selected=selected;this.action=action;
         }
     }
@@ -34,14 +41,41 @@ final class VelaPlaybackPanel extends FrameLayout {
     private TextView text(String s,int size){TextView v=new TextView(context);v.setText(s);v.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,size*VelaReading.scale(context));v.setTextColor(VelaTheme.WHITE);v.setTypeface(Ui.medium);v.setGravity(Gravity.CENTER_VERTICAL);v.setIncludeFontPadding(false);return v;}
     private static GradientDrawable round(int color){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(VelaTheme.PANEL_RADIUS);return d;}
     private void put(FrameLayout p,View v,int x,int y,int w,int h){LayoutParams lp=new LayoutParams(w,h);lp.leftMargin=x;lp.topMargin=y;p.addView(v,lp);}
+    private long nextDetailUpdate;
+    private final Runnable updateDetails=this::updateDetails;
+    private void trackUpdate(Item item){
+        if(item.updated!=null&&(nextDetailUpdate==0||item.refreshAt<nextDetailUpdate))nextDetailUpdate=item.refreshAt;
+    }
+    private void updateDetails(){
+        long now=SystemClock.uptimeMillis();
+        nextDetailUpdate=0;
+        for(int i=0;i<list.getChildCount();i++){
+            Row row=(Row)list.getChildAt(i);
+            if(row.item.updated!=null&&row.item.refreshAt<=now)row.bind(row.item.updated.get());
+            trackUpdate(row.item);
+        }
+        scheduleDetailUpdate();
+    }
+    private void scheduleDetailUpdate(){
+        removeCallbacks(updateDetails);
+        if(nextDetailUpdate!=0&&!closed&&isAttachedToWindow()&&hasWindowFocus()&&hasFocus()&&isShown())
+            getHandler().postAtTime(updateDetails,nextDetailUpdate);
+    }
+    @Override public void requestChildFocus(View child,View focused){super.requestChildFocus(child,focused);scheduleDetailUpdate();}
+    @Override public void clearChildFocus(View child){super.clearChildFocus(child);removeCallbacks(updateDetails);}
+    @Override public void onWindowFocusChanged(boolean focused){super.onWindowFocusChanged(focused);scheduleDetailUpdate();}
+    @Override public void onVisibilityAggregated(boolean visible){super.onVisibilityAggregated(visible);if(visible)scheduleDetailUpdate();else removeCallbacks(updateDetails);}
+    @Override protected void onDetachedFromWindow(){removeCallbacks(updateDetails);super.onDetachedFromWindow();}
     private void refresh(int selected){
+        nextDetailUpdate=0;
         List<Item> items=model.items();buttons.clear();
         for(int i=0;i<items.size();i++){
             Row row;if(i<list.getChildCount())row=(Row)list.getChildAt(i);else{row=new Row();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=4;list.addView(row,lp);}
-            row.bind(items.get(i));if(row.item.action!=null)buttons.add(row);
+            row.bind(items.get(i));trackUpdate(row.item);if(row.item.action!=null)buttons.add(row);
         }
         while(list.getChildCount()>items.size())list.removeViewAt(list.getChildCount()-1);
         if(!buttons.isEmpty())buttons.get(Math.max(0,Math.min(selected,buttons.size()-1))).requestFocus();
+        scheduleDetailUpdate();
     }
     private final class Row extends TextView {
         Item item;
@@ -50,7 +84,7 @@ final class VelaPlaybackPanel extends FrameLayout {
         private void style(){if(item==null)return;VelaTheme.rowText(this,item.title,item.detail,hasFocus());setBackground(VelaTheme.row(hasFocus(),VelaReading.accent(context)));}
     }
     boolean remote(KeyEvent e){int k=e.getKeyCode();if(k==KeyEvent.KEYCODE_MENU){if(e.getAction()==KeyEvent.ACTION_DOWN&&e.getRepeatCount()==0)close();return true;}if(k==KeyEvent.KEYCODE_BACK||k==KeyEvent.KEYCODE_DPAD_LEFT){if(e.getAction()==KeyEvent.ACTION_UP&&!e.isCanceled())close();return true;}if(k==KeyEvent.KEYCODE_DPAD_DOWN||k==KeyEvent.KEYCODE_DPAD_UP){if(e.getAction()==KeyEvent.ACTION_DOWN&&!buttons.isEmpty()){int at=buttons.indexOf(findFocus());buttons.get(Math.max(0,Math.min(buttons.size()-1,at+(k==KeyEvent.KEYCODE_DPAD_DOWN?1:-1)))).requestFocus();}return true;}return false;}
-    void close(){if(closed)return;closed=true;buttons.clear();list.removeAllViews();if(getParent() instanceof ViewGroup)((ViewGroup)getParent()).removeView(this);exit.run();}
+    void close(){if(closed)return;closed=true;removeCallbacks(updateDetails);buttons.clear();list.removeAllViews();if(getParent() instanceof ViewGroup)((ViewGroup)getParent()).removeView(this);exit.run();}
     static SharedPreferences prefs(Context c){return VelaWorkspace.prefs(c,"vela-playback");}
     static String key(String name,String field){return VelaGuideFix.key(name)+"-"+field;}
     static void tvItems(Context c,TvView tv,String channel,List<Item> out){if(tv==null)return;for(int type:new int[]{TvTrackInfo.TYPE_AUDIO,TvTrackInfo.TYPE_SUBTITLE}){List<TvTrackInfo> tracks=tv.getTracks(type);String label=type==TvTrackInfo.TYPE_AUDIO?L10n.text("Audio"):L10n.text("Subtitles");if(type==TvTrackInfo.TYPE_SUBTITLE&&tracks!=null&&!tracks.isEmpty())out.add(new Item(Group.SUBTITLES,L10n.text("Off"),tv.getSelectedTrack(type)==null,()->{tv.setCaptionEnabled(false);tv.selectTrack(type,null);prefs(c).edit().putString(key(channel,"sub"),"off").apply();}));if(tracks!=null)for(TvTrackInfo track:tracks){String lang=track.getLanguage()==null?"":track.getLanguage();String title=track.getDescription()==null?(lang.isEmpty()?"":Locale.forLanguageTag(lang).getDisplayLanguage(Ui.locale())):track.getDescription().toString();if(title.isEmpty())title=label+" "+(tracks.indexOf(track)+1);out.add(new Item(type==TvTrackInfo.TYPE_AUDIO?Group.AUDIO:Group.SUBTITLES,title,track.getId().equals(tv.getSelectedTrack(type)),()->{if(type==TvTrackInfo.TYPE_SUBTITLE)tv.setCaptionEnabled(true);tv.selectTrack(type,track.getId());prefs(c).edit().putString(key(channel,type==TvTrackInfo.TYPE_AUDIO?"audio":"sub"),track.getId()).apply();}));}}}
