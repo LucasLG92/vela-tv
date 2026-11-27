@@ -133,6 +133,8 @@ Lite leaves Full's multimedia Home, library clients and IPTV player inactive. Bo
 2. **Choose Full or Lite**, then pick your Home layout. Link your media accounts and add your TV sources when you are ready.
 3. **Make it yours.** Choose your Home shelves and sidebar apps, then use Vela's Home-screen setting if you want it as your default launcher.
 
+For a manual install of the latest tested changes from `main`, open the direct download on your TV. This build uses a separate signing key and can update earlier manual builds signed with that key. Keep using official releases for an existing official installation. [Download the test APK](https://github.com/LucasLG92/vela-tv/raw/refs/heads/descargas-tv/Vela.apk)
+
 **[Installation and recovery guide](guide/INSTALL.md)** · [Compatibility](guide/COMPATIBILITY.md) · [Troubleshooting and bug reports](https://github.com/LucasLG92/vela-tv/issues)
 
 All menus support **English, Español, Português, Français, Deutsch and Italiano**, or follow the system language. Library titles and channel names keep their original text.
