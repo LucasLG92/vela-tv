@@ -14,10 +14,84 @@ public final class AndroidTvRegressionTest extends Instrumentation {
     static String stamp(long sec){SimpleDateFormat f=new SimpleDateFormat("yyyyMMddHHmmss Z",Locale.ROOT);f.setTimeZone(TimeZone.getTimeZone("UTC"));return f.format(new Date(sec*1000));}
     byte[] reply(java.net.URL url)throws Exception{if(url.getPath().equals("/original.png"))return red;if(url.getPath().equals("/corrected.png"))return blue;if(url.getPath().equals("/channels.m3u")){StringBuilder b=new StringBuilder("#EXTM3U\n");for(int i=1;i<=36;i++)b.append("#EXTINF:-1 tvg-id=\"demo").append(i).append("\" tvg-logo=\"https://vela-fixture.invalid/original.png\" group-title=\"Demo\",Canal Demo ").append(String.format(Locale.ROOT,"%02d",i)).append("\nhttps://vela-fixture.invalid/never-play/").append(i).append(".m3u8\n");return RefinementHttp.text(b.toString());}if(url.getPath().equals("/guide.xml")){long now=System.currentTimeMillis()/1000;StringBuilder b=new StringBuilder("<tv>");for(int i=1;i<=36;i++)b.append("<channel id='demo").append(i).append("'><display-name>Canal Demo ").append(String.format(Locale.ROOT,"%02d",i)).append("</display-name><icon src='https://vela-fixture.invalid/").append(i==2?"corrected.png":"original.png").append("'/></channel>");for(int i=1;i<=36;i++)b.append("<programme channel='demo").append(i).append("' start='").append(stamp(now-1800)).append("' stop='").append(stamp(now+7200)).append("'><title>Programa Demo ").append(i).append("</title><category>Sports</category></programme>");return RefinementHttp.text(b.append("</tv>").toString());}return null;}
     TvTimelineView timeline()throws Exception{return (TvTimelineView)field(tv,"timeline");}int row()throws Exception{return (Integer)field(timeline(),"row");}List<LiveTvData.Channel> visible()throws Exception{return (List<LiveTvData.Channel>)field(tv,"guideChannels");}
-    void paging()throws Exception{TvTimelineView timeline=timeline();await(()->!visible().isEmpty()&&timeline.hasFocus());int rows=VelaReading.rows(context);List<LiveTvData.Channel> page=(List<LiveTvData.Channel>)field(tv,"channels");for(int i=1;i<rows;i++)key(KeyEvent.KEYCODE_DPAD_DOWN);check(row()==rows-1,"Did not reach the final visible channel");key(KeyEvent.KEYCODE_DPAD_DOWN);await(()->(Integer)field(tv,"guideOffset")==rows);check(row()==0&&((LiveTvData.Channel)field(tv,"selected")).id.equals(page.get(rows).id),"Next visible channel page kept its final row instead of its first");key(KeyEvent.KEYCODE_DPAD_UP);await(()->(Integer)field(tv,"guideOffset")==0);check(row()==rows-1,"Previous visible page did not select its last channel");for(int i=rows;i<=12;i++)key(KeyEvent.KEYCODE_DPAD_DOWN);await(()->(Integer)field(tv,"page")==1&&!(Boolean)field(tv,"loading"));check(row()==0,"Next catalog page did not select its first channel");key(KeyEvent.KEYCODE_DPAD_UP);await(()->(Integer)field(tv,"page")==0&&!(Boolean)field(tv,"loading"));check(row()==visible().size()-1,"Previous catalog page did not select its final channel");Thread.sleep(300);check(row()==visible().size()-1,"Async guide completion changed the requested row");}
-    void discovery()throws Exception{View origin=(View)field(tv,"origin"),organize=(View)field(tv,"organizeAction"),discover=(View)field(tv,"discoverAction");ui(origin::requestFocus);key(KeyEvent.KEYCODE_DPAD_RIGHT);check(organize.hasFocus(),"Right from source did not reach Organize");key(KeyEvent.KEYCODE_DPAD_RIGHT);check(discover.hasFocus(),"What to watch cannot be reached with the remote from the source controls");key(KeyEvent.KEYCODE_DPAD_CENTER);await(()->field(activity,"hub")!=null);check((Integer)field(field(activity,"hub"),"page")==8,"OK did not open What to watch in the shell");check(((View)field(activity,"hub")).hasFocus(),"What to watch opened without remote focus");key(KeyEvent.KEYCODE_BACK);await(()->field(activity,"hub")==null);check(discover.hasFocus(),"Back did not restore What to watch focus");ui(origin::requestFocus);key(KeyEvent.KEYCODE_DPAD_UP);check(discover.hasFocus(),"Up from source did not reach What to watch: next="+origin.getNextFocusUpId()+" discover="+discover.getId()+" shown="+discover.isShown()+" focus="+activity.getCurrentFocus());key(KeyEvent.KEYCODE_DPAD_DOWN);check(timeline().hasFocus(),"Down from What to watch did not return to the guide");ui(()->{tv.pause();LiveTvData.guideView(context,false);tv.resume();});await(()->!(Boolean)field(tv,"loading")&&!((List<?>)field(tv,"cards")).isEmpty());ui(origin::requestFocus);key(KeyEvent.KEYCODE_DPAD_RIGHT);key(KeyEvent.KEYCODE_DPAD_RIGHT);check(discover.hasFocus(),"Channel view cannot reach What to watch");key(KeyEvent.KEYCODE_DPAD_DOWN);check(((View)field(tv,"watch")).hasFocus(),"Channel view did not return to Watch now");}
+    void paging()throws Exception{
+        TvTimelineView timeline=timeline();
+        ListView categories=(ListView)field(tv,"categoryList");
+        await(()->!visible().isEmpty());
+        ui(categories::requestFocus);
+        key(KeyEvent.KEYCODE_DPAD_RIGHT);
+        await(timeline::hasFocus);
+        int rows=VelaReading.rows(context);
+        List<LiveTvData.Channel> page=(List<LiveTvData.Channel>)field(tv,"channels");
+        for(int i=1;i<rows;i++)key(KeyEvent.KEYCODE_DPAD_DOWN);
+        check(row()==rows-1,"Did not reach the final visible channel");
+        key(KeyEvent.KEYCODE_DPAD_DOWN);
+        await(()->(Integer)field(tv,"guideOffset")==rows);
+        check(row()==0&&((LiveTvData.Channel)field(tv,"selected")).id.equals(page.get(rows).id),"Next visible channel page kept its final row instead of its first");
+        key(KeyEvent.KEYCODE_DPAD_UP);
+        await(()->(Integer)field(tv,"guideOffset")==0);
+        check(row()==rows-1,"Previous visible page did not select its last channel");
+        for(int i=rows;i<=12;i++)key(KeyEvent.KEYCODE_DPAD_DOWN);
+        await(()->(Integer)field(tv,"page")==1&&!(Boolean)field(tv,"loading"));
+        check(row()==0,"Next catalog page did not select its first channel");
+        key(KeyEvent.KEYCODE_DPAD_UP);
+        await(()->(Integer)field(tv,"page")==0&&!(Boolean)field(tv,"loading"));
+        check(row()==visible().size()-1,"Previous catalog page did not select its final channel");
+        Thread.sleep(300);
+        check(row()==visible().size()-1,"Async guide completion changed the requested row");
+    }
+    void discovery()throws Exception{
+        View origin=(View)field(tv,"origin"),organize=(View)field(tv,"organizeAction"),discover=(View)field(tv,"discoverAction");
+        ui(origin::requestFocus);
+        key(KeyEvent.KEYCODE_DPAD_RIGHT);
+        check(organize.hasFocus(),"Right from source did not reach Organize");
+        key(KeyEvent.KEYCODE_DPAD_RIGHT);
+        check(discover.hasFocus(),"What to watch cannot be reached with the remote from the source controls");
+        key(KeyEvent.KEYCODE_DPAD_CENTER);
+        await(()->field(activity,"hub")!=null);
+        check((Integer)field(field(activity,"hub"),"page")==8,"OK did not open What to watch in the shell");
+        check(((View)field(activity,"hub")).hasFocus(),"What to watch opened without remote focus");
+        key(KeyEvent.KEYCODE_BACK);
+        await(()->field(activity,"hub")==null);
+        check(discover.hasFocus(),"Back did not restore What to watch focus");
+        key(KeyEvent.KEYCODE_DPAD_UP);
+        View widgets=(View)field(field(activity,"home"),"headerStatus");
+        check(widgets.hasFocus(),"Up from What to watch did not reach the header");
+        key(KeyEvent.KEYCODE_DPAD_DOWN);
+        check(discover.hasFocus(),"Down from the header did not return to What to watch");
+        key(KeyEvent.KEYCODE_DPAD_DOWN);
+        check(((View)field(tv,"categoryList")).hasFocus(),"Down from What to watch did not reach guide categories");
+        key(KeyEvent.KEYCODE_DPAD_RIGHT);
+        check(timeline().hasFocus(),"Right from categories did not reach the guide");
+        ui(()->{tv.pause();LiveTvData.guideView(context,false);tv.resume();});
+        await(()->!(Boolean)field(tv,"loading")&&!((List<?>)field(tv,"cards")).isEmpty());
+        ui(origin::requestFocus);
+        key(KeyEvent.KEYCODE_DPAD_RIGHT);
+        key(KeyEvent.KEYCODE_DPAD_RIGHT);
+        check(discover.hasFocus(),"Channel view cannot reach What to watch");
+        key(KeyEvent.KEYCODE_DPAD_DOWN);
+        check(((View)field(tv,"watch")).hasFocus(),"Channel view did not return to Watch now");
+    }
     int color(ImageView v){return v.getDrawable() instanceof BitmapDrawable?((BitmapDrawable)v.getDrawable()).getBitmap().getPixel(20,20):0;}
     void logos()throws Exception{LiveTvData.Channel ch=new M3uClient(context).page(null,"",null,0).channels.get(0);LiveTvLogos[] loader={null};ImageView[] view={null};try{ui(()->{loader[0]=new LiveTvLogos(context);view[0]=new LiveTvLogos.LogoView(context,ch.name);loader[0].load(ch,view[0]);});await(()->color(view[0])==Color.RED);VelaGuideFix.set(context,ch.name,"demo2",0);ui(()->loader[0].load(ch,view[0]));await(()->color(view[0])==Color.BLUE);check(new XmlTvGuide(context).guide(Collections.singletonList(ch)).get(ch.id).now.title.equals("Programa Demo 2"),"Corrected logo and programme identity disagree");VelaGuideFix.reset(context,ch.name);ui(()->loader[0].load(ch,view[0]));await(()->color(view[0])==Color.RED);check(((android.util.LruCache<?,?>)field(loader[0],"cache")).size()<=768,"Logo cache budget changed");}finally{VelaGuideFix.reset(context,ch.name);if(loader[0]!=null)ui(loader[0]::close);}}
+    private void checkExtInfNames()throws Exception{
+        String list="#EXTM3U\n"
+                +"#EXTINF:-1 tvg-id=\"regional\" tvg-name=\"Radio, Norte\" group-title=\"Radio\",\nhttps://radio.invalid/norte\n"
+                +"#EXTINF:-1 tvg-name=\"Other name\" group-title=\"Radio\",Magazine, tvg-id=\"Especial\"\nhttps://radio.invalid/magazine\n";
+        TvCatalogCache store=new TvCatalogCache(context);
+        String source="test-extinf-names";
+        try{
+            try(TvCatalogCache.Writer writer=store.writer(source)){
+                M3uClient.parse(new StringReader(list),false,writer);
+                writer.commit("{}");
+            }
+            List<LiveTvData.Channel> channels=store.page(source,"Radio","",null,0).channels;
+            check(channels.size()==2,"M3U dropped an entry with tvg-name and an empty display title");
+            LiveTvData.Channel regional=channels.get(0),magazine=channels.get(1);
+            check(regional.name.equals("Radio, Norte")&&regional.epgId.equals("regional"),"Quoted tvg-name or guide identity lost");
+            check(magazine.name.equals("Magazine, tvg-id=\"Especial\"")&&magazine.epgId.isEmpty(),"Display title was interpreted as M3U attributes");
+        }finally{store.remove(source);}
+    }
     public void onCreate(Bundle b){super.onCreate(b);start();}
-    public void onStart(){Bundle result=new Bundle();context=getTargetContext();try{try(ParcelFileDescriptor f=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(f)){check(in.read()=='1',"Owned emulator required");}xmlPreferences=new HashMap<>(context.getSharedPreferences("xmltv",0).getAll());previous=VelaWorkspace.active(context);profile=VelaWorkspace.create(context,"TV Fix "+SystemClock.elapsedRealtime());VelaWorkspace.select(context,profile);L10n.choose(context,"es");Ui.init(context);Personalization.complete(context);Updates.prefs(context).edit().putBoolean("automatic",false).commit();red=png(Color.RED);blue=png(Color.BLUE);RefinementHttp.install(this::reply);new M3uClient(context).configure("https://vela-fixture.invalid/channels.m3u","https://vela-fixture.invalid/guide.xml",false);new M3uClient(context).refresh(false);new XmlTvGuide(context).configure("https://vela-fixture.invalid/guide.xml");new XmlTvGuide(context).guide(new M3uClient(context).page(null,"",null,0).channels);LiveTvData.guideView(context,true);activity=(HomeActivity)startActivitySync(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));Object home=field(activity,"home");ui(()->{try{((List<View>)field(home,"sideButtons")).get(6).performClick();}catch(Exception e){throw new RuntimeException(e);}});await(()->field(home,"liveTv")!=null);tv=(HomeLiveTvView)field(home,"liveTv");await(()->!(Boolean)field(tv,"loading")&&!(Boolean)field(tv,"guideLoading"));runCase("paging",this::paging);runCase("discovery_remote",this::discovery);runCase("corrected_logo",this::logos);for(Map.Entry<String,String> item:checks.entrySet())result.putString(item.getKey(),item.getValue());}catch(Throwable e){result.putString("error",android.util.Log.getStackTraceString(e));}finally{try{if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}if(xmlPreferences!=null){SharedPreferences.Editor edit=context.getSharedPreferences("xmltv",0).edit().clear();for(Map.Entry<String,?> entry:xmlPreferences.entrySet()){Object v=entry.getValue();if(v instanceof String)edit.putString(entry.getKey(),(String)v);else if(v instanceof Boolean)edit.putBoolean(entry.getKey(),(Boolean)v);else if(v instanceof Long)edit.putLong(entry.getKey(),(Long)v);else if(v instanceof Integer)edit.putInt(entry.getKey(),(Integer)v);}edit.commit();}}catch(Exception ignored){}}boolean ok=!result.containsKey("error")&&checks.size()==3;for(String value:checks.values())ok&=value.equals("PASS");result.putString("result",ok?"PASS native channel paging in both directions and across catalog pages, async guide completion, actual remote What to watch activation/return, corrected EPG logo precedence/cache reset and original-logo restoration. Fixture only; no playback or personal credentials.":"FAIL native TV regressions");finish(ok?-1:1,result);}
+    public void onStart(){Bundle result=new Bundle();context=getTargetContext();try{try(ParcelFileDescriptor f=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(f)){check(in.read()=='1',"Owned emulator required");}xmlPreferences=new HashMap<>(context.getSharedPreferences("xmltv",0).getAll());previous=VelaWorkspace.active(context);profile=VelaWorkspace.create(context,"TV Fix "+SystemClock.elapsedRealtime());VelaWorkspace.select(context,profile);L10n.choose(context,"es");Ui.init(context);Personalization.complete(context);Updates.prefs(context).edit().putBoolean("automatic",false).commit();red=png(Color.RED);blue=png(Color.BLUE);RefinementHttp.install(this::reply);new M3uClient(context).configure("https://vela-fixture.invalid/channels.m3u","https://vela-fixture.invalid/guide.xml",false);new M3uClient(context).refresh(false);new XmlTvGuide(context).configure("https://vela-fixture.invalid/guide.xml");new XmlTvGuide(context).guide(new M3uClient(context).page(null,"",null,0).channels);LiveTvData.guideView(context,true);activity=(HomeActivity)startActivitySync(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));Object home=field(activity,"home");ui(()->{try{((List<View>)field(home,"sideButtons")).get(6).performClick();}catch(Exception e){throw new RuntimeException(e);}});await(()->field(home,"liveTv")!=null);tv=(HomeLiveTvView)field(home,"liveTv");await(()->!(Boolean)field(tv,"loading")&&!(Boolean)field(tv,"guideLoading"));runCase("extinf_names",this::checkExtInfNames);runCase("paging",this::paging);runCase("discovery_remote",this::discovery);runCase("corrected_logo",this::logos);for(Map.Entry<String,String> item:checks.entrySet())result.putString(item.getKey(),item.getValue());}catch(Throwable e){result.putString("error",android.util.Log.getStackTraceString(e));}finally{try{if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}if(xmlPreferences!=null){SharedPreferences.Editor edit=context.getSharedPreferences("xmltv",0).edit().clear();for(Map.Entry<String,?> entry:xmlPreferences.entrySet()){Object v=entry.getValue();if(v instanceof String)edit.putString(entry.getKey(),(String)v);else if(v instanceof Boolean)edit.putBoolean(entry.getKey(),(Boolean)v);else if(v instanceof Long)edit.putLong(entry.getKey(),(Long)v);else if(v instanceof Integer)edit.putInt(entry.getKey(),(Integer)v);}edit.commit();}}catch(Exception ignored){}}boolean ok=!result.containsKey("error")&&checks.size()==4;for(String value:checks.values())ok&=value.equals("PASS");result.putString("result",ok?"PASS native channel paging in both directions and across catalog pages, async guide completion, actual remote What to watch activation/return, corrected EPG logo precedence/cache reset and original-logo restoration. Fixture only; no playback or personal credentials.":"FAIL native TV regressions");finish(ok?-1:1,result);}
 }
