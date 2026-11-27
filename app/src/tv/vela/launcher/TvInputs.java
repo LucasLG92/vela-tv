@@ -10,6 +10,7 @@ import java.util.regex.*;
 /** Public TV input metadata only. CEC child labels describe devices; parent IDs describe ports. */
 final class TvInputs {
     static final int UNKNOWN=-1,CONNECTED=TvInputManager.INPUT_STATE_CONNECTED,STANDBY=TvInputManager.INPUT_STATE_CONNECTED_STANDBY,DISCONNECTED=TvInputManager.INPUT_STATE_DISCONNECTED;
+    private static final Pattern PORT_NUMBER=Pattern.compile("(?i)HDMI[\\s_-]*([0-9]{1,2})(?![0-9])");
     static final String[] PRESETS=DeviceProfiles.presets();
     static final class Raw {
         final String id,parent,label,custom;final int state;
@@ -65,9 +66,26 @@ final class TvInputs {
     static List<Entry> resolve(Context c,List<Raw> raw){
         Map<String,Raw> all=new TreeMap<>();for(Raw r:raw)if(r.id!=null&&!r.id.isEmpty())all.put(r.id,r);
         Map<String,List<Raw>> groups=new TreeMap<>();for(Raw r:all.values()){String root=r.id;Set<String> seen=new HashSet<>();for(Raw current=r;current.parent!=null&&!current.parent.isEmpty()&&seen.add(current.id);){root=current.parent;Raw next=all.get(root);if(next==null)break;current=next;}groups.computeIfAbsent(root,k->new ArrayList<>()).add(r);}
+        Map<String,Integer> reported=new HashMap<>();
+        for(String key:groups.keySet()){
+            Raw port=all.get(key);
+            if(port==null)continue;
+            Matcher number=PORT_NUMBER.matcher(port.label);
+            if(number.find())reported.put(key,Integer.parseInt(number.group(1)));
+        }
+        Set<Integer> used=new HashSet<>(reported.values());
+        int nextFree=1;
         List<Entry> out=new ArrayList<>();int ordinal=0;for(Map.Entry<String,List<Raw>> group:groups.entrySet()){
             String key=group.getKey();Raw port=all.get(key),chosen=null;for(Raw r:group.getValue())if(!r.id.equals(key)&&(chosen==null||rank(r)>rank(chosen)))chosen=r;
-            int index=++ordinal;if(port!=null){Matcher m=Pattern.compile("(?i)HDMI[\\s_-]*([0-9]{1,2})").matcher(port.label);if(m.find())index=Integer.parseInt(m.group(1));}
+            int index=++ordinal;
+            if(reported.containsKey(key))index=reported.get(key);
+            else{
+                if(used.contains(index)){
+                    while(used.contains(nextFree))nextFree++;
+                    index=nextFree++;
+                }
+                used.add(index);
+            }
             String portName="HDMI "+index,override=preset(c,key);boolean manual=!override.equals("auto");
             // A stale CEC child must not make an unplugged port appear connected.
             int state=port!=null?port.state:chosen==null?UNKNOWN:chosen.state;

@@ -65,7 +65,8 @@ final class InputsScreen extends VelaScreen {
     private void render(){
         picking=false;boolean navFocus=navigation.navigationTarget(this)!=null&&navigation.navigationTarget(this).hasFocus();
         closePreview();if(icons!=null)icons.clearViews();else icons=new DeviceIcons(this);root=new FrameLayout(this);cards.clear();
-        List<TvInputs.Entry> entries=source.read();
+        List<TvInputs.Entry> available=source.read();
+        List<TvInputs.Entry> entries=available.subList(0,Math.min(32,available.size()));
         TvInputs.Layout layout=TvInputs.Layout.selected(this);
         if(!entries.isEmpty()&&layout!=TvInputs.Layout.CARDS){liveLayout(entries,layout,navFocus);return;}
         inputLight=new VelaSpotlight(this);inputLight.tint(0xff849792);place(root,inputLight,0,0,1790,490);heroName=text("",82,VelaTheme.WHITE);heroName.setSingleLine();heroName.setAutoSizeTextTypeUniformWithConfiguration(42,82,2,android.util.TypedValue.COMPLEX_UNIT_PX);heroName.setTypeface(Ui.displayMedium);place(root,heroName,82,85,940,116);heroPort=text("",24,VelaTheme.SECONDARY);place(root,heroPort,86,40,900,43);
@@ -76,7 +77,7 @@ final class InputsScreen extends VelaScreen {
         HorizontalScrollView scroll=new HorizontalScrollView(this);scroll.setHorizontalScrollBarEnabled(false);scroll.setClipToPadding(false);scroll.setClipChildren(false);scroll.setFillViewport(false);LinearLayout strip=new LinearLayout(this);strip.setClipChildren(false);strip.setClipToPadding(false);strip.setOrientation(LinearLayout.HORIZONTAL);strip.setPadding(24,20,24,20);scroll.addView(strip);place(root,scroll,40,448,1704,334);
         scroll.setOnScrollChangeListener((v,x,y,ox,oy)->{if(icons!=null)icons.refreshVisible();});
         View restore=null;TvInputs.Entry initial=entries.isEmpty()?null:entries.get(0);for(TvInputs.Entry e:entries)if(e.state==TvInputs.CONNECTED&&!e.model.equals("other")){initial=e;break;}
-        for(int i=0;i<Math.min(32,entries.size());i++){
+        for(int i=0;i<entries.size();i++){
             TvInputs.Entry entry=entries.get(i);FrameLayout card=new FrameLayout(this);card.setId(View.generateViewId());card.setFocusable(true);card.setFocusableInTouchMode(true);card.setDefaultFocusHighlightEnabled(false);card.setClipChildren(false);LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(232,294);cp.rightMargin=28;strip.addView(card,cp);cards.add(card);int index=i;
             FrameLayout well=new FrameLayout(this);well.setClipChildren(false);place(card,well,8,0,216,216);
             DeviceIcons.Artwork art=new DeviceIcons.Artwork(this,entry.model);place(well,art,43,43,130,130);if(icons!=null)icons.load(entry.model,art);

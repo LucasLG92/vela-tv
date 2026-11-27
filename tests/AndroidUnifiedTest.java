@@ -18,16 +18,22 @@ import org.json.*;
 public final class AndroidUnifiedTest extends Instrumentation {
     private Context context;private final Bundle result=new Bundle();private String phase="setup";
     private final List<Activity> opened=new ArrayList<>();
-    static TvInputs.Source fixtureInputs(){return new TvInputs.Source(){
-            public List<TvInputs.Entry> read(){return Arrays.asList(new TvInputs.Entry("fixture-hdmi-1","fixture-hdmi-1","HDMI 1","Nintendo Switch","switch",TvInputs.CONNECTED,false),new TvInputs.Entry("fixture-hdmi-2","fixture-hdmi-2","HDMI 2","Computer","pc",TvInputs.CONNECTED,false));}
-            public void start(Runnable changed){}public void stop(){}
-        };}
+    static final class FixtureInputs implements TvInputs.Source {
+        List<TvInputs.Entry> entries=Arrays.asList(
+                new TvInputs.Entry("fixture-hdmi-1","fixture-hdmi-1","HDMI 1","Nintendo Switch","switch",TvInputs.CONNECTED,false),
+                new TvInputs.Entry("fixture-hdmi-2","fixture-hdmi-2","HDMI 2","Computer","pc",TvInputs.CONNECTED,false));
+        Runnable changed;
+        int reads;
+        public List<TvInputs.Entry> read(){reads++;return entries;}
+        public void start(Runnable changed){this.changed=changed;}
+        public void stop(){changed=null;}
+    }
     public static final class Lite extends LiteHomeActivity {
         protected boolean allowAutomaticChecks(){return false;}
-        protected TvInputs.Source createInputsSource(){return fixtureInputs();}
+        protected TvInputs.Source createInputsSource(){return new FixtureInputs();}
     }
     public static final class Full extends HomeActivity {
-        @Override TvInputs.Source createInputsSource(){return fixtureInputs();}
+        @Override TvInputs.Source createInputsSource(){return new FixtureInputs();}
     }
     @Override public Activity newActivity(ClassLoader loader,String name,Intent intent)throws InstantiationException,IllegalAccessException,ClassNotFoundException{
         Activity a=name.equals(LiteHomeActivity.class.getName())?new Lite():name.equals(HomeActivity.class.getName())?new Full():super.newActivity(loader,name,intent);opened.add(a);return a;
@@ -100,6 +106,46 @@ public final class AndroidUnifiedTest extends Instrumentation {
         if(lite)ui(()->{try{show.invoke(activity,0,false);}catch(Exception e){throw new RuntimeException(e);}});
         else ui(()->home.navigateSection(5));
     }
+    void verifyHotplugFocus(Activity lite)throws Exception{
+        FixtureInputs source=(FixtureInputs)field(lite,"inputSource");
+        List<TvInputs.Entry> original=source.entries;
+        View apps=((View[])field(lite,"navigation"))[2];
+        ui(apps::requestFocus);
+        check(apps.hasFocus(),"Could not focus Apps in the sidebar");
+        int before=source.reads;
+        ui(()->{source.entries=Collections.emptyList();source.changed.run();});
+        await(()->source.reads>before);
+        check(apps.hasFocus(),"Unplugging HDMI pulled focus away from Apps");
+        int emptyReads=source.reads;
+        ui(()->{source.entries=original;source.changed.run();});
+        await(()->source.reads>emptyReads);
+        check(apps.hasFocus(),"Reconnecting HDMI pulled focus away from Apps");
+    }
+    void verifyPortNumbers(){
+        TvInputs.Raw reported=new TvInputs.Raw("b",null,"HDMI 1","",TvInputs.CONNECTED);
+        TvInputs.Raw unnamed=new TvInputs.Raw("a",null,"Input","",TvInputs.CONNECTED);
+        TvInputs.Raw console=new TvInputs.Raw("child","a","Nintendo Switch","",TvInputs.CONNECTED);
+        List<TvInputs.Entry> ports=TvInputs.resolve(context,Arrays.asList(console,unnamed,reported));
+        check(ports.size()==2&&ports.get(0).key.equals("b")&&ports.get(0).port.equals("HDMI 1")
+                &&ports.get(1).port.equals("HDMI 2")&&ports.get(1).inputId.equals("child"),
+                "An unnamed input collided with a reported HDMI number or lost its CEC route");
+    }
+    void verifyManyPorts(InputsScreen screen)throws Exception{
+        FixtureInputs source=(FixtureInputs)field(screen,"source");
+        List<TvInputs.Entry> original=source.entries;
+        List<TvInputs.Entry> many=new ArrayList<>();
+        for(int i=1;i<=33;i++){
+            boolean last=i==33;
+            many.add(new TvInputs.Entry("port"+i,"port"+i,"HDMI "+i,last?"Computer":"HDMI "+i,
+                    last?"pc":"other",last?TvInputs.CONNECTED:TvInputs.DISCONNECTED,false));
+        }
+        ui(()->{source.entries=many;source.changed.run();});
+        await(()->((List<?>)field(screen,"cards")).size()==32);
+        check(((TvInputs.Entry)field(screen,"heroEntry")).key.equals("port1"),
+                "Home featured a port outside the visible cards");
+        ui(()->{source.entries=original;source.changed.run();});
+        await(()->((List<?>)field(screen,"cards")).size()==original.size());
+    }
     void verifyLiveStyle(Activity activity,VelaHdmiBrowser browser,boolean cinema)throws Exception{
         check(browser!=null&&browser.rows.size()==2,"Missing HDMI layout");
         ui(browser.rows.get(0)::requestFocus);
@@ -146,6 +192,8 @@ public final class AndroidUnifiedTest extends Instrumentation {
         Activity lite=foreground(LiteHomeActivity.class.getName());check(VelaEdition.lite(context)&&field(lite,"shell")!=null,"Lite controller did not start");
         check(priorArt||!new File(context.getCacheDir(),"plex-art").exists(),"Lite initialized multimedia artwork");for(Activity a:opened)if(a instanceof HomeActivity)check(field(a,"home")==null,"Lite constructed the Full home controller");
         Method preview=LiteHomeActivity.class.getDeclaredMethod("show",int.class,boolean.class);preview.setAccessible(true);final Activity previewLite=lite;ui(()->{try{preview.invoke(previewLite,0,false);}catch(Exception e){throw new RuntimeException(e);}});shot("02-lite");
+        phase="hdmi-hotplug-focus";verifyHotplugFocus(lite);
+        phase="hdmi-port-numbers";verifyPortNumbers();
         phase="hdmi-window";verifyLiveStyle(lite,(VelaHdmiBrowser)field(lite,"hdmi"),false);
         chooseHdmi(lite,TvInputs.Layout.CINEMA);
         phase="hdmi-cinema";verifyLiveStyle(lite,(VelaHdmiBrowser)field(lite,"hdmi"),true);
@@ -173,6 +221,7 @@ public final class AndroidUnifiedTest extends Instrumentation {
             CinemaHomeView restored=(CinemaHomeView)field(full,"home");
             InputsScreen classic=(InputsScreen)((HomeScreenHost)field(restored,"panels")).screen;
             check(field(classic,"hdmi")==null&&TvInputs.Layout.selected(context)==TvInputs.Layout.CARDS,"Cards kept a preview session");
+            phase="many-hdmi-ports";verifyManyPorts(classic);
             shot("04-full");
             VelaLayout.save(context,VelaLayout.preset(VelaLayout.read(context),VelaLayout.TELEVISION),true);
             LiveTvData.guideView(context,false);

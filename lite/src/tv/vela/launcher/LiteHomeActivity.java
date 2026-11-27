@@ -170,15 +170,22 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     }
     private void renderInputs(boolean preserveNavigation){
         closePreview();rebuildingInputs=true;final String restorePort=selectedPort;
-        boolean navFocus=preserveNavigation&&navigation[INPUTS].hasFocus();if(devices==null)devices=new DeviceIcons(this);else devices.clearViews();content.removeAllViews();tiles.clear();pager.removeAllViews();
+        boolean keepOutsideFocus=preserveNavigation&&getCurrentFocus()!=null&&!content.hasFocus();
+        if(devices==null)devices=new DeviceIcons(this);else devices.clearViews();content.removeAllViews();tiles.clear();pager.removeAllViews();
         List<TvInputs.Entry> entries=inputSource.read();
         boolean appsHome=VelaLayout.DEVICES.equals(VelaLayout.start(this));
         TvInputs.Layout style=TvInputs.Layout.selected(this);
-        if(!entries.isEmpty()&&style!=TvInputs.Layout.CARDS){liveInputs(entries,style,navFocus,appsHome);return;}
+        if(!entries.isEmpty()&&style!=TvInputs.Layout.CARDS){liveInputs(entries,style,keepOutsideFocus,appsHome);return;}
         if(entries.isEmpty()){
             put(content,text(t("Nenhuma entrada compartilhada pela TV","No inputs shared by this TV","La TV no comparte entradas HDMI"),36,VelaTheme.WHITE),64,110,1560,70);
             put(content,text(t("Instale o Vela Lite na televisão, não no aparelho HDMI.","Install Vela Lite on the television, rather than the HDMI box.","Instala Vela Lite en la televisión, en lugar del dispositivo HDMI."),25,VelaTheme.SECONDARY),64,205,1560,60);
-            TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,320,570,76);tiles.add(settings);rebuildingInputs=false;if(appsHome)inputApps(450).requestFocus();else focusFirst();return;
+            TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,320,570,76);tiles.add(settings);
+            View appsStrip=appsHome?inputApps(450):null;
+            rebuildingInputs=false;
+            if(!keepOutsideFocus){
+                if(appsStrip!=null)appsStrip.requestFocus();else focusFirst();
+            }
+            return;
         }
         inputLight=new VelaSpotlight(this);inputLight.tint(0xff849792);put(content,inputLight,0,0,1790,490);heroName=text("",82,VelaTheme.WHITE);heroName.setSingleLine();heroName.setAutoSizeTextTypeUniformWithConfiguration(42,82,2,android.util.TypedValue.COMPLEX_UNIT_PX);heroName.setTypeface(Ui.displayMedium);put(content,heroName,82,85,940,116);heroPort=text("",24,VelaTheme.SECONDARY);put(content,heroPort,86,40,900,43);
         heroOpen=button("",()->{if(featured!=null)launchInput(featured);});heroOpen.setBackground(plate(VelaTheme.CARD,30));heroOpen.setTextColor(VelaTheme.WHITE);heroOpen.setOnFocusChangeListener((v,f)->{heroOpen.setBackground(plate(f?VelaTheme.pearl(VelaReading.accent(this)):VelaTheme.CARD,30));heroOpen.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);VelaFocus.card(heroOpen,f);});put(content,heroOpen,86,238,270,60);heroOpen.setOnKeyListener(this::widgetsUp);heroOpen.setOnLongClickListener(v->{consumeOkUp=true;if(featured!=null)chooseProfile(featured);return true;});
@@ -198,11 +205,13 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
             TextView settings=button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS));put(content,settings,64,806,420,58);
         }
         FrameLayout.LayoutParams hint=(FrameLayout.LayoutParams)footer.getLayoutParams();hint.leftMargin=652;hint.topMargin=926;hint.width=1180;footer.setLayoutParams(hint);footer.setText(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"));
-        rebuildingInputs=false;if(navFocus)navigation[INPUTS].requestFocus();else if(restored!=null)restored.requestFocus();else if(connected!=null)connected.requestFocus();else focusFirst();
+        rebuildingInputs=false;
+        if(keepOutsideFocus)return;
+        if(restored!=null)restored.requestFocus();else if(connected!=null)connected.requestFocus();else focusFirst();
     }
     private VelaHdmiBrowser hdmi;
     private void closePreview(){if(hdmi!=null){hdmi.close();hdmi=null;}}
-    private void liveInputs(List<TvInputs.Entry> entries,TvInputs.Layout style,boolean navFocus,boolean appsHome){
+    private void liveInputs(List<TvInputs.Entry> entries,TvInputs.Layout style,boolean keepOutsideFocus,boolean appsHome){
         hdmi=new VelaHdmiBrowser(this,style,entries,selectedPort,devices,scene,new VelaHdmiBrowser.Actions(){
             public void selected(TvInputs.Entry entry){
                 if(!entry.key.equals(selectedPort)){
@@ -225,7 +234,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         if(appsHome)inputApps(790);
         else put(content,button(t("Ajustes da televisão","TV settings","Ajustes de la televisión"),()->openSettings(Settings.ACTION_SETTINGS)),64,806,420,58);
         footer.setText(t("OK · Abrir     Manter OK · Identificar dispositivo","OK · Open     Hold OK · Identify device","OK · Abrir     Mantener OK · Identificar dispositivo"));rebuildingInputs=false;
-        if(navFocus)navigation[INPUTS].requestFocus();else hdmi.initial.requestFocus();
+        if(!keepOutsideFocus)hdmi.initial.requestFocus();
     }
     private View recentCard(){org.json.JSONObject item=VelaRecentActivity.available(this);if(item.length()==0)return null;VelaRecentActivity.Card card=new VelaRecentActivity.Card(this,item,()->resumeActivity(item));put(content,card,1170,6,520,78);return card;}
     private void resumeActivity(org.json.JSONObject item){
