@@ -48,7 +48,13 @@ final class AmbientWeather {
     }
     static String mode(Context c){return prefs(c).getString("mode",manual(c)==null?"auto":"manual");}
     static String name(Context c){Place p=manual(c);return "manual".equals(mode(c))&&p!=null?p.name:Ui.tr("Automática","Automatic","Automática");}
-    static void select(Context c,Place place){prefs(c).edit().putString("mode","manual").putString("city",place.name).putString("lat",Double.toString(place.lat)).putString("lon",Double.toString(place.lon)).putString("zone",place.zone).remove("cache").apply();}
+    static void select(Context c,Place place){
+        SharedPreferences p=prefs(c);
+        SharedPreferences.Editor edit=p.edit().putString("mode","manual").putString("city",place.name)
+                .putString("lat",Double.toString(place.lat)).putString("lon",Double.toString(place.lon)).putString("zone",place.zone);
+        if(!place.key().equals(p.getString("cacheKey","")))edit.remove("cache");
+        edit.apply();
+    }
     static List<Place> search(String query)throws Exception{
         query=query.trim();if(query.length()<2||query.length()>100)return Collections.emptyList();
         JSONObject body=new JSONObject(get("https://geocoding-api.open-meteo.com/v1/search?name="+URLEncoder.encode(query,"UTF-8")+"&count=5&language="+Ui.locale().getLanguage()+"&format=json"));
