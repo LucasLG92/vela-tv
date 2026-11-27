@@ -1,5 +1,6 @@
 package tv.vela.launcher;
 
+import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.*;
 import android.database.sqlite.SQLiteDatabase;
@@ -19,6 +20,30 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
         @Override public SharedPreferences getSharedPreferences(String name,int mode){String key="owned-query-"+name;preferences.add(key);return super.getSharedPreferences(key,mode);}
         void cleanup(){for(String p:preferences)getBaseContext().deleteSharedPreferences(p);remove(root);}
         void remove(File f){if(f.isDirectory()){File[] children=f.listFiles();if(children!=null)for(File c:children)remove(c);}f.delete();}
+    }
+    private VelaHub.Host reminderGuide(Context context){
+        Activity[] owner={null};
+        runOnMainSync(()->owner[0]=new Activity(){ {attachBaseContext(context);} });
+        return new FullToolsData(owner[0]){
+            public void activate(VelaHub.Hit hit){throw new AssertionError();}
+            public void closed(boolean changed){throw new AssertionError();}
+            public String scope(){return LiveTvData.source(context);}
+        };
+    }
+    private static void checkRecurringRefresh(Context c,VelaHub.Host guide,String scenario)throws Exception{
+        SharedPreferences prefs=VelaShows.prefs(c);
+        prefs.edit().remove("scan").commit();
+        VelaProgrammeRefresh refresh=new VelaProgrammeRefresh(c);
+        try{
+            refresh.check(guide);
+            long until=SystemClock.elapsedRealtime()+10000;
+            while(!prefs.contains("scan")&&SystemClock.elapsedRealtime()<until)Thread.sleep(20);
+            check(prefs.contains("scan"),scenario+" refresh did not complete");
+            List<String> titles=new ArrayList<>();
+            for(VelaShows.Airing airing:VelaShows.cached(c))titles.add(airing.title);
+            check(titles.equals(Arrays.asList("Órbita Episodio 4","Órbita Episodio 5")),
+                    scenario+" should find both episodes and exclude Órbita abierta, got "+titles);
+        }finally{refresh.close();}
     }
     public void onCreate(Bundle b){super.onCreate(b);start();}
     public void onStart(){Bundle result=new Bundle();Fixture c=null;try{
@@ -50,7 +75,26 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
         List<VelaShows.Airing> second=cache.discover(0,0,1,new CancellationSignal());check(second.size()==24,"Second page was lost");for(VelaShows.Airing p:second)check(!titles.contains(p.title),"Paging repeated an airing");
         List<VelaShows.Airing> sports=cache.discover(2,2,0,new CancellationSignal());check(sports.size()==24,"Genre filter lost its page");for(VelaShows.Airing p:sports)check(Integer.parseInt(p.title.substring(10))%2==0,"Non-sport programme escaped");
         List<VelaShows.Airing> matches=cache.airings("Programme 0",0,new CancellationSignal());check(matches.size()==1&&matches.get(0).start==now+900,"Explicit EPG identity or time correction lost");
+        try(SQLiteDatabase db=SQLiteDatabase.openDatabase(new File(folder,"xmltv.db").getPath(),null,SQLiteDatabase.OPEN_READWRITE)){
+            for(int i=0;i<30;i++){
+                db.execSQL("INSERT INTO programmes(channel,start,end,title) VALUES(?,?,?,?)",
+                        new Object[]{"epg-2",now+i*60,now+(i+1)*60,"Órbita abierta "+i});
+            }
+            long start=now+3600;
+            for(String title:Arrays.asList("Órbita Episodio 4","Órbita Episodio 5","Órbita abierta")){
+                db.execSQL("INSERT INTO programmes(channel,start,end,title) VALUES(?,?,?,?)",new Object[]{"epg-2",start,start+1800,title});
+                start+=3600;
+            }
+        }
+        VelaHub.Host guide=reminderGuide(c);
+        List<VelaShows.Airing> broad=guide.airings("Órbita",0,new CancellationSignal());
+        check(broad.size()==24,"General search must still return a bounded page");
+        for(VelaShows.Airing airing:broad)check(airing.title.startsWith("Órbita abierta"),"Unexpected partial-match page");
+        VelaShows.toggle(c,"Órbita Episodio 4");
+        checkRecurringRefresh(c,guide,"Following an episode from the guide");
+        VelaShows.prefs(c).edit().putString("rules","[\"Órbita Capítulo 9\"]").commit();
+        checkRecurringRefresh(c,guide,"Existing chapter-specific rule");
         CancellationSignal stop=new CancellationSignal();stop.cancel();boolean cancelled=false;try{cache.discover(0,0,0,stop);}catch(OperationCanceledException expected){cancelled=true;}check(cancelled,"Query ignored cancellation");
-        result.putString("result","PASS actual encrypted catalogue with 6000 channels and 20000 EPG rows in "+elapsed+" ms; indexed matching, 24-record pages, genres, hidden channels, explicit aliases, offsets and cancellation. Owned isolated fixture only.");
+        result.putString("result","PASS actual encrypted catalogue with 6000 channels and 20000 EPG rows in "+elapsed+" ms; indexed matching, 24-record pages, genres, hidden channels, explicit aliases, offsets, cancellation and recurring reminders across episodes for new and previously saved rules. Owned isolated fixture only.");
     }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));}finally{if(c!=null)c.cleanup();}finish(result.containsKey("error")?1:-1,result);}
 }

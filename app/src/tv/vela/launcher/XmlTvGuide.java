@@ -6,10 +6,13 @@ import org.xmlpull.v1.XmlPullParser;import java.io.*;import java.net.*;import ja
 /** Disk-indexed external XMLTV. Only the visible channel/time window enters memory. */
 final class XmlTvGuide {
     List<VelaShows.Airing> antennaAirings(Map<Long,String> tuned,String query,int page,android.os.CancellationSignal signal)throws Exception{
-        long now=System.currentTimeMillis()/1000;
-        return antennaWindow(tuned,query,page,signal,now,now+48*3600,0);
+        return antennaAirings(tuned,VelaGuideSearch.Titles.page(query,page),signal);
     }
-    private List<VelaShows.Airing> antennaWindow(Map<Long,String> tuned,String query,int page,android.os.CancellationSignal signal,long from,long to,int genre)throws Exception{
+    List<VelaShows.Airing> antennaAirings(Map<Long,String> tuned,VelaGuideSearch.Titles titles,android.os.CancellationSignal signal)throws Exception{
+        long now=System.currentTimeMillis()/1000;
+        return antennaWindow(tuned,titles,signal,now,now+48*3600,0);
+    }
+    private List<VelaShows.Airing> antennaWindow(Map<Long,String> tuned,VelaGuideSearch.Titles titles,android.os.CancellationSignal signal,long from,long to,int genre)throws Exception{
         File file=new File(context.getCacheDir(),"tv-guide/xmltv.db");
         String address=url();
         if(address.isEmpty()||!file.isFile())return Collections.emptyList();
@@ -17,7 +20,7 @@ final class XmlTvGuide {
         for(String name:tuned.values())names.putIfAbsent("name:"+TvChannelNames.match(name),name);
         try(SQLiteDatabase db=open();Cursor meta=db.rawQuery("SELECT source FROM meta WHERE id=1",null)){
             if(!meta.moveToFirst()||!meta.getString(0).equals(LiveTvData.hash(address)))return Collections.emptyList();
-            return VelaGuideSearch.readWindow(context,db,names,"alias",XmlTvGuide::fallbackAlias,query,page,signal,from,to,genre);
+            return VelaGuideSearch.readWindow(context,db,names,"alias",XmlTvGuide::fallbackAlias,titles,signal,from,to,genre);
         }
     }
     static final String DEFAULT_URL="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiafanart.xml.gz";
@@ -128,7 +131,7 @@ final class XmlTvGuide {
     }
     List<VelaShows.Airing> discover(Map<Long,String> tuned,int mode,int genre,int page,android.os.CancellationSignal signal)throws Exception{
         long[] window=VelaDiscovery.bounds(mode);
-        return antennaWindow(tuned,"",page,signal,window[0],window[1],genre);
+        return antennaWindow(tuned,VelaGuideSearch.Titles.page("",page),signal,window[0],window[1],genre);
     }
     private static String fallbackAlias(String key){
         if(key.equals("name:fdf"))return "name:factoriadeficcion";

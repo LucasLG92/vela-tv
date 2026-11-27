@@ -99,7 +99,7 @@ public final class AndroidSearchUxTest extends Instrumentation {
     void sources()throws Exception{
         VelaToolsData isolated=new VelaToolsData(activity){
             List<VelaHub.Hit> channels(String q,int p,CancellationSignal c)throws Exception{throw new IOException("Unavailable channels");}
-            public List<VelaShows.Airing> airings(String q,int p,CancellationSignal c)throws Exception{throw new IOException("Unavailable guide");}
+            List<VelaShows.Airing> airings(VelaGuideSearch.Titles titles,CancellationSignal c)throws Exception{throw new IOException("Unavailable guide");}
             List<VelaHub.Hit> media(String q,int p,CancellationSignal c){return Collections.singletonList(new VelaHub.Hit("Plex","Alien","Demo",new Object()));}
             public void activate(VelaHub.Hit h){}public void repair(){}public void closed(boolean changed){}
         };

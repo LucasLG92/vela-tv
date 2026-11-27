@@ -16,16 +16,19 @@ import java.util.zip.GZIPInputStream;
 /** Streaming public programme metadata. No playlists, stream URLs, IPTV accounts or playback code. */
 final class LiteXmlTvGuide {
     List<VelaShows.Airing> airings(Map<Long,String> tuned,String query,int page,CancellationSignal signal){
+        return airings(tuned,VelaGuideSearch.Titles.page(query,page),signal);
+    }
+    List<VelaShows.Airing> airings(Map<Long,String> tuned,VelaGuideSearch.Titles titles,CancellationSignal signal){
         long now=System.currentTimeMillis()/1000;
-        try{return antennaWindow(tuned,query,page,signal,now,now+48*3600,0);}
+        try{return antennaWindow(tuned,titles,signal,now,now+48*3600,0);}
         catch(RuntimeException unavailable){signal.throwIfCanceled();return Collections.emptyList();}
     }
-    private List<VelaShows.Airing> antennaWindow(Map<Long,String> tuned,String query,int page,CancellationSignal signal,long from,long to,int genre){
+    private List<VelaShows.Airing> antennaWindow(Map<Long,String> tuned,VelaGuideSearch.Titles titles,CancellationSignal signal,long from,long to,int genre){
         if(!enabled()||!file.isFile())return Collections.emptyList();
         Map<String,String> names=new LinkedHashMap<>();
         for(String name:tuned.values())names.putIfAbsent(match(name),name);
         try(SQLiteDatabase db=open()){
-            return VelaGuideSearch.readWindow(context,db,names,"name",query,page,signal,from,to,genre);
+            return VelaGuideSearch.readWindow(context,db,names,"name",null,titles,signal,from,to,genre);
         }
     }
     static final String URL="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiafanart.xml.gz";
@@ -97,7 +100,7 @@ final class LiteXmlTvGuide {
     }
     List<VelaShows.Airing> discover(Map<Long,String> tuned,int mode,int genre,int page,CancellationSignal signal){
         long[] window=VelaDiscovery.bounds(mode);
-        return antennaWindow(tuned,"",page,signal,window[0],window[1],genre);
+        return antennaWindow(tuned,VelaGuideSearch.Titles.page("",page),signal,window[0],window[1],genre);
     }
     private static String resolve(SQLiteDatabase db,String name){return VelaGuideSearch.uniqueChannel(db,"name",match(name));}
     Map<String,List<LiveTvData.Programme>> read(List<LiveTvData.Channel> visible,long from,long to,CancellationSignal signal){Map<String,List<LiveTvData.Programme>> result=new HashMap<>();if(!enabled()||!file.exists())return result;try(SQLiteDatabase db=open()){int count=0;for(LiveTvData.Channel channel:visible){check(signal);if(++count>13)break;String id=VelaGuideFix.alias(context,channel.name);if(id.isEmpty())id=resolve(db,channel.name);if(id.isEmpty())continue;long offset=VelaGuideFix.offset(context,channel.name);List<LiveTvData.Programme> list=new ArrayList<>();try(Cursor c=db.rawQuery("SELECT start,end,title,description,image FROM programmes WHERE channel=? AND end>? AND start<? ORDER BY start LIMIT 32",new String[]{id,Long.toString(from-offset),Long.toString(to-offset)})){while(c.moveToNext())list.add(new LiveTvData.Programme(c.getLong(0)+offset,c.getLong(1)+offset,c.getString(2),c.getString(3),c.getString(4)));}if(!list.isEmpty())result.put(channel.id,list);}}catch(Exception unavailable){}return result;}

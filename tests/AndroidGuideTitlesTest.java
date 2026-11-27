@@ -47,6 +47,23 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
                     throw new AssertionError("Antenna search lost the chosen XMLTV ID or time correction");
             }
         } finally { VelaGuideFix.reset(c,label); }
+
+        StringBuilder episodes=new StringBuilder("<tv><channel id='demo'><display-name>Demo HD</display-name></channel>");
+        for(int i=0;i<30;i++){
+            long start=now+60L*i;
+            episodes.append(programme("demo",start,start+60,"<title>Órbita abierta</title>"));
+        }
+        episodes.append(programme("demo",now+3600,now+5400,"<title>Órbita Episodio 5</title>"));
+        episodes.append(programme("demo",now+5400,now+7200,"<title>Luna Capítulo 2</title>")).append("</tv>");
+        byte[] schedule=episodes.toString().getBytes(StandardCharsets.UTF_8);
+        full.importGuide(new ByteArrayInputStream(schedule),LiveTvData.hash(full.url()),now);
+        lite.importGuide(new ByteArrayInputStream(schedule),tuned,now,signal);
+        VelaGuideSearch.Titles followed=VelaGuideSearch.Titles.followed(new HashSet<>(Arrays.asList("orbita","luna")));
+        for(List<VelaShows.Airing> rows:Arrays.asList(full.antennaAirings(names,followed,signal),lite.airings(names,followed,signal))){
+            if(rows.size()!=2)throw new AssertionError("Antenna reminders lost episodes after a page of similar titles");
+            equal("Órbita Episodio 5",rows.get(0).title);
+            equal("Luna Capítulo 2",rows.get(1).title);
+        }
     }
     @Override public void onCreate(Bundle args){super.onCreate(args);start();}
     @Override public void onStart(){
