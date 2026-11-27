@@ -23,7 +23,17 @@ final class VelaShows {
     static String identity(String title){return VelaWorkspace.normal(title).replaceFirst("\\s+(?:t\\s*\\d+\\s*e\\s*\\d+|s\\d+e\\d+|temporada\\s+\\d+.*|episodio\\s+\\d+.*|cap[ií]tulo\\s+\\d+.*)$","").trim();}
     static List<String> rules(Context c){List<String> out=new ArrayList<>();try{JSONArray a=new JSONArray(prefs(c).getString("rules","[]"));for(int i=0;i<Math.min(MAX_RULES,a.length());i++){String s=VelaWorkspace.clean(a.getString(i),160);if(!s.isEmpty()&&!out.contains(s))out.add(s);}}catch(JSONException invalid){}return out;}
     static boolean follows(Context c,String title){for(String rule:rules(c))if(identity(rule).equals(identity(title)))return true;return false;}
-    static void toggle(Context c,String title){List<String> values=rules(c);String key=identity(title);boolean removed=values.removeIf(s->identity(s).equals(key));if(!removed&&values.size()<MAX_RULES&&!key.isEmpty())values.add(VelaWorkspace.clean(title.replaceFirst("(?i)\\s+(?:T\\d+\\s*E\\d+|S\\d+E\\d+).*$",""),160));prefs(c).edit().putString("rules",new JSONArray(values).toString()).remove("scan").commit();schedule(c);}
+    static void toggle(Context c,String title){
+        synchronized(VelaWorkspace.class){
+            List<String> values=rules(c);
+            String key=identity(title);
+            boolean removed=values.removeIf(s->identity(s).equals(key));
+            if(!removed&&values.size()<MAX_RULES&&!key.isEmpty())
+                values.add(VelaWorkspace.clean(title.replaceFirst("(?i)\\s+(?:T\\d+\\s*E\\d+|S\\d+E\\d+).*$",""),160));
+            prefs(c).edit().putString("rules",new JSONArray(values).toString()).remove("scan").commit();
+        }
+        schedule(c);
+    }
     static boolean enabled(Context c){return prefs(c).getBoolean("notifications",false);}
     static boolean permitted(Context c){NotificationManager m=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);if(m==null||!m.areNotificationsEnabled()||Build.VERSION.SDK_INT>=33&&c.checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)return false;NotificationChannel channel=m.getNotificationChannel("vela-programmes");return channel==null||channel.getImportance()!=NotificationManager.IMPORTANCE_NONE;}
     static void invalidate(Context c){cancel(c);prefs(c).edit().remove("airings").remove("scan").remove("shown").commit();}
@@ -69,5 +79,26 @@ final class VelaShows {
     private static PendingIntent alarm(Context c){return PendingIntent.getBroadcast(c,701,new Intent(c,VelaReminderReceiver.class).setAction(c.getPackageName()+".PROGRAMME"),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);}
     static void cancel(Context c){AlarmManager m=(AlarmManager)c.getSystemService(Context.ALARM_SERVICE);if(m!=null)m.cancel(alarm(c));}
     static void schedule(Context c){cancel(c);if(!enabled(c)||!permitted(c))return;long now=System.currentTimeMillis()/1000,shown=prefs(c).getLong("shown",0);for(Airing p:cached(c))if(p.start>shown&&p.start>now){AlarmManager m=(AlarmManager)c.getSystemService(Context.ALARM_SERVICE);if(m!=null)m.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,Math.max(System.currentTimeMillis()+1000,(p.start-120)*1000),alarm(c));return;}}
-    static void deliver(Context c){if(!enabled(c))return;long now=System.currentTimeMillis()/1000,shown=prefs(c).getLong("shown",0),latest=shown;int sent=0;for(Airing p:cached(c))if(p.start>shown&&p.start<=now+150&&p.end>now&&sent++<4){latest=Math.max(latest,p.start);NotificationManager manager=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);if(manager!=null&&manager.areNotificationsEnabled()&&(Build.VERSION.SDK_INT<33||c.checkSelfPermission("android.permission.POST_NOTIFICATIONS")==android.content.pm.PackageManager.PERMISSION_GRANTED)){manager.createNotificationChannel(new NotificationChannel("vela-programmes",VelaWorkspace.t("Programmes","Programas"),NotificationManager.IMPORTANCE_DEFAULT));String cls=VelaEdition.lite(c)?"tv.vela.launcher.LiteHomeActivity":"tv.vela.launcher.HomeActivity";Intent open=new Intent().setClassName(c.getPackageName(),cls).putExtra("velaTools",3).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);PendingIntent pi=PendingIntent.getActivity(c,702,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);manager.notify(703+(sent%4),new Notification.Builder(c,"vela-programmes").setSmallIcon(R.drawable.icon).setContentTitle(p.title).setContentText(p.channel+" · "+(p.start>now?VelaWorkspace.t("Starting soon","Empieza pronto"):VelaWorkspace.t("On now","En emisión"))).setContentIntent(pi).setAutoCancel(true).build());}}if(latest>shown)prefs(c).edit().putLong("shown",latest).commit();schedule(c);}
+    static void deliver(Context c){
+        if(!enabled(c)||!permitted(c))return;
+        NotificationManager manager=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.createNotificationChannel(new NotificationChannel("vela-programmes",VelaWorkspace.t("Programmes","Programas"),NotificationManager.IMPORTANCE_DEFAULT));
+        String cls=VelaEdition.lite(c)?"tv.vela.launcher.LiteHomeActivity":"tv.vela.launcher.HomeActivity";
+        Intent open=new Intent().setClassName(c.getPackageName(),cls).putExtra("velaTools",3).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pi=PendingIntent.getActivity(c,702,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+        long now=System.currentTimeMillis()/1000,shown=prefs(c).getLong("shown",0),latest=shown;
+        int sent=0;
+        for(Airing p:cached(c)){
+            if(p.start<=shown||p.start>now+150||p.end<=now)continue;
+            String timing=p.start>now?VelaWorkspace.t("Starting soon","Empieza pronto"):VelaWorkspace.t("On now","En emisión");
+            Notification notification=new Notification.Builder(c,"vela-programmes").setSmallIcon(R.drawable.icon)
+                    .setContentTitle(p.title).setContentText(p.channel+" · "+timing).setContentIntent(pi).setAutoCancel(true).build();
+            try{manager.notify(703+(sent+1)%4,notification);}
+            catch(SecurityException permissionChanged){break;}
+            latest=Math.max(latest,p.start);
+            if(++sent==4)break;
+        }
+        if(latest>shown)prefs(c).edit().putLong("shown",latest).commit();
+        schedule(c);
+    }
 }

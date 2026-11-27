@@ -13,10 +13,34 @@ final class VelaProgrammeRefresh {
     private Future<?> job;private CancellationSignal signal=new CancellationSignal();private boolean closed;
     VelaProgrammeRefresh(Context c){context=c.getApplicationContext();}
     void check(VelaHub.Host provider){
-        if(closed||job!=null&&!job.isDone()||VelaShows.rules(context).isEmpty())return;
-        File file=new File(context.getCacheDir(),VelaEdition.lite(context)?"antenna-epg/programmes.db":"tv-guide/xmltv.db");SharedPreferences prefs=VelaShows.prefs(context);String scope=provider.scope();if(!scope.equals(prefs.getString("scope",""))){VelaShows.invalidate(context);prefs.edit().putString("scope",scope).commit();}long now=System.currentTimeMillis(),last=prefs.getLong("scan",0);if(now-last>=0&&now-last<15*60_000&&prefs.getLong("guide",0)==file.lastModified())return;
-        String profile=VelaWorkspace.active(context);List<String> rules=VelaShows.rules(context);signal=new CancellationSignal();CancellationSignal token=signal;
-        job=worker.submit(()->{try{List<VelaShows.Airing> airings=matching(rules,provider,token);token.throwIfCanceled();synchronized(VelaWorkspace.class){if(profile.equals(VelaWorkspace.active(context))&&scope.equals(provider.scope())&&!token.isCanceled()){VelaShows.replace(context,airings);prefs.edit().putLong("scan",now).putLong("guide",file.lastModified()).apply();}}}catch(Exception unavailable){/* A stale/offline guide keeps the previous safe reminder schedule. */}});
+        if(closed||job!=null&&!job.isDone())return;
+        synchronized(VelaWorkspace.class){
+            List<String> rules=VelaShows.rules(context);
+            if(rules.isEmpty())return;
+            String profile=VelaWorkspace.active(context),scope=provider.scope();
+            SharedPreferences prefs=VelaShows.prefs(context);
+            if(!scope.equals(prefs.getString("scope",""))){
+                VelaShows.invalidate(context);
+                prefs.edit().putString("scope",scope).commit();
+            }
+            File guide=new File(context.getCacheDir(),VelaEdition.lite(context)?"antenna-epg/programmes.db":"tv-guide/xmltv.db");
+            long guideVersion=guide.lastModified(),now=System.currentTimeMillis(),last=prefs.getLong("scan",0);
+            if(now>=last&&now-last<15*60_000&&prefs.getLong("guide",0)==guideVersion)return;
+            CancellationSignal token=new CancellationSignal();
+            signal=token;
+            job=worker.submit(()->{
+                try{
+                    List<VelaShows.Airing> airings=matching(rules,provider,token);
+                    synchronized(VelaWorkspace.class){
+                        if(token.isCanceled()||!profile.equals(VelaWorkspace.active(context))
+                                ||!scope.equals(provider.scope())||guideVersion!=guide.lastModified()
+                                ||!rules.equals(VelaShows.rules(context)))return;
+                        VelaShows.replace(context,airings);
+                        prefs.edit().putLong("scan",now).putLong("guide",guideVersion).apply();
+                    }
+                }catch(Exception unavailable){/* Keep the previous schedule until the guide can be read. */}
+            });
+        }
     }
     static List<VelaShows.Airing> matching(List<String> rules,VelaHub.Host provider,CancellationSignal signal)throws Exception{
         Set<String> series=new HashSet<>();

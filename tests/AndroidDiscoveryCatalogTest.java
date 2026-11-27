@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 import org.json.JSONObject;
 
 /** Exercise the actual encrypted catalogue/attached EPG query, without a TV, account or network. */
@@ -22,13 +23,19 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
         void cleanup(){for(String p:preferences)getBaseContext().deleteSharedPreferences(p);remove(root);}
         void remove(File f){if(f.isDirectory()){File[] children=f.listFiles();if(children!=null)for(File c:children)remove(c);}f.delete();}
     }
-    private VelaHub.Host reminderGuide(Context context){
+    interface AfterGuideRead {void run()throws Exception;}
+    private VelaHub.Host reminderGuide(Context context,AfterGuideRead afterRead){
         Activity[] owner={null};
         runOnMainSync(()->owner[0]=new Activity(){ {attachBaseContext(context);} });
         return new FullToolsData(owner[0]){
             public void activate(VelaHub.Hit hit){throw new AssertionError();}
             public void closed(boolean changed){throw new AssertionError();}
             public String scope(){return LiveTvData.source(context);}
+            @Override List<VelaShows.Airing> airings(VelaGuideSearch.Titles titles,CancellationSignal signal)throws Exception{
+                List<VelaShows.Airing> rows=super.airings(titles,signal);
+                afterRead.run();
+                return rows;
+            }
         };
     }
     private static void checkRecurringRefresh(Context c,VelaHub.Host guide,String scenario)throws Exception{
@@ -45,6 +52,30 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
             check(titles.equals(Arrays.asList("Órbita Episodio 4","Órbita Episodio 5")),
                     scenario+" should find both episodes and exclude Órbita abierta, got "+titles);
         }finally{refresh.close();}
+    }
+    private static void awaitScan(VelaProgrammeRefresh refresh)throws Exception{
+        java.lang.reflect.Field job=VelaProgrammeRefresh.class.getDeclaredField("job");
+        job.setAccessible(true);
+        ((Future<?>)job.get(refresh)).get(15,TimeUnit.SECONDS);
+    }
+    private void changedDuringScan(Context c,VelaHub.Host guide,AfterGuideRead update,String expected,boolean remembered)throws Exception{
+        SharedPreferences prefs=VelaShows.prefs(c);
+        prefs.edit().remove("scan").commit();
+        VelaProgrammeRefresh refresh=new VelaProgrammeRefresh(c);
+        try{
+            refresh.check(reminderGuide(c,update));
+            awaitScan(refresh);
+            check(!prefs.contains("scan"),"An outdated scan was marked fresh after changing "+expected);
+            if(remembered)check(hasTitle(c,expected),"An outdated scan overwrote a newly followed airing");
+            refresh.check(guide);
+            awaitScan(refresh);
+            check(prefs.contains("scan"),"The next check did not accept the updated guide");
+            check(hasTitle(c,expected),"Newly matched programme missing: "+expected);
+        }finally{refresh.close();}
+    }
+    private static boolean hasTitle(Context c,String title){
+        for(VelaShows.Airing airing:VelaShows.cached(c))if(title.equals(airing.title))return true;
+        return false;
     }
     private static JSONObject saveBroadcast(Context c,VelaHub.Host guide,VelaShows.Airing airing)throws Exception{
         VelaHub.Hit hit=new VelaHub.Hit("Programme",airing.title,airing.channel,airing);
@@ -144,7 +175,7 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
                 start+=3600;
             }
         }
-        VelaHub.Host guide=reminderGuide(c);
+        VelaHub.Host guide=reminderGuide(c,()->{});
         List<VelaShows.Airing> broad=guide.airings("Órbita",0,new CancellationSignal());
         check(broad.size()==24,"General search must still return a bounded page");
         for(VelaShows.Airing airing:broad)check(airing.title.startsWith("Órbita abierta"),"Unexpected partial-match page");
@@ -153,6 +184,20 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
         VelaShows.prefs(c).edit().putString("rules","[\"Órbita Capítulo 9\"]").commit();
         checkRecurringRefresh(c,guide,"Existing chapter-specific rule");
         CancellationSignal stop=new CancellationSignal();stop.cancel();boolean cancelled=false;try{cache.discover(0,0,0,stop);}catch(OperationCanceledException expected){cancelled=true;}check(cancelled,"Query ignored cancellation");
+        final Fixture fixture=c;
+        changedDuringScan(c,guide,()->{
+            VelaShows.toggle(fixture,"Órbita abierta");
+            VelaShows.remember(fixture,guide.followedAirings(Collections.singleton(VelaShows.identity("Órbita abierta")),new CancellationSignal()));
+        },"Órbita abierta",true);
+        File guideFile=new File(folder,"xmltv.db");
+        changedDuringScan(c,guide,()->{
+            long previous=guideFile.lastModified();
+            try(SQLiteDatabase db=SQLiteDatabase.openDatabase(guideFile.getPath(),null,SQLiteDatabase.OPEN_READWRITE)){
+                db.execSQL("INSERT INTO programmes(channel,start,end,title) VALUES(?,?,?,?)",
+                        new Object[]{"epg-2",now+5*3600,now+6*3600,"Órbita Episodio 6"});
+            }
+            check(guideFile.setLastModified(previous+2000),"Fixture could not advance the guide timestamp");
+        },"Órbita Episodio 6",false);
         savedChannelSources(c,cache,guide);
         result.putString("result","PASS actual encrypted catalogue with 6000 channels and 20000 EPG rows in "+elapsed+" ms; indexed matching, 24-record pages, genres, hidden channels, explicit aliases, offsets, cancellation and recurring reminders across episodes for new and previously saved rules. Owned isolated fixture only.");
     }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));}finally{if(c!=null)c.cleanup();}finish(result.containsKey("error")?1:-1,result);}
