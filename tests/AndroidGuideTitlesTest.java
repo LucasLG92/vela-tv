@@ -88,6 +88,37 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
         if(Collections.frequency(requests,PLAYLIST)!=2)throw new AssertionError("Legacy guide did not recover with a single playlist refresh");
     }
 
+    private static void checkRelativePlaylist(Context c,Map<String,byte[]> replies)throws Exception{
+        String address="https://playlist.example.invalid/lists/tv.m3u?subscription=fixture";
+        String channel="#EXTINF:-1 tvg-id='demo' tvg-logo='/logos/demo.png',Demo\n";
+        String list="#EXTM3U x-tvg-url='../listed.xml'\n"+channel
+                +"../live/demo.m3u8?quality=hd|User-Agent=FixtureTV\n"
+                +"#EXTINF:-1,Absolute\nhttps://playlist.example.invalid/live/absolute.m3u8\n"
+                +"#EXTINF:-1,Query\n?stream=tv\n"
+                +"#EXTINF:-1,Unencrypted\nhttp://playlist.example.invalid/clear.ts\n"
+                +"#EXTINF:-1,Local\nfile:///tmp/video.ts\n";
+        replies.put(address,RefinementHttp.text(list));
+        M3uClient client=new M3uClient(c);
+        client.configure(address,"",false);
+        if(client.refresh(true))throw new AssertionError("Initial playlist import used an offline cache");
+        List<LiveTvData.Channel> channels=client.page(null,"",null,0).channels;
+        if(channels.size()!=3)throw new AssertionError("Expected three valid playlist streams, got "+channels.size());
+        LiveTvData.Channel demo=channels.get(0);
+        String stream="https://playlist.example.invalid/live/demo.m3u8?quality=hd";
+        equal(stream,demo.streams.get(0));
+        equal("FixtureTV",VelaStreamHeaders.forSignal(demo,stream).get("User-Agent"));
+        equal("https://playlist.example.invalid/logos/demo.png",demo.logo);
+        equal("Emisión de la lista",client.guide(channels).get(demo.id).now.title);
+        equal("https://playlist.example.invalid/live/absolute.m3u8",channels.get(1).streams.get(0));
+        equal("https://playlist.example.invalid/lists/tv.m3u?stream=tv",channels.get(2).streams.get(0));
+        for(String manifest:Arrays.asList("#EXT-X-TARGETDURATION:10\n#EXTINF:10,Segment\npart.ts\n",
+                "#EXT-X-STREAM-INF:BANDWIDTH=90000\nlow.m3u8\n")){
+            replies.put(address,RefinementHttp.text("#EXTM3U\n"+manifest));
+            if(!client.refresh(true))throw new AssertionError("An HLS manifest replaced the channel list");
+            equal(stream,client.page(null,"",null,0).channels.get(0).streams.get(0));
+        }
+    }
+
     private static Map<String,LiveTvData.Guide> loadFeed(Context c,boolean playlist,List<LiveTvData.Channel> channels)throws Exception{
         return playlist?new M3uClient(c).guide(channels):LiveTvData.publicGuide(c,channels);
     }
@@ -414,6 +445,7 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             if(!requests.equals(Arrays.asList(XmlTvGuide.DEFAULT_URL,plain+".gz")))throw new AssertionError("Missing cold-cache schedule fallback");
             equal(plain+".gz",full.url());
             checkPlaylistSettings(c,requests);
+            checkRelativePlaylist(c,cachedFeeds);
             List<String> cacheFailures=new ArrayList<>();
             for(boolean custom:new boolean[]{true,false}){
                 try{checkCacheRecovery(c,custom,cachedFeeds,requests,now);}
@@ -425,7 +457,7 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             checkSearch(c,full,lite,now);
             checkTimeFormats(c,full,lite,now);
             checkProgrammeOnlyGuide(c,full,lite,now);
-            result.putString("result","PASS preservation and recovery of XMLTV and JSON guide caches, custom and advertised playlist guides with accented text, single XMLTV descriptions across all three readers, genre filters with split text and reversed category order, bounded category caches, programme-only feeds with exact, antenna and manual channel matches, antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
+            result.putString("result","PASS relative playlist streams, logos and guides, HLS manifest rollback, preservation and recovery of XMLTV and JSON guide caches, custom and advertised playlist guides with accented text, single XMLTV descriptions across all three readers, genre filters with split text and reversed category order, bounded category caches, programme-only feeds with exact, antenna and manual channel matches, antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
         }catch(Exception|AssertionError failure){result.putString("error",android.util.Log.getStackTraceString(failure));}
         finally{
             SQLiteDatabase.deleteDatabase(fullDb);SQLiteDatabase.deleteDatabase(liteDb);
