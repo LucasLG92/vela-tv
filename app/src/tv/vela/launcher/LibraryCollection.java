@@ -8,6 +8,16 @@ import java.util.*;
 /** Account-bound collection references; no artwork, sessions or provider URLs in preferences. */
 final class LibraryCollection {
     static final int MAX_PINNED=6,HOME_ITEMS=8,PAGE=12;
+    static final class Page {
+        final List<LibraryCollection> items=new ArrayList<>();
+        final int nextOffset;
+        Page(int offset,int received,int total)throws IOException{
+            if(offset<0||offset>1_200_000||received>PAGE)throw new IOException("Invalid collection page");
+            int end=offset+received;
+            boolean more=total<0?received==PAGE:end<total;
+            nextOffset=received>0&&more?end:-1;
+        }
+    }
     final String provider,key,title,account;
     LibraryCollection(String provider,String key,String title,String account)throws IOException{if(!Arrays.asList("Plex","Jellyfin").contains(provider)||!(provider.equals("Plex")?key.matches("[0-9]{1,20}"):key.matches("[a-f0-9]{32}"))||account.isEmpty()||account.length()>128)throw new IOException("Invalid collection");this.provider=provider;this.key=key;String clean=title==null?"":title.replaceAll("[\\p{Cntrl}]"," ").trim();this.title=clean.substring(0,Math.min(160,clean.length()));this.account=account;}
     String identity(){return provider+"|"+account+"|"+key;}

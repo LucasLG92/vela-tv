@@ -186,7 +186,8 @@ class PlexClient {
         path=path.replace("X-Plex-Container-Size="+PAGE_SIZE,"X-Plex-Container-Size="+VelaHomeRows.LIMIT);
         return VelaHomeRows.merge(row,parseChildren(catalogJson(path,1024*1024),0,VelaHomeRows.LIMIT).films,Collections.emptyList());
     }
-    private JSONObject catalogJson(String path,int limit)throws Exception{Map<String,?> values=prefs.getAll();String base=(String)values.get("serverUri"),token=(String)values.get("serverToken");if(base==null||token==null||token.isEmpty())throw new IOException("Plex not linked");return new JSONObject(new String(bytes(base+path,token,null,12000,limit),StandardCharsets.UTF_8));}
+    private JSONObject catalogJson(String path,int limit)throws Exception{return catalogJson(prefs.getAll(),path,limit);}
+    private JSONObject catalogJson(Map<String,?> values,String path,int limit)throws Exception{String base=(String)values.get("serverUri"),token=(String)values.get("serverToken");if(base==null||token==null||token.isEmpty())throw new IOException("Plex not linked");return new JSONObject(new String(bytes(base+path,token,null,12000,limit),StandardCharsets.UTF_8));}
     CatalogFilters.Options filters(Section section)throws Exception{if(!section.key.matches("[0-9]+"))throw new IOException("Invalid section");return CatalogFilters.plexOptions(catalogJson("/library/sections/"+section.key+"/all?includeMeta=1&includeAdvanced=1&X-Plex-Container-Start=0&X-Plex-Container-Size=0",1024*1024),section);}
     CatalogFilters.Choices choices(Section section,CatalogFilters.Facet facet,int offset,String search)throws Exception{
         if(!facet.fixed.isEmpty()||facet.path.isEmpty())return CatalogFilters.slice(facet.fixed,offset,search);String route=CatalogFilters.safePlexFacet(facet.path,section);if(route.isEmpty()||!CatalogFilters.field(facet.id)||offset<0||search.length()>80)throw new IOException("Invalid filter options");
@@ -206,8 +207,25 @@ class PlexClient {
         }
         return new LibraryPage(result,offset,total,received);
     }
-    List<LibraryCollection> collections(Section section,int offset)throws Exception{
-        if(!section.key.matches("[0-9]{1,20}")||offset<0)throw new IOException("Invalid collection page");JSONObject root=catalogJson("/library/sections/"+section.key+"/collections?X-Plex-Container-Start="+offset+"&X-Plex-Container-Size=12",1024*1024);JSONObject container=root.getJSONObject("MediaContainer");if(container.optInt("offset",offset)!=offset)throw new IOException("Invalid collection offset");JSONArray a=container.optJSONArray("Metadata");if(a!=null&&a.length()>12)throw new IOException("Collection page limit");List<LibraryCollection> out=new ArrayList<>();String account=profileKey(identity());for(int i=0;a!=null&&i<a.length();i++){JSONObject j=a.getJSONObject(i);if(j.optString("type").equals("collection"))out.add(new LibraryCollection("Plex",j.getString("ratingKey"),j.optString("title"),account));}return out;
+    LibraryCollection.Page collectionPage(Section section,int offset)throws Exception{
+        if(!section.key.matches("[0-9]{1,20}")||offset<0)throw new IOException("Invalid collection page");
+        Map<String,?> session=prefs.getAll();
+        String path="/library/sections/"+section.key+"/collections?X-Plex-Container-Start="+offset+"&X-Plex-Container-Size="+LibraryCollection.PAGE;
+        JSONObject container=catalogJson(session,path,1024*1024).getJSONObject("MediaContainer");
+        if(container.optInt("offset",offset)!=offset)throw new IOException("Invalid collection offset");
+        String identity=Objects.toString(session.get("serverId"),"")+":"+profileKey((String)session.get("serverToken"));
+        if(!identity.equals(identity()))throw new IOException("Library account changed");
+        String account=profileKey(identity);
+        JSONArray rows=container.optJSONArray("Metadata");
+        int received=rows==null?0:rows.length();
+        LibraryCollection.Page result=new LibraryCollection.Page(offset,received,container.optInt("totalSize",-1));
+        for(int i=0;i<received;i++){
+            JSONObject item=rows.optJSONObject(i);
+            if(item!=null&&"collection".equals(item.optString("type"))&&item.optString("ratingKey").matches("[0-9]{1,20}")){
+                result.items.add(new LibraryCollection("Plex",item.getString("ratingKey"),item.optString("title"),account));
+            }
+        }
+        return result;
     }
     LibraryPage collectionItems(String key,int offset,int limit)throws Exception{if(!key.matches("[0-9]{1,20}")||offset<0||limit<1||limit>PAGE_SIZE)throw new IOException("Invalid collection");return parseChildren(catalogJson("/library/metadata/"+key+"/children?includeGuids=1&X-Plex-Container-Start="+offset+"&X-Plex-Container-Size="+limit,2*1024*1024),offset,limit);}
     LibraryPage children(Film parent,int offset)throws Exception{return collectionItems(parent.key,offset,PAGE_SIZE);}

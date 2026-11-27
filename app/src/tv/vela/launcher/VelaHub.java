@@ -25,6 +25,7 @@ final class VelaHub extends FrameLayout {
         Hit(String kind,String title,String detail,Object value){this.kind=kind;this.title=title;this.detail=detail;this.value=value;}
     }
     static final class Hits extends ArrayList<Hit> {boolean more,partial;}
+    static final class CollectionHits extends ArrayList<Hit> {int nextOffset=-1;}
     interface Host {
         List<Hit> search(String query,int page,CancellationSignal cancel)throws Exception;
         default List<Hit> voiceSearch(VelaVoice.Request request,int page,CancellationSignal cancel)throws Exception{return search(request.query,page,cancel);}
@@ -43,7 +44,7 @@ final class VelaHub extends FrameLayout {
         default List<VelaShows.Airing> discover(int mode,int genre,int page,CancellationSignal signal)throws Exception{return airings("",page,signal);}
         default boolean hasCollections(){return false;}
         default List<VelaLayout.Service> homeServices(){return Collections.emptyList();}
-        default List<Hit> collections(String source,int page,CancellationSignal signal)throws Exception{return Collections.emptyList();}
+        default CollectionHits collections(String source,int offset,CancellationSignal signal)throws Exception{return new CollectionHits();}
         default boolean collectionPinned(Hit hit){return false;}
         default void pinCollection(Hit hit)throws Exception{throw new IOException("Unavailable");}
         default boolean navigation(){return false;}
@@ -59,7 +60,7 @@ final class VelaHub extends FrameLayout {
     private Future<?> task;private CancellationSignal cancel=new CancellationSignal();private int epoch,page=-1,resultPage;private final long revision;private volatile boolean closed;private boolean changed,building=true,testing;private String capture="",query="";private JSONObject pending;private EditText input;
     private final ConcurrentLinkedQueue<AutoCloseable> disposables=new ConcurrentLinkedQueue<>();private VelaConnect mobile;private String correction="",guideQuery="";private int guidePage,discoveryMode,discoveryGenre,discoveryPage;
     private VelaHomeEditor homeEditor;private boolean searchSettings,hdmiLayout;private VelaDiscoveryView discovery;private VelaSearchView searchView;private VelaVoice.Request searchRequest;
-    private VelaProgrammeArt programmeArt;private VelaPerformance.Session performance;private boolean stylePreview;private int collectionPage;private String collectionSource="",detailLookup="";
+    private VelaProgrammeArt programmeArt;private VelaPerformance.Session performance;private boolean stylePreview;private int collectionOffset;private final Deque<Integer> previousCollectionOffsets=new ArrayDeque<>();private String collectionSource="",detailLookup="";
     private boolean pinEntry,rememberRows;private JSONObject layoutDraft;private String grabbed="";
     private final List<View> controls=new ArrayList<>();private final int[] focusMemory=new int[10];
     private VelaVoice.Request spokenRequest;private int widgetPage;private boolean widgetOrdering;private int remoteLevel,remoteKey,remoteScan,remoteGesture;
@@ -286,7 +287,7 @@ final class VelaHub extends FrameLayout {
     }
     private void remoteFirst(){if(!closed&&!controls.isEmpty())controls.get(0).requestFocus();}
     private void remoteBack(){if(remoteLevel==1){render();remoteFirst();}else if(remoteLevel==3)remoteButton();else if(remoteLevel==4)remoteActions();else{remoteShortcuts();remoteFirst();}}
-    private void design(){row(L10n.text("Visual styles"),VelaStyle.name(VelaStyle.selected(activity)),this::styles);row(L10n.text("Home widgets"),L10n.text("Clock, weather and useful shortcuts"),this::widgetSettings);if(host.hasCollections())row(L10n.text("Home collections"),L10n.text("Pin up to six collections from your server"),()->{collectionPage=0;collections();});caption.setText(t("Edit your home without leaving Vela. Folders work in both editions.","Organiza tu inicio sin salir de Vela. Las carpetas funcionan en ambas versiones."));row(L10n.text("Edit home sections"),L10n.text("Hold OK to move · Arrows to arrange · Save or cancel"),()->{layoutDraft=VelaLayout.read(activity);editLayout("");});JSONArray folders=VelaLayout.folders(activity);for(int i=0;i<folders.length();i++){final int at=i;JSONObject f=folders.optJSONObject(i);row("▦  "+f.optString("name"),f.optJSONArray("apps").length()+(f.optJSONArray("apps").length()==1?L10n.text(" app"):L10n.text(" apps")),()->folder(at,0));}input=field(L10n.text("New folder name"));row(L10n.text("Create folder"),L10n.text("Up to 12 folders"),()->{try{VelaLayout.folder(activity,input.getText().toString().trim(),"");changed=true;render();}catch(Exception bad){status.setText(L10n.text("Choose a different name, up to 40 characters."));}});}
+    private void design(){row(L10n.text("Visual styles"),VelaStyle.name(VelaStyle.selected(activity)),this::styles);row(L10n.text("Home widgets"),L10n.text("Clock, weather and useful shortcuts"),this::widgetSettings);if(host.hasCollections())row(L10n.text("Home collections"),L10n.text("Pin up to six collections from your server"),()->openCollections(""));caption.setText(t("Edit your home without leaving Vela. Folders work in both editions.","Organiza tu inicio sin salir de Vela. Las carpetas funcionan en ambas versiones."));row(L10n.text("Edit home sections"),L10n.text("Hold OK to move · Arrows to arrange · Save or cancel"),()->{layoutDraft=VelaLayout.read(activity);editLayout("");});JSONArray folders=VelaLayout.folders(activity);for(int i=0;i<folders.length();i++){final int at=i;JSONObject f=folders.optJSONObject(i);row("▦  "+f.optString("name"),f.optJSONArray("apps").length()+(f.optJSONArray("apps").length()==1?L10n.text(" app"):L10n.text(" apps")),()->folder(at,0));}input=field(L10n.text("New folder name"));row(L10n.text("Create folder"),L10n.text("Up to 12 folders"),()->{try{VelaLayout.folder(activity,input.getText().toString().trim(),"");changed=true;render();}catch(Exception bad){status.setText(L10n.text("Choose a different name, up to 40 characters."));}});}
 
     private void editLayout(String focus){
         clear();heading.setText(L10n.text("Your Home"));caption.setText(L10n.text("Loading…"));JSONObject draft=layoutDraft;
@@ -359,7 +360,41 @@ final class VelaHub extends FrameLayout {
     private void previewStyle(int style){clear();stylePreview=true;heading.setText(VelaStyle.name(style));caption.setText(L10n.text("Style preview · Your current settings are unchanged"));VelaStyle.Preview preview=new VelaStyle.Preview(activity,style);options.addView(preview,new LinearLayout.LayoutParams(-1,270));note(L10n.text("Applies to card sizes and background balance. Reading, reduced motion and your section order are kept."));row(L10n.text("Save style"),"",()->{try{VelaStyle.apply(activity,style);changed=true;styles();}catch(RuntimeException failure){status.setText(L10n.text("Could not save the change."));}});row(L10n.text("Cancel"),"",this::styles);first();}
     private void performance(){clear();heading.setText(L10n.text("Performance lab"));caption.setText(L10n.text("This process only. Frame capture stops after 30 seconds or when you leave."));performance=new VelaPerformance.Session(activity);TextView sample=text(L10n.text("Measuring…"),21,VelaTheme.SECONDARY);sample.setPadding(6,8,6,16);options.addView(sample,new LinearLayout.LayoutParams(-1,-2));String baseline=activity.getSharedPreferences("vela-performance",0).getString("baseline","");TextView comparison=text(baseline.isEmpty()?L10n.text("No baseline saved"):L10n.text("Saved baseline")+"\n"+baseline,18,VelaTheme.MUTED);comparison.setPadding(6,8,6,12);row(L10n.text("Refresh measurement"),L10n.text("Navigate between the controls to measure actual frames"),()->measure(sample));row(L10n.text("Save as baseline"),L10n.text("Numbers only, stored on this device"),()->{String value=sample.getText().toString();if(value.equals(L10n.text("Measuring…")))return;activity.getSharedPreferences("vela-performance",0).edit().putString("baseline",value).apply();comparison.setText(L10n.text("Saved baseline")+"\n"+value);});options.addView(comparison,new LinearLayout.LayoutParams(-1,-2));note(L10n.text("An idle screen produces few frames. PSS is process memory, not the television's total memory. Disk cache is not RAM."));measure(sample);first();}
     private void measure(TextView view){if(performance==null||!performance.active())performance=new VelaPerformance.Session(activity);VelaPerformance.Session session=performance;work(signal->VelaPerformance.sample(activity,signal),value->{view.setText(value+"\n"+session.frames());});}
-    private void collections(){clear();heading.setText(L10n.text("Home collections"));caption.setText(L10n.text("Pin up to six collections. Home loads eight titles per collection."));int selectedPage=collectionPage;work(signal->host.collections(collectionSource,selectedPage,signal),value->{List<Hit> items=(List<Hit>)value;for(Hit hit:items)row((!hit.kind.equals("collection-source")&&host.collectionPinned(hit)?"✓ ":"")+hit.title,hit.detail,()->{if(hit.kind.equals("collection-source")){collectionSource=(String)hit.value;collectionPage=0;collections();return;}try{host.pinCollection(hit);changed=true;collections();}catch(Exception failed){status.setText(L10n.text("Could not change this collection. Check the connection or the six-collection limit."));}});if(items.isEmpty())note(L10n.text("No collections on this page. Collections must exist on your connected server."));if(!collectionSource.isEmpty())row(L10n.text("Choose another library"),"",()->{collectionSource="";collectionPage=0;collections();});if(selectedPage>0)row(L10n.text("‹ Previous"),"",()->{collectionPage--;collections();});if(items instanceof Hits?((Hits)items).more||items.size()==12:items.size()==12)row(L10n.text("Next ›"),"",()->{collectionPage++;collections();});first();});}
+    private void openCollections(String source){
+        collectionSource=source;
+        collectionOffset=0;
+        previousCollectionOffsets.clear();
+        collections();
+    }
+    private void collections(){
+        clear();
+        heading.setText(L10n.text("Home collections"));
+        caption.setText(L10n.text("Pin up to six collections. Home loads eight titles per collection."));
+        String source=collectionSource;
+        int offset=collectionOffset;
+        work(signal->host.collections(source,offset,signal),value->{
+            CollectionHits items=(CollectionHits)value;
+            for(Hit hit:items){
+                if(hit.kind.equals("collection-source")){
+                    row(hit.title,hit.detail,()->openCollections((String)hit.value));
+                }else{
+                    row((host.collectionPinned(hit)?"✓  ":"")+hit.title,hit.detail,()->{
+                        try{host.pinCollection(hit);changed=true;collections();}
+                        catch(Exception failed){status.setText(L10n.text("Could not change this collection. Check the connection or the six-collection limit."));}
+                    });
+                }
+            }
+            if(items.isEmpty())note(L10n.text("No collections on this page. Collections must exist on your connected server."));
+            if(!source.isEmpty())row(L10n.text("Choose another library"),"",()->openCollections(""));
+            if(!previousCollectionOffsets.isEmpty())row(L10n.text("‹ Previous"),"",()->{
+                collectionOffset=previousCollectionOffsets.pop();collections();
+            });
+            if(items.nextOffset>offset)row(L10n.text("Next ›"),"",()->{
+                previousCollectionOffsets.push(offset);collectionOffset=items.nextOffset;collections();
+            });
+            first();
+        });
+    }
     private ImageView programmeImage(FrameLayout card,VelaShows.Airing p,int width,int height){TextView placeholder=text(p.channel,20,VelaTheme.MUTED);placeholder.setGravity(Gravity.CENTER);put(card,placeholder,12,12,width,height);ImageView image=new ImageView(activity);image.setScaleType(p.image.isEmpty()?ImageView.ScaleType.FIT_CENTER:ImageView.ScaleType.CENTER_CROP);image.setBackground(VelaTheme.shape(0x182C323D,14));image.setClipToOutline(true);put(card,image,12,12,width,height);if(programmeArt==null)programmeArt=new VelaProgrammeArt(activity,this);programmeArt.bind(image,p.image.isEmpty()?p.logo:p.image);return image;}
     private void programmeRow(VelaShows.Airing p,String detail,Runnable action){FrameLayout card=new FrameLayout(activity);card.setFocusable(true);card.setFocusableInTouchMode(true);card.setDefaultFocusHighlightEnabled(false);card.setPadding(4,4,4,4);programmeImage(card,p,184,104);TextView title=text(p.title,23,VelaTheme.WHITE);title.setMaxLines(2);title.setEllipsize(TextUtils.TruncateAt.END);put(card,title,220,12,866,62);TextView sub=text(detail,18,VelaTheme.SECONDARY);sub.setSingleLine(true);sub.setEllipsize(TextUtils.TruncateAt.END);put(card,sub,220,80,866,34);card.setBackground(VelaTheme.row(false,VelaReading.accent(activity)));card.setOnFocusChangeListener((v,f)->{if(f)host.contentFocused();card.setBackground(VelaTheme.row(f,VelaReading.accent(activity)));title.setTextColor(f?VelaTheme.INK:VelaTheme.WHITE);sub.setTextColor(f?0xFF626773:VelaTheme.SECONDARY);});card.setOnClickListener(v->action.run());card.setOnKeyListener(this::controlKey);card.setNextFocusLeftId(categories[page].getId());card.setContentDescription(p.title+" · "+detail);LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,132);lp.bottomMargin=8;options.addView(card,lp);controls.add(card);}
     private void programmeHeader(VelaShows.Airing p){FrameLayout header=new FrameLayout(activity);programmeImage(header,p,296,168);TextView info=text(p.description.isEmpty()?L10n.text("No description supplied by this source."):p.description,21,VelaTheme.SECONDARY);info.setMaxLines(5);info.setEllipsize(TextUtils.TruncateAt.END);put(header,info,336,12,770,168);long now=System.currentTimeMillis()/1000;if(p.start<=now&&p.end>now){ProgressBar bar=new ProgressBar(activity,null,android.R.attr.progressBarStyleHorizontal);bar.setMax(1000);bar.setProgress((int)(1000d*(now-p.start)/(p.end-p.start)));bar.setProgressTintList(android.content.res.ColorStateList.valueOf(VelaReading.accent(activity)));put(header,bar,12,198,1098,6);}options.addView(header,new LinearLayout.LayoutParams(-1,222));}

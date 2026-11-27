@@ -18,7 +18,28 @@ abstract class FullToolsData extends VelaToolsData {
         for(String key:keys){boolean nativePlex=key.equals(VelaLayout.PLEX),nativeJf=key.equals(VelaLayout.JELLYFIN),linked=nativePlex?plex:nativeJf&&jf;String title=nativePlex?"Plex":nativeJf?"Jellyfin":SidebarApps.label(activity,key);if(title==null||title.isEmpty())title=key;boolean fallback=nativePlex?plex&&(!library.isJellyfin()||library.both()):nativeJf?jf&&(library.isJellyfin()||library.both()):layout.optBoolean("appResume",true);out.add(new VelaLayout.Service(key,title,L10n.text(linked?"Linked library":"Uses Continue watching shared by Android TV"),fallback,linked));}return out;
     }
     public boolean hasCollections(){return new LibraryClient(activity).connected();}
-    public List<VelaHub.Hit> collections(String source,int page,CancellationSignal signal)throws Exception{LibraryClient client=new LibraryClient(activity);VelaHub.Hits out=new VelaHub.Hits();if(source.isEmpty()){List<LibraryClient.SectionSource> roots=client.collectionSources();for(int i=page*12;i<Math.min(roots.size(),page*12+12);i++){LibraryClient.SectionSource root=roots.get(i);out.add(new VelaHub.Hit("collection-source",root.title,L10n.text("Choose a library"),root.key));}out.more=(page+1)*12<roots.size();}else for(LibraryCollection item:client.collections(source,page)){signal.throwIfCanceled();out.add(new VelaHub.Hit("collection",item.title,item.provider,item.json()));}return out;}
+    public VelaHub.CollectionHits collections(String source,int offset,CancellationSignal signal)throws Exception{
+        LibraryClient client=new LibraryClient(activity);
+        VelaHub.CollectionHits out=new VelaHub.CollectionHits();
+        if(source.isEmpty()){
+            List<LibraryClient.SectionSource> roots=client.collectionSources();
+            int end=Math.min(roots.size(),offset+LibraryCollection.PAGE);
+            for(int i=offset;i<end;i++){
+                signal.throwIfCanceled();
+                LibraryClient.SectionSource root=roots.get(i);
+                out.add(new VelaHub.Hit("collection-source",root.title,L10n.text("Choose a library"),root.key));
+            }
+            if(end<roots.size())out.nextOffset=end;
+        }else{
+            LibraryCollection.Page page=client.collectionPage(source,offset);
+            for(LibraryCollection item:page.items){
+                signal.throwIfCanceled();
+                out.add(new VelaHub.Hit("collection",item.title,item.provider,item.json()));
+            }
+            out.nextOffset=page.nextOffset;
+        }
+        return out;
+    }
     public boolean collectionPinned(VelaHub.Hit hit){try{LibraryCollection item=LibraryCollection.read((org.json.JSONObject)hit.value);for(LibraryCollection p:LibraryCollection.pinned(activity))if(p.identity().equals(item.identity()))return true;}catch(Exception bad){}return false;}
     public void pinCollection(VelaHub.Hit hit)throws Exception{new LibraryClient(activity).toggleCollection(LibraryCollection.read((org.json.JSONObject)hit.value));}
     List<VelaHub.Hit> channels(String query,int page,CancellationSignal signal)throws Exception{
