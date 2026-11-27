@@ -88,17 +88,36 @@ final class VelaShows {
         Intent open=new Intent().setClassName(c.getPackageName(),cls).putExtra("velaTools",3).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pi=PendingIntent.getActivity(c,702,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         long now=System.currentTimeMillis()/1000,shown=prefs(c).getLong("shown",0),latest=shown;
-        int sent=0;
+        List<Airing> due=new ArrayList<>();
         for(Airing p:cached(c)){
-            if(p.start<=shown||p.start>now+150||p.end<=now)continue;
-            String timing=p.start>now?VelaWorkspace.t("Starting soon","Empieza pronto"):VelaWorkspace.t("On now","En emisión");
-            Notification notification=new Notification.Builder(c,"vela-programmes").setSmallIcon(R.drawable.icon)
-                    .setContentTitle(p.title).setContentText(p.channel+" · "+timing).setContentIntent(pi).setAutoCancel(true).build();
-            try{manager.notify(703+(sent+1)%4,notification);}
-            catch(SecurityException permissionChanged){break;}
-            latest=Math.max(latest,p.start);
-            if(++sent==4)break;
+            if(p.start>shown&&p.start<=now+150&&p.end>now)due.add(p);
         }
+        try{
+            if(due.size()>4){
+                // Android TV has limited notification space. Show simultaneous broadcasts together.
+                Notification.InboxStyle list=new Notification.InboxStyle();
+                for(int i=0;i<Math.min(7,due.size());i++){
+                    Airing p=due.get(i);
+                    list.addLine(p.title+" · "+p.channel);
+                }
+                Airing first=due.get(0);
+                Notification summary=new Notification.Builder(c,"vela-programmes").setSmallIcon(R.drawable.icon)
+                        .setContentTitle(VelaWorkspace.t("Programmes","Programas")+" · "+due.size())
+                        .setContentText(first.title+" · "+first.channel).setNumber(due.size()).setStyle(list)
+                        .setContentIntent(pi).setAutoCancel(true).build();
+                manager.notify(704,summary);
+                latest=due.get(due.size()-1).start;
+            }else{
+                int sent=0;
+                for(Airing p:due){
+                    String timing=p.start>now?VelaWorkspace.t("Starting soon","Empieza pronto"):VelaWorkspace.t("On now","En emisión");
+                    Notification notification=new Notification.Builder(c,"vela-programmes").setSmallIcon(R.drawable.icon)
+                            .setContentTitle(p.title).setContentText(p.channel+" · "+timing).setContentIntent(pi).setAutoCancel(true).build();
+                    manager.notify(703+(++sent)%4,notification);
+                    latest=Math.max(latest,p.start);
+                }
+            }
+        }catch(SecurityException permissionChanged){/* Keep unposted reminders pending. */}
         if(latest>shown)prefs(c).edit().putLong("shown",latest).commit();
         schedule(c);
     }

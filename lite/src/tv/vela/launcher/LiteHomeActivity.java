@@ -41,7 +41,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     private TvInputs.Source inputSource;private DeviceIcons devices;private ExecutorService worker;
     private List<LiteCatalog.App> apps=Collections.emptyList();private int section=INPUTS,inputPage,appPage,generation;
     private VelaAutoTune.Session autoTune;
-    private void resumeAutoTune(){if(autoTune==null)autoTune=new VelaAutoTune.Session(this,new VelaAutoTune.Host(){public String source(){return "antenna";}public boolean allowed(){return visible;}public void tune(VelaAutoTune.Plan plan){if(channelMenu!=null)channelMenu.close();if(hub!=null)hub.close();closeTelevision();try{resumeActivity(plan.activity(VelaWorkspace.active(LiteHomeActivity.this)));}catch(org.json.JSONException unavailable){}}});autoTune.resume();}
+    private void resumeAutoTune(){if(autoTune==null)autoTune=new VelaAutoTune.Session(this,new VelaAutoTune.Host(){public String source(){return "antenna";}public boolean allowed(){return visible;}public void tune(VelaAutoTune.Plan plan){try{resumeActivity(plan.activity(VelaWorkspace.active(LiteHomeActivity.this)));}catch(org.json.JSONException unavailable){}}});autoTune.resume();}
     private String selectedPort="";private TvInputs.Entry editing;private boolean visible,registered,consumeOkUp,rebuildingInputs;
 
     protected TvInputs.Source createInputsSource(){return new TvInputs.SystemSource(this);}
@@ -241,12 +241,25 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         String profile=VelaWorkspace.active(this);if(!profile.equals(item.optString("profile")))return;
         Intent intent=VelaRecentActivity.intent(this,item);if(intent!=null){launch(intent);return;}
         if(!item.optString("kind").equals("channel")||!item.optString("scope").equals("antenna"))return;
-        final int token=generation;ExecutorService resolve=new ThreadPoolExecutor(0,1,3,TimeUnit.SECONDS,new ArrayBlockingQueue<>(1));
+        final int token=generation;
+        LiteAntennaPlayer previousPlayer=player;
+        VelaPlaybackPanel previousMenu=channelMenu;
+        int toolsPage=hub==null?-1:hub.page();
+        ExecutorService resolve=new ThreadPoolExecutor(0,1,3,TimeUnit.SECONDS,new ArrayBlockingQueue<>(1));
         jobs.add(resolve.submit(()->{List<LiveTvData.Channel> all=Collections.emptyList();LiveTvData.Channel found=null;
             try{all=createAntennaData().channels(new CancellationSignal());found=LiteChannelPersonal.resolveActivity(this,item.optString("key"),all);}catch(Exception unavailable){}finally{resolve.shutdown();}
             List<LiveTvData.Channel> catalog=all;LiveTvData.Channel channel=found;main.post(()->{
                 if(!visible||generation!=token||!profile.equals(VelaWorkspace.active(this)))return;
-                if(channel!=null){section=TV;playAntenna(channel,catalog);}else Toast.makeText(this,L10n.text("This channel is no longer available."),0).show();
+                if(player!=previousPlayer||channelMenu!=previousMenu||(hub==null?-1:hub.page())!=toolsPage)return;
+                if(channel==null){
+                    Toast.makeText(this,L10n.text("This channel is no longer available."),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(channelMenu!=null)channelMenu.close();
+                if(hub!=null)hub.close();
+                closeTelevision();
+                section=TV;
+                playAntenna(channel,catalog);
             });
         }));
     }

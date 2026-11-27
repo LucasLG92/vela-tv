@@ -34,7 +34,27 @@ public final class LiteAutoTuneTest extends Instrumentation {
         sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);await(()->VelaAutoTune.plans(context).size()==1&&card()!=null);check(((android.widget.TextView)card().actions.getChildAt(0)).getText().toString().contains(L10n.text("Cancel switch")),"Lite cannot cancel the switch");check(card()==originalCard&&activity.getCurrentFocus()==card().actions.getChildAt(0),"Lite scheduling rebuilt the sheet or lost focus");check(((android.widget.TextView)field(card(),"eventState")).getText().toString().contains(L10n.text("Switch scheduled")),"Lite scheduled time is not integrated");shot("scheduled");compactControls();sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);await(()->VelaAutoTune.plans(context).isEmpty());sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);await(()->VelaAutoTune.plans(context).size()==1);
         phase="same-alias-channel-switch";ui(()->call(activity,"playAntenna",new Class[]{LiveTvData.Channel.class,List.class},all.get(1),all));await(()->field(activity,"player")!=null);Object old=field(activity,"player");VelaAutoTune.Session original=(VelaAutoTune.Session)field(activity,"autoTune");VelaAutoTune.Host host=(VelaAutoTune.Host)field(original,"host");java.util.concurrent.atomic.AtomicLong clock=new java.util.concurrent.atomic.AtomicLong(now*1000);
         ui(()->{original.pause();session=new VelaAutoTune.Session(activity,host,clock::get);session.resume();});set(activity,"autoTune",session);clock.set(programme.start*1000);ui(()->call(session,"deliver",new Class[]{}));await(()->field(activity,"player")!=null&&((LiveTvData.Channel)field(field(activity,"player"),"channel")).id.equals(target.id));check(field(activity,"player")!=old,"The old tuner player was not replaced");int players=0;ViewGroup root=(ViewGroup)field(activity,"windowRoot");for(int i=0;i<root.getChildCount();i++)if(root.getChildAt(i) instanceof LiteAntennaPlayer)players++;check(players==1,"Parallel tuner players retained");check(VelaAutoTune.plans(context).isEmpty(),"Lite repeated the completed switch");
+        phase="unavailable-scheduled-channel";
+        ui(()->call(activity,"show",new Class[]{int.class,boolean.class},1,false));
+        await(()->field(activity,"guide")!=null&&!(Boolean)field(field(activity,"guide"),"loading"));
+        Object nextGuide=field(activity,"guide");
+        LiveTvData.Channel unavailable=all.get(1);
+        LiveTvData.Programme later=new LiveTvData.Programme(programme.start+600,programme.end+600,"Later programme","","");
+        ui(()->call(nextGuide,"activateChannel",new Class[]{LiveTvData.Channel.class,LiveTvData.Programme.class},unavailable,later));
+        sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);
+        await(()->VelaAutoTune.scheduled(context,"antenna",LiteChannelPersonal.key(unavailable,all),later.start));
+        ui(()->call(activity,"playAntenna",new Class[]{LiveTvData.Channel.class,List.class},target,all));
+        Object playing=field(activity,"player");
+        new TvPersonalization(context,"antenna").hide(LiteChannelPersonal.key(unavailable,all),unavailable.name,true);
+        clock.set(later.start*1000);
+        ui(()->call(session,"deliver",new Class[]{}));
+        List<?> jobs=(List<?>)field(activity,"jobs");
+        ((java.util.concurrent.Future<?>)jobs.get(jobs.size()-1)).get(10,java.util.concurrent.TimeUnit.SECONDS);
+        waitForIdleSync();
+        check(field(activity,"player")==playing&&((View)playing).isShown(),"An unavailable scheduled channel interrupted the current player");
+        check(((LiveTvData.Channel)field(playing,"channel")).id.equals(target.id),"The playing channel changed after the scheduled lookup failed");
+        check(VelaAutoTune.plans(context).isEmpty(),"An unavailable automatic switch remained pending");
         check(!VelaWorkspace.snapshot(context).toString().contains(VelaAutoTune.NAMESPACE),"Lite exported viewing plans");ui(session::pause);new TvPersonalization(context,"antenna").hide(LiteChannelPersonal.key(target,all),target.name,true);check(LiteChannelPersonal.resolveActivity(context,LiteChannelPersonal.key(target,all),all)==null,"Hidden scheduled tuner channel reopened");
         result.putString("result","PASS Lite real future programme card, remote scheduling and cancellation, automatic switch to the correct tuner identity despite duplicate aliases, previous player disposal, one-shot consume, hidden-channel guard and private backup exclusion. Owned tuner fixture only.");
-    }catch(Throwable e){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(e));try{if(activity!=null)shot("failure");}catch(Exception ignored){}}finally{try{if(session!=null)ui(session::close);if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}}catch(Exception ignored){}}finish(result.containsKey("error")?1:-1,result);}
+    }catch(Throwable e){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(e));try{VelaContentDetails visibleCard=activity==null?null:card();if(visibleCard!=null&&visibleCard.isShown())shot("failure");}catch(Exception|AssertionError screenshotFailed){result.putString("screenshot_error",screenshotFailed.toString());}}finally{try{if(session!=null)ui(session::close);if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}}catch(Exception ignored){}}finish(result.containsKey("error")?1:-1,result);}
 }
