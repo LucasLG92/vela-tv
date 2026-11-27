@@ -67,6 +67,17 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
         List<VelaShows.Airing> matches=guide.airings("Programme 0",0,signal);
         check(matches.size()==2&&matches.get(0).channel.equals(original.channel)&&matches.get(1).channel.equals(original.channel),
                 "The real catalogue did not produce two same-name broadcasts");
+        VelaShows.toggle(c,original.title);
+        VelaShows.Airing legacyRow=new VelaShows.Airing(original.title,original.channel,original.start,original.end);
+        VelaShows.replace(c,Collections.singletonList(legacyRow));
+        VelaShows.remember(c,matches);
+        VelaShows.remember(c,matches);
+        List<VelaShows.Airing> followed=VelaShows.cached(c);
+        check(followed.size()==2,"Following a show lost a same-name regional channel or duplicated a reread");
+        Set<String> followedChannels=new HashSet<>();
+        for(VelaShows.Airing airing:followed)followedChannels.add(airing.channelKey);
+        check(followedChannels.contains(matches.get(0).channelKey)&&followedChannels.contains(matches.get(1).channelKey),
+                "Followed programmes did not keep the original tuning references");
         Set<String> resolved=new HashSet<>();
         for(VelaShows.Airing airing:matches){
             check(airing.title.equals(original.title)&&airing.start==original.start&&airing.end==original.end,"Different EPG slot in fixture");
