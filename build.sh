@@ -94,4 +94,6 @@ if [ ! -f vela.keystore ]; then
     -storepass vela-local -keypass vela-local -dname "CN=Vela" >/dev/null 2>&1
 fi
 "$BT/apksigner" sign --ks vela.keystore --ks-pass pass:vela-local --key-pass pass:vela-local --out Vela.apk out/aligned.apk
+"$BT/apksigner" verify Vela.apk
+"${PYTHON:-python3}" tests/check_tv_package.py "$BT/aapt2" Vela.apk
 echo "Built Vela.apk ($(du -h Vela.apk | cut -f1)). Install: adb install -r Vela.apk"

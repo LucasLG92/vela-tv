@@ -105,4 +105,5 @@ if (!(Test-Path -LiteralPath 'vela.keystore')) {
 Run-Native (Join-Path $bt 'apksigner.bat') @('sign','--ks','vela.keystore','--ks-pass','pass:vela-local','--key-pass','pass:vela-local',
     '--out','Vela.apk','out/aligned.apk')
 Run-Native (Join-Path $bt 'apksigner.bat') @('verify','--verbose','Vela.apk')
+Run-Native $PythonPath @('tests/check_tv_package.py',(Join-Path $bt 'aapt2.exe'),'Vela.apk')
 Write-Output 'Built Vela.apk'

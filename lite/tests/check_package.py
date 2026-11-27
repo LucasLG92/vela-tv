@@ -1,9 +1,12 @@
 """Verify that the actual Lite APK is independent and contains no full Vela runtime."""
 from pathlib import Path
-import hashlib,json,os,re,subprocess,zipfile
+import hashlib,json,os,re,subprocess,sys,zipfile
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'tests'))
+from check_tv_package import check_tv_support
 root=Path(__file__).resolve().parents[1];sdk=Path(os.environ.get('ANDROID_HOME',str(Path(os.environ.get('LOCALAPPDATA',Path.home()))/'Android/Sdk')));bt=max((sdk/'build-tools').iterdir(),key=lambda p:tuple(map(int,p.name.split('.'))));apk=root/'Vela-Lite.apk'
 data=apk.read_bytes();badging=subprocess.check_output([str(bt/('aapt2.exe' if os.name=='nt' else 'aapt2')),'dump','badging',str(apk)]).decode()
 assert "name='tv.vela.launcher.lite'" in badging and re.search(r"(?:minSdkVersion|sdkVersion):'26'",badging) and "targetSdkVersion:'33'" in badging
+check_tv_support(badging)
 permissions=re.findall(r"^uses-permission: name='([^']+)'",badging,re.M)
 assert set(permissions)=={'android.permission.READ_TV_LISTINGS','android.permission.INTERNET','android.permission.ACCESS_NETWORK_STATE','android.permission.REQUEST_INSTALL_PACKAGES','android.permission.POST_NOTIFICATIONS','android.permission.RECEIVE_BOOT_COMPLETED','android.permission.RECORD_AUDIO'},'Only TV, network, update, opt-in alerts and user-requested voice permissions may be requested'
 with zipfile.ZipFile(apk) as z:
