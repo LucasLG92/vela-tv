@@ -47,7 +47,7 @@ final class VelaSearchView extends FrameLayout {
     private void put(FrameLayout parent,View v,int x,int y,int w,int h){LayoutParams p=new LayoutParams(w,h);p.leftMargin=x;p.topMargin=y;parent.addView(v,p);}
     static int kind(VelaHub.Hit h){return h.value instanceof Intent?3:h.value instanceof TvInputs.Entry?4:h.value instanceof LiveTvData.Channel||h.value instanceof VelaShows.Airing?2:1;}
     private void paintFilters(){for(int i=0;i<filters.length;i++){TextView v=(TextView)filters[i];if(v==null)continue;boolean focus=v.hasFocus();v.setBackground(VelaTheme.shape(focus?VelaTheme.pearl(VelaReading.accent(activity)):i==filter?VelaTheme.RAISED:Color.TRANSPARENT,24));v.setTextColor(focus?VelaTheme.INK:VelaTheme.WHITE);}}
-    void loading(String query){if(!query.equals(lastQuery)){filter=0;paintFilters();lastQuery=query;}loading=true;all.clear();visible.clear();input.setText(query);releaseCards();empty.setText(L10n.text("Searching…"));empty.setVisibility(VISIBLE);count.setText("");pager();}
+    void loading(String query){if(!query.equals(lastQuery)){filter=0;paintFilters();lastQuery=query;}loading=true;all.clear();visible.clear();releaseCards();empty.setText(L10n.text("Searching…"));empty.setVisibility(VISIBLE);count.setText("");pager();}
     void idle(){loading=false;more=false;localPage=backendPage=0;releaseCards();all.clear();visible.clear();empty.setText(L10n.text("Search your library, channels, apps and inputs."));empty.setVisibility(VISIBLE);count.setText("");pager();}
     void error(int page){loading=false;more=false;localPage=0;backendPage=page;empty.setText(L10n.text("Could not search. Try again."));empty.setVisibility(VISIBLE);pager();}
     void results(java.util.List<VelaHub.Hit> values,int page,boolean hasMore,boolean returningToPreviousPage){
@@ -59,7 +59,8 @@ final class VelaSearchView extends FrameLayout {
         more=hasMore||values.size()>96;
         filterResults();
         localPage=returningToPreviousPage?Math.max(0,visible.size()-1)/pageSize:0;
-        render(hasFocus());
+        boolean editingDraft=input.hasFocus()&&!lastQuery.equals(input.getText().toString().trim());
+        render(hasFocus()&&!editingDraft);
     }
     private void filterResults(){
         visible.clear();

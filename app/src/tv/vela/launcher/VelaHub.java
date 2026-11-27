@@ -97,7 +97,7 @@ final class VelaHub extends FrameLayout {
     private void searchPage(){
         for(int i=0;i<canvas.getChildCount();i++)canvas.getChildAt(i).setVisibility(GONE);
         searchView=new VelaSearchView(activity,new VelaSearchView.Host(){
-            public void search(String text){query=text;searchRequest=null;spokenRequest=null;resultPage=0;VelaHub.this.search(false);}
+            public void search(String text){hideSearchKeyboard();query=text;searchRequest=null;spokenRequest=null;resultPage=0;VelaHub.this.search(false);}
             public void navigation(){if(!host.navigation())VelaHub.this.close();}public boolean header(View from){return host.header(from);}public void voice(){VelaHub.this.voice();}public void settings(){searchPreferences();}public void close(){VelaHub.this.close();}
             public void open(Hit hit){openSearchHit(hit);}public void save(Hit hit){try{JSONObject ref=host.reference(hit);if(ref==null)return;VelaWatchlist.toggle(activity,ref);searchView.message(L10n.text("Watch later updated"));}catch(Exception bad){searchView.message(L10n.text("Could not save this item."));}}
             public void next(int direction){resultPage=Math.max(0,resultPage+direction);VelaHub.this.search(direction<0);}public void focused(){host.contentFocused();}
@@ -116,9 +116,13 @@ final class VelaHub extends FrameLayout {
     }
     private void saveSearchPreference(boolean first){if(VelaSessions.blocked(activity)){page=4;unlockPage();return;}VelaVoice.firstResult(activity,first);changed=true;searchPreferences();}
     private void openSearchHit(Hit hit){if(hit.value instanceof VelaShows.Airing){airing((VelaShows.Airing)hit.value);return;}close();host.activate(hit);}
+    private void hideSearchKeyboard(){
+        if(input==null)return;
+        InputMethodManager keyboard=(InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(keyboard!=null)keyboard.hideSoftInputFromWindow(input.getWindowToken(),0);
+    }
     private void search(boolean returningToPreviousPage){
         if(searchView==null)return;
-        if(input!=null){query=input.getText().toString().trim();InputMethodManager keyboard=(InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);if(keyboard!=null)keyboard.hideSoftInputFromWindow(input.getWindowToken(),0);}
         if(query.isEmpty()){cancelWork();spokenRequest=null;searchRequest=null;searchView.idle();searchView.message(L10n.text("Enter a name to search."));return;}
         searchView.loading(query);String q=query,scope=host.scope();int p=resultPage;VelaVoice.Request spoken=spokenRequest;spokenRequest=null;if(spoken!=null)searchRequest=spoken;VelaVoice.Request scoped=searchRequest;
         work(signal->scoped==null?host.search(q,p,signal):host.voiceSearch(scoped,p,signal),value->{
@@ -140,6 +144,7 @@ final class VelaHub extends FrameLayout {
     void voiceResult(int result,Intent data){String spoken=VelaVoice.result(result,data);if(!spoken.isEmpty())voiceQuery(VelaVoice.parse(spoken));}
     void voiceQuery(VelaVoice.Request request){
         if(closed||request==null||request.query.isEmpty())return;
+        hideSearchKeyboard();
         if(request.target==VelaVoice.DISCOVERY){spokenRequest=null;discoveryGenre=request.genre;discoveryMode=request.tonight?1:0;discoveryPage=0;if(page!=8)select(8);else render();focusNavigation();return;}
         query=request.query;resultPage=0;searchRequest=request;spokenRequest=request;if(page!=0)select(0);else render();focusNavigation();
     }
