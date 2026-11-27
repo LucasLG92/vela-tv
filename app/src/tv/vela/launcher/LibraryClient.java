@@ -83,7 +83,21 @@ final class LibraryClient {
     byte[] avatar()throws Exception{return isJellyfin()?jellyfin.avatar():plex.avatarImage(plex.prefs.getString("accountToken",""));}
     boolean canMarkWatched(PlexClient.Film f){return f!=null&&f.continuing&&!f.tvSource&&("movie".equals(f.type)||"episode".equals(f.type))&&(jf(f)?jellyfin.connected():f.packageName.equals("com.plexapp.android")&&plex.connected());}
     void markWatched(PlexClient.Film f,String expected)throws Exception{String source=identityFor(f);if(!canMarkWatched(f)||!expected.equals(source)&&!(expected.equals(identity())&&uses(f.packageName)))throw new IOException("Library account changed");if(jf(f))jellyfin.markWatched(f.key,source.substring("Jellyfin|".length()));else plex.markWatched(f.key,source.substring("Plex|".length()));}
-    JSONObject reference(PlexClient.Film f)throws Exception{if(f.tvSource||!Arrays.asList("com.plexapp.android",JellyfinClient.PACKAGE).contains(f.packageName))return null;String account=PlexClient.profileKey(jf(f)?jellyfin.identity():plex.identity());return new JSONObject().put("id","media:"+PlexClient.profileKey(f.packageName+"|"+account+"|"+f.key)).put("kind","media").put("provider",jf(f)?"Jellyfin":"Plex").put("key",f.key).put("account",account).put("title",VelaWorkspace.clean(f.title,320));}
+    JSONObject reference(PlexClient.Film f)throws Exception{
+        if(f.tvSource||!Arrays.asList("com.plexapp.android",JellyfinClient.PACKAGE).contains(f.packageName))return null;
+        String account=PlexClient.profileKey(jf(f)?jellyfin.identity():plex.identity());
+        JSONObject ref=new JSONObject().put("id","media:"+PlexClient.profileKey(f.packageName+"|"+account+"|"+f.key))
+                .put("kind","media").put("provider",jf(f)?"Jellyfin":"Plex").put("key",f.key)
+                .put("account",account).put("title",VelaWorkspace.clean(f.title,320));
+        if("episode".equals(f.type)){
+            List<String> detail=new ArrayList<>();
+            String number=VelaWorkspace.clean(f.episodeLabel,48),name=VelaWorkspace.clean(f.detailTitle,240);
+            if(!number.isEmpty())detail.add(number);
+            if(!name.isEmpty()&&!name.equals(f.title)&&!name.equals(number))detail.add(name);
+            if(!detail.isEmpty())ref.put("episode",String.join(" · ",detail));
+        }
+        return ref;
+    }
     PlexClient.Film resolve(JSONObject ref)throws Exception{boolean jf=ref.optString("provider").equals("Jellyfin");String expected=PlexClient.profileKey(jf?jellyfin.identity():plex.identity());if(!ref.optString("account").equals(expected))return null;PlexClient.Film f=jf?jellyfin.item(ref.optString("key")):plex.item(ref.optString("key"));if(f!=null)decorate(Arrays.asList(f));return f;}
     Intent open(PlexClient.Film f){
         if(f==null)return null;if(jf(f)){String id=JellyfinClient.guid(f.key);Intent i=HomeApps.launchIntent(context.getPackageManager(),JellyfinClient.PACKAGE);return id.isEmpty()||i==null?null:i.putExtra("ItemId",id).putExtra("HideSplash",true);}

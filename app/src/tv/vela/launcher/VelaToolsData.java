@@ -22,11 +22,21 @@ abstract class VelaToolsData implements VelaHub.Host {
     void pin(JSONObject data)throws Exception{throw new IOException("No pinned sidebar in Lite");}
     void source(JSONObject data)throws Exception{throw new IOException("No IPTV in Lite");}
     void favorite(LiveTvData.Channel ch)throws Exception{throw new IOException();}
+    @Override public JSONObject reference(VelaHub.Hit hit)throws Exception{
+        return hit.value instanceof VelaShows.Airing?VelaWatchlist.airing((VelaShows.Airing)hit.value):null;
+    }
     public final List<VelaShows.Airing> airings(String query,int page,CancellationSignal signal)throws Exception{
         return airings(VelaGuideSearch.Titles.page(query,page),signal);
     }
     public final List<VelaShows.Airing> followedAirings(Set<String> series,CancellationSignal signal)throws Exception{
         return airings(VelaGuideSearch.Titles.followed(series),signal);
+    }
+    static List<VelaShows.Airing> antennaReferences(List<VelaShows.Airing> airings,Map<Long,String> names,String source,java.util.function.Function<Long,String> keyFor){
+        Map<String,String> unique=new HashMap<>();
+        for(Map.Entry<Long,String> entry:names.entrySet())unique.merge(entry.getValue(),keyFor.apply(entry.getKey()),(a,b)->"");
+        List<VelaShows.Airing> result=new ArrayList<>(airings.size());
+        for(VelaShows.Airing airing:airings)result.add(airing.onChannel(source,unique.getOrDefault(airing.channel,"")));
+        return result;
     }
     abstract List<VelaShows.Airing> airings(VelaGuideSearch.Titles titles,CancellationSignal signal)throws Exception;
     abstract List<VelaHub.Hit> channels(String query,int page,CancellationSignal signal)throws Exception;

@@ -17,7 +17,16 @@ final class VelaWatchlist {
         String encoded=new JSONArray(list).toString();if(encoded.length()>64*1024)throw new IOException("Watch later size limit");
         if(!prefs(c).edit().putString("items",encoded).commit())throw new IOException("Watch later write failed");
     }
-    static String airingId(VelaShows.Airing p){return "tv:"+LiveTvData.hash(TvChannelNames.match(p.channel)+"|"+p.start+"|"+p.end+"|"+VelaShows.identity(p.title));}
-    static JSONObject airing(VelaShows.Airing p)throws Exception{return new JSONObject().put("id",airingId(p)).put("kind","tv").put("title",VelaWorkspace.clean(p.title,320)).put("channel",VelaWorkspace.clean(p.channel,160)).put("start",p.start).put("end",p.end);}
-    static VelaShows.Airing asAiring(JSONObject p){return new VelaShows.Airing(p.optString("title"),p.optString("channel"),p.optLong("start"),p.optLong("end"));}
+    static String airingId(VelaShows.Airing p){
+        String channel=p.channelKey.isEmpty()?TvChannelNames.match(p.channel):p.channelKey;
+        if(!p.source.isEmpty())channel=p.source+"|"+channel;
+        return "tv:"+LiveTvData.hash(channel+"|"+p.start+"|"+p.end+"|"+VelaShows.identity(p.title));
+    }
+    static JSONObject broadcastFields(VelaShows.Airing p)throws JSONException{
+        JSONObject item=new JSONObject().put("title",p.title).put("channel",p.channel).put("start",p.start).put("end",p.end);
+        if(!p.source.isEmpty())item.put("source",p.source).put("channelKey",p.channelKey);
+        return item;
+    }
+    static JSONObject airing(VelaShows.Airing p)throws Exception{return broadcastFields(p).put("id",airingId(p)).put("kind","tv");}
+    static VelaShows.Airing asAiring(JSONObject p){return new VelaShows.Airing(p.optString("title"),p.optString("channel"),p.optLong("start"),p.optLong("end"),"","","","",p.optString("source"),p.optString("channelKey"));}
 }

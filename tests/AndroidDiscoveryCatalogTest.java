@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.*;
 import java.io.*;
 import java.util.*;
+import org.json.JSONObject;
 
 /** Exercise the actual encrypted catalogue/attached EPG query, without a TV, account or network. */
 public final class AndroidDiscoveryCatalogTest extends Instrumentation {
@@ -44,6 +45,52 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
             check(titles.equals(Arrays.asList("Órbita Episodio 4","Órbita Episodio 5")),
                     scenario+" should find both episodes and exclude Órbita abierta, got "+titles);
         }finally{refresh.close();}
+    }
+    private static JSONObject saveBroadcast(Context c,VelaHub.Host guide,VelaShows.Airing airing)throws Exception{
+        VelaHub.Hit hit=new VelaHub.Hit("Programme",airing.title,airing.channel,airing);
+        JSONObject ref=guide.reference(hit);
+        VelaWatchlist.toggle(c,ref);
+        return ref;
+    }
+    private static void savedChannelSources(Context c,TvCatalogCache cache,VelaHub.Host guide)throws Exception{
+        CancellationSignal signal=new CancellationSignal();
+        VelaShows.Airing original=guide.airings("Programme 0",0,signal).get(0);
+        JSONObject first=saveBroadcast(c,guide,original);
+        new M3uClient(c).configure("https://vela-fixture.invalid/second-playlist.m3u","",false);
+        try(TvCatalogCache.Writer writer=cache.writer(LiveTvData.source(c))){
+            for(String country:Arrays.asList("ES","MX")){
+                LiveTvData.Channel channel=new LiveTvData.Channel(country,"["+country+"] Canal 0 HD","Demo","",Collections.singletonList("http://127.0.0.1:9/owned.ts"));
+                writer.add(channel,false);
+            }
+            writer.commit("{}");
+        }
+        List<VelaShows.Airing> matches=guide.airings("Programme 0",0,signal);
+        check(matches.size()==2&&matches.get(0).channel.equals(original.channel)&&matches.get(1).channel.equals(original.channel),
+                "The real catalogue did not produce two same-name broadcasts");
+        Set<String> resolved=new HashSet<>();
+        for(VelaShows.Airing airing:matches){
+            check(airing.title.equals(original.title)&&airing.start==original.start&&airing.end==original.end,"Different EPG slot in fixture");
+            JSONObject saved=saveBroadcast(c,guide,airing);
+            VelaHub.Hit hit=guide.resolve(saved,signal);
+            check(hit!=null&&hit.value instanceof LiveTvData.Channel,"Saved channel did not reopen in its source");
+            resolved.add(((LiveTvData.Channel)hit.value).id);
+        }
+        check(resolved.equals(new HashSet<>(Arrays.asList("ES","MX")))&&VelaWatchlist.read(c).size()==3,
+                "Two regions or two playlists replaced the same saved broadcast");
+        check(guide.resolve(first,signal)==null,"Saved broadcast tuned a namesake on the second playlist");
+        new M3uClient(c).configure("https://vela-fixture.invalid/discovery-query.m3u","",false);
+        VelaHub.Hit again=guide.resolve(first,signal);
+        check(again!=null&&((LiveTvData.Channel)again.value).id.equals("fixture-0"),"Returning to the first playlist lost the saved channel");
+        JSONObject legacy=VelaWatchlist.airing(new VelaShows.Airing(original.title,original.channel,original.start,original.end));
+        JSONObject unknown=new JSONObject(legacy.toString()).put("source","antenna").put("channelKey","");
+        String nameOnly=VelaWatchlist.airingId(VelaWatchlist.asAiring(unknown));
+        unknown.put("channel","Another unavailable channel");
+        check(!nameOnly.equals(VelaWatchlist.airingId(VelaWatchlist.asAiring(unknown)))&&guide.resolve(unknown,signal)==null,
+                "Unresolved channels shared an ID or opened by name");
+        VelaWatchlist.toggle(c,legacy);
+        check(guide.resolve(legacy,signal)==null,"A broadcast saved without a source resolved by name");
+        VelaWatchlist.toggle(c,legacy);
+        check(VelaWatchlist.read(c).size()==3,"Removing a legacy reference removed a source-bound broadcast");
     }
     public void onCreate(Bundle b){super.onCreate(b);start();}
     public void onStart(){Bundle result=new Bundle();Fixture c=null;try{
@@ -95,6 +142,7 @@ public final class AndroidDiscoveryCatalogTest extends Instrumentation {
         VelaShows.prefs(c).edit().putString("rules","[\"Órbita Capítulo 9\"]").commit();
         checkRecurringRefresh(c,guide,"Existing chapter-specific rule");
         CancellationSignal stop=new CancellationSignal();stop.cancel();boolean cancelled=false;try{cache.discover(0,0,0,stop);}catch(OperationCanceledException expected){cancelled=true;}check(cancelled,"Query ignored cancellation");
+        savedChannelSources(c,cache,guide);
         result.putString("result","PASS actual encrypted catalogue with 6000 channels and 20000 EPG rows in "+elapsed+" ms; indexed matching, 24-record pages, genres, hidden channels, explicit aliases, offsets, cancellation and recurring reminders across episodes for new and previously saved rules. Owned isolated fixture only.");
     }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));}finally{if(c!=null)c.cleanup();}finish(result.containsKey("error")?1:-1,result);}
 }
