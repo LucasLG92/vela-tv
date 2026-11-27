@@ -66,21 +66,57 @@ final class VelaPlaybackPanel extends FrameLayout {
     @Override public void onWindowFocusChanged(boolean focused){super.onWindowFocusChanged(focused);scheduleDetailUpdate();}
     @Override public void onVisibilityAggregated(boolean visible){super.onVisibilityAggregated(visible);if(visible)scheduleDetailUpdate();else removeCallbacks(updateDetails);}
     @Override protected void onDetachedFromWindow(){removeCallbacks(updateDetails);super.onDetachedFromWindow();}
-    private void refresh(int selected){
+    void refreshOptions(){
+        View focused=findFocus();
+        refresh(buttons.indexOf(focused),focused instanceof Row?(Row)focused:null);
+    }
+    private Row insertRow(int index){
+        Row row=new Row();
+        LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
+        lp.bottomMargin=4;
+        list.addView(row,index,lp);
+        return row;
+    }
+    private void refresh(int selected){refresh(selected,null);}
+    private void refresh(int selected,Row focused){
         nextDetailUpdate=0;
-        List<Item> items=model.items();buttons.clear();
+        List<Item> items=model.items();
+        // Keep the focused view attached so a held OK reaches the same action on key-up.
+        if(focused!=null){
+            for(int i=0;i<items.size();i++){
+                Item item=items.get(i);
+                if(item.action==null||!item.title.equals(focused.item.title))continue;
+                int old=list.indexOfChild(focused);
+                if(old>i)list.removeViews(i,old-i);
+                for(int index=old;index<i;index++)insertRow(index);
+                break;
+            }
+        }
+        buttons.clear();
         for(int i=0;i<items.size();i++){
-            Row row;if(i<list.getChildCount())row=(Row)list.getChildAt(i);else{row=new Row();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=4;list.addView(row,lp);}
-            row.bind(items.get(i));trackUpdate(row.item);if(row.item.action!=null)buttons.add(row);
+            Row row=i<list.getChildCount()?(Row)list.getChildAt(i):insertRow(i);
+            boolean retained=row==focused&&row.item.title.equals(items.get(i).title);
+            row.bind(items.get(i));trackUpdate(row.item);
+            if(row.item.action!=null){
+                if(retained)selected=buttons.size();
+                buttons.add(row);
+            }
         }
         while(list.getChildCount()>items.size())list.removeViewAt(list.getChildCount()-1);
-        if(!buttons.isEmpty())buttons.get(Math.max(0,Math.min(selected,buttons.size()-1))).requestFocus();
+        if(selected>=0&&!buttons.isEmpty())buttons.get(Math.min(selected,buttons.size()-1)).requestFocus();
         scheduleDetailUpdate();
     }
     private final class Row extends TextView {
         Item item;
         Row(){super(context);setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,22*VelaReading.scale(context));setTextColor(VelaTheme.WHITE);setTypeface(Ui.medium);setGravity(Gravity.CENTER_VERTICAL);setIncludeFontPadding(false);setPadding(22,18,22,18);setMinHeight((int)(78*VelaReading.scale(context)));setDefaultFocusHighlightEnabled(false);setOnFocusChangeListener((v,f)->style());setOnClickListener(v->{Item chosen=item;if(chosen==null||chosen.action==null)return;int at=buttons.indexOf(this);try{chosen.action.run();}catch(RuntimeException unavailable){Toast.makeText(context,L10n.text("This option is unavailable for the current signal."),Toast.LENGTH_SHORT).show();}if(!closed)refresh(at);});}
-        void bind(Item value){boolean changed=item==null||!item.title.equals(value.title)||!item.detail.equals(value.detail);item=value;setFocusable(value.action!=null);setFocusableInTouchMode(value.action!=null);setClickable(value.action!=null);if(changed)style();}
+        void bind(Item value){
+            boolean sameTitle=item!=null&&item.title.equals(value.title);
+            if(isPressed()&&!sameTitle){cancelPendingInputEvents();setPressed(false);}
+            boolean changed=!sameTitle||!item.detail.equals(value.detail);
+            item=value;
+            setFocusable(value.action!=null);setFocusableInTouchMode(value.action!=null);setClickable(value.action!=null);
+            if(changed)style();
+        }
         private void style(){if(item==null)return;VelaTheme.rowText(this,item.title,item.detail,hasFocus());setBackground(VelaTheme.row(hasFocus(),VelaReading.accent(context)));}
     }
     boolean remote(KeyEvent e){int k=e.getKeyCode();if(k==KeyEvent.KEYCODE_MENU){if(e.getAction()==KeyEvent.ACTION_DOWN&&e.getRepeatCount()==0)close();return true;}if(k==KeyEvent.KEYCODE_BACK||k==KeyEvent.KEYCODE_DPAD_LEFT){if(e.getAction()==KeyEvent.ACTION_UP&&!e.isCanceled())close();return true;}if(k==KeyEvent.KEYCODE_DPAD_DOWN||k==KeyEvent.KEYCODE_DPAD_UP){if(e.getAction()==KeyEvent.ACTION_DOWN&&!buttons.isEmpty()){int at=buttons.indexOf(findFocus());buttons.get(Math.max(0,Math.min(buttons.size()-1,at+(k==KeyEvent.KEYCODE_DPAD_DOWN?1:-1)))).requestFocus();}return true;}return false;}

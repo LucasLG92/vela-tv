@@ -42,7 +42,9 @@ final class VelaAutoTune {
     }
     static boolean scheduled(Context c,String scope,String key,long start){for(Plan p:plans(c))if(p.matches(scope,key,start))return true;return false;}
     static synchronized boolean toggle(Context c,Plan next,long now)throws IOException{
-        List<Plan> values=plans(c);boolean removed=values.removeIf(p->p.matches(next.scope,next.key,next.start));values.removeIf(p->p.start<=now||p.start>now+HORIZON);
+        List<Plan> values=plans(c);boolean removed=values.removeIf(p->p.matches(next.scope,next.key,next.start));
+        // A guide click can run before the timer queued for the same second.
+        values.removeIf(p->p.end<=now||p.start<now-GRACE||p.start>now+HORIZON);
         if(!removed){
             if(next.start<=now||next.start>now+HORIZON||decode("["+json(next)+"]").size()!=1)throw new IOException("Programme is no longer upcoming");
             if(values.size()>=MAX_PLANS)throw new Limit();

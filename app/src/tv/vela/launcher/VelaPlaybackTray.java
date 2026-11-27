@@ -38,7 +38,10 @@ final class VelaPlaybackTray extends FrameLayout {
     private int groupIndex,choiceIndex;
     private boolean closed;
     private VelaPlaybackPanel advanced;
-    private final Runnable redraw=()->{if(!closed&&advanced==null)render();};
+    private final Runnable redraw=()->{
+        if(closed)return;
+        if(advanced==null)render();else advanced.refreshOptions();
+    };
 
     VelaPlaybackTray(Context c,String channel,CharSequence programme,Drawable logo,VelaPlaybackPanel.Model model,Runnable exit){
         super(c);this.channel=channel;this.model=model;this.exit=exit;
@@ -170,6 +173,7 @@ final class VelaPlaybackTray extends FrameLayout {
         }
         if(!closed)render();
     }
+    void moreOptionsChanged(){if(advanced!=null)advanced.refreshOptions();}
     void tracksChanged(){removeCallbacks(redraw);post(redraw);}
     boolean remote(KeyEvent e){
         if(advanced!=null)return advanced.remote(e);

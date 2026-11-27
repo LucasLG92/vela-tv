@@ -104,7 +104,11 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     void selectReplay(LiveTvData.Channel ch,LiveTvData.Programme recording,String url){replayUrl=url;replayProgramme=recording;liveBadge.reset(recording!=null);frameworkSignal="";if(controls!=null)controls.close();timeShiftStatus=TvInputManager.TIME_SHIFT_STATUS_UNSUPPORTED;timeShiftStart=timeShiftCurrent=0;closeChannels(false);selected=ch;historyNotified=false;panel.artAvailable(false);panel.rail.color(0);metadata(null,null);channelLogo.label(ch.antenna()&&!ch.number.isEmpty()?ch.number:LiveTvActivity.displayName(ch.name));channelLogo.setImageDrawable(null);if(artwork==null)artwork=new LiveTvLogos(activity);artwork.page();artwork.load(ch,channelLogo);intro.setVisibility(VISIBLE);resetNetworkSession();signals=new TvSignalFallback(ch);signal=replayUrl.isEmpty()?null:new TvSignalFallback.Signal(ch,replayUrl);paused=false;panel.channelName((ch.antenna()&&!ch.number.isEmpty()?ch.number+" · ":"")+LiveTvActivity.displayName(ch.name));showControls();if(active)startSignal();}
     void metadata(LiveTvData.Programme current,LiveTvData.Programme next){
         long now=System.currentTimeMillis()/1000;
-        programmeEnd=current!=null&&current.current(now)?current.end:0;
+        long end=current!=null&&current.current(now)?current.end:0;
+        if(programmeEnd!=end){
+            programmeEnd=end;
+            if(controls!=null&&replayProgramme==null)controls.moreOptionsChanged();
+        }
         panel.bind(current,next,replayProgramme,now);
         if(quickDrawer.getVisibility()==VISIBLE)quickAdapter.notifyDataSetChanged();
     }
@@ -164,7 +168,12 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     private void startAntenna(){
         video.setVisibility(GONE);liveBadge.resolution(0);TvView next=new TvView(activity);tuner=next;addView(next,0,new LayoutParams(-1,-1));
         next.setCallback(new TvView.TvInputCallback(){
-            public void onTimeShiftStatusChanged(String input,int status){if(tuner==next)timeShiftStatus=status;}
+            public void onTimeShiftStatusChanged(String input,int status){
+                if(tuner!=next||timeShiftStatus==status)return;
+                timeShiftStatus=status;
+                if(status!=TvInputManager.TIME_SHIFT_STATUS_AVAILABLE)paused=false;
+                if(controls!=null)controls.moreOptionsChanged();
+            }
             public void onVideoAvailable(String input){if(active&&tuner==next){int mode=VelaPlaybackPanel.prefs(activity).getInt(VelaPlaybackPanel.key(selected.name,"aspect"),0);next.setScaleX(mode==1?1.08f:1);next.setScaleY(mode==1?1.08f:1);rendered=true;prepared=true;notifyStarted();main.removeCallbacks(timeout);message.setVisibility(GONE);pictureReady();}}
             public void onVideoUnavailable(String input,int reason){if(tuner!=next||!active)return;if(reason==TvInputManager.VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY){rendered=true;prepared=true;notifyStarted();main.removeCallbacks(timeout);message.setVisibility(GONE);pictureReady();return;}rendered=false;main.removeCallbacks(hide);message.setVisibility(VISIBLE);message.setText(reason==TvInputManager.VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL?Ui.tr("Sem sinal de antena. Confira o cabo.","No antenna signal. Check the cable.","Sin señal de antena. Comprueba el cable."):Ui.tr("Sintonizando…","Tuning…","Sintonizando…"));if(reason==TvInputManager.VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL)main.removeCallbacks(timeout);showControls();}
             public void onConnectionFailed(String input){if(active&&tuner==next)failed();}

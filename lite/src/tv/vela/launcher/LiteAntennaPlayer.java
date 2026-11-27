@@ -18,6 +18,7 @@ final class LiteAntennaPlayer extends FrameLayout implements AutoCloseable {
     private final List<LiveTvData.Channel> allChannels,channels;private List<LiveTvData.Channel> pickerValues=Collections.emptyList();private boolean pickerFavorites,pickerRecent,pickerFocusRows,historyNotified;private String pickerSignature="";private final TvRemotePress selectPress;private LiveTvData.Channel channel;private Map<String,List<LiveTvData.Programme>> programmes=Collections.emptyMap();
     private final List<Logo> logoViews=new ArrayList<>();private final List<View> pickerRows=new ArrayList<>();private final TextView message;private final VelaPlayerUi.Signal badge;
     private final VelaSleepTimer sleep;private Logo currentLogo;
+    private long programmeEnd;
     private int signalHeight;private VelaPlaybackTray controls;private int controlsKey=-1;private boolean paused;private int timeShiftStatus=TvInputManager.TIME_SHIFT_STATUS_UNSUPPORTED;private long shiftStart,shiftCurrent;
     private Future<?> job;private CancellationSignal cancellation;private int generation,pickerPage;private boolean closed,ready,failed,blocked,infoShown=true,pickerShown;
     private final Runnable hideInfo=this::hideInfoOverlay;
@@ -41,7 +42,12 @@ final class LiteAntennaPlayer extends FrameLayout implements AutoCloseable {
             public void onDisconnected(String input){if(!closed)failure(t("The tuner disconnected.","El sintonizador se ha desconectado."));}
             public void onContentBlocked(String input,TvContentRating rating){if(closed)return;blocked=true;ready=false;main.removeCallbacks(timeout);showInfo();message.setText(t("Blocked by the television's parental controls.\nOK · Open television","Bloqueado por el control parental de la televisión.\nOK · Abrir televisión"));message.setVisibility(VISIBLE);}
             public void onContentAllowed(String input){if(!closed){blocked=false;if(ready)message.setVisibility(GONE);}}
-            public void onTimeShiftStatusChanged(String input,int value){if(!closed)timeShiftStatus=value;}
+            public void onTimeShiftStatusChanged(String input,int value){
+                if(closed||timeShiftStatus==value)return;
+                timeShiftStatus=value;
+                if(value!=TvInputManager.TIME_SHIFT_STATUS_AVAILABLE)paused=false;
+                if(controls!=null)controls.moreOptionsChanged();
+            }
             public void onTrackSelected(String input,int type,String id){if(!closed&&controls!=null)controls.tracksChanged();}
             public void onTracksChanged(String input,List<TvTrackInfo> tracks){VelaPlaybackPanel.restoreTv(getContext(),television,channel.name);if(closed)return;if(controls!=null)controls.tracksChanged();int height=0;if(tracks!=null)for(TvTrackInfo track:tracks)if(track.getType()==TvTrackInfo.TYPE_VIDEO&&track.getVideoHeight()>0){height=track.getVideoHeight();break;}signalHeight=height;badge.resolution(height);}
         });
@@ -60,7 +66,13 @@ final class LiteAntennaPlayer extends FrameLayout implements AutoCloseable {
             info.logo(currentLogo);logoViews.add(currentLogo);info.artAvailable(false);info.rail.color(0);
         }
         info.channelName((favourites.has(channel,allChannels)?"★ ":"")+channel.name);
-        info.bind(current(programmes,channel,now),next(programmes,channel,now),null,now);
+        LiveTvData.Programme on=current(programmes,channel,now);
+        info.bind(on,next(programmes,channel,now),null,now);
+        long end=on==null?0:on.end;
+        if(programmeEnd!=end){
+            programmeEnd=end;
+            if(controls!=null)controls.moreOptionsChanged();
+        }
         Bitmap logo=artwork.get(channel.id);
         if(logo!=null){currentLogo.bitmap(logo);info.artAvailable(true);info.rail.color(VelaPlayerUi.logoColor(logo));}
     }
