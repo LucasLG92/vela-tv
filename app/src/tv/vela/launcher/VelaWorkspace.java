@@ -10,6 +10,10 @@ import java.util.*;
 /** Local personalities and deliberately credential-free, versioned configuration snapshots. */
 final class VelaWorkspace {
     static final int MAX_BYTES=512*1024,MAX_PROFILES=6;
+    private static final int MAX_SECTIONS=96;
+    private static final List<String> SETTINGS_SECTIONS=Arrays.asList(
+            "visuals","sidebar_apps","input_cards","lite_home","lite_tv","vela-reading","vela-programmes",
+            "vela-remote","live-tv","vela-layout","vela-epg-fixes","vela-widgets","vela-search","vela-playback");
     static final String DEFAULT="default";
     private VelaWorkspace(){}
     static SharedPreferences registry(Context c){return c.getSharedPreferences("vela-workspace",0);}
@@ -56,7 +60,7 @@ final class VelaWorkspace {
             String key="names-"+id;
             synchronized(VelaWorkspace.class){
                 Set<String> saved=registry.getStringSet(key,Collections.emptySet());
-                if(saved.size()<96&&!saved.contains(name)){
+                if(saved.size()<MAX_SECTIONS&&!saved.contains(name)){
                     Set<String> updated=new HashSet<>(saved);updated.add(name);
                     registry.edit().putStringSet(key,updated).commit();
                 }
@@ -74,7 +78,7 @@ final class VelaWorkspace {
     static String clean(String s,int limit){if(s==null)return "";s=s.replaceAll("[\\p{Cntrl}]"," ").trim();return s.substring(0,Math.min(limit,s.length()));}
     static String normal(String s){return Normalizer.normalize(s,Normalizer.Form.NFD).replaceAll("\\p{M}+","").toLowerCase(Locale.ROOT).trim();}
     private static void depth(String text)throws IOException{int level=0;boolean quoted=false,escaped=false,done=false;for(int i=0;i<text.length();i++){char ch=text.charAt(i);if(quoted){if(escaped)escaped=false;else if(ch=='\\')escaped=true;else if(ch=='"')quoted=false;continue;}if(i==0&&ch=='\uFEFF')continue;if(done&&!Character.isWhitespace(ch))throw new IOException("Trailing backup content");if(ch=='"')quoted=true;else if(ch=='{'||ch=='['){if(++level>8)throw new IOException("Backup nesting limit");}else if(ch=='}'||ch==']'){if(--level<0)throw new IOException("Invalid backup structure");if(level==0)done=true;}}if(level!=0||quoted)throw new IOException("Incomplete backup");}
-    private static boolean namespace(String n){return Arrays.asList("visuals","sidebar_apps","input_cards","lite_home","lite_tv","vela-reading","vela-programmes","vela-remote","live-tv","vela-layout","vela-epg-fixes","vela-widgets","vela-search","vela-playback").contains(n)||n.matches("tv-personal-[a-f0-9]{64}");}
+    private static boolean namespace(String n){return SETTINGS_SECTIONS.contains(n)||n.startsWith(CHANNEL_PREFS)&&lowerHex(n,CHANNEL_PREFS.length(),64);}
     private static boolean allowed(String n,String k){
         if(n.equals("vela-playback"))return k.equals("engine")||k.equals("buffer");
         if(n.equals("vela-search"))return k.equals("voice_first");
@@ -99,7 +103,17 @@ final class VelaWorkspace {
         boolean string=n.equals("vela-remote")&&k.equals("bindings")||n.equals("vela-widgets")||n.equals("vela-layout")||n.equals("vela-epg-fixes")||n.equals("sidebar_apps")||n.equals("input_cards")||n.startsWith("tv-personal-")||n.equals("vela-programmes");
         boolean integer=n.equals("visuals")&&k.startsWith("appearance_")||n.equals("lite_home")&&k.equals("start_section")||n.equals("vela-reading")&&!k.equals("contrast")||n.equals("vela-remote")&&!k.equals("bindings");
         if(set&&!(v instanceof JSONArray)||string&&!(v instanceof String)||integer&&!(v instanceof Integer)||!set&&!string&&!integer&&!(v instanceof Boolean))throw new IOException("Wrong setting type");
-        if(v instanceof String){String s=(String)v;if(s.length()>96*1024||s.matches("(?is).*https?://.*"))throw new IOException("Invalid configuration value");if(n.equals("vela-remote")){if(s.length()>8192)throw new IOException("Shortcuts too large");depth(s);VelaRemote.validate(new JSONArray(s));}if(n.equals("vela-widgets")){if(s.length()>2048)throw new IOException("Widget settings too large");depth(s);try{VelaWidgets.validate(new JSONObject(s));}catch(JSONException bad){throw new IOException("Invalid widgets",bad);}}if(n.equals("vela-layout")||n.equals("vela-epg-fixes")){depth(s);try{if(n.equals("vela-layout"))VelaLayout.validate(new JSONObject(s));else VelaGuideFix.validate(new JSONObject(s));}catch(Exception bad){throw new IOException("Invalid layout or guide correction",bad);}}if(n.equals("sidebar_apps")){depth(s);JSONArray a=new JSONArray(s);if(a.length()>128)throw new IOException("Too many shortcuts");for(int i=0;i<a.length();i++)if(!a.getString(i).matches("[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+"))throw new IOException("Invalid app");}if(n.equals("input_cards")){
+        if(v instanceof String){String s=(String)v;if(s.length()>96*1024||s.matches("(?is).*https?://.*"))throw new IOException("Invalid configuration value");if(n.equals("vela-remote")){if(s.length()>8192)throw new IOException("Shortcuts too large");depth(s);VelaRemote.validate(new JSONArray(s));}if(n.equals("vela-widgets")){if(s.length()>2048)throw new IOException("Widget settings too large");depth(s);try{VelaWidgets.validate(new JSONObject(s));}catch(JSONException bad){throw new IOException("Invalid widgets",bad);}}if(n.equals("vela-layout")||n.equals("vela-epg-fixes")){depth(s);try{if(n.equals("vela-layout"))VelaLayout.validate(new JSONObject(s));else VelaGuideFix.validate(new JSONObject(s));}catch(Exception bad){throw new IOException("Invalid layout or guide correction",bad);}}if(n.equals("sidebar_apps")){
+            depth(s);
+            JSONArray slots=new JSONArray(s);
+            if(slots.length()>128)throw new IOException("Too many shortcuts");
+            for(int i=0;i<slots.length();i++){
+                Object item=slots.get(i);
+                if(!(item instanceof String))throw new IOException("Invalid app");
+                String pkg=(String)item;
+                if(!pkg.isEmpty()&&!pkg.matches("[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+"))throw new IOException("Invalid app");
+            }
+        }if(n.equals("input_cards")){
             if(k.equals("hdmi_layout")){
                 for(TvInputs.Layout layout:TvInputs.Layout.values())if(layout.key.equals(s))return s;
                 throw new IOException("Invalid HDMI layout");
@@ -112,25 +126,55 @@ final class VelaWorkspace {
         throw new IOException("Invalid value type");
     }
     static synchronized JSONObject snapshot(Context c)throws IOException{
-        JSONObject data=new JSONObject();Set<String> names=new TreeSet<>(Arrays.asList("visuals","sidebar_apps","input_cards","lite_home","lite_tv","vela-reading","vela-programmes","vela-remote","live-tv","vela-layout","vela-epg-fixes","vela-widgets","vela-search","vela-playback"));String prefix=active(c).equals(DEFAULT)?"":"vp-"+active(c)+"-";
-        names.addAll(registry(c).getStringSet("names-"+active(c),Collections.emptySet()));File[] files=new File(c.getApplicationInfo().dataDir,"shared_prefs").listFiles();if(files!=null)for(File f:files){String n=f.getName();if(n.startsWith(prefix+"tv-personal-")&&n.endsWith(".xml"))names.add(n.substring(prefix.length(),n.length()-4));}
-        try{int total=0;for(String n:names){if(!namespace(n)||++total>96)continue;JSONObject values=new JSONObject();for(Map.Entry<String,?> e:prefs(c,n).getAll().entrySet())if(allowed(n,e.getKey())){Object encoded=encode(e.getValue());validate(n,e.getKey(),encoded);values.put(e.getKey(),encoded);}if(values.length()>0)data.put(n,values);}JSONObject root=new JSONObject().put("format","vela-settings").put("version",1).put("edition",VelaEdition.lite(c)?"lite":"full").put("created",System.currentTimeMillis()).put("settings",data);VelaAntennaBackup.describe(c,root);return root;}catch(JSONException e){throw new IOException("Invalid settings",e);}
+        String profile=active(c);
+        String prefix=DEFAULT.equals(profile)?"":"vp-"+profile+"-";
+        Set<String> names=new TreeSet<>(SETTINGS_SECTIONS);
+        names.addAll(registry(c).getStringSet("names-"+profile,Collections.emptySet()));
+        File[] files=new File(c.getApplicationInfo().dataDir,"shared_prefs").listFiles();
+        if(files!=null)for(File file:files){
+            String name=file.getName();
+            if(name.startsWith(prefix+CHANNEL_PREFS)&&name.endsWith(".xml"))
+                names.add(name.substring(prefix.length(),name.length()-4));
+        }
+        try{
+            JSONObject data=new JSONObject();
+            for(String name:names){
+                if(!namespace(name))continue;
+                JSONObject values=new JSONObject();
+                for(Map.Entry<String,?> entry:c.getSharedPreferences(prefix+name,0).getAll().entrySet()){
+                    String key=entry.getKey();
+                    if(!allowed(name,key))continue;
+                    Object encoded=encode(entry.getValue());
+                    validate(name,key,encoded);
+                    values.put(key,encoded);
+                }
+                if(values.length()==0)continue;
+                if(data.length()>=MAX_SECTIONS)throw new IOException(t("Backup too large.","La copia es demasiado grande."));
+                data.put(name,values);
+            }
+            JSONObject root=new JSONObject().put("format","vela-settings").put("version",1)
+                    .put("edition",VelaEdition.lite(c)?"lite":"full").put("created",System.currentTimeMillis()).put("settings",data);
+            VelaAntennaBackup.describe(c,root);
+            return root;
+        }catch(JSONException e){throw new IOException("Invalid settings",e);}
     }
     static JSONObject read(InputStream in)throws IOException{ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] b=new byte[8192];for(int n;(n=in.read(b))!=-1;){if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(out.size()+n>MAX_BYTES)throw new IOException(t("Backup too large.","La copia es demasiado grande."));out.write(b,0,n);}try{String text=out.toString("UTF-8");depth(text);JSONObject j=new JSONObject(text);validateSnapshot(j);return j;}catch(JSONException e){throw new IOException(t("This is not a Vela settings backup.","No es una copia de ajustes de Vela."),e);}}
-    private static JSONObject validateSnapshot(JSONObject j)throws IOException,JSONException{if(j.length()>6)throw new IOException("Unknown backup metadata");for(Iterator<String> fields=j.keys();fields.hasNext();)if(!Arrays.asList("format","version","edition","created","settings","antenna").contains(fields.next()))throw new IOException("Unknown backup metadata");if(!(j.get("version") instanceof Integer)||j.has("created")&&!(j.get("created") instanceof Number)||j.has("antenna")&&(!(j.get("antenna") instanceof JSONObject)||j.getJSONObject("antenna").length()>512))throw new IOException("Invalid backup metadata");if(!j.optString("format").equals("vela-settings")||j.optInt("version")!=1||!Arrays.asList("lite","full").contains(j.optString("edition")))throw new IOException("Unsupported backup");JSONObject data=j.getJSONObject("settings");if(data.length()>96)throw new IOException("Too many sections");for(Iterator<String> it=data.keys();it.hasNext();){String n=it.next();if(!namespace(n))throw new IOException("Unknown section");JSONObject values=data.getJSONObject(n);if(values.length()>768)throw new IOException("Too many settings");for(Iterator<String> keys=values.keys();keys.hasNext();){String k=keys.next();validate(n,k,values.get(k));}}return data;}
+    private static JSONObject validateSnapshot(JSONObject j)throws IOException,JSONException{if(j.length()>6)throw new IOException("Unknown backup metadata");for(Iterator<String> fields=j.keys();fields.hasNext();)if(!Arrays.asList("format","version","edition","created","settings","antenna").contains(fields.next()))throw new IOException("Unknown backup metadata");if(!(j.get("version") instanceof Integer)||j.has("created")&&!(j.get("created") instanceof Number)||j.has("antenna")&&(!(j.get("antenna") instanceof JSONObject)||j.getJSONObject("antenna").length()>512))throw new IOException("Invalid backup metadata");if(!j.optString("format").equals("vela-settings")||j.optInt("version")!=1||!Arrays.asList("lite","full").contains(j.optString("edition")))throw new IOException("Unsupported backup");JSONObject data=j.getJSONObject("settings");if(data.length()>MAX_SECTIONS)throw new IOException("Too many sections");for(Iterator<String> it=data.keys();it.hasNext();){String n=it.next();if(!namespace(n))throw new IOException("Unknown section");JSONObject values=data.getJSONObject(n);if(values.length()>768)throw new IOException("Too many settings");for(Iterator<String> keys=values.keys();keys.hasNext();){String k=keys.next();validate(n,k,values.get(k));}}return data;}
     static String description(JSONObject j){JSONObject d=j.optJSONObject("settings");return (d==null?0:d.length())+t(" setting groups · "," grupos de ajustes · ")+(j.optString("edition").equals("lite")?"Vela Lite":"Vela")+"\n"+t("Applied to the active profile. Accounts and passwords are not included.","Se aplicará al perfil activo. No incluye cuentas ni contraseñas.");}
     static void write(JSONObject j,OutputStream out)throws IOException{byte[] bytes=j.toString().getBytes(StandardCharsets.UTF_8);if(bytes.length>MAX_BYTES)throw new IOException("Backup too large");out.write(bytes);out.flush();}
     private static File undoFile(Context c){return new File(c.getFilesDir(),"vela-undo-"+active(c)+".json");}
-    static synchronized void saveUndo(Context c)throws IOException{File temp=new File(c.getFilesDir(),"vela-undo.tmp");try(FileOutputStream out=new FileOutputStream(temp)){write(snapshot(c),out);out.getFD().sync();}if(!temp.renameTo(undoFile(c))){temp.delete();throw new IOException("Could not save recovery copy");}}
+    static synchronized void saveUndo(Context c)throws IOException{saveUndo(c,snapshot(c));}
+    private static void saveUndo(Context c,JSONObject current)throws IOException{File temp=new File(c.getFilesDir(),"vela-undo.tmp");try(FileOutputStream out=new FileOutputStream(temp)){write(current,out);out.getFD().sync();}if(!temp.renameTo(undoFile(c))){temp.delete();throw new IOException("Could not save recovery copy");}}
     static boolean canUndo(Context c){return undoFile(c).isFile();}
     static void undo(Context c)throws IOException{JSONObject before;try(InputStream in=new FileInputStream(undoFile(c))){before=read(in);}apply(c,before,false);}
     private static void put(SharedPreferences.Editor e,String k,Object v){if(v instanceof String)e.putString(k,(String)v);else if(v instanceof Boolean)e.putBoolean(k,(Boolean)v);else if(v instanceof Integer)e.putInt(k,(Integer)v);else if(v instanceof Long)e.putLong(k,(Long)v);else if(v instanceof Float)e.putFloat(k,(Float)v);else e.putStringSet(k,(Set<String>)v);}
     static synchronized void apply(Context c,JSONObject j,boolean save)throws IOException{
         Map<String,SharedPreferences> destinations=new LinkedHashMap<>();Map<String,Map<String,?>> previous=new LinkedHashMap<>();
         try{
-            validateSnapshot(j);JSONObject old=snapshot(c).getJSONObject("settings"),data=VelaAntennaBackup.prepare(c,j,old);boolean same=j.getString("edition").equals(VelaEdition.lite(c)?"lite":"full");Set<String> names=new TreeSet<>();for(Iterator<String> it=old.keys();it.hasNext();)names.add(it.next());for(Iterator<String> it=data.keys();it.hasNext();)names.add(it.next());
+            validateSnapshot(j);JSONObject current=snapshot(c);
+            JSONObject old=current.getJSONObject("settings"),data=VelaAntennaBackup.prepare(c,j,old);boolean same=j.getString("edition").equals(VelaEdition.lite(c)?"lite":"full");Set<String> names=new TreeSet<>();for(Iterator<String> it=old.keys();it.hasNext();)names.add(it.next());for(Iterator<String> it=data.keys();it.hasNext();)names.add(it.next());
             for(String n:names){if(!same&&!n.equals("vela-search")&&!n.equals("vela-widgets")&&!n.equals("vela-reading")&&!n.equals("input_cards")&&!n.equals("vela-remote")&&!n.equals("vela-layout"))continue;SharedPreferences p=prefs(c,n);destinations.put(n,p);previous.put(n,new HashMap<>(p.getAll()));}
-            if(save)saveUndo(c);
+            if(save)saveUndo(c,current);
             for(Map.Entry<String,SharedPreferences> entry:destinations.entrySet()){
                 if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();String n=entry.getKey();SharedPreferences.Editor edit=entry.getValue().edit();for(String k:previous.get(n).keySet())if(allowed(n,k))edit.remove(k);JSONObject values=data.optJSONObject(n);if(values!=null)for(Iterator<String> keys=values.keys();keys.hasNext();){String k=keys.next();put(edit,k,validate(n,k,values.get(k)));}if(!edit.commit())throw new IOException("Write failed");
             }
