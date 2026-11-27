@@ -85,7 +85,7 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     private boolean startPending;
     private String toolsStart;
     @Override protected void onResume() {
-        super.onResume();if(home==null||VelaEdition.route(this,"full"))return;
+        super.onResume();if(isFinishing()||home==null||VelaEdition.route(this,"full"))return;
         foreground=true;Updates.automatic(this);if(voiceSearchUI!=null)voiceSearchUI.resume();toolsMain.removeCallbacks(programmeTick);programmeTick.run();
         if(home!=null&&hub==null){if(!startPending||!home.openStart())home.resume();startPending=false;if(!home.showingUpdates())Updates.resumeInstallation(this);}else if(home!=null)home.resumeTools();VelaShows.schedule(this);startSync();
         if(!deliverVoice()&&hub!=null)hub.resumeSearch();resumeAutoTune();
@@ -115,9 +115,10 @@ public class HomeActivity extends Activity implements VelaHub.Owner {
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);if(voiceSearchUI!=null)voiceSearchUI.cancel();
         setIntent(intent);
+        if(VelaEdition.route(this,"full"))return;
         if(receiveSearch(intent))return;
         if(intent.hasExtra("velaTools")){int page=intent.getIntExtra("velaTools",0);intent.removeExtra("velaTools");tools(page);return;}
-        if(hub!=null){hub.close();if(home!=null)home.reset();return;}
+        if(hub!=null)hub.close();
         if(home!=null){if("settings".equals(intent.getStringExtra("velaEntry")))home.settings();else home.reset();}
     }
 

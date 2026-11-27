@@ -8,6 +8,8 @@ import android.view.*;
 import android.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import org.json.*;
 
@@ -32,6 +34,28 @@ public final class AndroidUnifiedTest extends Instrumentation {
     interface Ready{boolean get()throws Exception;}
     void check(boolean value,String detail){if(!value)throw new AssertionError(detail);}
     void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
+    void openSearch(Activity home)throws Exception{
+        getContext().startActivity(new Intent(Intent.ACTION_SEARCH).setClass(context,HomeActivity.class)
+                .putExtra(SearchManager.QUERY,"HDMI").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        await(()->home.hasWindowFocus()&&field(home,"hub")!=null);
+    }
+    void verifyRecoveryEntry(Activity full,Intent icon)throws Exception{
+        getContext().startActivity(new Intent(context,SettingsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        Activity standalone=foreground(SettingsActivity.class.getName());
+        Path crashes=new File(context.getFilesDir(),"home-crashes.txt").toPath();
+        byte[] original=Files.exists(crashes)?Files.readAllBytes(crashes):null;
+        try{
+            String now=Long.toString(System.currentTimeMillis());
+            Files.write(crashes,Arrays.asList(now,now,now));
+            getContext().startActivity(icon);
+            await(()->standalone.hasWindowFocus()&&standalone.getIntent().hasCategory(Intent.CATEGORY_LEANBACK_LAUNCHER));
+        }finally{
+            if(original==null)Files.deleteIfExists(crashes);else Files.write(crashes,original);
+        }
+        getContext().startActivity(icon);
+        await(()->standalone.isFinishing()&&full.hasWindowFocus()
+                &&((CinemaHomeView)field(full,"home")).navigationDestination()==7);
+    }
     void await(Ready ready)throws Exception{long end=SystemClock.elapsedRealtime()+18000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(ready.get())return;Thread.sleep(80);}throw new AssertionError("Timeout "+phase);}
     Object field(Object target,String name)throws Exception{for(Class<?> c=target.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(target);}catch(NoSuchFieldException ignored){}throw new NoSuchFieldException(name);}
     Activity foreground(String name)throws Exception{final Activity[] found={null};await(()->{for(Activity a:opened)if(a.getClass().getName().equals(name)||a instanceof Full&&name.equals(HomeActivity.class.getName())||a instanceof Lite&&name.equals(LiteHomeActivity.class.getName()))if(a.hasWindowFocus()&&!a.isFinishing()){found[0]=a;return true;}return false;});return found[0];}
@@ -150,6 +174,15 @@ public final class AndroidUnifiedTest extends Instrumentation {
             check(!LiveTvData.guideView(context),"Guide shortcut changed the TV display preference");
             VelaLayout.save(context,VelaLayout.previous(context),true);
             check(context.getSharedPreferences("plex",0).getString("accountToken","").equals("synthetic-retained-session"),"Mode switch deleted an account");
+            phase="full-icon-after-search";
+            openSearch(full);
+            Intent icon=context.getPackageManager().getLeanbackLaunchIntentForPackage(context.getPackageName());
+            check(icon!=null,"Vela has no TV launcher icon");
+            getContext().startActivity(icon);
+            await(()->full.hasWindowFocus()&&field(full,"hub")==null
+                    &&((CinemaHomeView)field(full,"home")).navigationDestination()==7);
+            phase="reused-settings-icon";
+            verifyRecoveryEntry(full,icon);
             ui(()->VelaEdition.chooser(full));chooser=foreground(EditionActivity.class.getName());card(chooser,"Lite");lite=foreground(LiteHomeActivity.class.getName());
             check(VelaWorkspace.prefs(context,"lite_home").getInt("start_section",-1)==2&&VelaWorkspace.prefs(context,"vela-remote").getInt("voice_key",0)==KeyEvent.KEYCODE_F6,"Mode switch reset profile settings");
             check(context.getSharedPreferences("plex",0).getString("accountToken","").equals("synthetic-retained-session"),"Lite removed a saved Full account");
@@ -164,11 +197,20 @@ public final class AndroidUnifiedTest extends Instrumentation {
         check(VelaLayout.previous(context).toString().equals(original.toString()),"Previous Home lost");
         VelaLayout.save(context,VelaLayout.previous(context),true);
         check(LiteHomeActivity.startSection(context,2)==0,"Restored HDMI Home did not route to inputs");
-        phase="home-key-routing";getContext().startActivity(new Intent(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP));foreground(LiteHomeActivity.class.getName());check(VelaEdition.lite(context),"HOME changed selected mode");
+        phase="lite-home-after-search";
+        final Activity activeLite=lite;
+        View[] navigation=(View[])field(activeLite,"navigation");
+        ui(navigation[3]::performClick);
+        check(field(activeLite,"settingsView")!=null,"Lite Settings did not open");
+        openSearch(activeLite);
+        getContext().startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+                .setClass(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        await(()->activeLite.hasWindowFocus()&&field(activeLite,"hub")==null&&((Integer)field(activeLite,"section"))==0);
+        check(VelaEdition.lite(context),"HOME changed selected mode");
         phase="settings-pin";VelaSessions.setPin(context,"2468");VelaSessions.lock();boolean locked=false;try{VelaEdition.select(context,"lite");}catch(IllegalStateException expected){locked=true;}check(locked,"Mode selection bypassed the settings PIN");VelaSessions.unlock(context,"2468");VelaSessions.prefs(context).edit().clear().commit();
         phase="unified-update-channel";String hash=String.join("",Collections.nCopies(64,"a"));JSONObject a=new JSONObject().put("tag_name","v2.0.1-preview").put("draft",false).put("prerelease",true).put("assets",new JSONArray().put(new JSONObject().put("name","Vela-2.0.1-preview.apk").put("browser_download_url",LiteReleaseFeed.REPO+"/releases/download/v2.0.1-preview/Vela-2.0.1-preview.apk").put("state","uploaded").put("size",2000).put("digest","sha256:"+hash)));
         LiteReleaseFeed.Release release=LiteReleaseFeed.newest(new JSONArray().put(a),"2.0.0-preview",true,true);check(release!=null&&release.json().getJSONArray("assets").getJSONObject(0).getString("name").equals("Vela-2.0.1-preview.apk"),"Unified Lite uses the legacy APK");check(LiteReleaseFeed.newest(new JSONArray().put(a),"0.18.0-preview",true)==null,"Legacy Lite accepted another package's feed");check(LiteUpdateManager.authority(context).equals("tv.vela.launcher.lite-updates"),"Installer provider collides with Full");
-        result.putString("result","PASS three HDMI layouts, remote selection, preview failure and native passthrough, per-profile mode persistence, native first-run choices and saved presets, Home-to-guide routing, Lite controller without multimedia artwork, embedded mode settings, Android 8 Full refusal / modern reversible Full-Lite flow, saved profile/account retention, unchanged antenna identities/EPG fixes, HOME routing and unified-vs-legacy update channel. Owned emulator, synthetic data only.");
+        result.putString("result","PASS three HDMI layouts, remote selection, preview failure and native passthrough, per-profile mode persistence, native first-run choices and saved presets, Home-to-guide routing, Lite controller without multimedia artwork, embedded mode settings, Android 8 Full refusal / modern reversible Full-Lite flow, saved profile/account retention, unchanged antenna identities/EPG fixes, search and HOME routing across mode changes, launcher-icon and recovery routing, and the unified update channel. Owned emulator, synthetic data only.");
     }catch(Throwable e){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(e));try{shot("failure");}catch(Exception ignored){}}
     finally{try{for(Activity a:opened)if(!a.isFinishing())ui(a::finish);VelaSessions.prefs(context).edit().clear().commit();context.getSharedPreferences("plex",0).edit().remove("accountToken").commit();VelaEdition.prefs(context).edit().clear().commit();context.getSharedPreferences("personalization",0).edit().clear().commit();TvInputs.prefs(context).edit().remove("hdmi_layout").commit();VelaLayout.prefs(context).edit().remove("document").remove("previous").commit();}catch(Exception ignored){}}
     finish(result.containsKey("error")?1:-1,result);}

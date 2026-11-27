@@ -95,7 +95,7 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
         buildShell();VelaPerformance.firstFrame(shell,homeCreated);int tools=state==null?getIntent().getIntExtra("velaTools",-1):state.getInt("velaTools",-1);getIntent().removeExtra("velaTools");if(tools>=0)tools(tools);
         receiveSearch(getIntent());
     }
-    @Override public void onResume(){super.onResume();if(shell==null||VelaEdition.route(this,"lite"))return;visible=true;if(voiceSearchUI!=null)voiceSearchUI.resume();if(headerWidgets!=null)headerWidgets.start();hideSystemBars();IntentFilter filter=new IntentFilter();filter.addAction(Intent.ACTION_PACKAGE_ADDED);filter.addAction(Intent.ACTION_PACKAGE_REMOVED);filter.addAction(Intent.ACTION_PACKAGE_CHANGED);filter.addDataScheme("package");
+    @Override public void onResume(){super.onResume();if(isFinishing()||shell==null||VelaEdition.route(this,"lite"))return;visible=true;if(voiceSearchUI!=null)voiceSearchUI.resume();if(headerWidgets!=null)headerWidgets.start();hideSystemBars();IntentFilter filter=new IntentFilter();filter.addAction(Intent.ACTION_PACKAGE_ADDED);filter.addAction(Intent.ACTION_PACKAGE_REMOVED);filter.addAction(Intent.ACTION_PACKAGE_CHANGED);filter.addDataScheme("package");
         if(Build.VERSION.SDK_INT>=33)registerReceiver(packagesChanged,filter,Context.RECEIVER_NOT_EXPORTED);else registerReceiver(packagesChanged,filter);registered=true;
         if(hub==null)show(section==PROFILE?INPUTS:section,false);else stage.setVisibility(View.VISIBLE);tick.run();VelaShows.schedule(this);startSync();updates.observe(updateListener);if(allowAutomaticChecks())updates.automaticCheck();if(hub==null&&updates.requested()&&getPackageManager().canRequestPackageInstalls()){show(UPDATES,false);updates.resumeInstall(this);}
         if(!deliverVoice()&&hub!=null)hub.resumeSearch();resumeAutoTune();
@@ -104,7 +104,18 @@ public class LiteHomeActivity extends Activity implements VelaHub.Owner {
     @Override public void onDestroy(){if(shell==null){super.onDestroy();return;}destroying=true;if(voiceSearchUI!=null)voiceSearchUI.cancel();if(headerWidgets!=null)headerWidgets.stop();if(programmes!=null)programmes.close();if(hub!=null)hub.close();if(shell!=null&&shell.getViewTreeObserver().isAlive())shell.getViewTreeObserver().removeOnGlobalLayoutListener(reading);main.removeCallbacksAndMessages(null);closeTelevision();inputSource.stop();releaseImages();if(shell!=null&&shell.getViewTreeObserver().isAlive()){shell.getViewTreeObserver().removeOnGlobalFocusChangeListener(focusListener);shell.getViewTreeObserver().removeOnGlobalLayoutListener(reading);}super.onDestroy();}
     @Override public void onTrimMemory(int level){super.onTrimMemory(level);appIcons.evictAll();}
     @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);voice.save(out);out.putInt("section",section==PROFILE?INPUTS:section);out.putInt("input_page",inputPage);out.putInt("app_page",appPage);out.putInt("settings_category",settingsCategory);if(hub!=null)out.putInt("velaTools",hub.page());}
-    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);if(voiceSearchUI!=null)voiceSearchUI.cancel();setIntent(intent);if(receiveSearch(intent))return;if(intent.hasExtra("velaTools")){int page=intent.getIntExtra("velaTools",0);intent.removeExtra("velaTools");tools(page);return;}if(hub!=null){hub.close();return;}if(intent.hasCategory(Intent.CATEGORY_HOME)){section=startSection();if(visible)show(section,false);}}
+    @Override protected void onNewIntent(Intent intent){
+        super.onNewIntent(intent);
+        if(voiceSearchUI!=null)voiceSearchUI.cancel();
+        setIntent(intent);
+        if(VelaEdition.route(this,"lite"))return;
+        if(receiveSearch(intent))return;
+        if(intent.hasExtra("velaTools")){int page=intent.getIntExtra("velaTools",0);intent.removeExtra("velaTools");tools(page);return;}
+        boolean home=intent.hasCategory(Intent.CATEGORY_HOME);
+        if(home)section=startSection();
+        if(hub!=null)hub.close();
+        else if(home&&visible)show(section,false);
+    }
     @Override public void onConfigurationChanged(Configuration configuration){super.onConfigurationChanged(configuration);if(voiceSearchUI!=null)voiceSearchUI.cancel();if(hub!=null){recreate();return;}buildShell();if(visible){show(section==PROFILE?INPUTS:section,false);main.removeCallbacks(tick);tick.run();}}
     private void hideSystemBars(){getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);}
     private void releaseImages(){closePreview();generation++;for(Future<?> job:jobs)job.cancel(true);jobs.clear();if(worker!=null){worker.shutdownNow();worker=null;}for(ImageView image:appImages)image.setImageDrawable(null);appImages.clear();appIcons.evictAll();if(devices!=null){devices.close();devices=null;}apps=Collections.emptyList();}
