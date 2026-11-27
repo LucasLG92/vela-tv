@@ -84,13 +84,25 @@ public final class AndroidVoiceTest extends Instrumentation {
         armLegacy();
         Intent external=new Intent().setClassName(getContext().getPackageName(),Recognizer.class.getName()).putExtra("words","busca la película Arrival");ui(()->activity.startActivityForResult(external,VelaVoice.REQUEST));
         await(()->activity.hasWindowFocus()&&actual()!=null&&((EditText)field(actual(),"input")).getText().toString().equals("Arrival"));
-        Intent query=new Intent(Intent.ACTION_SEARCH).setClassName(context.getPackageName(),activity.getClass().getName()).putExtra(SearchManager.QUERY,"Open Water").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);getContext().startActivity(query);
+        Intent query=new Intent(Intent.ACTION_SEARCH).setClassName(context.getPackageName(),activity.getClass().getName()).putExtra(SearchManager.QUERY,"Open Water").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);context.startActivity(query);
         await(()->actual()!=null&&((EditText)field(actual(),"input")).getText().toString().equals("Open Water"));check(activity.getIntent().getAction()==null,"Consumed Android search will replay after recreation");
         SearchManager search=(SearchManager)activity.getSystemService(Context.SEARCH_SERVICE);check(search.getSearchableInfo(new ComponentName(activity,activity.getClass()))!=null,"Android cannot discover the searchable Activity");
     }
+    void appAliases()throws Exception{
+        VelaHub.Host host=(VelaHub.Host)field(actual(),"host");
+        VelaVoice.Request exact=VelaVoice.parse("Busca la aplicación Voice test alternate");
+        List<VelaHub.Hit> alternate=host.voiceSearch(exact,0,new CancellationSignal());
+        ComponentName alias=new ComponentName(getContext().getPackageName(),"tv.vela.launcher.VoiceTestAlternate");
+        check(alternate.size()==1&&alias.equals(((Intent)alternate.get(0).value).getComponent()),"An unmatched TV entry hid a matching launcher alias from the same package");
+        List<VelaHub.Hit> common=host.voiceSearch(VelaVoice.parse("Busca la aplicación Voice test"),0,new CancellationSignal());
+        ComponentName tvEntry=new ComponentName(getContext().getPackageName(),Recognizer.class.getName());
+        check(common.size()==1&&tvEntry.equals(((Intent)common.get(0).value).getComponent()),"Matching both entries duplicated the app or lost the TV entry");
+    }
     void openInstalledApp()throws Exception{
         VelaVoice.firstResult(context,true);
-        String label=context.getPackageManager().getApplicationLabel(context.getPackageManager().getApplicationInfo("com.android.settings",0)).toString();
+        ComponentName testApp=new ComponentName(getContext().getPackageName(),Recognizer.class.getName());
+        android.content.pm.PackageManager pm=context.getPackageManager();
+        String label=pm.getActivityInfo(testApp,0).loadLabel(pm).toString();
         armLegacy();
         launch=addMonitor(new IntentFilter(Intent.ACTION_MAIN),new ActivityResult(Activity.RESULT_CANCELED,null),true);
         Intent external=new Intent("tv.vela.tests.RECOGNIZE").setClassName(getContext().getPackageName(),Recognizer.class.getName()).putExtra("words","abre la aplicación "+label);ui(()->activity.startActivityForResult(external,VelaVoice.REQUEST));
@@ -115,7 +127,7 @@ public final class AndroidVoiceTest extends Instrumentation {
     public void onCreate(Bundle b){super.onCreate(b);arguments=b;start();}
     public void onStart(){Bundle result=new Bundle();context=getTargetContext();try{
         try(ParcelFileDescriptor f=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(f)){check(in.read()=='1',"Owned emulator required");}RefinementHttp.install(url->null);previousMode=VelaEdition.prefs(context).getString("mode","");String requested=arguments.getString("fixture","");if(requested.equals("unified-lite"))VelaEdition.select(context,"lite");if(requested.equals("unified-full"))VelaEdition.select(context,"full");lite=context.getPackageName().endsWith(".lite")||context.getSharedPreferences("vela-edition",0).getString("mode","").equals("lite");previous=VelaWorkspace.active(context);language=L10n.choice();profile=VelaWorkspace.create(context,"Voice Demo");VelaWorkspace.select(context,profile);L10n.choose(context,"en");Ui.init(context);context.getSharedPreferences("personalization",0).edit().putBoolean("initialized",true).putBoolean("complete",true).commit();VelaWorkspace.prefs(context,lite?"lite_updates":"updates").edit().putBoolean("automatic",false).commit();
-        phase="grammar";grammar();activity=startActivitySync(new Intent().setClassName(context.getPackageName(),"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));phase="session";session();phase="production-keys";productionKeys();phase="real-recognizer-roundtrip";roundTrip();phase="actual-installed-app-command";openInstalledApp();phase="themed-results";fixtures();
+        phase="grammar";grammar();activity=startActivitySync(new Intent().setClassName(context.getPackageName(),"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));phase="session";session();phase="production-keys";productionKeys();phase="real-recognizer-roundtrip";roundTrip();phase="app-aliases";appAliases();phase="actual-installed-app-command";openInstalledApp();phase="themed-results";fixtures();
         result.putString("result","PASS six-language commands, Google language independence, Vela-only Search/remote/F6 bindings, native listening UI, Google keys preserved, lifecycle cancellation, stale-profile refusal and cancelled release, single request, one-use saved results, profile isolation, actual external recognizer Activity pause/result/resume, literal Android ACTION_SEARCH, searchable manifest, one text lookup, ambiguous selection, app/channel intent separation, Tonight discovery and disconnected HDMI guard. Synthetic speech only; no physical microphone or account.");
     }catch(Throwable error){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(error));try{VelaHub h=actual();result.putString("diagnosis","appLaunches="+(launch==null?-1:launch.getHits())+" window="+activity.hasWindowFocus()+" foreground="+field(activity,lite?"visible":"foreground")+" hub="+(h!=null)+(h==null?"":" query="+field(h,"query")+" status="+((TextView)field(h,"status")).getText()+" rows="+((List<?>)field(h,"controls")).size()));}catch(Exception ignored){}}finally{try{if(integrated!=null)ui(integrated::cancel);if(monitor!=null)removeMonitor(monitor);if(launch!=null)removeMonitor(launch);if(fixture!=null)ui(fixture::close);if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}if(language!=null)L10n.choose(context,language);if(previousMode!=null){if(previousMode.isEmpty())VelaEdition.prefs(context).edit().remove("mode").commit();else VelaEdition.select(context,previousMode);}}catch(Exception ignored){}}
         finish(result.containsKey("error")?1:-1,result);

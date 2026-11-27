@@ -52,7 +52,11 @@ abstract class VelaToolsData implements VelaHub.Host {
             PackageManager pm=activity.getPackageManager();TreeMap<String,ResolveInfo> apps=new TreeMap<>();Set<String> seen=new HashSet<>();
             for(String category:new String[]{Intent.CATEGORY_LEANBACK_LAUNCHER,Intent.CATEGORY_LAUNCHER})for(ResolveInfo info:pm.queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(category),0)){
                 signal.throwIfCanceled();if(info.activityInfo==null||!info.activityInfo.enabled)continue;String pkg=info.activityInfo.packageName;
-                if(!pkg.equals(activity.getPackageName())&&seen.add(pkg)){String label=info.loadLabel(pm).toString();if(match(label,query))apps.put((VelaVoice.appKey(label).equals(VelaVoice.appKey(query))?"0|":"1|")+VelaWorkspace.normal(label)+"|"+pkg,info);}
+                if(pkg.equals(activity.getPackageName())||seen.contains(pkg))continue;
+                String label=info.loadLabel(pm).toString();
+                if(!match(label,query))continue;
+                seen.add(pkg);
+                apps.put((VelaVoice.appKey(label).equals(VelaVoice.appKey(query))?"0|":"1|")+VelaWorkspace.normal(label)+"|"+pkg,info);
             }
             int at=0;for(ResolveInfo info:apps.values()){if(at>=page*4&&at<(page+1)*4){Intent open=new Intent(Intent.ACTION_MAIN).setComponent(new ComponentName(info.activityInfo.packageName,info.activityInfo.name)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);out.add(new VelaHub.Hit(t("App","Aplicación"),info.loadLabel(pm).toString(),t("Open application","Abrir aplicación"),open));}at++;}out.more=at>(page+1)*4;
         }

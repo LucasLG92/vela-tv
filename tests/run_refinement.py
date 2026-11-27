@@ -37,7 +37,12 @@ if a.test in ('discovery','search-ux','navigation-cost'):
 
 pkg='tv.vela.launcher'+('.lite' if a.lite else '');testpkg=pkg+'.refinement.tests'
 provider='<provider android:name="tv.vela.launcher.'+cls+'$Provider" android:authorities="android.media.tv" android:exported="true"/>' if a.lite and a.test in ('tv-fixes','recent-channel','auto-tune','discovery') else ''
-recognizer='<activity android:name="tv.vela.launcher.AndroidVoiceTest$Recognizer" android:exported="true"/>' if a.test=='voice' else ''
+recognizer=''
+if a.test=='voice':
+ recognizer=('<activity android:name="tv.vela.launcher.AndroidVoiceTest$Recognizer" android:exported="true" android:label="Voice test app">'
+             '<intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter></activity>'
+             '<activity-alias android:name="tv.vela.launcher.VoiceTestAlternate" android:targetActivity="tv.vela.launcher.AndroidVoiceTest$Recognizer" android:exported="true" android:label="Voice test alternate">'
+             '<intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity-alias>')
 if a.test=='remote':recognizer='<activity android:name="tv.vela.launcher.AndroidRemoteTest$Target" android:label="Remote test target" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter></activity>'
 (out/'manifest.xml').write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="'+testpkg+'"><uses-permission android:name="android.permission.INTERNET"/><application'+(' android:label="Remote test target"' if a.test=='remote' else '')+'>'+provider+recognizer+'</application><instrumentation android:name="tv.vela.launcher.'+cls+'" android:targetPackage="'+pkg+'"'+('' if a.lite else ' android:targetProcesses="tv.vela.launcher:home"')+'/></manifest>',encoding='utf8')
 run([bt/('aapt2'+exe),'link','-o',out/'base.apk','-I',android,'--manifest',out/'manifest.xml','-A',assets,'--min-sdk-version','26' if a.lite or a.test in ('unified','migration','search-ux','home-editor','efficiency') or a.fixture=='unified-lite' else '30','--target-sdk-version','33'])
