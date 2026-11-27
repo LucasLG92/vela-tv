@@ -1,6 +1,6 @@
 # Vela para Android TV
 
-[Descargar Vela.apk](https://github.com/LucasLG92/vela-tv/raw/refs/heads/descargas-tv/Vela.apk) · [Código de esta compilación](https://github.com/LucasLG92/vela-tv/commit/74e40063b5c312e74b1995544631d687ed726263)
+[Descargar Vela.apk](https://github.com/LucasLG92/vela-tv/raw/refs/heads/descargas-tv/Vela.apk) · [Código de esta compilación](https://github.com/LucasLG92/vela-tv/commit/0786179188e87d14ed85ce716b918d4e68186f11)
 
 Abre el enlace desde un navegador de la televisión y abre el APK descargado. Al iniciar Vela puedes elegir Lite desde Android TV 8 o Full desde Android TV 11.
 
@@ -8,7 +8,7 @@ Esta compilación de main usa la firma local de las revisiones de prueba. Androi
 
 SHA-256 del APK
 
-`f7a08d7004b3cce2aa3631025f15480d2ffe94985656b52eda22dfc9edb34ef2`
+`0c32506eda69dd1aa2e473e87013eba9dda75b6fd131e978c2473819511deb34`
 
 SHA-256 del certificado de firma
 
