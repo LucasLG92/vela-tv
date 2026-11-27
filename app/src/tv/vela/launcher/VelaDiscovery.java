@@ -9,7 +9,24 @@ import java.util.*;
 
 /** Discover actual EPG metadata, never inferred movie/sports recommendations. */
 final class VelaDiscovery {
-    static long[] bounds(int mode){long now=System.currentTimeMillis()/1000;if(mode==0)return new long[]{now,now+1};if(mode==1){Calendar a=Calendar.getInstance();a.set(Calendar.HOUR_OF_DAY,18);a.set(Calendar.MINUTE,0);a.set(Calendar.SECOND,0);a.set(Calendar.MILLISECOND,0);Calendar b=(Calendar)a.clone();b.add(Calendar.DAY_OF_MONTH,1);b.set(Calendar.HOUR_OF_DAY,4);if(now>=b.getTimeInMillis()/1000){a.add(Calendar.DAY_OF_MONTH,1);b.add(Calendar.DAY_OF_MONTH,1);}return new long[]{Math.max(now,a.getTimeInMillis()/1000),b.getTimeInMillis()/1000};}return new long[]{now,now+48*3600};}
+    static long[] bounds(int mode){
+        Calendar local=Calendar.getInstance();
+        long now=local.getTimeInMillis()/1000;
+        if(mode==0)return new long[]{now,now+1};
+        if(mode!=1)return new long[]{now,now+48*3600};
+
+        // The evening guide continues after midnight until 04:00 local time.
+        Calendar start=(Calendar)local.clone();
+        if(local.get(Calendar.HOUR_OF_DAY)<4)start.add(Calendar.DAY_OF_MONTH,-1);
+        start.set(Calendar.HOUR_OF_DAY,18);
+        start.set(Calendar.MINUTE,0);
+        start.set(Calendar.SECOND,0);
+        start.set(Calendar.MILLISECOND,0);
+        Calendar end=(Calendar)start.clone();
+        end.add(Calendar.DAY_OF_MONTH,1);
+        end.set(Calendar.HOUR_OF_DAY,4);
+        return new long[]{Math.max(now,start.getTimeInMillis()/1000),end.getTimeInMillis()/1000};
+    }
     static String eventId(String system,String value){return "dd_progid".equals(system)&&value!=null&&value.matches("(?:EP|SP|MV)[0-9]{6,14}\\.[0-9]{1,8}")?"dd:"+value:"";}
     static boolean eventColumn(SQLiteDatabase db,String schema){try(Cursor c=db.rawQuery("PRAGMA "+schema+"table_info(programmes)",null)){while(c.moveToNext())if("event_id".equals(c.getString(1)))return true;}return false;}
     static void ensureEvents(SQLiteDatabase db){if(!eventColumn(db,"")){db.execSQL("ALTER TABLE programmes ADD COLUMN event_id TEXT NOT NULL DEFAULT ''");db.execSQL("UPDATE meta SET updated=0");}}
