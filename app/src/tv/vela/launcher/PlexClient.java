@@ -302,9 +302,12 @@ class PlexClient {
             }
             if(slot==row.size()){
                 if(slot<12)row.add(item);
-            }else if(resumePriority(item)>resumePriority(row.get(slot))){
-                // Upgrade the card in place when another hub has a playable episode or a resume position.
-                row.set(slot,item);
+            }else{
+                JSONObject previous=row.get(slot);
+                int priority=resumePriority(item),previousPriority=resumePriority(previous);
+                boolean moreRecentPlayback=priority==2&&previousPriority==2
+                        &&item.optLong("lastViewedAt")>previous.optLong("lastViewedAt");
+                if(priority>previousPriority||moreRecentPlayback)row.set(slot,item);
             }
         }
     }

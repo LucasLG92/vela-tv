@@ -3,6 +3,9 @@ package tv.vela.launcher;
 import android.app.*;
 import android.content.*;
 import android.database.MatrixCursor;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.media.tv.TvContract;
 import android.os.*;
 import android.view.*;
@@ -22,6 +25,32 @@ public class AndroidContinueWatchingTest extends Instrumentation {
     private String text(View view){StringBuilder result=new StringBuilder();if(view instanceof TextView)result.append(((TextView)view).getText()).append(' ');if(view instanceof ViewGroup)for(int i=0;i<((ViewGroup)view).getChildCount();i++)result.append(text(((ViewGroup)view).getChildAt(i)));return result.toString();}
     private TextView label(View view,String value){if(view instanceof TextView&&value.contentEquals(((TextView)view).getText()))return (TextView)view;if(view instanceof ViewGroup)for(int i=0;i<((ViewGroup)view).getChildCount();i++){TextView match=label(((ViewGroup)view).getChildAt(i),value);if(match!=null)return match;}return null;}
     private TextView caption(View card,String title){ViewGroup group=(ViewGroup)card;for(int i=0;i<group.getChildCount();i++){View v=group.getChildAt(i);if(v instanceof TextView&&title.contentEquals(((TextView)v).getText()))return (TextView)v;}return null;}
+    private boolean fullyVisible(View view){
+        Rect visible=new Rect();
+        if(!view.isShown()||view.getAlpha()==0||!view.getGlobalVisibleRect(visible))return false;
+        RectF full=new RectF(0,0,view.getWidth(),view.getHeight());
+        Matrix transform=new Matrix();
+        view.transformMatrixToGlobal(transform);
+        transform.mapRect(full);
+        return !visible.isEmpty()&&visible.width()>=full.width()-2&&visible.height()>=full.height()-2;
+    }
+    private void awaitShelf(CinemaHomeView home,View card,TextView heading,View content,String message)throws Exception{
+        long deadline=SystemClock.uptimeMillis()+5000;
+        boolean[] visible={false};
+        Field motion=CinemaHomeView.class.getDeclaredField("shelfMotion");
+        motion.setAccessible(true);
+        do{
+            runOnMainSync(()->{
+                try{
+                    android.animation.ValueAnimator scroll=(android.animation.ValueAnimator)motion.get(home);
+                    visible[0]=(scroll==null||!scroll.isStarted())&&card.hasFocus()&&fullyVisible(heading)&&fullyVisible(content);
+                }catch(IllegalAccessException error){throw new AssertionError(error);}
+            });
+            if(visible[0])return;
+            SystemClock.sleep(32);
+        }while(SystemClock.uptimeMillis()<deadline);
+        throw new AssertionError(message);
+    }
     private int redPixel(HorizontalScrollView rail,int x)throws Exception{android.graphics.Rect bounds=new android.graphics.Rect();ui(()->rail.getGlobalVisibleRect(bounds));float scale=bounds.width()/(float)rail.getWidth();Thread.sleep(100);android.graphics.Bitmap shot=getUiAutomation().takeScreenshot();try{return android.graphics.Color.red(shot.getPixel(bounds.left+Math.round(x*scale),bounds.top+Math.round(80*scale)));}finally{shot.recycle();}}
     private void restore(SharedPreferences prefs,Map<String,?> values){SharedPreferences.Editor edit=prefs.edit().clear();for(Map.Entry<String,?> e:values.entrySet()){Object v=e.getValue();if(v instanceof String)edit.putString(e.getKey(),(String)v);else if(v instanceof Boolean)edit.putBoolean(e.getKey(),(Boolean)v);else if(v instanceof Integer)edit.putInt(e.getKey(),(Integer)v);else if(v instanceof Long)edit.putLong(e.getKey(),(Long)v);else if(v instanceof Set)edit.putStringSet(e.getKey(),new HashSet<>((Set<String>)v));}edit.commit();}
     private PlexClient.Film resumeItem(String pkg,String key,String id,long time,long position){
@@ -144,11 +173,13 @@ public class AndroidContinueWatchingTest extends Instrumentation {
                 List<View> current=(List<View>)field(home,"cards");ui(()->current.get(0).requestFocus());Thread.sleep(250);
                 TextView caption=caption(current.get(0),video.title);check(caption.getLineCount()==2,"Fixture did not exercise a two-line caption");check(caption.getLayout().getLineBottom(1)<=caption.getHeight(),"Two-line title clipped its last glyphs at size "+size);
                 TextView hero=(TextView)field(home,"title");check(hero.getLayout().getLineBottom(hero.getLineCount()-1)<=hero.getHeight(),"Hero title clipped at size "+size);
-                sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);waitForIdleSync();Thread.sleep(250);
-                check(a.getCurrentFocus()==current.get(current.size()-1),"Down skipped Latest uploads at size "+size);
-                TextView heading=label((View)field(home,"shelfList"),"Últimas subidas");android.graphics.Rect visibleBox=new android.graphics.Rect();heading.getGlobalVisibleRect(visibleBox);float scale=visibleBox.width()/(float)heading.getWidth();check(visibleBox.height()>=heading.getHeight()*scale-2,"Latest heading clipped after Down at size "+size);
-                check(scroll.getScrollY()==((View)heading.getParent()).getTop(),"Automatic focus scrolling hid the shelf heading");
-                sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP);waitForIdleSync();Thread.sleep(250);check(scroll.getScrollY()==0,"Up did not restore the first heading");
+                View shelfList=(View)field(home,"shelfList"),latest=current.get(current.size()-1);
+                TextView latestHeading=label(shelfList,"Últimas subidas"),resumeHeading=label(shelfList,VelaLayout.label("resume"));
+                check(latestHeading!=null&&resumeHeading!=null,"Missing shelf heading at size "+size);
+                sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);
+                awaitShelf(home,latest,latestHeading,latest,"Down did not reveal the latest heading and focused poster at size "+size);
+                sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP);
+                awaitShelf(home,current.get(0),resumeHeading,caption,"Up did not restore the resume heading and focused caption at size "+size);
             }
             View art=(View)field(home,"backdrop"),veil=(View)field(home,"backdropBottom");check(art.getBottom()==veil.getBottom(),"Backdrop stops before its bottom gradient, leaving a seam");
             check(plexBefore.equals(new PlexClient(c).prefs.getAll())&&Arrays.equals(apps,SidebarApps.slots(c)),"Preview changed accounts or app shortcuts");
