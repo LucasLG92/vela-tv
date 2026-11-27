@@ -18,22 +18,12 @@ public final class AndroidWorkspaceTest extends Instrumentation {
     private Activity activity;private VelaHub hub;private String phase="setup";private final Bundle result=new Bundle();private Context context;private boolean lite;
     private void check(boolean value,String why){if(!value)throw new AssertionError(why);}
     private Object get(Object o,String name)throws Exception{for(Class<?> c=o.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(o);}catch(NoSuchFieldException next){}throw new NoSuchFieldException(name);}
-    private void tonightWindow(int hour,int minute,boolean alreadyStarted){
-        TimeZone previous=TimeZone.getDefault();
-        long now=System.currentTimeMillis();
-        int offset=(int)((hour*60L+minute-Math.floorMod(now/60_000,1440L))*60_000);
-        try{
-            TimeZone.setDefault(new SimpleTimeZone(offset,"Fixture"));
-            long[] window=VelaDiscovery.bounds(1);
-            Calendar start=Calendar.getInstance(),end=Calendar.getInstance(),expectedEnd=Calendar.getInstance();
-            if(hour>=4)expectedEnd.add(Calendar.DAY_OF_MONTH,1);
-            start.setTimeInMillis(window[0]*1000);end.setTimeInMillis(window[1]*1000);
-            if(alreadyStarted)check(Math.abs(window[0]-now/1000)<=2,"Tonight skipped the rest of the current night");
-            else check(start.get(Calendar.HOUR_OF_DAY)==18&&start.get(Calendar.MINUTE)==0,"Tonight did not start at 18:00");
-            check(end.get(Calendar.YEAR)==expectedEnd.get(Calendar.YEAR)&&end.get(Calendar.DAY_OF_YEAR)==expectedEnd.get(Calendar.DAY_OF_YEAR)
-                    &&end.get(Calendar.HOUR_OF_DAY)==4&&end.get(Calendar.MINUTE)==0&&window[1]>window[0]
-                    &&window[1]-window[0]<=10*3600,"Wrong end of the overnight guide");
-        }finally{TimeZone.setDefault(previous);}
+    private void tonightWindow(String instant,String expectedStart,String expectedEnd){
+        Calendar local=Calendar.getInstance(TimeZone.getTimeZone("Europe/Madrid"));
+        local.setTimeInMillis(java.time.Instant.parse(instant).toEpochMilli());
+        long[] window=VelaDiscovery.bounds(1,local);
+        check(window[0]==java.time.Instant.parse(expectedStart).getEpochSecond()
+                &&window[1]==java.time.Instant.parse(expectedEnd).getEpochSecond(),"Wrong overnight guide at "+instant);
     }
     private void ui(Runnable action){runOnMainSync(action);waitForIdleSync();}
     interface Ready{boolean ready()throws Exception;}
@@ -52,9 +42,12 @@ public final class AndroidWorkspaceTest extends Instrumentation {
         phase="cross-edition";JSONObject cross=new JSONObject().put("format","vela-settings").put("version",1).put("edition",lite?"full":"lite").put("settings",new JSONObject().put("vela-reading",new JSONObject().put("text",1)).put("visuals",new JSONObject().put("appearance_color",0)));VelaWorkspace.apply(context,cross,true);check(VelaReading.choice(context,"text",2)==1&&VelaWorkspace.prefs(context,"visuals").getInt("appearance_color",-1)==4,"Cross-edition restore applied unsupported choices");
         phase="programme-index";File index=new File(context.getCacheDir(),"owned-workspace-epg.db");index.delete();try(SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(index,null)){db.execSQL("CREATE TABLE aliases(alias TEXT,channel TEXT)");db.execSQL("CREATE TABLE programmes(channel TEXT,start INTEGER,end INTEGER,title TEXT)");db.execSQL("INSERT INTO aliases VALUES ('name:demo','one'),('name:foreign','foreign')");long now=System.currentTimeMillis()/1000;for(int i=0;i<42;i++)db.execSQL("INSERT INTO programmes VALUES ('one',?,?,?)",new Object[]{now+600+i*1800,now+1200+i*1800,"El café T1 E"+i});db.execSQL("INSERT INTO programmes VALUES ('foreign',?,?,?)",new Object[]{now+900,now+1800,"El café · ajeno"});Map<String,String> names=new HashMap<>();names.put("name:demo","Canal · Demostración");List<VelaShows.Airing> first=VelaGuideSearch.read(db,names,"alias","cafe",0,new CancellationSignal()),second=VelaGuideSearch.read(db,names,"alias","cafe",1,new CancellationSignal());check(first.size()==24&&second.size()==18&&second.get(0).start>first.get(23).start,"Schedule search is not paginated or accent-insensitive");for(VelaShows.Airing p:first)check(p.channel.equals("Canal · Demostración"),"A channel outside the local tuner leaked into search");CancellationSignal canceled=new CancellationSignal();canceled.cancel();boolean stopped=false;try{VelaGuideSearch.read(db,names,"alias","café",0,canceled);}catch(OperationCanceledException expected){stopped=true;}check(stopped,"Cancelled search kept reading");}index.delete();
         phase="tonight across midnight";
-        tonightWindow(2,15,true);
-        tonightWindow(4,15,false);
-        tonightWindow(21,15,true);
+        tonightWindow("2025-01-07T01:15:00Z","2025-01-07T01:15:00Z","2025-01-07T03:00:00Z");
+        tonightWindow("2025-01-07T03:00:00Z","2025-01-07T17:00:00Z","2025-01-08T03:00:00Z");
+        tonightWindow("2025-01-07T20:15:00Z","2025-01-07T20:15:00Z","2025-01-08T03:00:00Z");
+        // The spring and autumn overnight windows have different lengths.
+        tonightWindow("2025-03-29T17:00:00Z","2025-03-29T17:00:00Z","2025-03-30T02:00:00Z");
+        tonightWindow("2025-10-25T16:00:00Z","2025-10-25T16:00:00Z","2025-10-26T03:00:00Z");
         phase="recurring-shows";VelaShows.toggle(context,"El café T1 E1");check(VelaShows.follows(context,"El café T1 E9"),"Episode title did not match a recurring programme");long now=System.currentTimeMillis()/1000;VelaShows.remember(context,Arrays.asList(new VelaShows.Airing("El café T1 E9","Canal · Demostración",now+3600,now+5400),new VelaShows.Airing("Otro programa","Otro canal",now+60,now+600)));check(VelaShows.cached(context).size()==1&&!VelaShows.enabled(context),"Unfollowed programme accepted or notifications enabled without consent");VelaShows.toggle(context,"El café T1 E2");check(VelaShows.rules(context).isEmpty()&&VelaShows.cached(context).isEmpty(),"Unfollow left another episode subscribed");
         phase="antenna-portability";String service=LiveTvData.hash("owned-dvb-service");JSONObject exported=new JSONObject().put("ant-1",new JSONObject().put("service",service).put("name","canal demo").put("radio",false)).put("ant-2",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));Map<String,JSONObject> stations=new HashMap<>();stations.put("ant-90",new JSONObject().put("service",service).put("name","renamed demo").put("radio",false));stations.put("ant-91",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));stations.put("ant-92",new JSONObject().put("service","").put("name","ambiguous").put("radio",false));Map<String,String> matches=VelaAntennaBackup.match(exported,stations);check(matches.get("ant-1").equals("ant-90")&&!matches.containsKey("ant-2"),"Antenna restore guessed a row ID or an ambiguous station name");
         phase="reading-density";for(int n=0;n<3;n++){VelaReading.prefs(context).edit().putInt("text",n).putInt("density",0).commit();check(VelaReading.rows(context)==6-n,"Large text did not reduce guide rows");}VelaReading.prefs(context).edit().clear().commit();

@@ -9,8 +9,8 @@ import java.util.*;
 
 /** Discover actual EPG metadata, never inferred movie/sports recommendations. */
 final class VelaDiscovery {
-    static long[] bounds(int mode){
-        Calendar local=Calendar.getInstance();
+    static long[] bounds(int mode){return bounds(mode,Calendar.getInstance());}
+    static long[] bounds(int mode,Calendar local){
         long now=local.getTimeInMillis()/1000;
         if(mode==0)return new long[]{now,now+1};
         if(mode!=1)return new long[]{now,now+48*3600};
