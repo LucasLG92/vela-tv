@@ -298,9 +298,32 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         if(key==KeyEvent.KEYCODE_CHANNEL_UP||key==KeyEvent.KEYCODE_CHANNEL_DOWN){if(event.getRepeatCount()==0)actions.zap(key==KeyEvent.KEYCODE_CHANNEL_UP?1:-1);return true;}
 
         if(key==KeyEvent.KEYCODE_DPAD_LEFT){if(event.getRepeatCount()==0){if(panel.getVisibility()==VISIBLE){controlsKey=key;openPlaybackControls();}else showControls();}return true;}
-        if(key==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE&&tuner!=null&&timeShiftStatus==TvInputManager.TIME_SHIFT_STATUS_AVAILABLE){if(paused)tuner.timeShiftResume();else tuner.timeShiftPause();paused=!paused;return true;}
-        if(key==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE&&prepared&&dvr!=null&&(buffer!=null||!replayUrl.isEmpty())){togglePause();showControls();return true;}
-        if(key==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE&&prepared&&player!=null&&!replayUrl.isEmpty()){try{if(player.isPlaying()){player.pause();paused=true;main.removeCallbacks(timeout);showControls();}else{player.start();paused=false;progress.reset(SystemClock.elapsedRealtime(),player.getCurrentPosition());if(!rendered)main.postDelayed(timeout,TvSignalFallback.START_TIMEOUT_MS);delayHide();}}catch(IllegalStateException ignored){}return true;}
+        if(key==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE&&tuner!=null&&timeShiftStatus==TvInputManager.TIME_SHIFT_STATUS_AVAILABLE){
+            if(event.getRepeatCount()==0){
+                if(paused)tuner.timeShiftResume();else tuner.timeShiftPause();
+                paused=!paused;
+            }
+            return true;
+        }
+        if(key==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE&&prepared&&dvr!=null&&(buffer!=null||!replayUrl.isEmpty())){
+            if(event.getRepeatCount()==0){togglePause();showControls();}
+            return true;
+        }
+        if(key==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE&&prepared&&player!=null&&!replayUrl.isEmpty()){
+            if(event.getRepeatCount()>0)return true;
+            try{
+                if(player.isPlaying()){
+                    player.pause();paused=true;
+                    main.removeCallbacks(timeout);showControls();
+                }else{
+                    player.start();paused=false;
+                    progress.reset(SystemClock.elapsedRealtime(),player.getCurrentPosition());
+                    if(!rendered)main.postDelayed(timeout,TvSignalFallback.START_TIMEOUT_MS);
+                    delayHide();
+                }
+            }catch(IllegalStateException ignored){}
+            return true;
+        }
         if(panel.getVisibility()==VISIBLE)delayHide();return false;
     }
     private long position(){return dvr!=null?dvr.position():player==null?0:player.getCurrentPosition();}

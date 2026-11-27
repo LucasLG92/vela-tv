@@ -29,6 +29,29 @@ public final class AndroidBroadcastDesignTest extends Instrumentation {
         });
         waitForIdleSync();
     }
+    private void heldPlayPause()throws Exception{
+        LiveTvData.Channel channel=lineup.get(1);
+        runOnMainSync(()->player.selectReplay(channel,listings.get(channel.id).now,origin+"cine.mp4"));
+        long until=SystemClock.elapsedRealtime()+22000;
+        while(!(player.rendered&&player.prepared)&&SystemClock.elapsedRealtime()<until){
+            waitForIdleSync();Thread.sleep(60);
+        }
+        check(player.rendered&&player.prepared,"Replay did not start");
+        int code=KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
+        boolean[] pausedAndResumed=new boolean[2];
+        runOnMainSync(()->{
+            long when=SystemClock.uptimeMillis();
+            player.key(new KeyEvent(when,when,KeyEvent.ACTION_DOWN,code,0));
+            player.key(new KeyEvent(when,when+500,KeyEvent.ACTION_DOWN,code,1));
+            player.key(new KeyEvent(when,when+550,KeyEvent.ACTION_UP,code,0));
+            pausedAndResumed[0]=!playing();
+            player.key(new KeyEvent(KeyEvent.ACTION_DOWN,code));
+            player.key(new KeyEvent(KeyEvent.ACTION_UP,code));
+            pausedAndResumed[1]=playing();
+        });
+        check(pausedAndResumed[0]&&pausedAndResumed[1],"Holding Play/Pause toggled playback more than once");
+    }
+    private boolean playing(){return player.dvr!=null?player.dvr.playing():player.player.isPlaying();}
     private View view(String field)throws Exception{Field f=LiveTvPlayer.class.getDeclaredField(field);f.setAccessible(true);return (View)f.get(player);}
     private void photo(String name)throws Exception{
         waitForIdleSync();Thread.sleep(520);
@@ -92,7 +115,8 @@ public final class AndroidBroadcastDesignTest extends Instrumentation {
             key(KeyEvent.KEYCODE_DPAD_RIGHT);check(view("quickDrawer").isShown(),"Right should open channel surfing");key(KeyEvent.KEYCODE_DPAD_DOWN);android.widget.ListView rows=(android.widget.ListView)view("quickList");check(rows.hasFocus()&&rows.getSelectedItemPosition()==2&&player.selected==lineup.get(1),"Browsing should move focus without changing the film");photo("05-canales");if(tour)Thread.sleep(2400);key(KeyEvent.KEYCODE_BACK);
             check(!view("quickDrawer").isShown()&&player.rendered,"Back should return to the same playing channel");
             if(recorder!=null){try(InputStream stdout=new ParcelFileDescriptor.AutoCloseInputStream(recorder)){byte[] buffer=new byte[256];while(stdout.read(buffer)!=-1){}}}
-            result.putString("result","PASS native opening, clean video, OK info, left controls, right channel list, return to a decoded local film.");
+            heldPlayPause();
+            result.putString("result","PASS single toggle per Play/Pause press, native opening, clean video, OK info, left controls, right channel list, return to a decoded local film.");
         }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));}
         finally{if(activity!=null)runOnMainSync(()->{if(player!=null)player.pause();activity.finish();});if(previousLanguage!=null)L10n.choose(getTargetContext(),previousLanguage);if("lite".equals(previousMode))VelaEdition.select(getTargetContext(),"lite");finish(result.containsKey("error")?1:-1,result);}
     }
