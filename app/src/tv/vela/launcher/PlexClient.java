@@ -220,12 +220,76 @@ class PlexClient {
         JSONObject container=response.optJSONObject("MediaContainer"),home=root.optJSONObject("MediaContainer");
         if(container==null||home==null)return;
         JSONArray metadata=container.optJSONArray("Metadata"),hubs=container.optJSONArray("Hub");
-        if(metadata==null&&hubs!=null&&hubs.length()>0){JSONObject hub=hubs.optJSONObject(0);if(hub!=null)metadata=hub.optJSONArray("Metadata");}
-        if(metadata==null)return;
-        JSONArray bounded=new JSONArray();for(int i=0;i<Math.min(12,metadata.length());i++)bounded.put(metadata.get(i));
-        JSONArray merged=new JSONArray().put(new JSONObject().put("hubIdentifier","vela.continue").put("Metadata",bounded));
-        JSONArray existing=home.optJSONArray("Hub");for(int i=0;existing!=null&&i<existing.length();i++){JSONObject hub=existing.optJSONObject(i);if(hub!=null){String id=hub.optString("hubIdentifier").toLowerCase(Locale.ROOT);if(!id.contains("continue")&&!id.contains("ondeck"))merged.put(hub);}}
+        List<JSONObject> row=new ArrayList<>();
+        if(metadata!=null)addContinueItems(row,metadata);
+        else if(hubs!=null){
+            boolean recognized=collectContinueHubs(hubs,row);
+            if(!recognized&&hubs.length()>0){
+                // Older endpoints can return a single unnamed hub.
+                JSONObject only=hubs.length()==1?hubs.optJSONObject(0):null;
+                if(only==null||!only.optString("hubIdentifier").isEmpty()||only.optJSONArray("Metadata")==null)return;
+                addContinueItems(row,only.optJSONArray("Metadata"));
+            }
+        }else if(container.optInt("size",-1)!=0)return;
+
+        JSONArray merged=new JSONArray().put(new JSONObject().put("hubIdentifier","vela.continue")
+                .put("Metadata",new JSONArray(row)));
+        JSONArray existing=home.optJSONArray("Hub");
+        for(int i=0;existing!=null&&i<existing.length();i++){
+            JSONObject hub=existing.optJSONObject(i);
+            if(hub!=null&&!continueHub(hub))merged.put(hub);
+        }
         home.put("Hub",merged);
+    }
+    private static boolean continueHub(JSONObject hub){
+        String id=hub.optString("hubIdentifier").toLowerCase(Locale.ROOT);
+        return id.contains("continue")||id.contains("ondeck");
+    }
+    private static boolean collectContinueHubs(JSONArray hubs,List<JSONObject> row){
+        boolean recognized=false;
+        for(int i=0;i<hubs.length();i++){
+            JSONObject hub=hubs.optJSONObject(i);
+            if(hub==null||!continueHub(hub))continue;
+            JSONArray items=hub.optJSONArray("Metadata");
+            if(items!=null){
+                addContinueItems(row,items);
+                recognized=true;
+            }else if(hub.optInt("size",-1)==0)recognized=true;
+        }
+        return recognized;
+    }
+    private static void addContinueItems(List<JSONObject> row,JSONArray items){
+        for(int i=0;i<Math.min(PAGE_SIZE,items.length());i++){
+            JSONObject item=items.optJSONObject(i);
+            if(item==null)continue;
+            String type=item.optString("type"),key=item.optString("ratingKey");
+            if(key.isEmpty()||!(type.equals("movie")||type.equals("episode")||type.equals("show")))continue;
+            long offset=item.optLong("viewOffset"),duration=item.optLong("duration");
+            if((duration>0&&offset>=duration)||(item.optInt("viewCount")>0&&offset<=0))continue;
+            String series=seriesKey(item);
+            int slot=0;
+            for(;slot<row.size();slot++){
+                JSONObject previous=row.get(slot);
+                if(key.equals(previous.optString("ratingKey"))||(!series.isEmpty()&&series.equals(seriesKey(previous))))break;
+            }
+            if(slot==row.size()){
+                if(slot<12)row.add(item);
+            }else if(resumePriority(item)>resumePriority(row.get(slot))){
+                // Upgrade the card in place when another hub has a playable episode or a resume position.
+                row.set(slot,item);
+            }
+        }
+    }
+    private static int resumePriority(JSONObject item){
+        if(item.optString("type").equals("show"))return 0;
+        return item.optLong("viewOffset")>0?2:1;
+    }
+    private static String seriesKey(JSONObject item){
+        switch(item.optString("type")){
+            case "episode":return item.optString("grandparentRatingKey");
+            case "show":return item.optString("ratingKey");
+            default:return "";
+        }
     }
     static void mergeRecent(JSONObject root,JSONObject response) throws Exception {
         JSONObject container=response.optJSONObject("MediaContainer"),home=root.optJSONObject("MediaContainer");if(container==null||home==null)return;
@@ -244,20 +308,21 @@ class PlexClient {
         List<Film> films = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         Set<String> seriesSeen = new HashSet<>();
-        int resumed=0,others=0;boolean hasRecent=false;
+        int others=0;boolean hasRecent=false;
         JSONObject container = root.optJSONObject("MediaContainer");
         JSONArray hubs = container == null ? null : container.optJSONArray("Hub");
         if (hubs == null) return films;
         for(int i=0;i<hubs.length();i++){JSONObject hub=hubs.optJSONObject(i);if(hub!=null&&recentHub(hub.optString("hubIdentifier").toLowerCase(Locale.ROOT)))hasRecent=true;}
-        // Continue watching first; preserve the server's ordering within each row.
-        for (int pass = 0; pass < 2; pass++) for (int i = 0; i < hubs.length() && films.size() < 48; i++) {
+        List<JSONObject> resume=new ArrayList<>();
+        collectContinueHubs(hubs,resume);
+        for(JSONObject item:resume)films.add(parseFilm(item,true));
+        for (int i = 0; i < hubs.length() && others < 36; i++) {
             JSONObject hub = hubs.getJSONObject(i);
-            String identifier = hub.optString("hubIdentifier", "").toLowerCase(Locale.ROOT);
-            boolean resume = identifier.contains("continue") || identifier.contains("ondeck");
-            if (resume != (pass == 0)) continue;
-            boolean recent=recentHub(identifier);if(!resume&&hasRecent&&!recent)continue;
+            if(continueHub(hub))continue;
+            String identifier=hub.optString("hubIdentifier").toLowerCase(Locale.ROOT);
+            boolean recent=recentHub(identifier);if(hasRecent&&!recent)continue;
             JSONArray metadata = hub.optJSONArray("Metadata");
-            for (int j = 0; metadata != null && j < Math.min(metadata.length(),24) && films.size() < 48; j++) {
+            for (int j = 0; metadata != null && j < Math.min(metadata.length(),24) && others < 36; j++) {
                 JSONObject item = metadata.getJSONObject(j);
                 String type = item.optString("type");
                 if(recent&&type.equals("season")){
@@ -265,20 +330,18 @@ class PlexClient {
                     item.remove("Guid"); // IDs on this metadata belong to the season.
                 }
                 String key = item.optString("ratingKey");
-                type=item.optString("type");String group=resume?"resume:":"library:";
+                type=item.optString("type");
                 if ((!type.equals("movie") && !type.equals("episode") && !type.equals("show")) || key.isEmpty()) continue;
-                Film film=parseFilm(item,resume);if(resume&&((film.durationMs>0&&film.positionMs>=film.durationMs)||(item.optInt("viewCount")>0&&film.positionMs<=0)))continue;if(!seen.add(group+key))continue;
-                String seriesKey=type.equals("episode")?item.optString("grandparentRatingKey"):type.equals("show")?key:"";
-                if(!seriesKey.isEmpty() && !seriesSeen.add(group+seriesKey))continue;
-                if(resume){if(resumed>=12)continue;resumed++;}else{if(others>=36)continue;others++;}
-                film.recentlyAdded=recent;films.add(film);
+                if(!seen.add(key))continue;
+                String seriesKey=seriesKey(item);
+                if(!seriesKey.isEmpty() && !seriesSeen.add(seriesKey))continue;
+                Film film=parseFilm(item,false);
+                film.recentlyAdded=recent;films.add(film);others++;
             }
         }
         // Stable sorting merges recent movie/series hubs using Plex's actual added date.
         films.sort((a,b)->a.continuing!=b.continuing?(a.continuing?-1:1):!a.continuing&&a.recentlyAdded&&b.recentlyAdded?Long.compare(b.addedAtMs,a.addedAtMs):0);
-        List<Film> bounded=new ArrayList<>();resumed=0;others=0;
-        for(Film film:films)if(film.continuing?resumed++<12:others++<12)bounded.add(film);
-        return bounded;
+        return new ArrayList<>(films.subList(0,Math.min(films.size(),resume.size()+12)));
     }
     private static boolean recentHub(String id){return id.equals("vela.recent")||id.endsWith(".recent")||id.contains("recentlyadded");}
     Film item(String key)throws Exception{if(!key.matches("[0-9]{1,20}"))throw new IOException("Invalid item");JSONObject root=catalogJson("/library/metadata/"+key+"?includeGuids=1",2*1024*1024);JSONObject container=root.optJSONObject("MediaContainer");JSONArray items=container==null?null:container.optJSONArray("Metadata");return items==null||items.length()!=1?null:parseFilm(items.getJSONObject(0),false);}

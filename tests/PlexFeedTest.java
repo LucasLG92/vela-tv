@@ -5,6 +5,7 @@ import java.util.*;
 public class PlexFeedTest {
     public static void main(String[] args) throws Exception {
         links();
+        continueWatchingHubs();
         require(PlexClient.avatarAllowed("https://plex.tv/users/example/avatar")&&PlexClient.avatarAllowed("https://secure.gravatar.com/avatar/example"),"Plex avatar sources");
         for(String url:new String[]{"http://plex.tv/users/example/avatar","https://plex.tv.attacker.invalid/avatar","https://user@plex.tv/avatar","https://plex.tv:8080/avatar","file:///avatar.png","https://127.0.0.1/avatar"})require(!PlexClient.avatarAllowed(url),"Unsafe avatar source accepted");
         require(PlexClient.profileKey("").isEmpty(),"Unlinked account must not share a previous avatar");
@@ -86,6 +87,52 @@ public class PlexFeedTest {
         JSONObject finished=new JSONObject(episode.toString()).put("viewOffset",100);PlexClient.mergeContinue(nextHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray().put(finished).put(upcoming))));require(PlexClient.parseHubs(nextHome).size()==1&&PlexClient.parseHubs(nextHome).get(0).key.equals("102"),"finished metadata hid the next pending episode");
         require(PlexClient.watchedPath("102").equals("/:/scrobble?identifier=com.plexapp.plugins.library&key=102"),"watched endpoint");for(String bad:new String[]{"", "../42", "42&key=other", "movie", "999999999999999999999"}){rejected=false;try{PlexClient.watchedPath(bad);}catch(Exception expected){rejected=true;}require(rejected,"unsafe Plex watched item accepted");}
         System.out.println("PASS Plex feed and catalog: real artwork, hub-based continue watching, sections, bounded pages, offset validation, deduplication, unknown totals and empty/last pages");
+    }
+    private static void continueWatchingHubs()throws Exception{
+        JSONObject started=new JSONObject().put("type","episode").put("ratingKey","101")
+                .put("grandparentRatingKey","10").put("duration",120000).put("viewOffset",45000);
+        JSONObject pending=new JSONObject(started.toString()).put("ratingKey","102").put("viewOffset",0);
+        JSONObject nextSeries=new JSONObject(pending.toString()).put("ratingKey","201").put("grandparentRatingKey","20");
+        JSONObject movie=new JSONObject().put("type","movie").put("ratingKey","301").put("duration",120000).put("viewOffset",60000);
+        JSONObject recommendation=new JSONObject(movie.toString()).put("ratingKey","901");
+        JSONObject unrelated=hub("home.recommendations",recommendation);
+        JSONObject recent=hub("home.movies.recent",recommendation);
+        JSONObject show=new JSONObject().put("type","show").put("ratingKey","10");
+        JSONObject onDeck=hub("home.ondeck",show,pending,nextSeries,new JSONObject(movie.toString()).put("viewOffset",0));
+        JSONObject inProgress=hub("home.continue",started,movie);
+        for(JSONArray hubs:Arrays.asList(new JSONArray().put(unrelated).put(onDeck).put(inProgress),
+                new JSONArray().put(inProgress).put(unrelated).put(onDeck))){
+            JSONObject home=new JSONObject().put("MediaContainer",new JSONObject()
+                    .put("Hub",new JSONArray().put(hub("home.continue",recommendation)).put(recent)));
+            PlexClient.mergeContinue(home,new JSONObject().put("MediaContainer",new JSONObject().put("Hub",hubs)));
+            List<PlexClient.Film> row=PlexClient.parseHubs(home);
+            require(row.size()==4,"Continue Watching lost titles from a later Plex hub");
+            List<String> keys=new ArrayList<>();
+            for(PlexClient.Film film:row)if(film.continuing){
+                keys.add(film.key);
+                if(film.key.equals("101"))require(!film.nextEpisode&&film.positionMs==45000,"Started episode lost its position");
+                if(film.key.equals("301"))require(film.positionMs==60000,"Duplicate movie lost its resume position");
+                if(film.key.equals("201"))require(film.nextEpisode&&film.positionMs==0,"On Deck episode lost its next-up state");
+            }
+            require(keys.size()==3&&keys.containsAll(Arrays.asList("101","201","301")),"Wrong Plex episode or unrelated recommendation in Continue Watching");
+            require(row.get(3).recentlyAdded&&row.get(3).key.equals("901"),"Refreshing Continue Watching removed the recent row");
+        }
+        JSONObject full=hub("home.ondeck",pending);
+        for(int i=0;i<12;i++)full.getJSONArray("Metadata").put(new JSONObject(movie.toString()).put("ratingKey",String.valueOf(400+i)));
+        JSONObject duplicate=new JSONObject(started.toString());
+        duplicate.remove("grandparentRatingKey");
+        JSONObject fallback=new JSONObject().put("MediaContainer",new JSONObject()
+                .put("Hub",new JSONArray().put(full).put(hub("home.continue",started,duplicate))));
+        List<PlexClient.Film> bounded=PlexClient.parseHubs(fallback);
+        require(bounded.size()==12&&bounded.get(0).key.equals("101")&&bounded.get(11).key.equals("410"),
+                "A full fallback row lost its place, limit or in-progress replacement");
+        JSONObject home=new JSONObject().put("MediaContainer",new JSONObject().put("Hub",new JSONArray().put(inProgress).put(recent)));
+        PlexClient.mergeContinue(home,new JSONObject().put("MediaContainer",new JSONObject().put("size",0)));
+        List<PlexClient.Film> cleared=PlexClient.parseHubs(home);
+        require(cleared.size()==1&&cleared.get(0).recentlyAdded,"Explicitly empty Plex response retained finished titles");
+    }
+    private static JSONObject hub(String id,JSONObject... films)throws Exception{
+        return new JSONObject().put("hubIdentifier",id).put("Metadata",new JSONArray(Arrays.asList(films)));
     }
     private static void links()throws Exception{
         PlexClient.Film film=new PlexClient.Film();film.key="123";film.type="movie";film.title="Never placed in the URI";String prefix="plex://libraries/demo-server/unmatched/";
