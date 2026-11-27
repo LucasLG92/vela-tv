@@ -11,6 +11,7 @@ import java.lang.reflect.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.FutureTask;
 import org.json.*;
 
 /** Actual first run and reversible native controllers, including the Android 8 boundary. */
@@ -56,7 +57,16 @@ public final class AndroidUnifiedTest extends Instrumentation {
         await(()->standalone.isFinishing()&&full.hasWindowFocus()
                 &&((CinemaHomeView)field(full,"home")).navigationDestination()==7);
     }
-    void await(Ready ready)throws Exception{long end=SystemClock.elapsedRealtime()+18000;while(SystemClock.elapsedRealtime()<end){waitForIdleSync();if(ready.get())return;Thread.sleep(80);}throw new AssertionError("Timeout "+phase);}
+    void await(Ready ready)throws Exception{
+        long end=SystemClock.elapsedRealtime()+18000;
+        while(SystemClock.elapsedRealtime()<end){
+            FutureTask<Boolean> check=new FutureTask<>(ready::get);
+            runOnMainSync(check);
+            if(check.get())return;
+            Thread.sleep(80);
+        }
+        throw new AssertionError("Timeout "+phase);
+    }
     Object field(Object target,String name)throws Exception{for(Class<?> c=target.getClass();c!=null;c=c.getSuperclass())try{Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(target);}catch(NoSuchFieldException ignored){}throw new NoSuchFieldException(name);}
     Activity foreground(String name)throws Exception{final Activity[] found={null};await(()->{for(Activity a:opened)if(a.getClass().getName().equals(name)||a instanceof Full&&name.equals(HomeActivity.class.getName())||a instanceof Lite&&name.equals(LiteHomeActivity.class.getName()))if(a.hasWindowFocus()&&!a.isFinishing()){found[0]=a;return true;}return false;});return found[0];}
     View title(View root,String text){if(root instanceof TextView){String value=((TextView)root).getText().toString();if(value.equals(text)||value.startsWith(text+"\n"))return root;}if(root instanceof ViewGroup)for(int i=0;i<((ViewGroup)root).getChildCount();i++){View v=title(((ViewGroup)root).getChildAt(i),text);if(v!=null)return v;}return null;}
@@ -205,7 +215,14 @@ public final class AndroidUnifiedTest extends Instrumentation {
         openSearch(activeLite);
         context.startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
                 .setClass(context,HomeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        await(()->activeLite.hasWindowFocus()&&field(activeLite,"hub")==null&&((Integer)field(activeLite,"section"))==0);
+        // Android TV can open HOME in a distinct task from the activity that handled SEARCH.
+        await(()->{
+            for(Activity a:opened){
+                if(a instanceof LiteHomeActivity&&a.hasWindowFocus()&&a.getIntent().hasCategory(Intent.CATEGORY_HOME))
+                    return field(a,"hub")==null&&((Integer)field(a,"section"))==0;
+            }
+            return false;
+        });
         check(VelaEdition.lite(context),"HOME changed selected mode");
         phase="settings-pin";VelaSessions.setPin(context,"2468");VelaSessions.lock();boolean locked=false;try{VelaEdition.select(context,"lite");}catch(IllegalStateException expected){locked=true;}check(locked,"Mode selection bypassed the settings PIN");VelaSessions.unlock(context,"2468");VelaSessions.prefs(context).edit().clear().commit();
         phase="unified-update-channel";String hash=String.join("",Collections.nCopies(64,"a"));JSONObject a=new JSONObject().put("tag_name","v2.0.1-preview").put("draft",false).put("prerelease",true).put("assets",new JSONArray().put(new JSONObject().put("name","Vela-2.0.1-preview.apk").put("browser_download_url",LiteReleaseFeed.REPO+"/releases/download/v2.0.1-preview/Vela-2.0.1-preview.apk").put("state","uploaded").put("size",2000).put("digest","sha256:"+hash)));
