@@ -155,6 +155,8 @@ public final class AndroidNextTest extends Instrumentation {
                 ((View)text(tray[0],L10n.text("More")).getParent()).performClick();
                 text(tray[0],L10n.text("Sleep timer")).performClick();
                 check(text(tray[0],endOption)==null&&text(tray[0],preset).requestFocus(),"Unexpected initial sleep choices");
+                tray[0].dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_DPAD_CENTER));
+                check(text(tray[0],preset).isPressed(),"Timer preset did not receive OK down");
                 bufferAvailable[0]=true;
                 end[0]=System.currentTimeMillis()/1000+1800;
                 tray[0].tracksChanged();
@@ -163,6 +165,11 @@ public final class AndroidNextTest extends Instrumentation {
                 check(text(tray[0],endOption)!=null&&text(tray[0],L10n.text("Pause live TV"))!=null,
                         "Open playback controls ignored the updated guide and buffer");
                 check(text(tray[0],preset).hasFocus(),"Inserting a tuner action moved focus away from the timer preset");
+                tray[0].dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_DPAD_CENTER));
+            });
+            ui(()->{
+                check(timer.remaining()>1700_000&&timer.remaining()<=1800_000,"Refreshing the guide swallowed a held OK");
+                text(tray[0],L10n.text("Sleep timer")).performClick();
                 end[0]+=1800;
                 bufferAvailable[0]=false;
                 tray[0].tracksChanged();

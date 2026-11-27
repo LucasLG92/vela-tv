@@ -68,18 +68,37 @@ final class VelaPlaybackPanel extends FrameLayout {
     @Override protected void onDetachedFromWindow(){removeCallbacks(updateDetails);super.onDetachedFromWindow();}
     void refreshOptions(){
         View focused=findFocus();
-        String title=focused instanceof Row?((Row)focused).item.title:null;
-        refresh(buttons.indexOf(focused),title);
+        refresh(buttons.indexOf(focused),focused instanceof Row?(Row)focused:null);
+    }
+    private Row insertRow(int index){
+        Row row=new Row();
+        LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
+        lp.bottomMargin=4;
+        list.addView(row,index,lp);
+        return row;
     }
     private void refresh(int selected){refresh(selected,null);}
-    private void refresh(int selected,String keepTitle){
+    private void refresh(int selected,Row focused){
         nextDetailUpdate=0;
-        List<Item> items=model.items();buttons.clear();
+        List<Item> items=model.items();
+        // Keep the focused view attached so a held OK reaches the same action on key-up.
+        if(focused!=null){
+            for(int i=0;i<items.size();i++){
+                Item item=items.get(i);
+                if(item.action==null||!item.title.equals(focused.item.title))continue;
+                int old=list.indexOfChild(focused);
+                if(old>i)list.removeViews(i,old-i);
+                for(int index=old;index<i;index++)insertRow(index);
+                break;
+            }
+        }
+        buttons.clear();
         for(int i=0;i<items.size();i++){
-            Row row;if(i<list.getChildCount())row=(Row)list.getChildAt(i);else{row=new Row();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=4;list.addView(row,lp);}
+            Row row=i<list.getChildCount()?(Row)list.getChildAt(i):insertRow(i);
+            boolean retained=row==focused&&row.item.title.equals(items.get(i).title);
             row.bind(items.get(i));trackUpdate(row.item);
             if(row.item.action!=null){
-                if(row.item.title.equals(keepTitle))selected=buttons.size();
+                if(retained)selected=buttons.size();
                 buttons.add(row);
             }
         }
