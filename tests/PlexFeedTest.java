@@ -70,11 +70,12 @@ public class PlexFeedTest {
         JSONObject homeHub=new JSONObject().put("MediaContainer",new JSONObject());
         PlexClient.mergeContinue(homeHub,new JSONObject().put("MediaContainer",new JSONObject().put("Hub",new JSONArray().put(resume))));
         require(PlexClient.parseHubs(homeHub).size()==2,"continue-watching hub response shape");
-        JSONObject season=new JSONObject().put("ratingKey","season-1").put("type","season").put("parentRatingKey","series-1").put("parentTitle","Recent series").put("parentThumb","/series/poster").put("addedAt",300);
+        JSONObject season=new JSONObject().put("ratingKey","season-1").put("type","season").put("parentRatingKey","series-1").put("parentTitle","Recent series").put("Guid",new JSONArray().put(new JSONObject().put("id","tmdb://8055"))).put("parentThumb","/series/poster").put("addedAt",300);
         JSONObject older=new JSONObject(movie.toString()).put("addedAt",100),newer=new JSONObject(show.toString()).put("addedAt",400);
         JSONObject orderedHome=new JSONObject().put("MediaContainer",new JSONObject().put("Hub",new JSONArray().put(resume).put(recent)));
         PlexClient.mergeRecent(orderedHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray().put(older).put(season).put(newer).put(older))));
         List<PlexClient.Film> ordered=PlexClient.parseHubs(orderedHome);require(ordered.size()==5&&ordered.get(2).key.equals("13")&&ordered.get(3).key.equals("series-1")&&ordered.get(4).key.equals("11"),"recent feed must sort by addedAt, deduplicate within the row and preserve resume");
+        require(ordered.get(3).externalIds.isEmpty(),"Recent series must never inherit season identifiers");
         require(ordered.get(3).thumb.equals("/series/poster")&&ordered.get(3).title.equals("Recent series")&&ordered.get(3).addedAtMs==300000,"new season must use the series title and original poster");
         PlexClient.mergeRecent(orderedHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray())));require(PlexClient.parseHubs(orderedHome).size()==2,"an empty fresh feed must not resurrect cached recent titles");
         JSONArray tooMany=new JSONArray();for(int i=0;i<25;i++)tooMany.put(movie);rejected=false;try{PlexClient.mergeRecent(orderedHome,new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",tooMany)));}catch(Exception expected){rejected=true;}require(rejected,"unbounded recently-added response was accepted");

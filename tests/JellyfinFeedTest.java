@@ -6,7 +6,52 @@ public final class JellyfinFeedTest {
     static void check(boolean ok,String why){count++;if(!ok)throw new AssertionError(why);}
     static String item="0123456789abcdef0123456789abcdef",series="abcdef0123456789abcdef0123456789";
     static JSONObject movie()throws Exception{return new JSONObject().put("Id",item).put("Name","Película de prueba").put("Type","Movie").put("RunTimeTicks",108_000_000_000L).put("DateCreated","2026-10-20T12:30:00.1234567Z").put("ImageTags",new JSONObject().put("Primary","poster").put("Logo","logo")).put("BackdropImageTags",new JSONArray().put("backdrop")).put("UserData",new JSONObject().put("PlaybackPositionTicks",27_000_000_000L).put("LastPlayedDate","2026-10-21T10:00:00Z").put("Played",false));}
+    static PlexClient.Film plexMovie()throws Exception{
+        JSONArray ids=new JSONArray().put(new JSONObject().put("id","tmdb://55")).put(new JSONObject().put("id","imdb://tt1234567"));
+        JSONObject film=new JSONObject().put("type","movie").put("ratingKey","101").put("title","Fixture").put("Guid",ids);
+        JSONObject container=new JSONObject().put("Metadata",new JSONArray().put(film));
+        return PlexClient.parsePage(new JSONObject().put("MediaContainer",container),0).films.get(0);
+    }
+    static void sharedIds()throws Exception{
+        PlexClient.Film plex=plexMovie();
+        JSONObject source=movie().put("ProviderIds",new JSONObject().put("Imdb","tt1234567"));
+        PlexClient.Film jf=JellyfinClient.parseFilm(source,false,true);
+        List<PlexClient.Film> row=VelaHomeRows.merge("recent_movies",Arrays.asList(plex),Arrays.asList(jf));
+        check(row.size()==1&&row.get(0)==jf&&jf.alternative==plex,"A shared secondary IMDb ID must retain the newer card and the other provider");
+        source.getJSONObject("ProviderIds").put("Tmdb","99");
+        jf=JellyfinClient.parseFilm(source,false,true);
+        row=VelaHomeRows.merge("recent_movies",Arrays.asList(plexMovie()),Arrays.asList(jf));
+        check(row.size()==2&&jf.alternative==null,"Two different TMDB IDs must override a shared IMDb ID");
+        source.getJSONObject("ProviderIds").remove("Tmdb");
+        jf=JellyfinClient.parseFilm(source,false,true);
+        VelaHomeRows.Row limited=new VelaHomeRows.Row(1);
+        limited.add(plexMovie());
+        limited.add(jf);
+        check(limited.films.size()==1&&limited.films.get(0).alternative==jf,"A full row must still record an alternate provider");
+        PlexClient.Film contradictory=plexMovie();
+        contradictory.addExternalId("tmdb://99");
+        VelaHomeRows.Row ambiguous=new VelaHomeRows.Row(12);
+        ambiguous.add(contradictory);
+        ambiguous.add(jf);
+        check(ambiguous.films.size()==2,"A record containing contradictory IDs must stay separate");
+        VelaHomeRows.Row accumulated=new VelaHomeRows.Row(12);
+        accumulated.add(JellyfinClient.parseFilm(source,false,true));
+        accumulated.add(plexMovie());
+        source.getJSONObject("ProviderIds").put("Tmdb","99");
+        accumulated.add(JellyfinClient.parseFilm(source.put("Id",series),false,true));
+        check(accumulated.films.size()==2,"Conflict with an alternate source was overlooked");
+        PlexClient.Film old=new PlexClient.Film();old.type="movie";old.key=item;
+        JellyfinClient.readCachedIds(old,new JSONObject().put("external","imdb://tt1234567"));
+        check(old.externalIds.equals(Collections.singletonMap("imdb","tt1234567")),"Lost the ID of an existing cache entry");
+        old.externalIds.clear();old.type="show";old.seriesKey=item;
+        JellyfinClient.readCachedIds(old,new JSONObject().put("external","imdb://tt1234567"));
+        check(old.externalIds.isEmpty(),"Old cache assigned season identifiers to the series");
+        JSONObject season=source.put("Type","Season").put("SeriesId",series).put("SeriesName","Fixture");
+        check(JellyfinClient.parseFilm(season,false,true).externalIds.isEmpty(),"Latest season used a season ID for its parent series");
+        check(!JellyfinClient.parseFilm(season,false,false).externalIds.isEmpty(),"Native season lost its own IDs");
+    }
     public static void main(String[] args)throws Exception{
+        sharedIds();
         PlexClient.Film movie=JellyfinClient.parseFilm(movie(),true,false);check(movie!=null&&movie.provider.equals("Jellyfin")&&movie.packageName.equals(JellyfinClient.PACKAGE),"Source identity lost");check(movie.durationMs==10_800_000&&movie.positionMs==2_700_000&&movie.remainingMs()==8_100_000,"100ns ticks not converted to exact milliseconds");check(Math.abs(movie.progress-.25)<.001,"Progress mapping failed");check(movie.thumb.startsWith("/Items/"+item+"/Images/Primary?tag=")&&movie.art.contains("Backdrop")&&movie.logo.contains("Logo"),"Original image references lost");check(movie.addedAtMs>0&&movie.lastPlayedMs>movie.addedAtMs,"ISO timestamps, including tick precision, lost");
         JSONObject episode=movie().put("Type","Episode").put("SeriesName","Serie de prueba").put("SeriesId",series).put("SeriesPrimaryImageTag","seriesposter").put("ParentIndexNumber",2).put("IndexNumber",3);PlexClient.Film ep=JellyfinClient.parseFilm(episode,true,false);check(ep.key.equals(item)&&ep.title.equals("Serie de prueba")&&ep.thumb.contains(series)&&ep.episodeLabel.equals("T2 · E3"),"Episode lost playable ID, series artwork or season/episode");
         episode.remove("BackdropImageTags");episode.put("ParentBackdropItemId",series).put("ParentBackdropImageTags",new JSONArray().put("seriesbackdrop"));check(JellyfinClient.parseFilm(episode,true,false).art.contains(series),"Parent backdrop ignored");

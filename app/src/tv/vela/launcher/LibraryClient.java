@@ -29,8 +29,11 @@ final class LibraryClient {
     private static String tag(String prefix,String path){return path==null||path.isEmpty()||path.startsWith("vela-")?path:prefix+path;}
     static List<PlexClient.Film> merge(List<PlexClient.Film> a,List<PlexClient.Film> b){
         List<PlexClient.Film> all=new ArrayList<>(a);all.addAll(b);all.sort((x,y)->{if(x.continuing!=y.continuing)return x.continuing?-1:1;return Long.compare(x.continuing?y.lastPlayedMs:y.addedAtMs,x.continuing?x.lastPlayedMs:x.addedAtMs);});
-        List<PlexClient.Film> out=new ArrayList<>();Map<String,PlexClient.Film> seen=new HashMap<>();int resume=0,recent=0;
-        for(PlexClient.Film f:all){String id=(f.continuing?"resume|":"recent|")+(f.externalId.isEmpty()?f.packageName+"|"+f.key:f.type+"|"+f.externalId);PlexClient.Film previous=seen.get(id);if(previous!=null){if(!previous.packageName.equals(f.packageName)&&previous.alternative==null)previous.alternative=f;continue;}if(f.continuing?resume>=12:recent>=12)continue;seen.put(id,f);out.add(f);if(f.continuing)resume++;else recent++;}return out;
+        VelaHomeRows.Row resume=new VelaHomeRows.Row(12),recent=new VelaHomeRows.Row(12);
+        for(PlexClient.Film film:all)(film.continuing?resume:recent).add(film);
+        List<PlexClient.Film> out=new ArrayList<>(resume.films);
+        out.addAll(recent.films);
+        return out;
     }
     List<PlexClient.Film> cached(){if(both())return decorate(merge(plex.cached(),jellyfin.cached()));return decorate(isJellyfin()?jellyfin.cached():plex.cached());}
     boolean uses(String pkg){return both()||pkg.equals(JellyfinClient.PACKAGE)==isJellyfin();}
