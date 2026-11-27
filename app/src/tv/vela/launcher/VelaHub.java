@@ -37,6 +37,7 @@ final class VelaHub extends FrameLayout {
         default Hit resolve(JSONObject item,CancellationSignal signal)throws Exception{return null;}
         default void prepareBackup()throws Exception{}
         default String scope(){return "antenna";}
+        default String broadcastSource(){return "";}
         default JSONObject mobileState(int page)throws Exception{return new JSONObject();}
         default void mobileAction(JSONObject data)throws Exception{throw new IOException("Unavailable");}
         default List<VelaShows.Airing> discover(int mode,int genre,int page,CancellationSignal signal)throws Exception{return airings("",page,signal);}
@@ -151,10 +152,79 @@ final class VelaHub extends FrameLayout {
     private void readingChange(String key,int count){mutate(signal->{VelaWorkspace.saveUndo(activity);VelaReading.cycle(activity,key,count);return null;},v->{changed=true;render();first();});}
     private void shows(){row(L10n.text("Watch later"),VelaEdition.lite(activity)?L10n.text("Your saved broadcasts"):L10n.text("Your saved films, episodes and broadcasts"),this::watchlist);caption.setText(t("Follow a programme and find its next broadcasts in the available guide.","Sigue un programa y encuentra sus próximas emisiones en la guía disponible."));input=field(t("Programme name","Nombre del programa"));row(t("Follow this programme","Seguir este programa"),t("Up to 32 programmes per profile","Hasta 32 programas por perfil"),()->{String title=input.getText().toString().trim();if(title.isEmpty())return;if(!VelaShows.follows(activity,title))VelaShows.toggle(activity,title);changed=true;render();});row(t("Programme alerts","Avisos de programas"),VelaShows.enabled(activity)?VelaShows.permitted(activity)?t("On","Activados"):t("Permission needed","Permiso pendiente"):t("Off","Desactivados"),()->{boolean enabled=!VelaShows.enabled(activity);VelaShows.enabled(activity,enabled);changed=true;if(enabled&&Build.VERSION.SDK_INT>=33&&activity.checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)activity.requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},NOTIFICATIONS);render();});if(VelaShows.enabled(activity)&&!VelaShows.permitted(activity))row(t("Allow programme alerts in Android","Permitir avisos en Android"),"›",()->{try{activity.startActivity(new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,activity.getPackageName()));}catch(ActivityNotFoundException unavailable){status.setText(t("Open notification settings on your TV.","Abre los ajustes de notificaciones de la TV."));}});row(t("Refresh upcoming broadcasts","Actualizar próximas emisiones"),"",()->refreshShows(true));for(String rule:VelaShows.rules(activity))row(rule,t("OK · Stop following","OK · Dejar de seguir"),()->{VelaShows.toggle(activity,rule);changed=true;render();});for(VelaShows.Airing p:VelaShows.cached(activity))row(p.title,when(p),()->airing(p));note(t("Alerts use the cached guide and an approximate system alarm. Sleep, notification permissions and EPG availability can affect delivery. Open the guide to refresh schedules.","Los avisos usan la guía guardada y una alarma aproximada del sistema. El reposo, los permisos de notificación y la disponibilidad del EPG pueden afectar a su entrega. Abre la guía para renovar los horarios."));if(!VelaShows.rules(activity).isEmpty())refreshShows(false);}
     private String when(VelaShows.Airing p){return new SimpleDateFormat("EEE d · HH:mm",Ui.locale()).format(new Date(p.start*1000))+" · "+p.channel;}
-    private void airing(VelaShows.Airing p){if(page==8&&discovery!=null){discovery.show(p);return;}clear();heading.setText(p.title);caption.setText(when(p));programmeHeader(p);row(VelaWatchlist.contains(activity,VelaWatchlist.airingId(p))?L10n.text("Remove from Watch later"):L10n.text("Save for later"),L10n.text("Saves this broadcast, not a recording"),()->{try{VelaWatchlist.toggle(activity,VelaWatchlist.airing(p));airing(p);}catch(Exception bad){status.setText(L10n.text("Could not save this item."));}});row(L10n.text("Open channel"),p.channel,()->{work(signal->{for(Hit hit:host.search(p.channel,0,signal))if(hit.value instanceof LiveTvData.Channel&&TvChannelNames.match(hit.title).equals(TvChannelNames.match(p.channel)))return hit;return null;},value->{if(value==null){status.setText(L10n.text("Open Television to refresh the available channels."));return;}close();host.activate((Hit)value);});});row(VelaShows.follows(activity,p.title)?t("Stop following","Dejar de seguir"):t("Follow programme","Seguir programa"),t("Match future broadcasts by title","Encontrar próximas emisiones por título"),()->{VelaShows.toggle(activity,p.title);changed=true;render();});row(t("Back","Volver"),"",this::render);first();String lookup=p.channel+"|"+p.start;if((p.description.isEmpty()||p.image.isEmpty())&&!lookup.equals(detailLookup)){detailLookup=lookup;work(signal->host.airings(p.title,0,signal),value->{for(VelaShows.Airing more:(List<VelaShows.Airing>)value)if(more.start==p.start&&TvChannelNames.match(more.channel).equals(TvChannelNames.match(p.channel))&&(!more.description.isEmpty()&&p.description.isEmpty()||!more.image.isEmpty()&&p.image.isEmpty())){airing(new VelaShows.Airing(p.title,p.channel,p.start,p.end,p.eventId,more.description.isEmpty()?p.description:more.description,more.image.isEmpty()?p.image:more.image,p.logo.isEmpty()?more.logo:p.logo));break;}});}}
+    private void airing(VelaShows.Airing p){airing(p,false);}
+    private void airing(VelaShows.Airing p,boolean saved){
+        if(page==8&&discovery!=null){discovery.show(p);return;}
+        clear();heading.setText(p.title);caption.setText(when(p));programmeHeader(p);
+        row(VelaWatchlist.contains(activity,VelaWatchlist.airingId(p))?L10n.text("Remove from Watch later"):L10n.text("Save for later"),
+                L10n.text("Saves this broadcast, not a recording"),()->{
+            try{VelaWatchlist.toggle(activity,VelaWatchlist.airing(p));airing(p,saved);}
+            catch(Exception bad){status.setText(L10n.text("Could not save this item."));}
+        });
+        boolean identified=!p.source.isEmpty()&&!p.channelKey.isEmpty();
+        if(!saved||identified)row(L10n.text("Open channel"),p.channel,()->work(signal->{
+            if(identified)return host.resolve(VelaWatchlist.airing(p),signal);
+            for(Hit hit:host.search(p.channel,0,signal))
+                if(hit.value instanceof LiveTvData.Channel&&TvChannelNames.match(hit.title).equals(TvChannelNames.match(p.channel)))return hit;
+            return null;
+        },value->{
+            if(value==null||identified&&!p.source.equals(host.broadcastSource())){
+                status.setText(L10n.text(identified?"This channel is no longer available.":"Open Television to refresh the available channels."));
+                return;
+            }
+            close();host.activate((Hit)value);
+        }));
+        row(VelaShows.follows(activity,p.title)?t("Stop following","Dejar de seguir"):t("Follow programme","Seguir programa"),
+                t("Match future broadcasts by title","Encontrar próximas emisiones por título"),()->{VelaShows.toggle(activity,p.title);changed=true;render();});
+        row(t("Back","Volver"),"",this::render);first();
+        String lookup=p.source+"|"+p.channelKey+"|"+p.channel+"|"+p.start;
+        if(saved&&!identified||identified&&!p.source.equals(host.broadcastSource()))return;
+        if((p.description.isEmpty()||p.image.isEmpty())&&!lookup.equals(detailLookup)){
+            detailLookup=lookup;
+            work(signal->host.airings(p.title,0,signal),value->{
+                for(VelaShows.Airing more:(List<VelaShows.Airing>)value){
+                    if(identified&&(!p.source.equals(more.source)||!p.channelKey.equals(more.channelKey)))continue;
+                    if(more.start==p.start&&TvChannelNames.match(more.channel).equals(TvChannelNames.match(p.channel))
+                            &&(!more.description.isEmpty()&&p.description.isEmpty()||!more.image.isEmpty()&&p.image.isEmpty())){
+                        airing(new VelaShows.Airing(p.title,p.channel,p.start,p.end,p.eventId,
+                                more.description.isEmpty()?p.description:more.description,more.image.isEmpty()?p.image:more.image,
+                                p.logo.isEmpty()?more.logo:p.logo,p.source,p.channelKey),saved);
+                        break;
+                    }
+                }
+            });
+        }
+    }
     private void refreshShows(boolean feedback){if(feedback)status.setText(t("Reading the cached programme guide…","Leyendo la programación guardada…"));work(signal->VelaProgrammeRefresh.matching(VelaShows.rules(activity),host,signal),v->{VelaShows.replace(activity,(List<VelaShows.Airing>)v);if(feedback){clear();heading.setText(t("Upcoming broadcasts","Próximas emisiones"));caption.setText(t("From the guide currently stored on this TV.","De la guía guardada actualmente en esta TV."));for(VelaShows.Airing p:VelaShows.cached(activity))row(p.title,when(p),()->airing(p));row(t("Back","Volver"),"",this::render);status.setText(VelaShows.cached(activity).isEmpty()?t("No matching future broadcasts yet.","Aún no hay próximas emisiones coincidentes."):t("Upcoming broadcasts updated.","Próximas emisiones actualizadas."));first();}});}
 
-    private void watchlist(){clear();heading.setText(L10n.text("Watch later"));caption.setText(L10n.text("Saved on this profile. Broadcasts are references, not recordings."));for(JSONObject item:VelaWatchlist.read(activity)){row(item.optString("title"),item.optString("kind").equals("tv")?when(VelaWatchlist.asAiring(item)):item.optString("provider"),()->{if(item.optString("kind").equals("tv")){airing(VelaWatchlist.asAiring(item));return;}work(signal->host.resolve(item,signal),v->{if(v==null){status.setText(L10n.text("This item is unavailable in the current account."));return;}close();host.activate((Hit)v);});});controls.get(controls.size()-1).setOnLongClickListener(v->{try{VelaWatchlist.toggle(activity,item);watchlist();}catch(Exception bad){}return true;});}if(VelaWatchlist.read(activity).isEmpty())note(VelaEdition.lite(activity)?L10n.text("Save a broadcast from its programme details."):L10n.text("Hold OK on a library item, or save a broadcast from its programme details."));row(L10n.text("Back"),"",this::render);first();}
+    private void watchlist(){
+        clear();
+        heading.setText(L10n.text("Watch later"));
+        caption.setText(L10n.text("Saved on this profile. Broadcasts are references, not recordings."));
+        List<JSONObject> items=VelaWatchlist.read(activity);
+        for(JSONObject item:items){
+            boolean broadcast=item.optString("kind").equals("tv");
+            String detail=broadcast?when(VelaWatchlist.asAiring(item)):item.optString("provider");
+            String episode=item.optString("episode");
+            if(!episode.isEmpty()&&!broadcast)detail=episode+" · "+detail;
+            row(item.optString("title"),detail,()->{
+                if(broadcast){airing(VelaWatchlist.asAiring(item),true);return;}
+                work(signal->host.resolve(item,signal),value->{
+                    if(value==null){status.setText(L10n.text("This item is unavailable in the current account."));return;}
+                    close();
+                    host.activate((Hit)value);
+                });
+            });
+            controls.get(controls.size()-1).setOnLongClickListener(v->{
+                try{VelaWatchlist.toggle(activity,item);watchlist();}
+                catch(Exception bad){status.setText(L10n.text("Could not save this item."));}
+                return true;
+            });
+        }
+        if(items.isEmpty())note(VelaEdition.lite(activity)?L10n.text("Save a broadcast from its programme details."):L10n.text("Hold OK on a library item, or save a broadcast from its programme details."));
+        row(L10n.text("Back"),"",this::render);
+        first();
+    }
     private void profiles(){if(VelaSessions.blocked(activity)){unlockPage();return;}String active=VelaWorkspace.active(activity);caption.setText(t("Each profile has its own preferences and library accounts. New profiles start without linked accounts.","Cada perfil tiene sus ajustes y cuentas de biblioteca. Los perfiles nuevos empiezan sin cuentas vinculadas."));for(Map.Entry<String,String> e:VelaWorkspace.profiles(activity).entrySet())row(e.getValue()+(active.equals(e.getKey())?"  ✓":""),"",()->{try{VelaShows.cancel(activity);VelaWorkspace.select(activity,e.getKey());VelaShows.schedule(activity);changed=true;close();}catch(IOException failure){status.setText(t("Could not change profile.","No se pudo cambiar de perfil."));}});row(VelaSessions.configured(activity)?L10n.text("Change settings PIN"):L10n.text("Protect settings with a PIN"),L10n.text("Local Vela settings only"),this::pinPage);if(VelaSessions.configured(activity)){row(L10n.text("Remove settings PIN"),L10n.text("Local Vela settings only"),()->{VelaSessions.prefs(activity).edit().remove("hash").remove("salt").remove("retry").remove("failures").commit();VelaSessions.lock();render();});row(L10n.text("Lock settings now"),"",()->{VelaSessions.lock();render();});}if(VelaSessions.configured(activity))row(L10n.text("Enter guest mode"),L10n.text("Separate preferences and no personal library accounts"),()->{try{VelaSessions.enterGuest(activity);changed=true;close();}catch(Exception bad){status.setText(L10n.text("Unlock settings and leave a free profile slot first."));}});if(VelaWorkspace.profiles(activity).size()<VelaWorkspace.MAX_PROFILES){input=field(t("New profile name","Nombre del nuevo perfil"));row(t("Create profile","Crear perfil"),"",()->{try{VelaWorkspace.create(activity,input.getText().toString());changed=true;render();}catch(IOException bad){status.setText(bad.getMessage());}});}if(!active.equals(VelaWorkspace.DEFAULT))row(t("Delete this profile","Eliminar este perfil"),t("Local Vela preferences only","Solo sus preferencias locales de Vela"),()->{clear();caption.setText(t("Delete this profile and its local library authorizations?","¿Eliminar este perfil y sus autorizaciones locales de biblioteca?"));row(t("Delete profile","Eliminar perfil"),VelaWorkspace.profiles(activity).get(active),()->{try{VelaShows.cancel(activity);VelaWorkspace.delete(activity,active);VelaShows.schedule(activity);changed=true;close();}catch(IOException bad){status.setText(t("Could not delete profile.","No se pudo eliminar el perfil."));}});row(t("Cancel","Cancelar"),"",this::render);first();});}
 
     private EditText pinField(){EditText v=field(L10n.text("PIN · 4 to 8 digits"));v.setInputType(android.text.InputType.TYPE_CLASS_NUMBER|android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);v.setTypeface(Ui.medium);v.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});v.setSaveEnabled(false);v.setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);return v;}

@@ -15,7 +15,7 @@ import java.util.*;
 /** One hardware-backed player, explicitly started by the viewer and released on every pause. */
 final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
     interface Actions {void back();void zap(int direction);void channels(int page);void choose(LiveTvData.Channel channel);default void previous(){}default void started(LiveTvData.Channel channel){}default void favorite(LiveTvData.Channel channel){}default void channels(int page,boolean favorites){channels(page);}}
-    private final android.app.Activity activity;private final Actions actions;
+    private final android.app.Activity activity;private final String channelSource;private final Actions actions;
     final SurfaceView video;private final FrameLayout stage,intro,quickDrawer;private final VelaPlayerUi.Information panel;
     private final VelaPlayerUi.Signal liveBadge;private final TextView message,quickGroup,quickStatus,quickPrevious,quickNext,quickClose;
     private final LiveTvLogos.LogoView channelLogo;
@@ -57,7 +57,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         main.postDelayed(this,TvSignalFallback.CHECK_INTERVAL_MS);
     }};
     LiveTvPlayer(android.app.Activity a,Actions actions){
-        super(a);activity=a;this.actions=actions;sleep=new VelaSleepTimer(()->actions.back());setBackgroundColor(0xFF000000);setFocusable(true);setFocusableInTouchMode(true);setDefaultFocusHighlightEnabled(false);setClipChildren(false);setClipToPadding(false);audio=(AudioManager)a.getSystemService(Context.AUDIO_SERVICE);
+        super(a);activity=a;channelSource=LiveTvData.source(a);this.actions=actions;sleep=new VelaSleepTimer(()->actions.back());setBackgroundColor(0xFF000000);setFocusable(true);setFocusableInTouchMode(true);setDefaultFocusHighlightEnabled(false);setClipChildren(false);setClipToPadding(false);audio=(AudioManager)a.getSystemService(Context.AUDIO_SERVICE);
         video=new SurfaceView(a);video.getHolder().addCallback(this);addView(video,new LayoutParams(-1,-1,Gravity.CENTER));
         stage=new FrameLayout(a);addView(stage,new LayoutParams(-1,-1));
         intro=new FrameLayout(a);put(stage,intro,88,56,1744,52);
@@ -321,7 +321,7 @@ final class LiveTvPlayer extends FrameLayout implements SurfaceHolder.Callback {
         }}catch(RuntimeException unavailable){}
     }
 
-    private void channelOptions(LiveTvData.Channel ch){LiveTvData.Guide g=pickerGuide.get(ch.id);LiveTvData.Programme p=g==null?null:g.current(System.currentTimeMillis()/1000);if(activity instanceof VelaHub.Owner)((VelaHub.Owner)activity).channelOptions(ch.name,()->actions.favorite(ch),p==null?null:new VelaShows.Airing(p.title,ch.name,p.start,p.end,"",p.description,p.image,ch.logo));else actions.favorite(ch);}
+    private void channelOptions(LiveTvData.Channel ch){LiveTvData.Guide g=pickerGuide.get(ch.id);LiveTvData.Programme p=g==null?null:g.current(System.currentTimeMillis()/1000);if(activity instanceof VelaHub.Owner)((VelaHub.Owner)activity).channelOptions(ch.name,()->actions.favorite(ch),p==null?null:new VelaShows.Airing(p.title,ch.name,p.start,p.end,"",p.description,p.image,ch.logo,channelSource,TvChannelLibrary.key(ch)));else actions.favorite(ch);}
     private void openPlaybackControls(){
         if(selected==null)return;main.removeCallbacks(hide);closeChannels(false);panel.setVisibility(GONE);intro.setVisibility(GONE);
         controls=new VelaPlaybackTray(activity,LiveTvActivity.displayName(selected.name),panel.title.getText(),channelLogo.getDrawable(),this::playbackItems,()->{controls=null;controlsKey=-1;requestFocus();if(active)delayHide();});addView(controls,new LayoutParams(-1,-1));

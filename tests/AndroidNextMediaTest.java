@@ -21,19 +21,60 @@ public final class AndroidNextMediaTest extends Instrumentation {
         List<Film> cached(){return library();}
         List<Section> sections(){return Arrays.asList(new Section("1","Cinema","movie"),new Section("2","Series","show"));}
         LibraryPage page(Section section,int offset,CatalogFilters.Query q){if(!section.key.matches("[12]"))throw new AssertionError("Provider section prefix leaked to Plex");return new LibraryPage(library(),offset,1,1);}
-        Film item(String key){return key.equals("101")?movie(key,"tmdb://329865"):null;}
+        Film item(String key)throws Exception{
+            if(key.equals("101"))return movie(key,"tmdb://329865");
+            if(key.equals("201")||key.equals("202"))return plexEpisode(Integer.parseInt(key)-200);
+            return null;
+        }
         byte[] image(String path,int w,int h,boolean transparent){if(!path.startsWith("/library/"))throw new AssertionError("Jellyfin image routed to Plex");return "plex-fixture".getBytes(StandardCharsets.UTF_8);}
     }
     static final String ITEM="11111111111111111111111111111111",USER="22222222222222222222222222222222",LIBRARY="33333333333333333333333333333333";
     static JSONObject jfItem()throws Exception{return new JSONObject().put("Id",ITEM).put("Type","Movie").put("Name","Arrival · Demo").put("DateCreated","2026-01-01T00:00:00Z").put("ProviderIds",new JSONObject().put("Tmdb","329865").put("Imdb","tt2543164")).put("ImageTags",new JSONObject().put("Primary","fixture")).put("UserData",new JSONObject().put("Played",false));}
+    static final String SERIES_TITLE="Coastlines · Demo";
+    static String episodeName(int number){return number==1?"The island":"The crossing";}
+    static String jfEpisodeKey(int number){return "4444444444444444444444444444444"+number;}
+    static JSONObject jfEpisode(int number)throws Exception{
+        return new JSONObject().put("Id",jfEpisodeKey(number)).put("Type","Episode").put("Name",episodeName(number))
+                .put("SeriesName",SERIES_TITLE).put("ParentIndexNumber",1).put("IndexNumber",number);
+    }
+    static PlexClient.Film plexEpisode(int number)throws Exception{
+        JSONObject item=new JSONObject().put("ratingKey",String.valueOf(200+number)).put("type","episode")
+                .put("grandparentTitle",SERIES_TITLE).put("title",episodeName(number)).put("parentIndex",1).put("index",number);
+        JSONObject root=new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray().put(item)));
+        return PlexClient.parseChildren(root,0,2).films.get(0);
+    }
+    private void savedEpisodes(LibraryClient client,boolean jellyfin)throws Exception{
+        Set<String> ids=new HashSet<>();
+        for(int number=1;number<=2;number++){
+            PlexClient.Film film=jellyfin?JellyfinClient.parseFilm(jfEpisode(number),false,false):plexEpisode(number);
+            JSONObject ref=client.reference(film);
+            check(ids.add(ref.getString("id")),"Saved episodes share an ID");
+            VelaWatchlist.toggle(context,ref);
+            JSONObject saved=VelaWatchlist.read(context).get(0);
+            check(saved.getString("title").equals(SERIES_TITLE)&&saved.optString("episode").equals("T1 · E"+number+" · "+episodeName(number)),
+                    "Saved "+film.provider+" episodes cannot be distinguished");
+            check(client.resolve(saved).key.equals(film.key),"Saved episode resolved to a different item");
+            JSONObject legacy=new JSONObject(saved.toString());
+            legacy.remove("episode");
+            check(client.resolve(legacy).key.equals(film.key),"Older episode reference stopped resolving");
+            VelaWatchlist.toggle(context,legacy);
+            check(!VelaWatchlist.contains(context,ref.getString("id")),"Older reference no longer removes the same episode");
+        }
+    }
     static final class Server implements AutoCloseable {
-        final ServerSocket socket;final Thread worker;volatile boolean closed;volatile int reads;
+        final ServerSocket socket;final Thread worker;volatile boolean closed,unnumberedEpisode;volatile int reads;
         Server()throws Exception{socket=new ServerSocket(0,4,InetAddress.getByName("127.0.0.1"));worker=new Thread(()->{while(!closed)try(Socket client=socket.accept()){client.setSoTimeout(5000);BufferedReader input=new BufferedReader(new InputStreamReader(client.getInputStream(),StandardCharsets.US_ASCII));String line=input.readLine(),path=line==null?"":line.split(" ")[1];for(int i=0;i<64;i++){String h=input.readLine();if(h==null||h.isEmpty())break;}String body;String type="application/json";int status=200;reads++;
                     if(path.contains("/Images/")){body="jellyfin-fixture";type="image/png";}
                     else if(path.startsWith("/UserViews")){body=new JSONObject().put("Items",new JSONArray().put(new JSONObject().put("Id",LIBRARY).put("Name","Cinema").put("CollectionType","movies"))).toString();}
                     else if(path.startsWith("/UserItems/Resume")||path.startsWith("/Shows/NextUp"))body="{\"Items\":[]}";
-                    else if(path.startsWith("/Items/Latest"))body=new JSONArray().put(jfItem()).toString();
+                    else if(path.startsWith("/Items/Latest")){
+                        JSONObject latest=unnumberedEpisode?jfEpisode(1):jfItem();
+                        if(unnumberedEpisode){latest.remove("ParentIndexNumber");latest.remove("IndexNumber");}
+                        body=new JSONArray().put(latest).toString();
+                    }
                     else if(path.startsWith("/Items/"+ITEM))body=jfItem().toString();
+                    else if(path.startsWith("/Items/"+jfEpisodeKey(1)))body=jfEpisode(1).toString();
+                    else if(path.startsWith("/Items/"+jfEpisodeKey(2)))body=jfEpisode(2).toString();
                     else if(path.startsWith("/Items?"))body=new JSONObject().put("Items",new JSONArray().put(jfItem())).put("TotalRecordCount",1).put("StartIndex",0).toString();
                     else{status=404;body="{}";}byte[] data=body.getBytes(StandardCharsets.UTF_8);OutputStream out=client.getOutputStream();out.write(("HTTP/1.1 "+status+" OK\r\nContent-Type: "+type+"\r\nContent-Length: "+data.length+"\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));out.write(data);out.flush();
                 }catch(Exception error){if(!closed)throw new RuntimeException(error);}},"owned-jellyfin-fixture");worker.start();}
@@ -46,6 +87,14 @@ public final class AndroidNextMediaTest extends Instrumentation {
         phase="both-wire-feed";check(client.both(),"Both providers not enabled");List<PlexClient.Film> feed=client.library();check(feed.size()==1&&"329865".equals(feed.get(0).externalIds.get("tmdb"))&&feed.get(0).alternative!=null,"Reliable duplicate not combined with alternate provider");List<PlexClient.Film> cached=client.cached();check(cached.size()==1&&cached.get(0).alternative!=null,"Cached secondary ID lost the alternate provider");check(feed.get(0).thumb.startsWith("vela-"),"Artwork lost provider tag");List<PlexClient.Section> sections=client.sections();check(sections.size()==3,"Multiple provider libraries missing");for(PlexClient.Section section:sections){PlexClient.LibraryPage page=client.page(section,0);check(page.offset==0&&page.films.size()==1,"Provider routing or pagination failed");check(page.films.get(0).thumb.startsWith(section.key.startsWith("jellyfin:")?"vela-jellyfin:":"vela-plex:"),"Image scope changed with library picker");}
         phase="artwork-routing";check(new String(client.image("vela-plex:/library/metadata/101/thumb/1",64,96),StandardCharsets.UTF_8).equals("plex-fixture"),"Plex image routed to active default");String image="vela-jellyfin:/Items/"+ITEM+"/Images/Primary?tag=fixture";check(new String(client.image(image,64,96),StandardCharsets.UTF_8).equals("jellyfin-fixture"),"Jellyfin artwork used the wrong server");
         phase="watchlist-resolution";PlexClient.Film jf=JellyfinClient.parseFilm(jfItem(),false,true);JSONObject ref=client.reference(jf);check(!ref.toString().contains(server.base())&&!ref.toString().contains("fixture-only-not-a-real-token"),"Watchlist contains connection data");VelaWatchlist.toggle(context,ref);check(client.resolve(ref).key.equals(ITEM),"Saved Jellyfin item did not resolve from server");JSONObject p=client.reference(movie("101","tmdb://329865"));check(client.resolve(p).key.equals("101"),"Plex saved item did not resolve");
+        phase="watchlist-episodes";savedEpisodes(client,false);savedEpisodes(client,true);
+        phase="cached-episode-title";
+        server.unnumberedEpisode=true;
+        LibraryClient jellyfinOnly=client.home("jellyfin");
+        jellyfinOnly.library();
+        JSONObject cachedEpisode=jellyfinOnly.reference(jellyfinOnly.cached().get(0));
+        check(cachedEpisode.optString("episode").equals(episodeName(1)),"Unnumbered Jellyfin episode lost its name in the Home cache");
+        server.unnumberedEpisode=false;
         phase="profile-boundary";String owner=client.identity();other=VelaWorkspace.create(context,"Second media demo");VelaWorkspace.select(context,other);check(!new PlexClient(context).connected()&&!new JellyfinClient(context).connected()&&!new LibraryClient(context).connected(),"New profile inherited library accounts");check(client.identity().equals(owner),"Old client switched accounts during an in-flight request");check(VelaAccountScope.prefs(context,"library").getString("provider","").isEmpty(),"Provider selection crossed profiles");check(VelaWatchlist.read(context).isEmpty(),"Media watchlist crossed profiles");check(new LibraryClient(context).resolve(ref)==null,"Reference opened in another profile/account");VelaWorkspace.select(context,profile);check(new PlexClient(context).connected()&&new JellyfinClient(context).connected(),"Returning to profile lost its accounts");check(!VelaWorkspace.snapshot(context).toString().contains("fixture-owner"),"Account token entered a sync snapshot");
         phase="xmltv-event-wire";final File epgRoot=new File(context.getCacheDir(),"next-event-guide-"+profile);Context scoped=new ContextWrapper(context){public Context getApplicationContext(){return this;}public File getCacheDir(){epgRoot.mkdirs();return epgRoot;}};long eventNow=System.currentTimeMillis()/1000;java.text.SimpleDateFormat stamp=new java.text.SimpleDateFormat("yyyyMMddHHmmss Z",Locale.ROOT);stamp.setTimeZone(TimeZone.getTimeZone("UTC"));String xml="<tv><channel id='demo.one'><display-name>Demo One</display-name></channel><programme channel='demo.one' start='"+stamp.format(new Date((eventNow-60)*1000))+"' stop='"+stamp.format(new Date((eventNow+3600)*1000))+"'><title>Final · Demo</title><category>Sports</category><episode-num system='dd_progid'>SP12345678.0001</episode-num></programme></tv>";java.lang.reflect.Method ingest=XmlTvGuide.class.getDeclaredMethod("importGuide",InputStream.class,String.class,long.class);ingest.setAccessible(true);ingest.invoke(new XmlTvGuide(scoped),new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)),"owned-demo",eventNow);try(android.database.sqlite.SQLiteDatabase db=android.database.sqlite.SQLiteDatabase.openDatabase(new File(epgRoot,"tv-guide/xmltv.db").getPath(),null,android.database.sqlite.SQLiteDatabase.OPEN_READONLY);android.database.Cursor rows=db.rawQuery("SELECT event_id FROM programmes",null)){check(rows.moveToFirst()&&rows.getString(0).equals("dd:SP12345678.0001"),"XMLTV event ID was not stored by the streaming parser");}
         phase="combined-settings-native";L10n.choose(context,"es");activity=startActivitySync(new Intent().setClassName(context.getPackageName(),"tv.vela.launcher.SettingsActivity").putExtra("page",21).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));waitForIdleSync();Thread.sleep(250);android.graphics.Bitmap preview=getUiAutomation().takeScreenshot();check(preview.getWidth()==3840,"Native combined-library capture missing");try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),"next-08-combined-libraries.png"))){preview.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}preview.recycle();runOnMainSync(()->activity.finish());activity=null;
