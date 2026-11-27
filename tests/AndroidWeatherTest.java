@@ -31,7 +31,7 @@ public class AndroidWeatherTest extends Instrumentation {
     private void infoVisible(AmbientView view)throws Exception{
         await(()->field(view,"weatherSnapshot")!=null,"Live weather never arrived");
         AmbientWeather.Snapshot snapshot=(AmbientWeather.Snapshot)field(view,"weatherSnapshot");check(snapshot.city.equals("Madrid"),"Weather associated with wrong city");
-        check(((TextView)field(view,"weatherText")).getText().toString().startsWith(snapshot.degrees()),"Real temperature missing");
+        check(((TextView)field(view,"weatherText")).getText().toString().equals(snapshot.degrees()+" · "+AmbientWeather.condition(snapshot.code)),"Temperature or localized condition missing");
         check(((TextView)field(view,"clock")).getText().toString().matches("[0-2][0-9]:[0-5][0-9]"),"Clock missing");
         check(((TextView)field(view,"weatherCity")).getText().toString().equals("Madrid"),"City missing");
     }
@@ -45,7 +45,7 @@ public class AndroidWeatherTest extends Instrumentation {
             AmbientWeather.Snapshot cold=AmbientWeather.parse(fixture,"Fixture",now);check(cold.degrees().equals("-2 °C")&&!cold.day,"Negative/night parsing failed");
             check(cold.fresh(now+AmbientWeather.FRESH-1)&&!cold.fresh(now+AmbientWeather.FRESH),"Fresh cache expiry failed");check(!cold.usable(now+AmbientWeather.MAX_AGE+1)&&!cold.usable(now-1),"Expired/future weather accepted");
             boolean rejected=false;try{AmbientWeather.parse(fixture.replace("-2.4","null"),"Fixture",now);}catch(Exception expected){rejected=true;}check(rejected,"Missing temperature displayed as real zero");
-            check(AmbientWeather.condition(95).equals("Tormenta")&&AmbientWeather.icon(0,false).equals("clear_night"),"Weather symbols incorrect");
+            check(AmbientWeather.condition(95).equals(L10n.text("Thunderstorm"))&&AmbientWeather.icon(0,false).equals("clear_night"),"Weather symbols incorrect");
             List<AmbientWeather.Place> places=AmbientWeather.search("Madrid");AmbientWeather.Place madrid=null;for(AmbientWeather.Place place:places)if(place.zone.equals("Europe/Madrid")&&place.name.equals("Madrid")){madrid=place;break;}check(madrid!=null,"Real city search failed");
             AmbientWeather.prefs(c).edit().clear().commit();AmbientWeather.select(c,madrid);
             AmbientPrefs.get(c).edit().putString("style","plex").putBoolean("clock",true).putBoolean("weather",true).putBoolean("captions",true).putInt("seconds",120).commit();
