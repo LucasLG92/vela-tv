@@ -17,7 +17,8 @@ import org.json.*;
 /** Real shared result views, remote navigation, paging and profile-scoped launch policy. */
 public final class AndroidSearchUxTest extends Instrumentation {
     private Context context;private Activity activity;private VelaHub hub,anchor;private String previous,profile,mode,language,phase="setup";private Bundle args;
-    private final AtomicInteger requests=new AtomicInteger(),opened=new AtomicInteger();private volatile java.util.List<VelaHub.Hit> values=Collections.emptyList();private volatile VelaHub.Hit selected;private volatile String scope="fixture";private volatile CountDownLatch gate;
+    private final AtomicInteger requests=new AtomicInteger(),opened=new AtomicInteger();private volatile java.util.List<VelaHub.Hit> values=Collections.emptyList();private volatile VelaHub.Hit selected;private volatile String scope="fixture";private volatile CountDownLatch gate;private volatile boolean failSearch;
+    private volatile List<VelaHub.Hit> secondPage=Collections.emptyList();
     public static final class Lite extends LiteHomeActivity {protected boolean allowAutomaticChecks(){return false;}}
     public Activity newActivity(ClassLoader l,String n,Intent i)throws InstantiationException,IllegalAccessException,ClassNotFoundException{return n.equals(LiteHomeActivity.class.getName())?new Lite():super.newActivity(l,n,i);}
     interface Ready{boolean get()throws Exception;}
@@ -39,7 +40,7 @@ public final class AndroidSearchUxTest extends Instrumentation {
     void shot(String name)throws Exception{Thread.sleep(450);Bitmap b=getUiAutomation().takeScreenshot();try(OutputStream out=new FileOutputStream(new File(context.getExternalFilesDir(null),"voice-search-api"+Build.VERSION.SDK_INT+"-"+name+".png"))){b.compress(Bitmap.CompressFormat.PNG,100,out);}finally{b.recycle();}}
     void fixture()throws Exception{if(hub!=null)ui(hub::close);requests.set(0);opened.set(0);selected=null;
         VelaHub.Host anchorHost=(VelaHub.Host)field(anchor,"host");ui(()->{hub=new VelaHub(activity,new VelaHub.Host(){
-            public java.util.List<VelaHub.Hit> search(String q,int page,CancellationSignal signal)throws Exception{requests.incrementAndGet();CountDownLatch hold=gate;if(hold!=null)hold.await(10,TimeUnit.SECONDS);signal.throwIfCanceled();return values;}
+            public java.util.List<VelaHub.Hit> search(String q,int page,CancellationSignal signal)throws Exception{requests.incrementAndGet();CountDownLatch hold=gate;if(hold!=null)hold.await(10,TimeUnit.SECONDS);signal.throwIfCanceled();if(failSearch)throw new IOException("Provider unavailable");return page==0?values:page==1?secondPage:Collections.emptyList();}
             public java.util.List<VelaShows.Airing> airings(String q,int p,CancellationSignal s){return Collections.emptyList();}
             public void activate(VelaHub.Hit h){selected=h;opened.incrementAndGet();}public String diagnosis(CancellationSignal s){return "";}public void repair(){}public void closed(boolean changed){}public String scope(){return scope;}
             public boolean navigation(){return anchorHost.navigation();}public void title(String label){anchorHost.title(label);}public void contentFocused(){anchorHost.contentFocused();}
@@ -135,6 +136,34 @@ public final class AndroidSearchUxTest extends Instrumentation {
         XtreamClient.NetworkBudget slow=new XtreamClient.NetworkBudget(wire,12,5,()->clock[0]);try{slow.read(buffer);throw new AssertionError("Slow wire escaped budget");}catch(InterruptedIOException expected){}
         XtreamClient.NetworkBudget large=new XtreamClient.NetworkBudget(new ByteArrayInputStream(new byte[4]),1,100,()->0);try{large.read(buffer);throw new AssertionError("Byte limit escaped");}catch(IOException expected){}
     }
+    void providerPages(List<VelaHub.Hit> movies,View next)throws Exception{
+        String lastTitle=tiles().get(0).getContentDescription().toString();
+        secondPage=Collections.singletonList(new VelaHub.Hit("Plex","Next block","Demo",new Object()));
+        ui(next::performClick);await(()->tiles().size()==1&&tiles().get(0).getContentDescription().toString().startsWith("Next block"));
+        View previousPage=(View)field(view(),"previous");ui(previousPage::performClick);await(()->requests.get()==3&&!((Boolean)field(view(),"loading")));
+        check(tiles().size()==1&&lastTitle.contentEquals(tiles().get(0).getContentDescription()),"Previous skipped the final screen of the preceding provider page");
+        ui(next::performClick);await(()->requests.get()==4&&tiles().size()==1);
+        search("Alien");await(()->requests.get()==5&&tiles().size()==6);
+        check(tiles().get(0).getContentDescription().toString().startsWith("Alien,"),"Submitting the same query did not start at the first match");
+        ui(next::performClick);ui(next::performClick);failSearch=true;ui(next::performClick);
+        await(()->requests.get()==6&&!((Boolean)field(view(),"loading")));
+        check(previousPage.isEnabled()&&!next.isEnabled(),"Failed provider page offered the wrong navigation");
+        failSearch=false;ui(previousPage::performClick);await(()->tiles().size()==1);
+        check(lastTitle.contentEquals(tiles().get(0).getContentDescription()),"Could not return from a failed provider page");
+        values=secondPage;search("Next block");await(()->requests.get()==8&&tiles().size()==1);
+        View onlyResult=tiles().get(0);ui(onlyResult::requestFocus);key(KeyEvent.KEYCODE_DPAD_DOWN);
+        check(text(view(),L10n.text("Back")).hasFocus(),"Down from a single result did not focus Back");
+        phase="filtered-provider-pages";
+        List<VelaHub.Hit> mixed=new ArrayList<>(movies.subList(0,12));
+        mixed.add(new VelaHub.Hit("App","Alien app","Demo",new Intent(Intent.ACTION_MAIN)));
+        values=mixed;search("Alien");await(()->tiles().size()==6);
+        View library=((View[])field(view(),"filters"))[1];ui(library::performClick);ui(next::performClick);
+        String lastFilteredScreen=tiles().get(0).getContentDescription().toString();
+        ui(next::performClick);await(()->tiles().size()==1);ui(previousPage::performClick);
+        await(()->tiles().size()==6);
+        check(lastFilteredScreen.contentEquals(tiles().get(0).getContentDescription()),"Previous used the unfiltered page size");
+        values=movies;
+    }
     public void onCreate(Bundle b){super.onCreate(b);args=b;start();}
     public void onStart(){Bundle result=new Bundle();context=getTargetContext();try{
         try(ParcelFileDescriptor f=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(f)){check(in.read()=='1',"Owned emulator required");}
@@ -146,14 +175,16 @@ public final class AndroidSearchUxTest extends Instrumentation {
         ArrayList<VelaHub.Hit> movies=new ArrayList<>();String[] titles={"Alien: Romulus","Aliens","Alien","Alien³","Alien: Resurrection","Alien: Covenant","Alien vs. Predator","Alien: Earth","Aliens vs. Predator: Requiem","Alien anthology","Alien collection","Alien extras","Alien restored"};for(int i=0;i<titles.length;i++)movies.add(new VelaHub.Hit(i%2==0?"Plex":"Jellyfin",titles[i],i==2?"1979 · 1 h 57 min":L10n.text("Library")+" · Demo",new Object()));values=movies;fixture();voice("busca Alien");await(()->tiles().size()==6);check(requests.get()==1&&opened.get()==0,"Default result policy or query count failed");check(((java.util.List<VelaHub.Hit>)field(view(),"visible")).get(0).title.equals("Alien"),"Exact title was not ranked first");
         check(((FrameLayout)field(hub,"panel")).getVisibility()==View.GONE,"Search still shows the settings panel");shot("01-results");
         phase="remote-and-local-pages";ui(()->{try{tiles().get(0).requestFocus();}catch(Exception e){throw new RuntimeException(e);}});key(KeyEvent.KEYCODE_DPAD_RIGHT);check(tiles().get(1).hasFocus(),"Right did not move across result cards");key(KeyEvent.KEYCODE_DPAD_DOWN);check(tiles().get(3).hasFocus(),"Down did not preserve result column");View next=(View)field(view(),"next");ui(next::performClick);check(requests.get()==1&&tiles().size()==6,"Local paging repeated a provider query");ui(next::performClick);check(requests.get()==1&&tiles().size()==1,"Last local page lost a result");
+        providerPages(movies,next);
         phase="profile-and-portability";VelaVoice.firstResult(context,true);JSONObject copy=VelaWorkspace.snapshot(context);check(copy.getJSONObject("settings").getJSONObject("vela-search").getBoolean("voice_first"),"Preference excluded from portable settings");String other=VelaWorkspace.create(context,"Other search");VelaWorkspace.select(context,other);check(!VelaVoice.firstResult(context),"Launch policy leaked between profiles");VelaWorkspace.apply(context,copy,true);check(VelaVoice.firstResult(context),"Search preference was not restored");VelaWorkspace.undo(context);check(!VelaVoice.firstResult(context),"Undo did not restore the prior search policy");JSONObject invalid=new JSONObject(copy.toString());invalid.getJSONObject("settings").getJSONObject("vela-search").put("voice_first","true");boolean rejected=false;try{VelaWorkspace.apply(context,invalid,true);}catch(Exception expected){rejected=true;}check(rejected&&!VelaVoice.firstResult(context),"Malformed launch policy changed settings");VelaWorkspace.select(context,profile);VelaWorkspace.delete(context,other);
         phase="voice-first";fixture();voice("busca Alien");await(()->opened.get()==1);check(selected.title.equals("Alien")&&requests.get()==1,"First match did not use the displayed ranking exactly once");
         phase="literal-search-stays-selectable";fixture();ui(()->hub.voiceQuery(new VelaVoice.Request("Alien","Alien",VelaVoice.ANY,false,0,false,false)));await(()->tiles().size()==6);check(opened.get()==0,"Literal ACTION_SEARCH auto-launched");search("Aliens");await(()->requests.get()==2&&tiles().size()==6);check(opened.get()==0,"Keyboard search auto-launched");
         phase="scoped-and-offline";VelaHub.Hit app=new VelaHub.Hit("App","La 1","Demo",new Intent(Intent.ACTION_MAIN).setClassName("com.android.settings","com.android.settings.Settings"));VelaHub.Hit tv=new VelaHub.Hit("Channel","La 1","Demo",new LiveTvData.Channel("fixture","La 1","Demo","",Collections.singletonList("http://127.0.0.1:9/never-play")));values=Arrays.asList(app,tv);fixture();voice("pon el canal La 1");await(()->opened.get()==1);check(selected==tv,"Channel voice request selected an app");values=Collections.singletonList(new VelaHub.Hit("HDMI","HDMI 2","Demo",new TvInputs.Entry("fixture","fixture","HDMI 2","HDMI 2","hdmi",TvInputs.DISCONNECTED,false)));fixture();voice("abre HDMI 2");await(()->requests.get()==1&&!((Boolean)field(view(),"loading")));check(opened.get()==0&&tiles().isEmpty(),"Disconnected input auto-opened");shot("02-empty");
-        phase="stale-scope";values=movies;gate=new CountDownLatch(1);fixture();voice("busca Alien");await(()->requests.get()==1);scope="changed-fixture";gate.countDown();Thread.sleep(350);check(opened.get()==0,"Stale source auto-opened");gate=null;
+        phase="stale-scope";values=movies;gate=new CountDownLatch(1);fixture();voice("busca Alien");await(()->requests.get()==1);scope="changed-fixture";gate.countDown();await(()->!((Boolean)field(view(),"loading")));check(opened.get()==0&&tiles().isEmpty(),"Stale source displayed or opened a result");gate=null;
+        search("Alien");await(()->tiles().size()==6);check(opened.get()==0,"Retry after a source change auto-opened a result");
         phase="settings-and-reading";VelaVoice.firstResult(context,false);fixture();press(L10n.text("Voice and search"));check(hub.page()==VelaHub.SEARCH_SETTINGS,"Search settings cannot survive recreation");check(((View)((java.util.List<?>)field(hub,"controls")).get(0)).hasFocus(),"Opening voice preferences lost remote focus");shot("03-preference");press(L10n.text("Open first match"));check(VelaVoice.firstResult(context),"Settings did not persist first match");press(L10n.text("Show results"));check(!VelaVoice.firstResult(context),"Settings did not persist chooser");press(L10n.text("Back to search"));
         VelaReading.prefs(context).edit().putInt("text",2).commit();fixture();voice("busca Alien");await(()->tiles().size()==4);for(View tile:tiles()){Rect r=new Rect();check(tile.getGlobalVisibleRect(r)&&r.height()>0,"Large text result escaped the viewport");}shot("04-large-reading");
-        result.putString("result","PASS native Plex/Jellyfin posters, channel logos and programme images, page-scoped artwork release; visible/hidden/transparent/modal/expanded rail geometry with normal and reduced motion, compact voice surface and observer/animator/recogniser teardown; native dedicated search, bounded six/four-card pages, exact-first ranking, remote columns, no provider calls for local paging, per-profile launch policy and portable settings, one-use first voice result, literal/keyboard chooser, typed target isolation, disconnected-input refusal, stale-source guard and integrated settings. Synthetic emulator data only.");
+        result.putString("result","PASS native Plex/Jellyfin posters, channel logos and programme images, page-scoped artwork release; visible/hidden/transparent/modal/expanded rail geometry with normal and reduced motion, compact voice surface and observer/animator/recogniser teardown; native dedicated search, bounded six/four-card pages, exact-first ranking, remote columns, round-trip provider paging with filters and failures, single-page footer focus, no provider calls for local paging, per-profile launch policy and portable settings, one-use first voice result, literal/keyboard chooser, typed target isolation, disconnected-input refusal, stale-source guard and integrated settings. Synthetic emulator data only.");
     }catch(Throwable e){result.putString("error",phase+"\n"+android.util.Log.getStackTraceString(e));try{shot("failure");}catch(Exception ignored){}}
     finally{try{if(gate!=null)gate.countDown();if(hub!=null)ui(hub::close);if(activity!=null)ui(activity::finish);if(profile!=null){VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}if(language!=null)L10n.choose(context,language);if(mode!=null){if(mode.isEmpty())VelaEdition.prefs(context).edit().remove("mode").commit();else VelaEdition.select(context,mode);}}catch(Exception ignored){}}
     finish(result.containsKey("error")?1:-1,result);}

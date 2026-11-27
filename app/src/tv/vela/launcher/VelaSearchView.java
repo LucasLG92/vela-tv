@@ -19,7 +19,7 @@ final class VelaSearchView extends FrameLayout {
         default Runnable artwork(VelaHub.Hit hit,ImageView target,int width,int height){return null;}
     }
     private final Activity activity;private final Host host;
-    final EditText input;private final TextView count,empty,previous,next;
+    final EditText input;private final TextView count,empty,previous,next,back;
     private final FrameLayout cards;private final View[] filters=new View[5];
     private final ArrayList<VelaHub.Hit> all=new ArrayList<>(),visible=new ArrayList<>();
     private final ArrayList<View> tiles=new ArrayList<>();
@@ -37,7 +37,7 @@ final class VelaSearchView extends FrameLayout {
         cards=new FrameLayout(a);put(this,cards,44,232,1700,596);
         empty=label(L10n.text("Search your library, channels, apps and inputs."),28,VelaTheme.SECONDARY);empty.setMaxLines(3);empty.setGravity(Gravity.CENTER);put(cards,empty,160,120,1380,200);
         count=label("",20,VelaTheme.SECONDARY);put(this,count,44,856,970,60);
-        previous=button("‹  "+L10n.text("Previous"),()->move(-1));next=button(L10n.text("Next")+"  ›",()->move(1));TextView back=button(L10n.text("Back"),host::close);put(this,back,1064,856,200,60);put(this,previous,1284,856,210,60);put(this,next,1514,856,230,60);
+        previous=button("‹  "+L10n.text("Previous"),()->move(-1));next=button(L10n.text("Next")+"  ›",()->move(1));back=button(L10n.text("Back"),host::close);put(this,back,1064,856,200,60);put(this,previous,1284,856,210,60);put(this,next,1514,856,230,60);
         input.setOnKeyListener((v,k,e)->{if(e.getAction()!=KeyEvent.ACTION_DOWN)return false;if(k==KeyEvent.KEYCODE_DPAD_DOWN){filters[filter].requestFocus();return true;}if(k==KeyEvent.KEYCODE_DPAD_UP)return host.header(v);if(k==KeyEvent.KEYCODE_DPAD_LEFT&&input.getSelectionStart()==0&&input.getSelectionEnd()==0){host.navigation();return true;}return false;});
         paintFilters();pager();
     }
@@ -49,15 +49,27 @@ final class VelaSearchView extends FrameLayout {
     private void paintFilters(){for(int i=0;i<filters.length;i++){TextView v=(TextView)filters[i];if(v==null)continue;boolean focus=v.hasFocus();v.setBackground(VelaTheme.shape(focus?VelaTheme.pearl(VelaReading.accent(activity)):i==filter?VelaTheme.RAISED:Color.TRANSPARENT,24));v.setTextColor(focus?VelaTheme.INK:VelaTheme.WHITE);}}
     void loading(String query){if(!query.equals(lastQuery)){filter=0;paintFilters();lastQuery=query;}loading=true;all.clear();visible.clear();input.setText(query);releaseCards();empty.setText(L10n.text("Searching…"));empty.setVisibility(VISIBLE);count.setText("");pager();}
     void idle(){loading=false;more=false;localPage=backendPage=0;releaseCards();all.clear();visible.clear();empty.setText(L10n.text("Search your library, channels, apps and inputs."));empty.setVisibility(VISIBLE);count.setText("");pager();}
-    void error(){loading=false;empty.setText(L10n.text("Could not search. Try again."));empty.setVisibility(VISIBLE);pager();}
-    void results(java.util.List<VelaHub.Hit> values,int page,boolean hasMore){
-        if(closed)return;loading=false;all.clear();all.addAll(values.subList(0,Math.min(96,values.size())));backendPage=page;more=hasMore||values.size()>96;localPage=0;render(hasFocus());
+    void error(int page){loading=false;more=false;localPage=0;backendPage=page;empty.setText(L10n.text("Could not search. Try again."));empty.setVisibility(VISIBLE);pager();}
+    void results(java.util.List<VelaHub.Hit> values,int page,boolean hasMore,boolean returningToPreviousPage){
+        if(closed)return;
+        loading=false;
+        all.clear();
+        all.addAll(values.subList(0,Math.min(96,values.size())));
+        backendPage=page;
+        more=hasMore||values.size()>96;
+        filterResults();
+        localPage=returningToPreviousPage?Math.max(0,visible.size()-1)/pageSize:0;
+        render(hasFocus());
     }
-    private void chooseFilter(int at){filter=at;localPage=0;paintFilters();if(!loading)render(false);}
+    private void filterResults(){
+        visible.clear();
+        for(VelaHub.Hit hit:all)if(filter==0||kind(hit)==filter)visible.add(hit);
+    }
+    private void chooseFilter(int at){filter=at;localPage=0;paintFilters();if(!loading){filterResults();render(false);}}
     void pause(){for(Runnable cancel:imageRequests)cancel.run();imageRequests.clear();if(programmeArt!=null){programmeArt.close();programmeArt=null;}for(View v:tiles)if(v instanceof ViewGroup){View icon=((ViewGroup)v).getChildAt(0);if(icon instanceof ImageView)((ImageView)icon).setImageDrawable(null);}}
     private void releaseCards(){pause();for(View v:tiles)cards.removeView(v);tiles.clear();}
     private void render(boolean focus){
-        releaseCards();visible.clear();for(VelaHub.Hit h:all)if(filter==0||kind(h)==filter)visible.add(h);int start=localPage*pageSize;
+        releaseCards();int start=localPage*pageSize;
         for(int i=start;i<Math.min(start+pageSize,visible.size());i++)addCard(visible.get(i),i-start);
         empty.setVisibility(tiles.isEmpty()?VISIBLE:GONE);empty.setText(all.isEmpty()?L10n.text("No matches. Try another name."):L10n.text("No matches in this category."));
         count.setText(visible.isEmpty()?L10n.text("No results"):L10n.text("Results")+" "+(start+1)+"–"+Math.min(start+pageSize,visible.size())+" / "+visible.size()+"  ·  "+L10n.text("Page ")+(backendPage+1));pager();if(focus&&!tiles.isEmpty()&&isShown())tiles.get(0).requestFocus();
@@ -82,7 +94,7 @@ final class VelaSearchView extends FrameLayout {
         tile.setContentDescription(hit.title+", "+hit.kind+", "+hit.detail);tile.setOnClickListener(v->host.open(hit));tile.setOnLongClickListener(v->{host.save(hit);return true;});
         tile.setOnFocusChangeListener((v,f)->{if(f)host.focused();tile.setForeground(f?VelaTheme.artworkFocus(VelaReading.accent(activity),20):null);tile.setBackground(VelaTheme.shape(f?VelaTheme.RAISED:VelaTheme.PANEL,20));name.setTextColor(VelaTheme.WHITE);type.setTextColor(secondary(VelaTheme.MUTED));detail.setTextColor(secondary(VelaTheme.SECONDARY));icon.placeholder.color(VelaTheme.WHITE);});
         final int index=i;tile.setOnKeyListener((v,key,event)->{if(key<KeyEvent.KEYCODE_DPAD_UP||key>KeyEvent.KEYCODE_DPAD_RIGHT)return false;if(event.getAction()!=KeyEvent.ACTION_DOWN)return true;
-            if(key==KeyEvent.KEYCODE_DPAD_DOWN){if(index+2<tiles.size())tiles.get(index+2).requestFocus();else if(next.isEnabled())next.requestFocus();else previous.requestFocus();return true;}
+            if(key==KeyEvent.KEYCODE_DPAD_DOWN){if(index+2<tiles.size())tiles.get(index+2).requestFocus();else if(next.isEnabled())next.requestFocus();else if(previous.isEnabled())previous.requestFocus();else back.requestFocus();return true;}
             if(key==KeyEvent.KEYCODE_DPAD_UP){if(index>=2)tiles.get(index-2).requestFocus();else filters[filter].requestFocus();return true;}
             if(key==KeyEvent.KEYCODE_DPAD_RIGHT){if(index%2==0&&index+1<tiles.size()){tiles.get(index+1).requestFocus();return true;}return true;}
             if(index%2==1){tiles.get(index-1).requestFocus();return true;}host.navigation();return true;

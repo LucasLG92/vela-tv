@@ -23,6 +23,24 @@ public final class AndroidWorkspaceDataTest extends Instrumentation {
         public File getFilesDir(){File f=new File(super.getFilesDir(),"owned-workspace-data");f.mkdirs();return f;}
     }
     private String stamp(long seconds){SimpleDateFormat f=new SimpleDateFormat("yyyyMMddHHmmss Z",Locale.ROOT);f.setTimeZone(TimeZone.getTimeZone("UTC"));return f.format(new Date(seconds*1000));}
+    private void appOrderWithMissingPackage(Context c)throws Exception{
+        List<SidebarApps.Choice> installed=SidebarApps.choices(c);
+        check(installed.size()>=2,"App order fixture requires two launchable emulator apps");
+        String first=installed.get(0).pkg,second=installed.get(1).pkg;
+        String missing="com.vela.fixture.uninstalled";
+        List<String> original=Arrays.asList(first,missing,second);
+        VelaLayout.save(c,VelaLayout.read(c).put("appsOrder",new JSONArray(original)));
+        VelaLayout.moveApp(c,second,-1);
+        check(VelaLayout.apps(c).subList(0,3).equals(Arrays.asList(second,missing,first)),
+                "An unavailable package consumed the move between adjacent visible apps");
+        VelaLayout.moveApp(c,second,1);
+        check(VelaLayout.apps(c).subList(0,3).equals(original),
+                "Moving down did not restore the two apps and the reserved position");
+        List<String> before=VelaLayout.apps(c);
+        try{VelaLayout.moveApp(c,missing,-1);throw new AssertionError("Moved an unavailable app");}
+        catch(IOException expected){}
+        check(VelaLayout.apps(c).equals(before),"A stale app selection changed the order");
+    }
     private void backupRoundTrip(Context c)throws Exception{
         String original=VelaWorkspace.active(c);
         String profile=VelaWorkspace.create(c,"Backup fixture");
@@ -68,6 +86,7 @@ public final class AndroidWorkspaceDataTest extends Instrumentation {
     public void onCreate(Bundle args){super.onCreate(args);start();}
     public void onStart(){super.onStart();Bundle result=new Bundle();String phase="setup";Context base=getTargetContext(),c=new Sandbox(base);try{
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){check(in.read()=='1',"Owned emulator required");}
+        phase="app-order-after-uninstall";appOrderWithMissingPackage(c);
         phase="portable-backup-round-trip";backupRoundTrip(c);
         phase="catalog-v7-migration";File folder=new File(c.getCacheDir(),"tv-catalogs");folder.mkdirs();File database=new File(folder,"channels.db");database.delete();String source="m3u:"+LiveTvData.hash("owned-workspace-playlist");LiveTvData.prefs(c).edit().putString("mode","m3u").putString("m3u-id",source.substring(4)).commit();LiveTvData.Channel hd=new LiveTvData.Channel("demo-hd","La 1 HD","Generalistas","",Collections.singletonList("https://example.invalid/demo.m3u8"));
         try(SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(database,null)){db.execSQL("CREATE TABLE channels(source TEXT NOT NULL,id TEXT NOT NULL,category TEXT NOT NULL,name TEXT NOT NULL,search TEXT NOT NULL,ordinal INTEGER NOT NULL,payload BLOB NOT NULL,family TEXT NOT NULL DEFAULT '',quality INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(source,id))");ContentValues v=new ContentValues();v.put("source",source);v.put("id",hd.id);v.put("category",hd.group);v.put("name",hd.name);v.put("search",TvCatalogCache.normalize(hd.name));v.put("ordinal",0);v.put("payload",new TvPrivateData(c).encrypt(TvCatalogCache.json(hd)));v.put("family",TvChannelNames.family(hd));v.put("quality",TvChannelNames.rank(hd.name));db.insertOrThrow("channels",null,v);db.setVersion(7);}
@@ -78,7 +97,7 @@ public final class AndroidWorkspaceDataTest extends Instrumentation {
         phase="legacy-source-migration";String legacy=client.source();VelaWorkspace.prefs(c,"tv-personal-"+LiveTvData.hash(legacy)).edit().putString("hidden","[{\"k\":\"old-hidden\",\"n\":\"Canal demo\"}]").commit();check(new TvPersonalization(c,legacy).hidden("old-hidden"),"Existing organisation lost in portable source migration");String firstPortable=VelaWorkspace.channelSource(c,legacy);JSONObject backup=VelaWorkspace.snapshot(c);check(!backup.toString().contains("OWNED-DEMO-SECRET")&&!backup.toString().contains("example.invalid")&&!backup.toString().contains("owned-demo-user"),"Xtream credentials or host leaked into the backup");
         phase="device-local-login-ids";XtreamClient.Account otherDevice=new XtreamClient.Account(account.base,account.user,account.password,UUID.randomUUID().toString(),true,true);client.save(otherDevice);LiveTvData.Channel replacement=new LiveTvData.Channel("xc-42",one.name,one.group,"",Collections.emptyList(),"42",otherDevice.id);try(TvCatalogCache.Writer writer=cache.writer("xc:"+otherDevice.id+":*")){writer.add(replacement,false);writer.commit("{}");}check(client.favoriteIds().contains("xc-42")&&VelaWorkspace.channelSource(c,client.source()).equals(firstPortable)&&new TvPersonalization(c,client.source()).hidden("old-hidden"),"Reauthorizing the same provider lost portable favourites or organisation");
         phase="different-account-isolation";client.save(new XtreamClient.Account(account.base,"another-demo-user",account.password,UUID.randomUUID().toString(),true,true));check(client.favoriteIds().isEmpty()&&!new TvPersonalization(c,client.source()).hidden("old-hidden"),"A different provider account inherited choices");
-        result.putString("result","PASS portable backup, hidden shortcuts, section limits, restore and undo, Full real SQLite v7→v9 migration, encrypted channel reconstruction, active-source-only programme search, hidden-channel filtering, favourite metadata after cache eviction, profile isolation, portable source migration, same-provider reauthorization and separate provider accounts. No network or physical tuner request.");
+        result.putString("result","PASS app moves across unavailable packages, portable backup, hidden shortcuts, section limits, restore and undo, Full real SQLite v7→v9 migration, encrypted channel reconstruction, active-source-only programme search, hidden-channel filtering, favourite metadata after cache eviction, profile isolation, portable source migration, same-provider reauthorization and separate provider accounts. No network or physical tuner request.");
     }catch(Throwable failure){result.putString("phase",phase);result.putString("error",android.util.Log.getStackTraceString(failure));}finally{remove(c.getCacheDir());remove(c.getFilesDir());File[] prefs=new File(base.getApplicationInfo().dataDir,"shared_prefs").listFiles();if(prefs!=null)for(File f:prefs)if(f.getName().startsWith("owned-workspace-data-")&&f.getName().endsWith(".xml")){String name=f.getName().substring(0,f.getName().length()-4);base.getSharedPreferences(name,0).edit().clear().commit();base.deleteSharedPreferences(name);}}finish(result.containsKey("error")?1:-1,result);}
     private void remove(File f){File[] files=f.listFiles();if(files!=null)for(File child:files)remove(child);f.delete();}
 }

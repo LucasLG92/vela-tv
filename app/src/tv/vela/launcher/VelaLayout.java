@@ -1,6 +1,8 @@
 package tv.vela.launcher;
 
 import android.content.*;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import org.json.*;
 import java.io.IOException;
 import java.util.*;
@@ -110,6 +112,28 @@ final class VelaLayout {
     static void folder(Context c,String name,String app)throws Exception{JSONObject j=read(c);JSONArray a=folders(c);JSONObject target=null;for(int i=0;i<a.length();i++)if(a.getJSONObject(i).getString("name").equals(name))target=a.getJSONObject(i);if(target==null){target=new JSONObject().put("name",VelaWorkspace.clean(name,40)).put("apps",new JSONArray());a.put(target);}JSONArray next=new JSONArray(),old=target.getJSONArray("apps");boolean exists=false;for(int i=0;i<old.length();i++){String key=old.getString(i);if(key.equals(app))exists=true;else next.put(key);}if(!app.isEmpty()&&!exists)next.put(app);target.put("apps",next);save(c,j.put("folders",a));}
     static List<String> apps(Context c){List<String> out=new ArrayList<>();JSONArray a=settings(c).optJSONArray("appsOrder");for(int i=0;a!=null&&i<a.length();i++)out.add(a.optString(i));return out;}
     static int rank(Context c,String pkg){int index=apps(c).indexOf(pkg);return index<0?10000:index;}
-    static void moveApp(Context c,String pkg,int direction)throws Exception{if(Math.abs(direction)!=1)throw new IOException();List<String> order=apps(c);Set<String> seen=new HashSet<>(order);android.content.pm.PackageManager pm=c.getPackageManager();for(String category:new String[]{Intent.CATEGORY_LEANBACK_LAUNCHER,Intent.CATEGORY_LAUNCHER})for(android.content.pm.ResolveInfo item:pm.queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(category),0))if(item.activityInfo!=null&&seen.add(item.activityInfo.packageName))order.add(item.activityInfo.packageName);if(order.size()>256||!order.contains(pkg))throw new IOException();int at=order.indexOf(pkg);Collections.swap(order,at,Math.max(0,Math.min(order.size()-1,at+direction)));save(c,read(c).put("appsOrder",new JSONArray(order)));}
+    static void moveApp(Context c,String pkg,int direction)throws Exception{
+        if(direction!=-1&&direction!=1)throw new IOException("Invalid move direction");
+        List<String> order=apps(c);
+        Set<String> saved=new HashSet<>(order),installed=new HashSet<>();
+        PackageManager pm=c.getPackageManager();
+        for(String category:new String[]{Intent.CATEGORY_LEANBACK_LAUNCHER,Intent.CATEGORY_LAUNCHER}){
+            for(ResolveInfo item:pm.queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(category),0)){
+                if(item.activityInfo==null)continue;
+                String name=item.activityInfo.packageName;
+                if(installed.add(name)&&!saved.contains(name))order.add(name);
+            }
+        }
+        if(order.size()>256||!installed.contains(pkg))throw new IOException("Cannot move app");
+        // A restored or uninstalled app keeps its slot, but is absent from the editor.
+        int from=order.indexOf(pkg);
+        for(int to=from+direction;to>=0&&to<order.size();to+=direction){
+            if(installed.contains(order.get(to))){
+                Collections.swap(order,from,to);
+                save(c,read(c).put("appsOrder",new JSONArray(order)));
+                return;
+            }
+        }
+    }
     static void deleteFolder(Context c,int index)throws Exception{JSONObject j=read(c);JSONArray a=folders(c);a.remove(index);save(c,j.put("folders",a));}
 }

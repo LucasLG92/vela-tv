@@ -97,13 +97,13 @@ final class VelaHub extends FrameLayout {
     private void searchPage(){
         for(int i=0;i<canvas.getChildCount();i++)canvas.getChildAt(i).setVisibility(GONE);
         searchView=new VelaSearchView(activity,new VelaSearchView.Host(){
-            public void search(String text){query=text;searchRequest=null;spokenRequest=null;resultPage=0;VelaHub.this.search();}
+            public void search(String text){query=text;searchRequest=null;spokenRequest=null;resultPage=0;VelaHub.this.search(false);}
             public void navigation(){if(!host.navigation())VelaHub.this.close();}public boolean header(View from){return host.header(from);}public void voice(){VelaHub.this.voice();}public void settings(){searchPreferences();}public void close(){VelaHub.this.close();}
             public void open(Hit hit){openSearchHit(hit);}public void save(Hit hit){try{JSONObject ref=host.reference(hit);if(ref==null)return;VelaWatchlist.toggle(activity,ref);searchView.message(L10n.text("Watch later updated"));}catch(Exception bad){searchView.message(L10n.text("Could not save this item."));}}
-            public void next(int direction){resultPage=Math.max(0,resultPage+direction);VelaHub.this.search();}public void focused(){host.contentFocused();}
+            public void next(int direction){resultPage=Math.max(0,resultPage+direction);VelaHub.this.search(direction<0);}public void focused(){host.contentFocused();}
             public Runnable artwork(Hit hit,ImageView target,int width,int height){return host.artwork(hit,target,width,height);}
         },query);put(canvas,searchView,0,0,1790,940);input=searchView.input;host.title(L10n.text("Search"));
-        if(!query.isEmpty())search();
+        if(!query.isEmpty())search(false);
     }
     private void searchPreferences(){
         clear();if(VelaSessions.blocked(activity)){page=4;unlockPage();if(!controls.isEmpty())controls.get(0).requestFocus();return;}
@@ -116,16 +116,22 @@ final class VelaHub extends FrameLayout {
     }
     private void saveSearchPreference(boolean first){if(VelaSessions.blocked(activity)){page=4;unlockPage();return;}VelaVoice.firstResult(activity,first);changed=true;searchPreferences();}
     private void openSearchHit(Hit hit){if(hit.value instanceof VelaShows.Airing){airing((VelaShows.Airing)hit.value);return;}close();host.activate(hit);}
-    private void search(){
+    private void search(boolean returningToPreviousPage){
         if(searchView==null)return;
         if(input!=null){query=input.getText().toString().trim();InputMethodManager keyboard=(InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);if(keyboard!=null)keyboard.hideSoftInputFromWindow(input.getWindowToken(),0);}
         if(query.isEmpty()){cancelWork();spokenRequest=null;searchRequest=null;searchView.idle();searchView.message(L10n.text("Enter a name to search."));return;}
         searchView.loading(query);String q=query,scope=host.scope();int p=resultPage;VelaVoice.Request spoken=spokenRequest;spokenRequest=null;if(spoken!=null)searchRequest=spoken;VelaVoice.Request scoped=searchRequest;
         work(signal->scoped==null?host.search(q,p,signal):host.voiceSearch(scoped,p,signal),value->{
-            if(searchView==null||!scope.equals(host.scope()))return;
+            if(searchView==null)return;
+            if(!scope.equals(host.scope())){
+                resultPage=0;
+                searchView.error(resultPage);
+                return;
+            }
             List<Hit> raw=(List<Hit>)value;List<Hit> results=VelaVoice.ordered(q,scoped,raw);
             if(spoken!=null&&spoken.voice&&p==0&&VelaVoice.firstResult(activity)&&!results.isEmpty()){openSearchHit(results.get(0));return;}
-            searchView.results(results,p,raw.size()>96|| (raw instanceof Hits?((Hits)raw).more:raw.size()>=12));
+            boolean hasMore=raw.size()>96||(raw instanceof Hits?((Hits)raw).more:raw.size()>=12);
+            searchView.results(results,p,hasMore,returningToPreviousPage);
             searchView.partial(raw instanceof Hits&&((Hits)raw).partial);
         });
     }
@@ -137,7 +143,7 @@ final class VelaHub extends FrameLayout {
         if(request.target==VelaVoice.DISCOVERY){spokenRequest=null;discoveryGenre=request.genre;discoveryMode=request.tonight?1:0;discoveryPage=0;if(page!=8)select(8);else render();focusNavigation();return;}
         query=request.query;resultPage=0;searchRequest=request;spokenRequest=request;if(page!=0)select(0);else render();focusNavigation();
     }
-    void resumeSearch(){if(closed)return;if(discovery!=null)discovery.resume();else if(page==0&&!query.isEmpty())search();}
+    void resumeSearch(){if(closed)return;if(discovery!=null)discovery.resume();else if(page==0&&!query.isEmpty())search(false);}
     private void backups(){caption.setText(t("Keep your layout, favourites and preferences. Accounts, URLs, tokens and passwords are excluded.","Guarda tu aspecto, favoritos y preferencias. Se excluyen cuentas, URLs, tokens y contraseñas."));row(t("Save a backup on this TV","Guardar una copia en esta TV"),t("Active profile only","Solo el perfil activo"),()->work(signal->{saveLocal(signal);return t("Backup saved.","Copia guardada.");},v->status.setText((String)v)));row(t("Export to a file or USB","Exportar a un archivo o USB"),"JSON · Vela",()->document(EXPORT));row(t("Import from a file","Importar desde un archivo"),t("Review before restoring","Revisar antes de restaurar"),()->document(IMPORT));if(local().isFile())row(t("Restore this TV's backup","Restaurar la copia de esta TV"),"",()->work(signal->{try(InputStream in=new FileInputStream(local())){return VelaWorkspace.read(in);}},v->preview((JSONObject)v)));if(VelaWorkspace.canUndo(activity))row(t("Undo last restore or reading change","Deshacer la última restauración o cambio de lectura"),"",()->mutate(signal->{VelaWorkspace.undo(activity);return null;},v->{changed=true;render();status.setText(t("Previous settings recovered.","Ajustes anteriores recuperados."));}));note(t("Between Full and Lite, only common reading, remote and input settings are restored. Input identities must match the destination TV.","Entre completa y Lite se restauran solo los ajustes comunes de lectura, mando y entradas. Las entradas deben coincidir con las de la TV de destino. La antena se recupera por identidad DVB o nombre único; no se adivinan coincidencias."));}
     private File local(){return new File(activity.getFilesDir(),"vela-settings-"+VelaWorkspace.active(activity)+".json");}
     private JSONObject backup(CancellationSignal signal)throws Exception{synchronized(VelaWorkspace.class){signal.throwIfCanceled();host.prepareBackup();signal.throwIfCanceled();return VelaWorkspace.snapshot(activity);}}
@@ -339,7 +345,7 @@ final class VelaHub extends FrameLayout {
     interface Job {Object run(CancellationSignal signal)throws Exception;}
     interface Result {void ready(Object value);}
     private void mutate(Job job,Result result){work(signal->{synchronized(VelaWorkspace.class){signal.throwIfCanceled();return job.run(signal);}},result);}
-    private void work(Job job,Result result){cancelWork();int token=epoch;String profile=VelaWorkspace.active(activity);CancellationSignal jobSignal=cancel;task=worker.submit(()->{try{Object value=job.run(jobSignal);if(value instanceof AutoCloseable){disposables.add((AutoCloseable)value);if(closed||jobSignal.isCanceled()){disposables.remove(value);((AutoCloseable)value).close();return;}}main.post(()->{if(value instanceof AutoCloseable)disposables.remove(value);if(!closed&&epoch==token&&profile.equals(VelaWorkspace.active(activity)))result.ready(value);else if(value instanceof AutoCloseable)try{((AutoCloseable)value).close();}catch(Exception ignored){}});}catch(Exception failure){main.post(()->{if(!closed&&epoch==token){if(discovery!=null)discovery.error(L10n.text("Could not load programmes. Return to the guide and refresh it."));else if(searchView!=null)searchView.error();else status.setText(t("The operation could not be completed. Your accounts are unchanged.","No se pudo completar la operación. Tus cuentas se conservan."));}});}});}
+    private void work(Job job,Result result){cancelWork();int token=epoch;String profile=VelaWorkspace.active(activity);CancellationSignal jobSignal=cancel;task=worker.submit(()->{try{Object value=job.run(jobSignal);if(value instanceof AutoCloseable){disposables.add((AutoCloseable)value);if(closed||jobSignal.isCanceled()){disposables.remove(value);((AutoCloseable)value).close();return;}}main.post(()->{if(value instanceof AutoCloseable)disposables.remove(value);if(!closed&&epoch==token&&profile.equals(VelaWorkspace.active(activity)))result.ready(value);else if(value instanceof AutoCloseable)try{((AutoCloseable)value).close();}catch(Exception ignored){}});}catch(Exception failure){main.post(()->{if(!closed&&epoch==token){if(discovery!=null)discovery.error(L10n.text("Could not load programmes. Return to the guide and refresh it."));else if(searchView!=null)searchView.error(resultPage);else status.setText(t("The operation could not be completed. Your accounts are unchanged.","No se pudo completar la operación. Tus cuentas se conservan."));}});}});}
     private void cancelWork(){epoch++;cancel.cancel();if(task!=null)task.cancel(true);worker.purge();cancel=new CancellationSignal();}
     void pause(){if(searchView!=null)searchView.pause();if(discovery!=null)discovery.pause();main.removeCallbacks(remoteTimeout);if(remoteLevel==5){testing=false;capture="";remoteShortcuts();}stopMobile();cancelWork();if(programmeArt!=null){programmeArt.close();programmeArt=null;}if(performance!=null){performance.close();performance=null;}}
     static android.graphics.drawable.Drawable profileIcon(){return new Symbol(4);}
