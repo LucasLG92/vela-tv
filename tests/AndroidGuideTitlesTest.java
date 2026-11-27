@@ -23,6 +23,31 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
     private static void equal(String expected,String actual){
         if(!expected.equals(actual))throw new AssertionError("Expected ["+expected+"] but got ["+actual+"]");
     }
+    private static void checkSearch(Context c, XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
+        String label = "Demo HD";
+        List<LiveTvData.Channel> tuned = Collections.singletonList(new LiveTvData.Channel(21,"test","21",label,false,true,false));
+        Map<Long,String> names = Collections.singletonMap(21L,label);
+        CancellationSignal signal = new CancellationSignal();
+        String listings = "<tv><channel id='station.HD'><display-name>Demo HD</display-name></channel>"
+                + "<channel id='station.SD'><display-name>Demo HD</display-name></channel>"
+                + programme("station.HD",now+900,now+1800,"<title>Fixture A</title>")
+                + programme("station.SD",now+900,now+1800,"<title>Fixture B</title>") + "</tv>";
+        byte[] data = listings.getBytes(StandardCharsets.UTF_8);
+        full.importGuide(new ByteArrayInputStream(data),LiveTvData.hash(full.url()),now);
+        lite.importGuide(new ByteArrayInputStream(data),tuned,now,signal);
+        if (!full.antennaAirings(names,"Fixture",0,signal).isEmpty()
+                || !lite.airings(names,"Fixture",0,signal).isEmpty())
+            throw new AssertionError("An ambiguous antenna alias supplied a search result");
+        try {
+            VelaGuideFix.set(c,label,"station.SD",15);
+            for (List<VelaShows.Airing> rows : Arrays.asList(
+                    full.antennaAirings(names,"Fixture",0,signal), lite.airings(names,"Fixture",0,signal),
+                    full.discover(names,2,0,0,signal), lite.discover(names,2,0,0,signal))) {
+                if (rows.size()!=1 || rows.get(0).start!=now+1800 || !rows.get(0).title.equals("Fixture B"))
+                    throw new AssertionError("Antenna search lost the chosen XMLTV ID or time correction");
+            }
+        } finally { VelaGuideFix.reset(c,label); }
+    }
     @Override public void onCreate(Bundle args){super.onCreate(args);start();}
     @Override public void onStart(){
         Bundle result=new Bundle();Context base=getTargetContext();
@@ -50,11 +75,31 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
                 xml.append(programme(id,now-300,now+300,"<title lang='en'>"+expected[i]+"</title><title lang='es'>"+expected[i]+"</title><icon src='"+image+"'/><rating><icon src='https://vela-fixture.invalid/age.png'/></rating>"));
                 xml.append(programme(id,now+300,now+900,"<title>  </title><title>Bora <![CDATA[Bora]]> &amp; [COLOR tomato]música[/COLOR]</title><title lang='fr'>Autre titre</title>"));
             }
+            // Eight bad starts used to evict the valid programme from the Full now/next query.
+            String stop=STAMP.format(Instant.ofEpochSecond(now+300));
+            for(int i=0;i<8;i++)
+                xml.append("<programme channel='c0' stop='").append(stop).append("'><title>Invalid start</title></programme>");
+            ids.add("no-start");
+            xml.append("<programme channel='no-start' start='invalid' stop='").append(stop).append("'><title>Broken</title></programme>");
             xml.append("</tv>");String document=xml.toString();byte[] raw=document.getBytes(StandardCharsets.UTF_8);
             Map<String,LiveTvData.Guide> playlist=M3uClient.xmlGuide(new StringReader(document),ids,now);
+            if(playlist.containsKey("no-start"))throw new AssertionError("M3U accepted an invalid programme start");
             XmlTvGuide full=new XmlTvGuide(c);LiteXmlTvGuide lite=new LiteXmlTvGuide(c);
             full.importGuide(new ByteArrayInputStream(raw),LiveTvData.hash(full.url()),now);
             lite.importGuide(new ByteArrayInputStream(raw),channels,now,new CancellationSignal());
+            for(File file:Arrays.asList(fullDb,liteDb)){
+                try(SQLiteDatabase db=SQLiteDatabase.openDatabase(file.getPath(),null,SQLiteDatabase.OPEN_READONLY);
+                    android.database.Cursor rows=db.rawQuery("SELECT 1 FROM programmes WHERE start<=0 LIMIT 1",null)){
+                    if(rows.moveToFirst())throw new AssertionError("XMLTV importer retained an invalid start");
+                }
+            }
+            // Reopen caches written by the previous release, without a network refresh.
+            for(File file:Arrays.asList(fullDb,liteDb)){
+                try(SQLiteDatabase db=SQLiteDatabase.openDatabase(file.getPath(),null,SQLiteDatabase.OPEN_READWRITE)){
+                    db.execSQL("INSERT INTO programmes(channel,start,end,title) VALUES ('c0',0,?,'Cached invalid start')",new Object[]{now+300});
+                    db.setVersion(file.equals(fullDb)?5:1);
+                }
+            }
             Map<String,List<LiveTvData.Programme>> timetable=full.window(channels,now);
             Map<String,List<LiveTvData.Programme>> antenna=lite.read(channels,now,now+900,new CancellationSignal());
             for(int i=0;i<channels.size();i++){
@@ -121,7 +166,8 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             equal(expected[0],full.guide(channels).get(station).now.title);
             if(!requests.equals(Arrays.asList(XmlTvGuide.DEFAULT_URL,plain+".gz")))throw new AssertionError("Missing cold-cache schedule fallback");
             equal(plain+".gz",full.url());
-            result.putString("result","PASS legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
+            checkSearch(c,full,lite,now);
+            result.putString("result","PASS antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
         }catch(Exception|AssertionError failure){result.putString("error",android.util.Log.getStackTraceString(failure));}
         finally{
             SQLiteDatabase.deleteDatabase(fullDb);SQLiteDatabase.deleteDatabase(liteDb);
