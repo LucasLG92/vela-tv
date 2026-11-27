@@ -63,12 +63,17 @@ final class LiveTvData {
         Programme current(long time){return now!=null&&now.current(time)?now:next!=null&&next.current(time)?next:null;}
     }
     static Map<String,Guide> publicGuide(Context c,List<Channel> channels)throws Exception{
-        File file=cached(c,"epg.json");if(!fresh(file,2*3600_000L))try{download(EPG,file,8*1024*1024);}catch(Exception e){if(!fresh(file,24*3600_000L))throw e;}
-        Set<String> ids=new HashSet<>();for(Channel ch:channels)ids.add(ch.epgId);
-        try(Reader reader=new InputStreamReader(new FileInputStream(file),StandardCharsets.UTF_8)){return parseGuide(reader,ids,System.currentTimeMillis()/1000);}
+        Set<String> ids=new HashSet<>();
+        for(Channel channel:channels)if(!channel.epgId.isEmpty())ids.add(channel.epgId);
+        if(ids.isEmpty())return Collections.emptyMap();
+        return TvGuideFileCache.load(cached(c,"epg.json"),file->fetch(EPG,file,8*1024*1024),file->{
+            try(Reader reader=new InputStreamReader(new FileInputStream(file),StandardCharsets.UTF_8)){
+                return parseGuide(reader,ids,System.currentTimeMillis()/1000);
+            }
+        });
     }
     static Map<String,Guide> parseGuide(Reader input,Set<String> wanted,long time)throws Exception{
-        Map<String,Guide> result=new HashMap<>();JsonReader reader=new JsonReader(input);reader.beginArray();int count=0;
+        Map<String,Guide> result=new HashMap<>();JsonReader reader=new JsonReader(input);reader.beginArray();int count=0;boolean hasProgramme=false;
         while(reader.hasNext()){
             if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(++count>MAX_CHANNELS*2)throw new IOException("Too many EPG channels");
             String id="";Guide guide=new Guide();reader.beginObject();
@@ -78,11 +83,18 @@ final class LiveTvData {
                     reader.beginArray();int events=0;while(reader.hasNext()){
                         if(++events>5000)throw new IOException("Too many programmes");long start=0,end=0;String title="";reader.beginObject();
                         while(reader.hasNext()){String field=reader.nextName();if(field.equals("hi"))start=reader.nextLong();else if(field.equals("hf"))end=reader.nextLong();else if(field.equals("t")){title=reader.nextString();if(title.length()>512)title=title.substring(0,512);}else reader.skipValue();}
-                        reader.endObject();guide.add(new Programme(start,end,title),time);
+                        reader.endObject();
+                        guide.add(new Programme(start,end,title),time);
                     }reader.endArray();
                 }else reader.skipValue();
-            }reader.endObject();if(wanted.contains(id)&&(guide.now!=null||guide.next!=null))result.put(id,guide);
-        }reader.endArray();return result;
+            }reader.endObject();
+            if(!id.isEmpty()&&(guide.now!=null||guide.next!=null)){
+                hasProgramme=true;
+                if(wanted.contains(id))result.put(id,guide);
+            }
+        }reader.endArray();
+        if(!hasProgramme||reader.peek()!=android.util.JsonToken.END_DOCUMENT)throw new IOException("Invalid programme guide");
+        return result;
     }
     static Set<String> favorites(Context c,String source){return new LinkedHashSet<>(VelaWorkspace.prefs(c,"live-tv").getStringSet("favorites-"+hash(source),Collections.emptySet()));}
     static Set<String> toggleFavorite(Context c,String source,Channel channel)throws IOException{
@@ -116,8 +128,16 @@ final class LiveTvData {
         }throw new IOException("Too many redirects");
     }
     static void download(String url,File file,int limit)throws Exception{
-        File temporary=File.createTempFile("fetch-",".part",file.getParentFile());HttpURLConnection connection=null;
-        try{connection=connect(url);try(InputStream in=connection.getInputStream();OutputStream out=new FileOutputStream(temporary)){copy(in,out,limit);}java.nio.file.Files.move(temporary.toPath(),file.toPath(),java.nio.file.StandardCopyOption.REPLACE_EXISTING);}
-        finally{if(connection!=null)connection.disconnect();temporary.delete();}
+        File temporary=File.createTempFile("fetch-",".part",file.getParentFile());
+        try{
+            fetch(url,temporary,limit);
+            java.nio.file.Files.move(temporary.toPath(),file.toPath(),java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        }finally{temporary.delete();}
+    }
+    private static void fetch(String url,File file,int limit)throws Exception{
+        HttpURLConnection connection=connect(url);
+        try(InputStream in=connection.getInputStream();OutputStream out=new FileOutputStream(file)){
+            copy(in,out,limit);
+        }finally{connection.disconnect();}
     }
 }
