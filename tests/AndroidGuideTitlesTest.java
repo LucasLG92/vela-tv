@@ -52,6 +52,49 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             if(M3uClient.timestamp(invalid)!=0||LiteXmlTvGuide.timestamp(invalid)!=0)
                 throw new AssertionError("Accepted an invalid programme time: "+invalid);
     }
+    private static void checkProgrammeOnlyGuide(Context c, XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
+        String guideId="Station1.tv", label="Antenna 7";
+        LiveTvData.Channel playlist=new LiveTvData.Channel(guideId,"Different playlist name","","",Collections.emptyList());
+        LiveTvData.Channel antenna=new LiveTvData.Channel(7,"test","7","Station 1",false,true,false);
+        LiveTvData.Channel manual=new LiveTvData.Channel(17,"test","17",label,false,true,false);
+        List<LiveTvData.Channel> tuned=Arrays.asList(antenna,manual);
+        CancellationSignal signal=new CancellationSignal();
+        String source=LiveTvData.hash(full.url());
+        String events=programme(guideId,now-60,now+600,"<title>Morning news</title>")
+                +programme(guideId,now+600,now+1200,"<title>Local weather</title>")
+                +programme("other.network",now-60,now+600,"<title>Regional news</title>");
+        try{
+            VelaGuideFix.set(c,label,"other.network",0);
+            for(String declarations:Arrays.asList("","<channel id='listed'><display-name>Listed TV</display-name></channel>")){
+                byte[] xml=("<tv>"+declarations+events+"</tv>").getBytes(StandardCharsets.UTF_8);
+                boolean fullAccepted=true,liteAccepted=true;
+                try{full.importGuide(new ByteArrayInputStream(xml),source,now);}catch(IOException missing){fullAccepted=false;}
+                try{lite.importGuide(new ByteArrayInputStream(xml),tuned,now,signal);}catch(IOException missing){liteAccepted=false;}
+                if(!fullAccepted||!liteAccepted)throw new AssertionError("Programme-only XMLTV accepted by Full="+fullAccepted+", Lite="+liteAccepted);
+                LiveTvData.Guide visible=full.read(Collections.singletonList(playlist),now).get(guideId);
+                if(visible==null)throw new AssertionError("Full did not resolve the original playlist channel ID");
+                equal("Morning news",visible.now.title);
+                equal("Local weather",visible.next.title);
+                Map<String,List<LiveTvData.Programme>> rows=lite.read(tuned,now,now+1200,signal);
+                equal("Local weather",rows.get(antenna.id).get(1).title);
+                equal("Regional news",rows.get(manual.id).get(0).title);
+            }
+            // Older feeds can contain blank display names. An unassigned tuner has no exact EPG ID.
+            try(SQLiteDatabase db=SQLiteDatabase.openDatabase(new File(c.getCacheDir(),"tv-guide/xmltv.db").getPath(),null,SQLiteDatabase.OPEN_READWRITE)){
+                db.execSQL("INSERT OR IGNORE INTO aliases(alias,channel) VALUES('id:',?)",new Object[]{guideId});
+            }
+            LiveTvData.Channel unknown=new LiveTvData.Channel(30,"test","30","Unrelated station",false,true,false);
+            if(full.read(Collections.singletonList(unknown),now).containsKey(unknown.id))
+                throw new AssertionError("An empty legacy guide alias supplied another station's programmes");
+            String badRoot="<catalog><channel id='wrong'><display-name>Wrong</display-name></channel>"
+                    +programme("wrong",now-60,now+600,"<title>Wrong feed</title>")+"</catalog>";
+            try{
+                full.importGuide(new ByteArrayInputStream(badRoot.getBytes(StandardCharsets.UTF_8)),source,now);
+                throw new AssertionError("A non-TV document replaced a working guide");
+            }catch(IOException expected){}
+            equal("Morning news",full.read(Collections.singletonList(playlist),now).get(guideId).now.title);
+        }finally{VelaGuideFix.reset(c,label);}
+    }
     private static void checkSearch(Context c, XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
         String label = "Demo HD";
         List<LiveTvData.Channel> tuned = Collections.singletonList(new LiveTvData.Channel(21,"test","21",label,false,true,false));
@@ -214,7 +257,8 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             equal(plain+".gz",full.url());
             checkSearch(c,full,lite,now);
             checkTimeFormats(c,full,lite,now);
-            result.putString("result","PASS antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
+            checkProgrammeOnlyGuide(c,full,lite,now);
+            result.putString("result","PASS programme-only feeds with exact, antenna and manual channel matches, antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
         }catch(Exception|AssertionError failure){result.putString("error",android.util.Log.getStackTraceString(failure));}
         finally{
             SQLiteDatabase.deleteDatabase(fullDb);SQLiteDatabase.deleteDatabase(liteDb);

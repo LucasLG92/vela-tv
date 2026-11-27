@@ -36,7 +36,7 @@ class Handler(BaseHTTPRequestHandler):
             query=urllib.parse.parse_qs(url.query);action=query.get('action',[''])[0]
             if not action:value={'user_info':{'auth':1,'status':'Active','allowed_output_formats':['m3u8','ts']},'server_info':{'timezone':'UTC'}}
             elif action=='get_live_categories':value=[{'category_id':'1','category_name':'Fixture'}]
-            elif action=='get_live_streams':value=[{'stream_id':101,'name':'Fixture FHD','category_id':'1','stream_type':'live','stream_icon':''}]
+            elif action=='get_live_streams':value=[{'stream_id':101,'name':'Fixture FHD','category_id':'1','stream_type':'live','stream_icon':'','tv_archive':1,'tv_archive_duration':2}]
             else:value={}
             self.body(json.dumps(value).encode());return
         if path.endswith('/401.m3u8') or path.endswith('/401.ts') or path=='/denied.m3u8':self.body(b'',code=403);return
@@ -46,7 +46,15 @@ class Handler(BaseHTTPRequestHandler):
             self.body(b'#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1200000,RESOLUTION=640x360\nlive.m3u8\n','application/vnd.apple.mpegurl');return
         if path=='/radio.aac':
             self.body((args.media_dir/'radio.aac').read_bytes(),'audio/aac');return
-        if path=='/timeshift/demo.ts':
+        if path=='/m3u-archive.ts':
+            query=urllib.parse.parse_qs(url.query)
+            try:
+                start,end,duration=(int(query[key][0]) for key in ('start','end','duration'))
+                valid=end-start==duration and duration>0
+            except (KeyError,ValueError):valid=False
+            if not valid:self.body(b'',code=400);return
+            self.body(b''.join(p.read_bytes() for p in segments[:5]),'video/mp2t');return
+        if path=='/timeshift/demo.ts' or path.startswith('/timeshift/') and path.endswith('/101.ts'):
             self.body(b''.join(p.read_bytes() for p in segments[:5]),'video/mp2t');return
         if path=='/short.m3u8':
             self.body(b'#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:2\n#EXTINF:2,\nsegment000.ts\n#EXTINF:2,\nsegment001.ts\n#EXT-X-ENDLIST\n','application/vnd.apple.mpegurl');return
