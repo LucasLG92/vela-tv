@@ -23,6 +23,71 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
     private static void equal(String expected,String actual){
         if(!expected.equals(actual))throw new AssertionError("Expected ["+expected+"] but got ["+actual+"]");
     }
+    private static void checkDescriptions(XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
+        LiveTvData.Channel channel=new LiveTvData.Channel(43,"test","43","Descripciones",false,true,false);
+        List<LiveTvData.Channel> channels=Collections.singletonList(channel);
+        String text="<title>Magazine</title><desc>  </desc><desc lang='es'>  Cine <![CDATA[y]]> música &amp; más.  </desc>"
+                +"<desc lang='fr'>Cinéma et musique.</desc>";
+        String xml="<tv><channel id='demo'><display-name>Descripciones</display-name></channel>"
+                +programme("demo",now-60,now+600,text)
+                +programme("demo",now+600,now+1200,"<title>Next</title><desc>Second programme.</desc>")+"</tv>";
+        byte[] bytes=xml.getBytes(StandardCharsets.UTF_8);
+        full.importGuide(new ByteArrayInputStream(bytes),LiveTvData.hash(full.url()),now);
+        lite.importGuide(new ByteArrayInputStream(bytes),channels,now,new CancellationSignal());
+        LiveTvData.Guide m3u=M3uClient.xmlGuide(new StringReader(xml),Collections.singleton("demo"),now).get("demo");
+        for(List<LiveTvData.Programme> rows:Arrays.asList(full.window(channels,now).get(channel.id),
+                lite.read(channels,now,now+1200,new CancellationSignal()).get(channel.id),Arrays.asList(m3u.now,m3u.next))){
+            equal("Cine y música & más.",rows.get(0).description);
+            equal("Second programme.",rows.get(1).description);
+        }
+    }
+
+    private static final String PLAYLIST="https://playlist.example.invalid/tv.m3u";
+    private static final String GUIDE_A="https://playlist.example.invalid/listed.xml";
+    private static final String GUIDE_B="https://playlist.example.invalid/custom.xml";
+    private static byte[] playlistReply(String url,long now)throws IOException{
+        if(url.equals(PLAYLIST))return ("#EXTM3U x-tvg-url=\""+GUIDE_A+"\"\n#EXTINF:-1 tvg-id=\"demo\",Demo\nhttps://playlist.example.invalid/stream\n").getBytes(StandardCharsets.UTF_8);
+        if(!url.equals(GUIDE_A)&&!url.equals(GUIDE_B))return null;
+        String title=url.equals(GUIDE_A)?"Emisión de la lista":"Guía alternativa";
+        String xml="<?xml version='1.0' encoding='ISO-8859-1'?><tv>"
+                +programme("demo",now-60,now+600,"<title>"+title+"</title><desc>Información del día.</desc>")+"</tv>";
+        ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+        try(GZIPOutputStream zip=new GZIPOutputStream(bytes)){zip.write(xml.getBytes(StandardCharsets.ISO_8859_1));}
+        return bytes.toByteArray();
+    }
+    private static void checkPlaylistSettings(Context c,List<String> requests)throws Exception{
+        LiveTvData.prefs(c).edit().clear().commit();
+        M3uClient playlist=new M3uClient(c);
+        LiveTvData.Channel ch=new LiveTvData.Channel("demo","Demo","","",Collections.emptyList());
+        List<LiveTvData.Channel> channels=Collections.singletonList(ch);
+        playlist.configure(PLAYLIST,GUIDE_B,false);
+        playlist.refresh(true);
+        equal("Guía alternativa",playlist.guide(channels).get(ch.id).now.title);
+        playlist.configure(PLAYLIST,"",false);
+        equal("Emisión de la lista",playlist.guide(channels).get(ch.id).now.title);
+        playlist.configure(PLAYLIST,GUIDE_B,false);
+        LiveTvData.Programme programme=playlist.guide(channels).get(ch.id).now;
+        equal("Guía alternativa",programme.title);
+        equal("Información del día.",programme.description);
+        if(Collections.frequency(requests,PLAYLIST)!=1)throw new AssertionError("Changing guides downloaded the playlist again");
+
+        // A cache from an older release contains the effective URL, not its origin.
+        String source=M3uClient.identity(c);
+        try(TvCatalogCache.Writer writer=new TvCatalogCache(c).writer(source)){
+            writer.add(ch,true);
+            writer.commit(new org.json.JSONObject().put("headersVersion",1).put("epg",GUIDE_B).toString());
+        }
+        LiveTvData.prefs(c).edit().remove("m3u-epg").remove("m3u-guide-edited").commit();
+        equal("Guía alternativa",playlist.guide(channels).get(ch.id).now.title);
+        playlist.configure(PLAYLIST,GUIDE_B,false);
+        playlist.configure(PLAYLIST,"",false);
+        if(!playlist.guide(channels).isEmpty())throw new AssertionError("Cleared override survived in legacy guide cache");
+        playlist.refresh(false);
+        equal("Emisión de la lista",playlist.guide(channels).get(ch.id).now.title);
+        playlist.refresh(false);
+        if(Collections.frequency(requests,PLAYLIST)!=2)throw new AssertionError("Legacy guide did not recover with a single playlist refresh");
+    }
+
     private static void checkCategories(Context c, XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
         String label = "Category station", id = "category.test";
         String longLabel = "<category>" + String.join("", Collections.nCopies(250, "x")) + "</category>";
@@ -256,10 +321,11 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             boolean[] failFanart={false};
             List<String> requests=new ArrayList<>();
             RefinementHttp.install(url->{
+                if(url.getHost().equals("playlist.example.invalid")){requests.add(url.toString());return playlistReply(url.toString(),now);}
                 calls[0]++;requests.add(url.toString());
                 if(failFanart[0]&&url.toString().equals(XmlTvGuide.DEFAULT_URL))return null;
                 return bytes.toByteArray();
-            },Collections.singleton("raw.githubusercontent.com"));
+            },new HashSet<>(Arrays.asList("raw.githubusercontent.com","playlist.example.invalid")));
             equal(expected[0],full.guide(channels).get(channels.get(0).id).now.title);
             if(!lite.refresh(channels,new CancellationSignal()))throw new AssertionError("Legacy antenna cache stayed fresh");
             equal(expected[0],lite.read(channels,now,now+900,new CancellationSignal()).get(channels.get(0).id).get(0).title);
@@ -289,14 +355,19 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             equal(expected[0],full.guide(channels).get(station).now.title);
             if(!requests.equals(Arrays.asList(XmlTvGuide.DEFAULT_URL,plain+".gz")))throw new AssertionError("Missing cold-cache schedule fallback");
             equal(plain+".gz",full.url());
+            checkPlaylistSettings(c,requests);
+            checkDescriptions(full,lite,now);
             checkCategories(c,full,lite,now);
             checkSearch(c,full,lite,now);
             checkTimeFormats(c,full,lite,now);
             checkProgrammeOnlyGuide(c,full,lite,now);
-            result.putString("result","PASS genre filters with split text and reversed category order, bounded category caches, programme-only feeds with exact, antenna and manual channel matches, antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
+            result.putString("result","PASS custom and advertised playlist guides with accented text, single XMLTV descriptions across all three readers, genre filters with split text and reversed category order, bounded category caches, programme-only feeds with exact, antenna and manual channel matches, antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
         }catch(Exception|AssertionError failure){result.putString("error",android.util.Log.getStackTraceString(failure));}
         finally{
             SQLiteDatabase.deleteDatabase(fullDb);SQLiteDatabase.deleteDatabase(liteDb);
+            SQLiteDatabase.deleteDatabase(new File(root,"tv-catalogs/channels.db"));
+            LiveTvData.prefs(c).edit().clear().commit();
+            for(String url:Arrays.asList(GUIDE_A,GUIDE_B))LiveTvData.cached(c,"m3u-epg-"+LiveTvData.hash(url)+".data").delete();
             c.getSharedPreferences("xmltv",0).edit().clear().commit();c.getSharedPreferences("lite_xmltv",0).edit().clear().commit();
         }
         finish(result.containsKey("error")?1:-1,result);

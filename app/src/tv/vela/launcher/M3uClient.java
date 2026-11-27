@@ -27,6 +27,8 @@ final class M3uClient {
         String value=address.trim(),guide=epg.trim();valid(value,http);if(!guide.isEmpty())valid(guide,http);
         SharedPreferences p=LiveTvData.prefs(context);String old=identity(context),next="m3u:"+LiveTvData.hash(value);
         SharedPreferences.Editor e=p.edit().putString("m3u-private",secrets.encode(value)).putString("m3u-id",LiveTvData.hash(value)).putString("m3u-epg",guide.isEmpty()?"":secrets.encode(guide)).putBoolean("m3u-http",http).remove("source");
+        // Older catalogues cached the effective guide, which could belong to a previous setting.
+        if(select&&guide.isEmpty()&&(!old.equals(next)||!p.getString("m3u-epg","").isEmpty()))e.putBoolean("m3u-guide-edited",true);
         if(old.equals(next)&&!p.contains("m3u-private")){Set<String> favorites=LiveTvData.favorites(context,LiveTvData.CATALOG);if(!favorites.isEmpty())e.putStringSet("favorites-"+LiveTvData.hash(next),favorites);}
         if(!e.commit())throw new IOException("Could not save playlist");
         File[] legacy=LiveTvData.cached(context,"migration").getParentFile().listFiles((dir,name)->name.startsWith("catalog-")&&name.endsWith(".txt"));if(legacy!=null)for(File file:legacy)if(file.isFile())file.delete();
@@ -34,11 +36,16 @@ final class M3uClient {
     }
     boolean refresh(boolean force)throws Exception{
         if(!LiveTvData.prefs(context).contains("m3u-private"))save(url(),epgUrl(),allowHttp(),false);
-        String source=identity(context);if(!force&&cache.fresh(source,4*3600_000L)&&new JSONObject(cache.metadata(source)).optInt("headersVersion")==1)return false;
+        String source=identity(context);
+        if(!force&&cache.fresh(source,4*3600_000L)){
+            JSONObject metadata=new JSONObject(cache.metadata(source));
+            boolean ambiguous=metadata.has("epg")&&LiveTvData.prefs(context).getBoolean("m3u-guide-edited",false)&&epgUrl().isEmpty();
+            if(metadata.optInt("headersVersion")==1&&!ambiguous)return false;
+        }
         try{String address=url();valid(address,allowHttp());String epg;
             try(XtreamClient.Response response=new XtreamClient.Response(address,32*1024*1024);TvCatalogCache.Writer writer=cache.writer(source,response.connection.getContentLengthLong())){
                 epg=parse(new InputStreamReader(response.in,StandardCharsets.UTF_8),allowHttp(),writer);
-                String custom=epgUrl();if(!custom.isEmpty())epg=custom;if(writer.size()==0)throw new IOException("No direct channels");writer.commit(new JSONObject().put("epg",epg).put("default",address.equals(LiveTvData.DEFAULT_M3U)).put("headersVersion",1).toString());
+                if(writer.size()==0)throw new IOException("No direct channels");writer.commit(new JSONObject().put("playlistEpg",epg).put("default",address.equals(LiveTvData.DEFAULT_M3U)).put("headersVersion",1).toString());
             }
             return false;
         }catch(Exception failure){if(Thread.currentThread().isInterrupted())throw failure;if(cache.fresh(source,7*86400_000L))return true;throw new IOException("Playlist unavailable");}
@@ -89,7 +96,13 @@ final class M3uClient {
         }return epg;
     }
     Map<String,LiveTvData.Guide> guide(List<LiveTvData.Channel> channels)throws Exception{
-        String data=cache.metadata(identity(context));if(data.isEmpty())return Collections.emptyMap();JSONObject metadata=new JSONObject(data);String url=metadata.optString("epg");
+        String data=cache.metadata(identity(context));if(data.isEmpty())return Collections.emptyMap();
+        JSONObject metadata=new JSONObject(data);
+        String url=epgUrl();
+        if(url.isEmpty()){
+            url=metadata.optString("playlistEpg");
+            if(!metadata.has("playlistEpg")&&!LiveTvData.prefs(context).getBoolean("m3u-guide-edited",false))url=metadata.optString("epg");
+        }
         if(url.isEmpty())return metadata.optBoolean("default")?index(channels,LiveTvData.publicGuide(context,channels)):Collections.emptyMap();valid(url,allowHttp());
         File file=LiveTvData.cached(context,"m3u-epg-"+LiveTvData.hash(url)+".data");
         if(!LiveTvData.fresh(file,2*3600_000L)){
@@ -102,24 +115,65 @@ final class M3uClient {
         Set<String> wanted=new HashSet<>();for(LiveTvData.Channel channel:channels)if(!channel.epgId.isEmpty())wanted.add(channel.epgId);
         if(wanted.isEmpty())return Collections.emptyMap();
         try(PushbackInputStream in=new PushbackInputStream(new FileInputStream(file),2)){
-            int a=in.read(),b=in.read();if(b>=0)in.unread(b);if(a>=0)in.unread(a);InputStream decoded=a==31&&b==139?new GZIPInputStream(in):in;
-            return index(channels,xmlGuide(new InputStreamReader(new LimitedInput(decoded,32*1024*1024),StandardCharsets.UTF_8),wanted,System.currentTimeMillis()/1000));
+            int a=in.read(),b=in.read();if(b>=0)in.unread(b);if(a>=0)in.unread(a);
+            try(InputStream decoded=a==31&&b==139?new GZIPInputStream(in):in){
+                XmlPullParser parser=Xml.newPullParser();
+                parser.setInput(new LimitedInput(decoded,32*1024*1024),null);
+                return index(channels,xmlGuide(parser,wanted,System.currentTimeMillis()/1000));
+            }
         }
     }
     static Map<String,LiveTvData.Guide> index(List<LiveTvData.Channel> channels,Map<String,LiveTvData.Guide> byEpg){Map<String,LiveTvData.Guide> result=new HashMap<>();for(LiveTvData.Channel ch:channels)if(byEpg.containsKey(ch.epgId))result.put(ch.id,byEpg.get(ch.epgId));return result;}
     static Map<String,LiveTvData.Guide> xmlGuide(Reader input,Set<String> wanted,long now)throws Exception{
-        XmlPullParser p=Xml.newPullParser();p.setInput(input);Map<String,LiveTvData.Guide> result=new HashMap<>();String id="",title="",image="";long start=0,end=0;boolean keep=false,inTitle=false;int events=0;
-        for(int event=p.nextToken();event!=XmlPullParser.END_DOCUMENT;event=p.nextToken()){
-            if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(++events>1_000_000||event==XmlPullParser.DOCDECL)throw new IOException("Unsupported XMLTV");
-            if(event==XmlPullParser.START_TAG&&p.getName().equals("programme")){id=p.getAttributeValue(null,"channel");keep=wanted.contains(id);title="";image="";if(keep){start=timestamp(p.getAttributeValue(null,"start"));end=timestamp(p.getAttributeValue(null,"stop"));keep=start>0&&end>start;}}
-            else if(keep&&event==XmlPullParser.START_TAG&&p.getDepth()==3&&p.getName().equals("icon")&&image.isEmpty())image=VelaProgrammeArt.url(p.getAttributeValue(null,"src"));
-            else if(keep&&event==XmlPullParser.START_TAG&&p.getName().equals("title"))inTitle=title.isEmpty();
-            else if(inTitle&&title.length()<512&&(event==XmlPullParser.TEXT||event==XmlPullParser.CDSECT||event==XmlPullParser.ENTITY_REF)){
-                String part=p.getText();if(part!=null)title+=limit(part,512-title.length());
+        XmlPullParser parser=Xml.newPullParser();
+        parser.setInput(input);
+        return xmlGuide(parser,wanted,now);
+    }
+    private static Map<String,LiveTvData.Guide> xmlGuide(XmlPullParser parser,Set<String> wanted,long now)throws Exception{
+        Map<String,LiveTvData.Guide> result=new HashMap<>();
+        String id="",title="",description="",image="";
+        long start=0,end=0;
+        boolean keep=false,inTitle=false,inDescription=false;
+        int events=0;
+        for(int event=parser.nextToken();event!=XmlPullParser.END_DOCUMENT;event=parser.nextToken()){
+            if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();
+            if(++events>1_000_000||event==XmlPullParser.DOCDECL)throw new IOException("Unsupported XMLTV");
+            int depth=parser.getDepth();
+            if(event==XmlPullParser.START_TAG){
+                String tag=parser.getName();
+                if(depth==1&&!tag.equals("tv"))throw new IOException("Unsupported XMLTV root");
+                if(depth==2&&tag.equals("programme")){
+                    id=parser.getAttributeValue(null,"channel");
+                    keep=wanted.contains(id);
+                    if(keep){
+                        start=timestamp(parser.getAttributeValue(null,"start"));
+                        end=timestamp(parser.getAttributeValue(null,"stop"));
+                        keep=start>0&&end>start&&end>now;
+                    }
+                    title=description=image="";
+                }else if(depth==3&&keep){
+                    if(tag.equals("title"))inTitle=title.isEmpty();
+                    else if(tag.equals("desc"))inDescription=description.isEmpty();
+                    else if(tag.equals("icon")&&image.isEmpty())image=VelaProgrammeArt.url(parser.getAttributeValue(null,"src"));
+                }
+            }else if(event==XmlPullParser.TEXT||event==XmlPullParser.CDSECT||event==XmlPullParser.ENTITY_REF){
+                String part=parser.getText();
+                if(part!=null){
+                    if(inTitle&&title.length()<512)title+=limit(part,512-title.length());
+                    if(inDescription&&description.length()<1200)description+=limit(part,1200-description.length());
+                }
+            }else if(event==XmlPullParser.END_TAG){
+                String tag=parser.getName();
+                if(depth==3&&tag.equals("title")&&inTitle){title=XmlTvTitle.plain(title);inTitle=false;}
+                else if(depth==3&&tag.equals("desc")&&inDescription){description=description.trim();inDescription=false;}
+                else if(depth==2&&tag.equals("programme")){
+                    if(keep&&!title.isEmpty())result.computeIfAbsent(id,key->new LiveTvData.Guide())
+                            .add(new LiveTvData.Programme(start,end,title,description,image),now);
+                    keep=inTitle=inDescription=false;
+                }
             }
-            else if(event==XmlPullParser.END_TAG&&inTitle&&p.getName().equals("title")){title=XmlTvTitle.plain(title);inTitle=false;}
-            else if(event==XmlPullParser.END_TAG&&p.getName().equals("programme")){if(keep){LiveTvData.Guide entry=result.get(id);if(entry==null){entry=new LiveTvData.Guide();result.put(id,entry);}entry.add(new LiveTvData.Programme(start,end,title,"",image),now);}keep=false;inTitle=false;}
-        }return result;
+        }
+        return result;
     }
     static long timestamp(String value){return XmlTvTime.parse(value);}
     static final class LimitedInput extends FilterInputStream {int remaining;LimitedInput(InputStream in,int limit){super(in);remaining=limit;}private void count(int n)throws IOException{if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(n>0&&(remaining-=n)<0)throw new IOException("Guide limit");}public int read()throws IOException{int n=super.read();count(n<0?0:1);return n;}public int read(byte[] b,int o,int l)throws IOException{int n=in.read(b,o,l);count(n);return n;}}
