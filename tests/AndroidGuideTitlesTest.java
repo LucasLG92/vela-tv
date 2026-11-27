@@ -23,6 +23,40 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
     private static void equal(String expected,String actual){
         if(!expected.equals(actual))throw new AssertionError("Expected ["+expected+"] but got ["+actual+"]");
     }
+    private static void checkCategories(Context c, XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
+        String label = "Category station", id = "category.test";
+        String longLabel = "<category>" + String.join("", Collections.nCopies(250, "x")) + "</category>";
+        String genres = "<category>De<![CDATA[por]]>tes</category><category>Documental</category>";
+        String xml = "<tv><channel id='" + id + "'><display-name>" + label + "</display-name></channel>"
+                + programme(id, now - 60, now + 600, "<title>Genres first</title>" + genres + longLabel)
+                + programme(id, now + 600, now + 1200, "<title>Genres last</title>" + longLabel + genres)
+                + programme(id, now + 1200, now + 1800, "<title>Separate labels</title><category>De</category><category>portes</category>")
+                + "</tv>";
+        byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
+        List<LiveTvData.Channel> stations = Collections.singletonList(new LiveTvData.Channel(12,"test","12",label,false,true,false));
+        Map<Long,String> names = Collections.singletonMap(12L,label);
+        CancellationSignal signal = new CancellationSignal();
+        full.importGuide(new ByteArrayInputStream(bytes), LiveTvData.hash(full.url()), now);
+        lite.importGuide(new ByteArrayInputStream(bytes), stations, now, signal);
+        for (int genre : new int[]{2, 3}) {
+            for (List<VelaShows.Airing> rows : Arrays.asList(full.discover(names,2,genre,0,signal), lite.discover(names,2,genre,0,signal))) {
+                List<String> titles = new ArrayList<>();
+                for (VelaShows.Airing airing : rows) titles.add(airing.title);
+                if (!titles.equals(Arrays.asList("Genres first", "Genres last")))
+                    throw new AssertionError("XMLTV genre " + genre + " returned " + titles + " for reversed category order");
+            }
+        }
+        for (String file : Arrays.asList("tv-guide/xmltv.db", "antenna-epg/programmes.db")) {
+            try (SQLiteDatabase db = SQLiteDatabase.openDatabase(new File(c.getCacheDir(),file).getPath(),null,SQLiteDatabase.OPEN_READONLY);
+                 android.database.Cursor rows = db.rawQuery("SELECT max(length(category)) FROM programmes",null)) {
+                if (!rows.moveToFirst() || rows.getInt(0) > 240) throw new AssertionError("Oversized category in " + file);
+            }
+        }
+        LiveTvData.Guide guide = M3uClient.xmlGuide(new StringReader(xml), Collections.singleton(id), now).get(id);
+        equal("Genres first", guide.now.title);
+        equal("Genres last", guide.next.title);
+    }
+
     private static void checkTimeFormats(Context c, XmlTvGuide full, LiteXmlTvGuide lite, long now) throws Exception {
         long start=now-now%60-60, end=start+600;
         DateTimeFormatter minutes=DateTimeFormatter.ofPattern("yyyyMMddHHmm",Locale.ROOT);
@@ -255,10 +289,11 @@ public final class AndroidGuideTitlesTest extends Instrumentation {
             equal(expected[0],full.guide(channels).get(station).now.title);
             if(!requests.equals(Arrays.asList(XmlTvGuide.DEFAULT_URL,plain+".gz")))throw new AssertionError("Missing cold-cache schedule fallback");
             equal(plain+".gz",full.url());
+            checkCategories(c,full,lite,now);
             checkSearch(c,full,lite,now);
             checkTimeFormats(c,full,lite,now);
             checkProgrammeOnlyGuide(c,full,lite,now);
-            result.putString("result","PASS programme-only feeds with exact, antenna and manual channel matches, antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
+            result.putString("result","PASS genre filters with split text and reversed category order, bounded category caches, programme-only feeds with exact, antenna and manual channel matches, antenna search and discovery with ambiguous aliases, exact manual IDs and offsets, invalid starts and old caches, legacy guide artwork upgrade, offline retention and cold fallback, retry limits, custom sources, three XMLTV readers, now and next, repeated and alternative titles, CDATA and entities, legitimate repeats, both warm-cache upgrades.");
         }catch(Exception|AssertionError failure){result.putString("error",android.util.Log.getStackTraceString(failure));}
         finally{
             SQLiteDatabase.deleteDatabase(fullDb);SQLiteDatabase.deleteDatabase(liteDb);
