@@ -42,6 +42,36 @@ public final class AndroidRemoteTest extends Instrumentation {
         EditText[] edit={null};ui(()->{edit[0]=new EditText(activity);activity.addContentView(edit[0],new android.view.ViewGroup.LayoutParams(300,80));edit[0].requestFocus();check(!d.dispatch(event(scan,0,KeyEvent.KEYCODE_PROG_RED,0,7,0,0)),"Typing was intercepted");((android.view.ViewGroup)edit[0].getParent()).removeView(edit[0]);d.cancel();});
         VelaRemote.prefs(context).edit().clear().commit();
     }
+    void typingWithVoiceHold()throws Exception{
+        int key=KeyEvent.KEYCODE_A;
+        VelaRemote.set(context,key,0,0,"profiles");
+        VelaRemote.set(context,key,0,1,"voice");
+        ui(()->((VelaHub.Owner)activity).tools(0));
+        VelaHub search=hub();
+        EditText input=(EditText)field(search,"input");
+        ui(()->{input.setText("");check(input.requestFocus(),"Search field did not receive focus");});
+        ui(()->{
+            long start=SystemClock.uptimeMillis();
+            activity.dispatchKeyEvent(event(start,KeyEvent.ACTION_DOWN,key,0,KeyCharacterMap.VIRTUAL_KEYBOARD,0,0));
+            activity.dispatchKeyEvent(event(start,KeyEvent.ACTION_UP,key,0,KeyCharacterMap.VIRTUAL_KEYBOARD,0,0));
+        });
+        check(hub()==search&&"a".contentEquals(input.getText()),"Typing A opened its short-press shortcut while voice was assigned to a hold");
+
+        List<String> actions=new ArrayList<>();
+        ui(()->{
+            VelaRemote.Dispatcher dispatcher=new VelaRemote.Dispatcher(activity,new VelaRemote.Dispatcher.Host(){
+                public void activate(String action){actions.add(action);}
+                public void replay(KeyEvent event){throw new AssertionError("Voice hold replayed as text");}
+            });
+            long start=SystemClock.uptimeMillis();
+            dispatcher.dispatch(event(start,KeyEvent.ACTION_DOWN,key,0,7,0,0));
+            dispatcher.dispatch(event(start,KeyEvent.ACTION_DOWN,key,1,7,0,KeyEvent.FLAG_LONG_PRESS));
+            dispatcher.dispatch(event(start,KeyEvent.ACTION_UP,key,0,7,0,0));
+        });
+        check(actions.equals(Collections.singletonList("voice")),"The search field lost its voice hold");
+        ui(search::close);
+        VelaRemote.remove(context,key,0);
+    }
     void editor()throws Exception{
         ui(()->((VelaHub.Owner)activity).tools(VelaHub.REMOTE));await(()->hub()!=null&&hub().page()==VelaHub.REMOTE);shot("list-empty");clickText("Add a button");check(hub().testingRemote(),"Learning mode was not entered");press(KeyEvent.KEYCODE_PROG_RED);check(!hub().testingRemote(),"Learned button stayed in capture mode");check(controls().get(0).hasFocus(),"Learning a button left focus outside the editor");shot("button");click(0);clickText("Home widgets");check(VelaRemote.find(VelaRemote.read(context),KeyEvent.KEYCODE_PROG_RED,0,0).action.equals("widgets"),"Editor did not save short action");click(1);clickText("Profiles");shot("button-assigned");
         clickText("Back");shot("list");clickText("Add a button");View cancel=controls().get(0);ui(cancel::requestFocus);sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);waitForIdleSync();check(!hub().testingRemote(),"The remote cannot click Cancel during learning");
@@ -59,7 +89,7 @@ public final class AndroidRemoteTest extends Instrumentation {
     public void onStart(){context=getTargetContext();lite=context.getPackageName().endsWith(".lite");try{
         try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("getprop ro.kernel.qemu");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){check(in.read()=='1',"Owned emulator required");}
         RefinementHttp.install(url->null);previous=VelaWorkspace.active(context);if(Arrays.asList("Remote · Demo","Other · Demo").contains(VelaWorkspace.profiles(context).get(previous)))previous=VelaWorkspace.DEFAULT;for(Map.Entry<String,String> entry:VelaWorkspace.profiles(context).entrySet())if(Arrays.asList("Remote · Demo","Other · Demo").contains(entry.getValue())){VelaWorkspace.select(context,VelaWorkspace.DEFAULT);VelaWorkspace.delete(context,entry.getKey());}VelaWorkspace.select(context,previous);profile=VelaWorkspace.create(context,"Remote · Demo");VelaWorkspace.select(context,profile);L10n.choose(context,"es");Ui.init(context);VelaWidgets.State widgets=VelaWidgets.read(context);widgets.items.clear();widgets.items.add("clock");VelaWidgets.save(context,widgets);
-        model();activity=startActivitySync(new Intent().setClassName(context,"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));waitForIdleSync();phase="gestures";gestures();phase="native-editor";editor();result.putString("result","PASS "+(lite?"Lite":"Full")+" remote learn, short/long, app launch, scan codes, repeat/cancel, native fallback, profiles and portable backup");
+        model();activity=startActivitySync(new Intent().setClassName(context,"tv.vela.launcher."+(lite?"LiteHomeActivity":"HomeActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));waitForIdleSync();phase="gestures";gestures();phase="typing-with-voice-hold";typingWithVoiceHold();phase="native-editor";editor();result.putString("result","PASS "+(lite?"Lite":"Full")+" remote learn, short/long, app launch, scan codes, repeat/cancel, native fallback, profiles and portable backup");
     }catch(Throwable failure){result.putString("result","FAIL "+phase+": "+failure);try{shot("failure");}catch(Exception ignored){}android.util.Log.e("VelaRemoteTest",phase,failure);}finally{if(monitor!=null)removeMonitor(monitor);if(activity!=null)ui(()->{try{Object d=field(activity,"remote");if(d!=null)((VelaRemote.Dispatcher)d).cancel();activity.finish();}catch(Exception ignored){}});if(previous!=null&&profile!=null)try{VelaWorkspace.select(context,previous);VelaWorkspace.delete(context,profile);}catch(Exception ignored){}}
         finish(result.getString("result","").startsWith("PASS")?Activity.RESULT_OK:Activity.RESULT_CANCELED,result);
     }

@@ -64,7 +64,14 @@ final class VelaRemote {
             }
             if(down!=null&&event.getAction()==KeyEvent.ACTION_DOWN&&event.getRepeatCount()==0)cancel();
             if(event.getAction()!=KeyEvent.ACTION_DOWN||event.getRepeatCount()!=0||!allowed(event))return false;
-            List<Binding> list=bindings();Binding shortAction=find(list,event.getKeyCode(),event.getScanCode(),0),longAction=find(list,event.getKeyCode(),event.getScanCode(),1);if(shortAction==null&&longAction==null)return false;if(activity.getCurrentFocus() instanceof EditText&&!(shortAction!=null&&shortAction.action.equals("voice")||longAction!=null&&longAction.action.equals("voice")))return false;
+            List<Binding> list=bindings();
+            Binding shortAction=find(list,event.getKeyCode(),event.getScanCode(),0);
+            Binding longAction=find(list,event.getKeyCode(),event.getScanCode(),1);
+            if(activity.getCurrentFocus() instanceof EditText){
+                if(shortAction!=null&&!shortAction.action.equals("voice"))shortAction=null;
+                if(longAction!=null&&!longAction.action.equals("voice"))longAction=null;
+            }
+            if(shortAction==null&&longAction==null)return false;
             reset();down=new KeyEvent(event);tap=shortAction;hold=longAction;if(hold!=null)main.postDelayed(longPress,HOLD_MS);return true;
         }
         private static boolean same(KeyEvent a,KeyEvent b){return a.getDeviceId()==b.getDeviceId()&&a.getKeyCode()==b.getKeyCode()&&(a.getKeyCode()!=0||a.getScanCode()==b.getScanCode());}
