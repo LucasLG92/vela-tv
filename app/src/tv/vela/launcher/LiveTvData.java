@@ -59,7 +59,7 @@ final class LiveTvData {
     }
     static final class Guide {
         Programme now,next;
-        void add(Programme p,long time){if(p.title.isEmpty()||p.end<=p.start)return;if(p.current(time)&&(now==null||p.start>now.start))now=p;else if(p.start>time&&(next==null||p.start<next.start))next=p;}
+        void add(Programme p,long time){if(p.title.isEmpty()||p.start<=0||p.end<=p.start)return;if(p.current(time)&&(now==null||p.start>now.start))now=p;else if(p.start>time&&(next==null||p.start<next.start))next=p;}
         Programme current(long time){return now!=null&&now.current(time)?now:next!=null&&next.current(time)?next:null;}
     }
     static Map<String,Guide> publicGuide(Context c,List<Channel> channels)throws Exception{

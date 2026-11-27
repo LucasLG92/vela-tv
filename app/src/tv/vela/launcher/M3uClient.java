@@ -98,7 +98,7 @@ final class M3uClient {
         XmlPullParser p=Xml.newPullParser();p.setInput(input);Map<String,LiveTvData.Guide> result=new HashMap<>();String id="",title="",image="";long start=0,end=0;boolean keep=false,inTitle=false;int events=0;
         for(int event=p.nextToken();event!=XmlPullParser.END_DOCUMENT;event=p.nextToken()){
             if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(++events>1_000_000||event==XmlPullParser.DOCDECL)throw new IOException("Unsupported XMLTV");
-            if(event==XmlPullParser.START_TAG&&p.getName().equals("programme")){id=p.getAttributeValue(null,"channel");keep=wanted.contains(id);title="";image="";if(keep){start=timestamp(p.getAttributeValue(null,"start"));end=timestamp(p.getAttributeValue(null,"stop"));}}
+            if(event==XmlPullParser.START_TAG&&p.getName().equals("programme")){id=p.getAttributeValue(null,"channel");keep=wanted.contains(id);title="";image="";if(keep){start=timestamp(p.getAttributeValue(null,"start"));end=timestamp(p.getAttributeValue(null,"stop"));keep=start>0&&end>start;}}
             else if(keep&&event==XmlPullParser.START_TAG&&p.getDepth()==3&&p.getName().equals("icon")&&image.isEmpty())image=VelaProgrammeArt.url(p.getAttributeValue(null,"src"));
             else if(keep&&event==XmlPullParser.START_TAG&&p.getName().equals("title"))inTitle=title.isEmpty();
             else if(inTitle&&title.length()<512&&(event==XmlPullParser.TEXT||event==XmlPullParser.CDSECT||event==XmlPullParser.ENTITY_REF)){

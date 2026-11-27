@@ -6,8 +6,22 @@ import org.xmlpull.v1.XmlPullParser;import java.io.*;import java.net.*;import ja
 /** Disk-indexed external XMLTV. Only the visible channel/time window enters memory. */
 final class XmlTvGuide {
     List<VelaShows.Airing> antennaAirings(Map<Long,String> tuned,String query,int page,android.os.CancellationSignal signal)throws Exception{
-        File file=new File(context.getCacheDir(),"tv-guide/xmltv.db");String address=url();if(address.isEmpty()||!file.isFile())return Collections.emptyList();Map<String,String> names=new HashMap<>();for(String name:tuned.values()){String key="name:"+TvChannelNames.match(name);names.putIfAbsent(key,TvChannelNames.display(name));}
-        try(SQLiteDatabase db=open();Cursor meta=db.rawQuery("SELECT source FROM meta WHERE id=1",null)){if(!meta.moveToFirst()||!meta.getString(0).equals(LiveTvData.hash(address)))return Collections.emptyList();return VelaGuideSearch.readWindow(context,db,names,"alias",query,page,signal,System.currentTimeMillis()/1000,System.currentTimeMillis()/1000+48*3600,0);}
+        return antennaAirings(tuned,VelaGuideSearch.Titles.page(query,page),signal);
+    }
+    List<VelaShows.Airing> antennaAirings(Map<Long,String> tuned,VelaGuideSearch.Titles titles,android.os.CancellationSignal signal)throws Exception{
+        long now=System.currentTimeMillis()/1000;
+        return antennaWindow(tuned,titles,signal,now,now+48*3600,0);
+    }
+    private List<VelaShows.Airing> antennaWindow(Map<Long,String> tuned,VelaGuideSearch.Titles titles,android.os.CancellationSignal signal,long from,long to,int genre)throws Exception{
+        File file=new File(context.getCacheDir(),"tv-guide/xmltv.db");
+        String address=url();
+        if(address.isEmpty()||!file.isFile())return Collections.emptyList();
+        Map<String,String> names=new LinkedHashMap<>();
+        for(String name:tuned.values())names.putIfAbsent("name:"+TvChannelNames.match(name),name);
+        try(SQLiteDatabase db=open();Cursor meta=db.rawQuery("SELECT source FROM meta WHERE id=1",null)){
+            if(!meta.moveToFirst()||!meta.getString(0).equals(LiveTvData.hash(address)))return Collections.emptyList();
+            return VelaGuideSearch.readWindow(context,db,names,"alias",XmlTvGuide::fallbackAlias,titles,signal,from,to,genre);
+        }
     }
     static final String DEFAULT_URL="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiafanart.xml.gz";
     static final int MAX_BYTES=64*1024*1024,MAX_DB=24*1024*1024;
@@ -20,7 +34,7 @@ final class XmlTvGuide {
         File folder=new File(context.getCacheDir(),"tv-guide");folder.mkdirs();SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(new File(folder,"xmltv.db"),null);
         try{
             db.setMaximumSize(MAX_DB);
-            VelaDatabase.ensureSchema(db,5,XmlTvGuide::migrate);
+            VelaDatabase.ensureSchema(db,6,XmlTvGuide::migrate);
             return db;
         }catch(RuntimeException error){db.close();throw error;}
     }
@@ -30,6 +44,7 @@ final class XmlTvGuide {
         db.execSQL("CREATE TABLE IF NOT EXISTS programmes (channel TEXT, start INTEGER, end INTEGER, title TEXT)");
         db.execSQL("CREATE TABLE IF NOT EXISTS logos (channel TEXT PRIMARY KEY, image TEXT)");if(db.getVersion()<3){boolean category=false;try(Cursor columns=db.rawQuery("PRAGMA table_info(programmes)",null)){while(columns.moveToNext())if("category".equals(columns.getString(1)))category=true;}if(!category){db.execSQL("ALTER TABLE programmes ADD COLUMN category TEXT NOT NULL DEFAULT ''");
         db.execSQL("UPDATE meta SET updated=0");}db.setVersion(3);}if(db.getVersion()<4){db.execSQL("UPDATE meta SET updated=0");db.setVersion(4);}
+        db.delete("programmes","start<=0",null);
         VelaDiscovery.ensureEvents(db);
         VelaDiscovery.ensureArtwork(db);
         db.execSQL("CREATE INDEX IF NOT EXISTS programme_time ON programmes(channel,start,end)");
@@ -100,7 +115,7 @@ final class XmlTvGuide {
                             if(tag.equals("channel")){if(++channels>4096)throw new IOException("Channel limit");channel=parser.getAttributeValue(null,"id");if(channel==null||channel.length()>256)throw new IOException("Channel ID limit");kind="channel";names=0;bind(alias,exact(channel),channel);bind(alias,"name:"+TvChannelNames.match(channel),channel);}
                             else if(tag.equals("icon")&&kind.equals("channel")){String image=parser.getAttributeValue(null,"src");if(image!=null&&image.length()<=4096&&LiveTvData.https(image)){ContentValues logo=new ContentValues();logo.put("channel",channel);logo.put("image",secrets.encode(image));db.insertWithOnConflict("logos",null,logo,SQLiteDatabase.CONFLICT_REPLACE);}}
                             else if(tag.equals("display-name")&&kind.equals("channel")){name.setLength(0);inName=true;}
-                            else if(tag.equals("programme")){if(++programmes>150000)throw new IOException("Programme limit");channel=parser.getAttributeValue(null,"channel");start=M3uClient.timestamp(parser.getAttributeValue(null,"start"));end=M3uClient.timestamp(parser.getAttributeValue(null,"stop"));keep=channel!=null&&channel.length()<=256&&end>now-24*3600&&start<now+48*3600&&end>start;title="";description=programmeImage="";inDescription=false;category="";eventId=eventValue=eventSystem="";inEvent=false;kind="programme";}
+                            else if(tag.equals("programme")){if(++programmes>150000)throw new IOException("Programme limit");channel=parser.getAttributeValue(null,"channel");start=M3uClient.timestamp(parser.getAttributeValue(null,"start"));end=M3uClient.timestamp(parser.getAttributeValue(null,"stop"));keep=start>0&&channel!=null&&channel.length()<=256&&end>now-24*3600&&start<now+48*3600&&end>start;title="";description=programmeImage="";inDescription=false;category="";eventId=eventValue=eventSystem="";inEvent=false;kind="programme";}
                             else if(tag.equals("icon")&&kind.equals("programme")&&keep&&parser.getDepth()==3&&programmeImage.isEmpty())programmeImage=VelaProgrammeArt.url(parser.getAttributeValue(null,"src"));else if(tag.equals("desc")&&keep)inDescription=true;else if(tag.equals("episode-num")&&keep){eventSystem=parser.getAttributeValue(null,"system");eventValue="";inEvent=true;}else if(tag.equals("title")&&keep)inTitle=title.isEmpty();else if(tag.equals("category")&&keep)inCategory=true;
                         }else if(event==XmlPullParser.TEXT||event==XmlPullParser.CDSECT||event==XmlPullParser.ENTITY_REF){String text=parser.getText();if(text!=null){if(inDescription&&description.length()<1200)description+=text.substring(0,Math.min(text.length(),1200-description.length()));if(inName&&name.length()<160)name.append(text,0,Math.min(text.length(),160-name.length()));if(inEvent&&eventValue.length()<64)eventValue+=text.substring(0,Math.min(text.length(),64-eventValue.length()));if(inCategory&&category.length()<240)category+=text.substring(0,Math.min(text.length(),240-category.length()))+" ";if(inTitle&&title.length()<512)title+=text.substring(0,Math.min(text.length(),512-title.length()));}}
                         else if(event==XmlPullParser.END_TAG){String tag=parser.getName();if(tag.equals("display-name")){inName=false;if(kind.equals("channel")&&++names<=32){bind(alias,"name:"+TvChannelNames.match(name.toString()),channel);bind(alias,exact(name.toString()),channel);}}
@@ -114,8 +129,25 @@ final class XmlTvGuide {
             }
         }
     }
-    List<VelaShows.Airing> discover(Map<Long,String> tuned,int mode,int genre,int page,android.os.CancellationSignal signal)throws Exception{Map<String,String> names=new HashMap<>();for(String name:tuned.values()){String fixed=VelaGuideFix.alias(context,name);names.put(fixed.isEmpty()?"name:"+TvChannelNames.match(name):exact(fixed),name);}long[] w=VelaDiscovery.bounds(mode);if(url().isEmpty())return Collections.emptyList();try(SQLiteDatabase db=open()){try(Cursor meta=db.rawQuery("SELECT source FROM meta WHERE id=1",null)){if(!meta.moveToFirst()||!LiveTvData.hash(url()).equals(meta.getString(0)))return Collections.emptyList();}return VelaGuideSearch.readWindow(context,db,names,"alias","",page,signal,w[0],w[1],genre);}}
-    private static String resolve(SQLiteDatabase db,String key){try(Cursor row=db.rawQuery("SELECT channel FROM aliases WHERE alias=? LIMIT 2",new String[]{key})){if(!row.moveToFirst())return key.equals("name:fdf")?resolve(db,"name:factoriadeficcion"):key.equals("name:trecetv")||key.equals("name:eltrece")?resolve(db,"name:trece"):"";String id=row.getString(0);return row.moveToNext()?"":id;}}
+    List<VelaShows.Airing> discover(Map<Long,String> tuned,int mode,int genre,int page,android.os.CancellationSignal signal)throws Exception{
+        long[] window=VelaDiscovery.bounds(mode);
+        return antennaWindow(tuned,VelaGuideSearch.Titles.page("",page),signal,window[0],window[1],genre);
+    }
+    private static String fallbackAlias(String key){
+        if(key.equals("name:fdf"))return "name:factoriadeficcion";
+        if(key.equals("name:trecetv")||key.equals("name:eltrece"))return "name:trece";
+        return "";
+    }
+    private static String resolve(SQLiteDatabase db,String key){
+        try(Cursor rows=db.rawQuery("SELECT channel FROM aliases WHERE alias=? LIMIT 2",new String[]{key})){
+            if(rows.moveToFirst()){
+                String id=rows.getString(0);
+                return rows.moveToNext()?"":id;
+            }
+        }
+        String fallback=fallbackAlias(key);
+        return fallback.isEmpty()?"":VelaGuideSearch.uniqueChannel(db,"alias",fallback);
+    }
     String logo(LiveTvData.Channel ch)throws Exception{return logo(ch,VelaGuideFix.alias(context,ch.name));}
     String logo(LiveTvData.Channel ch,String mapping)throws Exception{String address=url();if(address.isEmpty())return "";try(SQLiteDatabase db=open();Cursor meta=db.rawQuery("SELECT source FROM meta WHERE id=1",null)){if(!meta.moveToFirst()||!meta.getString(0).equals(LiveTvData.hash(address)))return "";String id=mapping;if(id.isEmpty())id=resolve(db,exact(ch.epgId));String country=TvChannelNames.country(ch);if(id.isEmpty()&&(country.isEmpty()||country.equals("ES")))id=resolve(db,"name:"+TvChannelNames.match(ch.name));if(id.isEmpty())return "";try(Cursor logo=db.rawQuery("SELECT image FROM logos WHERE channel=?",new String[]{id})){return logo.moveToFirst()?secrets.decode(logo.getString(0)):"";}}}
     Map<String,LiveTvData.Guide> read(List<LiveTvData.Channel> visible,long now){Map<String,LiveTvData.Guide> result=new HashMap<>();try(SQLiteDatabase db=open()){int count=0;for(LiveTvData.Channel ch:visible){if(++count>LiveTvData.PAGE_SIZE||Thread.currentThread().isInterrupted())break;String id=VelaGuideFix.alias(context,ch.name);if(id.isEmpty())id=resolve(db,exact(ch.epgId));String country=TvChannelNames.country(ch);if(id.isEmpty()&&(country.isEmpty()||country.equals("ES")))id=resolve(db,"name:"+TvChannelNames.match(ch.name));if(id.isEmpty())continue;long offset=VelaGuideFix.offset(context,ch.name);LiveTvData.Guide guide=new LiveTvData.Guide();try(Cursor rows=db.rawQuery("SELECT start,end,title,description,image FROM programmes WHERE channel=? AND end>? ORDER BY start LIMIT 8",new String[]{id,Long.toString(now-offset)})){while(rows.moveToNext())guide.add(new LiveTvData.Programme(rows.getLong(0)+offset,rows.getLong(1)+offset,rows.getString(2),rows.getString(3),rows.getString(4)),now);}if(guide.now!=null||guide.next!=null)result.put(ch.id,guide);}}return result;}

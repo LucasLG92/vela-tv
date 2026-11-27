@@ -69,9 +69,11 @@ final class ContinueWatching {
         return result;
     }
     static List<PlexClient.Film> personalized(Context c,List<PlexClient.Film> base,List<PlexClient.Film> extra,List<PlexClient.Film> shared){
-        org.json.JSONObject settings=VelaLayout.read(c);List<PlexClient.Film> out=new ArrayList<>(),resume=new ArrayList<>();Set<String> found=new HashSet<>();
-        for(List<PlexClient.Film> group:Arrays.asList(base,extra,shared))for(PlexClient.Film original:group){PlexClient.Film f=original;if(!f.continuing){if(group==base)out.add(f);continue;}boolean fallback=!f.tvSource||settings.optBoolean("appResume",true);if(!VelaLayout.service(settings,f.packageName,fallback)){if(f.alternative==null||!VelaLayout.service(settings,f.alternative.packageName,true))continue;f=f.alternative;}String id=f.externalId.isEmpty()?f.packageName+"|"+f.key:f.type+"|"+f.externalId;if(found.add(id))resume.add(f);}
-        resume.sort((a,b)->Long.compare(b.lastPlayedMs,a.lastPlayedMs));out.addAll(0,resume.subList(0,Math.min(12,resume.size())));return out;
+        org.json.JSONObject settings=VelaLayout.read(c);List<PlexClient.Film> out=new ArrayList<>();VelaHomeRows.Row resume=new VelaHomeRows.Row(Integer.MAX_VALUE);
+        for(List<PlexClient.Film> group:Arrays.asList(base,extra,shared))for(PlexClient.Film original:group){PlexClient.Film f=original;if(!f.continuing){if(group==base)out.add(f);continue;}boolean fallback=!f.tvSource||settings.optBoolean("appResume",true);if(!VelaLayout.service(settings,f.packageName,fallback)){if(f.alternative==null||!VelaLayout.service(settings,f.alternative.packageName,true))continue;f=f.alternative;}resume.add(f);}
+        resume.films.sort((a,b)->Long.compare(b.lastPlayedMs,a.lastPlayedMs));
+        out.addAll(0,resume.films.subList(0,Math.min(12,resume.films.size())));
+        return out;
     }
     static String remaining(PlexClient.Film film){
         long ms=film.remainingMs();if(film.nextEpisode){String label=Ui.tr("Próximo episódio","Next episode","Siguiente episodio");return ms>0?label+" · "+duration(ms):label;}if(ms<=0)return Ui.tr("Continuar","Resume","Continuar");

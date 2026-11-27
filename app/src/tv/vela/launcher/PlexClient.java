@@ -121,7 +121,18 @@ class PlexClient {
         float progress = -1,thumbAspect;
         long durationMs,positionMs=-1,lastPlayedMs,addedAtMs;double homeRating;
         boolean continuing,tvSource,landscape,recentlyAdded,nextEpisode;
-        String seriesKey="",externalId="";Film alternative;
+        String seriesKey="";
+        Film alternative;
+        final Map<String,String> externalIds=new LinkedHashMap<>();
+        void addExternalId(String uri) {
+            int end=uri.indexOf("://");
+            if(end<0)return;
+            String source=uri.substring(0,end), value=uri.substring(end+3);
+            if(!Arrays.asList("tmdb","imdb","tvdb").contains(source)||!value.matches("[A-Za-z0-9_-]{1,40}"))return;
+            String previous=externalIds.get(source);
+            // A contradictory pair from one source cannot identify this item reliably.
+            externalIds.put(source,previous==null||previous.equals(value)?value:"");
+        }
         long remainingMs(){return durationMs>0&&positionMs>=0&&positionMs<durationMs?durationMs-positionMs:-1;}
     }
     static final int PAGE_SIZE = 24;
@@ -161,7 +172,7 @@ class PlexClient {
     }
     List<Film> homeRow(String row)throws Exception{
         String path=CatalogFilters.plexPath(new Section("0","",VelaHomeRows.type(row)),0,VelaHomeRows.query(row,false));
-        path="/library/all"+path.substring(path.indexOf('?'));
+        path="/library/all"+path.substring(path.indexOf('?'))+"&includeGuids=1";
         path=path.replace("X-Plex-Container-Size="+PAGE_SIZE,"X-Plex-Container-Size="+VelaHomeRows.LIMIT);
         return VelaHomeRows.merge(row,parseChildren(catalogJson(path,1024*1024),0,VelaHomeRows.LIMIT).films,Collections.emptyList());
     }
@@ -249,7 +260,10 @@ class PlexClient {
             for (int j = 0; metadata != null && j < Math.min(metadata.length(),24) && films.size() < 48; j++) {
                 JSONObject item = metadata.getJSONObject(j);
                 String type = item.optString("type");
-                if(recent&&type.equals("season"))item=new JSONObject(item.toString()).put("type","show").put("ratingKey",item.optString("parentRatingKey")).put("title",item.optString("parentTitle")).put("thumb",item.optString("parentThumb",item.optString("thumb")));
+                if(recent&&type.equals("season")){
+                    item=new JSONObject(item.toString()).put("type","show").put("ratingKey",item.optString("parentRatingKey")).put("title",item.optString("parentTitle")).put("thumb",item.optString("parentThumb",item.optString("thumb")));
+                    item.remove("Guid"); // IDs on this metadata belong to the season.
+                }
                 String key = item.optString("ratingKey");
                 type=item.optString("type");String group=resume?"resume:":"library:";
                 if ((!type.equals("movie") && !type.equals("episode") && !type.equals("show")) || key.isEmpty()) continue;
@@ -268,12 +282,16 @@ class PlexClient {
     }
     private static boolean recentHub(String id){return id.equals("vela.recent")||id.endsWith(".recent")||id.contains("recentlyadded");}
     Film item(String key)throws Exception{if(!key.matches("[0-9]{1,20}"))throw new IOException("Invalid item");JSONObject root=catalogJson("/library/metadata/"+key+"?includeGuids=1",2*1024*1024);JSONObject container=root.optJSONObject("MediaContainer");JSONArray items=container==null?null:container.optJSONArray("Metadata");return items==null||items.length()!=1?null:parseFilm(items.getJSONObject(0),false);}
-    private static String externalId(JSONObject item){JSONArray ids=item.optJSONArray("Guid");for(String provider:new String[]{"tmdb","imdb","tvdb"})for(int i=0;ids!=null&&i<ids.length();i++){JSONObject id=ids.optJSONObject(i);String value=id==null?"":id.optString("id");if(value.matches(provider+"://[A-Za-z0-9_-]{1,40}"))return value;}return "";}
     private static Film parseFilm(JSONObject item,boolean resume) {
         String type=item.optString("type"),key=item.optString("ratingKey");if(resume&&type.equals("season"))return null;
         if(key.isEmpty()||(!type.equals("movie")&&!type.equals("show")&&!type.equals("episode")&&!type.equals("season")))return null;
         Film film=new Film();film.key=key;film.type=type;film.continuing=resume;
-        film.externalId=externalId(item);film.title=item.optString(type.equals("episode")?"grandparentTitle":"title",item.optString("title"));
+        JSONArray guids=item.optJSONArray("Guid");
+        for(int i=0;guids!=null&&i<guids.length();i++){
+            JSONObject guid=guids.optJSONObject(i);
+            if(guid!=null)film.addExternalId(guid.optString("id"));
+        }
+        film.title=item.optString(type.equals("episode")?"grandparentTitle":"title",item.optString("title"));
         film.summary=item.optString("summary");film.detailTitle=item.optString("title");
         film.thumb=item.optString(type.equals("episode")?"grandparentThumb":"thumb",item.optString("thumb"));
         film.art=item.optString("art",item.optString("grandparentArt",film.thumb));

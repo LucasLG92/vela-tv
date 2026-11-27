@@ -120,7 +120,13 @@ final class JellyfinClient {
     static PlexClient.Film parseFilm(JSONObject item,boolean resume,boolean recent){
         String key=id(item.optString("Id")),type=item.optString("Type");boolean episode=type.equals("Episode"),season=type.equals("Season");if(key.isEmpty()||!Arrays.asList("Movie","Series","Episode","Season").contains(type)||season&&resume)return null;
         String series=id(item.optString("SeriesId"));if(season&&series.isEmpty())return null;PlexClient.Film f=new PlexClient.Film();f.provider="Jellyfin";f.packageName=PACKAGE;f.key=season&&recent?series:key;f.type=episode?"episode":season&&!recent?"season":type.equals("Series")||season?"show":"movie";
-        JSONObject ids=item.optJSONObject("ProviderIds");for(String source:new String[]{"Tmdb","Imdb","Tvdb"}){String value=ids==null?"":ids.optString(source);if(value.matches("[A-Za-z0-9_-]{1,40}")){f.externalId=source.toLowerCase(Locale.ROOT)+"://"+value;break;}}f.seriesKey=episode||season?series:"";f.detailTitle=shortText(item.optString("Name"),320);f.title=shortText(item.optString(episode||season?"SeriesName":"Name",item.optString("Name")),320);if(f.title.isEmpty())return null;if(season&&!recent)f.title=shortText(item.optString("Name"),320);f.summary=shortText(item.optString("Overview"),1600);
+        JSONObject ids=item.optJSONObject("ProviderIds");
+        if(ids!=null&&!(season&&recent)){
+            for(String source:Arrays.asList("Tmdb","Imdb","Tvdb")){
+                f.addExternalId(source.toLowerCase(Locale.ROOT)+"://"+ids.optString(source));
+            }
+        }
+        f.seriesKey=episode||season?series:"";f.detailTitle=shortText(item.optString("Name"),320);f.title=shortText(item.optString(episode||season?"SeriesName":"Name",item.optString("Name")),320);if(f.title.isEmpty())return null;if(season&&!recent)f.title=shortText(item.optString("Name"),320);f.summary=shortText(item.optString("Overview"),1600);
         JSONObject tags=item.optJSONObject("ImageTags");String primary=tags==null?"":tags.optString("Primary");String posterId=f.key;if((episode||season)&&!series.isEmpty()&&!item.optString("SeriesPrimaryImageTag").isEmpty()){posterId=series;primary=item.optString("SeriesPrimaryImageTag");}
         f.thumb=primary.isEmpty()?"":imagePath(posterId,"Primary",primary);JSONArray backgrounds=item.optJSONArray("BackdropImageTags");String backdropId=key,backdrop=backgrounds==null?"":backgrounds.optString(0);
         if(backdrop.isEmpty()){backdropId=id(item.optString("ParentBackdropItemId"));JSONArray parent=item.optJSONArray("ParentBackdropImageTags");backdrop=parent==null?"":parent.optString(0);}
@@ -133,8 +139,23 @@ final class JellyfinClient {
     static String imagePath(String item,String type,String tag){return id(item).isEmpty()||!tag.matches("[A-Za-z0-9_-]{1,128}")?"":"/Items/"+id(item)+"/Images/"+type+"?tag="+tag;}
     static long time(String text){try{return Math.max(0,Instant.parse(text).toEpochMilli());}catch(Exception invalid){return 0;}}
     private static String shortText(String value,int length){return value.length()>length?value.substring(0,length):value;}
-    private static JSONArray cache(List<PlexClient.Film> films)throws JSONException{JSONArray out=new JSONArray();for(PlexClient.Film f:films)out.put(new JSONObject().put("k",f.key).put("t",f.title).put("s",f.summary).put("p",f.thumb).put("a",f.art).put("l",f.logo).put("m",f.meta).put("y",f.type).put("e",f.episodeLabel).put("d",f.durationMs).put("v",f.positionMs).put("r",f.continuing).put("n",f.recentlyAdded).put("at",f.addedAtMs).put("last",f.lastPlayedMs).put("next",f.nextEpisode).put("series",f.seriesKey).put("external",f.externalId));return out;}
-    List<PlexClient.Film> cached(){try{JSONArray items=new JSONArray(prefs.getString("cache","[]"));List<PlexClient.Film> out=new ArrayList<>();for(int i=0;i<Math.min(24,items.length());i++){JSONObject o=items.getJSONObject(i);PlexClient.Film f=new PlexClient.Film();f.key=id(o.optString("k"));if(f.key.isEmpty())continue;f.provider="Jellyfin";f.packageName=PACKAGE;f.title=o.optString("t");f.summary=o.optString("s");f.thumb=o.optString("p");f.art=o.optString("a");f.logo=o.optString("l");f.meta=o.optString("m");f.type=o.optString("y");f.episodeLabel=o.optString("e");f.durationMs=o.optLong("d");f.positionMs=o.optLong("v",-1);f.continuing=o.optBoolean("r");f.recentlyAdded=o.optBoolean("n");f.addedAtMs=o.optLong("at");f.lastPlayedMs=o.optLong("last");f.nextEpisode=o.optBoolean("next");f.seriesKey=id(o.optString("series"));f.externalId=o.optString("external");f.progress=f.durationMs>0&&f.positionMs>=0?Math.min(1,(float)f.positionMs/f.durationMs):-1;out.add(f);}return out;}catch(Exception invalid){return Collections.emptyList();}}
+    private static JSONArray cache(List<PlexClient.Film> films)throws JSONException{JSONArray out=new JSONArray();for(PlexClient.Film f:films)out.put(new JSONObject().put("k",f.key).put("t",f.title).put("s",f.summary).put("p",f.thumb).put("a",f.art).put("l",f.logo).put("m",f.meta).put("y",f.type).put("e",f.episodeLabel).put("d",f.durationMs).put("v",f.positionMs).put("r",f.continuing).put("n",f.recentlyAdded).put("at",f.addedAtMs).put("last",f.lastPlayedMs).put("next",f.nextEpisode).put("series",f.seriesKey).put("externalIds",new JSONObject(f.externalIds)));return out;}
+    static void readCachedIds(PlexClient.Film film,JSONObject entry){
+        // Old recent-season records carry their series key but their season's external ID.
+        if("show".equals(film.type)&&film.key.equals(film.seriesKey))return;
+        JSONObject ids=entry.optJSONObject("externalIds");
+        if(ids==null){
+            film.addExternalId(entry.optString("external"));
+            return;
+        }
+        for(String source:Arrays.asList("tmdb","imdb","tvdb")){
+            if(!ids.has(source))continue;
+            String value=ids.optString(source);
+            if(value.isEmpty())film.externalIds.put(source,"");
+            else film.addExternalId(source+"://"+value);
+        }
+    }
+    List<PlexClient.Film> cached(){try{JSONArray items=new JSONArray(prefs.getString("cache","[]"));List<PlexClient.Film> out=new ArrayList<>();for(int i=0;i<Math.min(24,items.length());i++){JSONObject o=items.getJSONObject(i);PlexClient.Film f=new PlexClient.Film();f.key=id(o.optString("k"));if(f.key.isEmpty())continue;f.provider="Jellyfin";f.packageName=PACKAGE;f.title=o.optString("t");f.summary=o.optString("s");f.thumb=o.optString("p");f.art=o.optString("a");f.logo=o.optString("l");f.meta=o.optString("m");f.type=o.optString("y");f.episodeLabel=o.optString("e");f.durationMs=o.optLong("d");f.positionMs=o.optLong("v",-1);f.continuing=o.optBoolean("r");f.recentlyAdded=o.optBoolean("n");f.addedAtMs=o.optLong("at");f.lastPlayedMs=o.optLong("last");f.nextEpisode=o.optBoolean("next");f.seriesKey=id(o.optString("series"));readCachedIds(f,o);f.progress=f.durationMs>0&&f.positionMs>=0?Math.min(1,(float)f.positionMs/f.durationMs):-1;out.add(f);}return out;}catch(Exception invalid){return Collections.emptyList();}}
     byte[] image(String path,int width,int height,boolean transparent)throws IOException{
         if(!connected()||path==null||!path.matches("/Items/[a-f0-9]{32}/Images/(Primary|Backdrop|Logo)\\?tag=[A-Za-z0-9_-]{1,128}"))throw new IOException("Invalid Jellyfin image");
         Session scope=stored();return bytes(scope.server.base,path+"&maxWidth="+Math.min(1920,Math.max(1,width))+"&maxHeight="+Math.min(1080,Math.max(1,height))+"&quality=88"+(transparent?"&format=png":""),scope.token,null,4*1024*1024,true);

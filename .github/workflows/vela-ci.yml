@@ -34,5 +34,6 @@ jobs:
           python3 tests/test_plex_feed.py
           python3 tests/test_jellyfin_feed.py
           python3 tests/test_updates.py
+          python3 tests/test_release_publication.py
           python3 tests/test_video_cadence.py
 
