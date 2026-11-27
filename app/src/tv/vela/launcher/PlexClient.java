@@ -111,7 +111,7 @@ class PlexClient {
         }
         throw new IOException(Ui.problem("Could not connect securely. Check that the server is on.","No se ha podido conectar de forma segura. Comprueba que el servidor esté encendido."));
     }
-    static final class Film {
+    static final class Film implements Cloneable {
         String detailTitle="";
         String key, title, summary, thumb, art, meta, type;
         String logo = "";
@@ -124,6 +124,16 @@ class PlexClient {
         String seriesKey="";
         Film alternative;
         final Map<String,String> externalIds=new LinkedHashMap<>();
+        // Provider IDs are populated while parsing. Row cards share that metadata.
+        Film withAlternative(Film other){
+            try{
+                Film card=(Film)super.clone();
+                card.alternative=other;
+                return card;
+            }catch(CloneNotSupportedException impossible){
+                throw new AssertionError(impossible);
+            }
+        }
         void addExternalId(String uri) {
             int end=uri.indexOf("://");
             if(end<0)return;

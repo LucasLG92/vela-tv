@@ -24,11 +24,47 @@ public class AndroidContinueWatchingTest extends Instrumentation {
     private TextView caption(View card,String title){ViewGroup group=(ViewGroup)card;for(int i=0;i<group.getChildCount();i++){View v=group.getChildAt(i);if(v instanceof TextView&&title.contentEquals(((TextView)v).getText()))return (TextView)v;}return null;}
     private int redPixel(HorizontalScrollView rail,int x)throws Exception{android.graphics.Rect bounds=new android.graphics.Rect();ui(()->rail.getGlobalVisibleRect(bounds));float scale=bounds.width()/(float)rail.getWidth();Thread.sleep(100);android.graphics.Bitmap shot=getUiAutomation().takeScreenshot();try{return android.graphics.Color.red(shot.getPixel(bounds.left+Math.round(x*scale),bounds.top+Math.round(80*scale)));}finally{shot.recycle();}}
     private void restore(SharedPreferences prefs,Map<String,?> values){SharedPreferences.Editor edit=prefs.edit().clear();for(Map.Entry<String,?> e:values.entrySet()){Object v=e.getValue();if(v instanceof String)edit.putString(e.getKey(),(String)v);else if(v instanceof Boolean)edit.putBoolean(e.getKey(),(Boolean)v);else if(v instanceof Integer)edit.putInt(e.getKey(),(Integer)v);else if(v instanceof Long)edit.putLong(e.getKey(),(Long)v);else if(v instanceof Set)edit.putStringSet(e.getKey(),new HashSet<>((Set<String>)v));}edit.commit();}
+    private PlexClient.Film resumeItem(String pkg,String key,String id,long time,long position){
+        PlexClient.Film film=new PlexClient.Film();
+        film.packageName=pkg;
+        film.key=key;
+        film.type="movie";
+        film.addExternalId("tmdb://"+id);
+        film.continuing=true;
+        film.lastPlayedMs=time;
+        film.positionMs=position;
+        return film;
+    }
+    private void checkProviderRecency(Context c){
+        PlexClient.Film plex=resumeItem(VelaLayout.PLEX,"plex-copy","123",1000,120000);
+        PlexClient.Film jelly=resumeItem(VelaLayout.JELLYFIN,"jf-copy","123",5000,600000);
+        PlexClient.Film other=resumeItem(VelaLayout.PLEX,"other","456",3000,150000);
+        List<PlexClient.Film> base=Arrays.asList(plex,other),extra=Collections.singletonList(jelly);
+        List<PlexClient.Film> row=ContinueWatching.personalized(c,base,extra,Collections.emptyList());
+        check(row.size()==2&&row.get(1)==other&&row.get(0).key.equals(jelly.key)&&row.get(0).positionMs==600000,"Resume lost the newest provider or its playback position");
+        check(row.get(0).alternative==plex&&jelly.alternative==null&&plex.alternative==null,"Merging a home row changed its source feeds");
+        plex.lastPlayedMs=6000;
+        row=ContinueWatching.personalized(c,base,extra,Collections.emptyList());
+        check(row.get(0).key.equals(plex.key)&&row.get(0).alternative==jelly,"Refreshing did not switch to the most recently played copy");
+        row=ContinueWatching.personalized(c,base,Collections.emptyList(),Collections.emptyList());
+        check(row.get(0).alternative==null,"Removing the extra provider left a stale alternate");
+    }
     public void onCreate(Bundle args){super.onCreate(args);start();}
     public void onStart(){
         Bundle result=new Bundle();HomeActivity activity=null;Context c=getTargetContext();SharedPreferences personalization=Personalization.prefs(c),visuals=Visuals.prefs(c);Map<String,?> saved=new HashMap<>(personalization.getAll()),visualSaved=new HashMap<>(visuals.getAll());
+        Locale locale=Locale.getDefault();
+        L10n.init(c,Config.LANGUAGE);
+        String language=L10n.choice(),edition=VelaEdition.prefs(c).getString("mode","");
+        SharedPreferences layout=VelaLayout.prefs(c);
+        Map<String,?> originalLayout=new HashMap<>(layout.getAll());
         try{
-            Locale.setDefault(new Locale("es","ES"));Map<String,?> plexBefore=new HashMap<>(new PlexClient(c).prefs.getAll());String[] apps=SidebarApps.slots(c);
+            VelaEdition.select(c,"full");
+            Locale.setDefault(new Locale("es","ES"));
+            L10n.choose(c,"es");
+            Ui.init(c);
+            VelaLayout.save(c,new JSONObject().put("hero","cinema"));
+            Map<String,?> plexBefore=new HashMap<>(new PlexClient(c).prefs.getAll());String[] apps=SidebarApps.slots(c);
+            checkProviderRecency(c);
             PlexClient.Film video;
             try(MatrixCursor cursor=row(1,TvSuggestions.YOUTUBE,"Vídeo real","Descripción","https://i.ytimg.com/vi/example/hqdefault.jpg","","https://www.youtube.com/watch?v=example",600_000,180_000,2000,0,1,"","",TvContract.WatchNextPrograms.TYPE_CLIP)){
                 video=ContinueWatching.parse(cursor);check(video!=null&&video.tvSource&&video.continuing&&video.landscape,"Continue item lost its source/layout flags");check(video.remainingMs()==420_000&&Math.abs(video.progress-.3f)<.001,"Watch Next duration/position mapping failed");
@@ -48,6 +84,13 @@ public class AndroidContinueWatchingTest extends Instrumentation {
             }
             try(MatrixCursor cursor=row(8,"com.example.app","Otra plataforma","","","content://example/thumbnail","https://example.com/play",600_000,100_000,0,0,1,"","",0,TvContract.WatchNextPrograms.ASPECT_RATIO_2_3,TvContract.WatchNextPrograms.ASPECT_RATIO_1_1)){
                 square=ContinueWatching.parse(cursor);check(square!=null&&square.thumbAspect==1,"Fallback thumbnail used the poster's different aspect ratio");
+            }
+            try(MatrixCursor cursor=row(9,"com.example.app","Miniatura","","http://example.com/old.jpg","content://example/thumbnail","https://example.com/play",600,50,0,0,1,"","",0,TvContract.WatchNextPrograms.ASPECT_RATIO_2_3,TvContract.WatchNextPrograms.ASPECT_RATIO_16_9)){
+                PlexClient.Film fallback=ContinueWatching.parse(cursor);
+                check(fallback!=null&&"content://example/thumbnail".equals(fallback.thumb)&&fallback.landscape&&Math.abs(fallback.thumbAspect-16f/9)<.001,"An unsupported poster hid a usable thumbnail or used the wrong aspect ratio");
+            }
+            try(MatrixCursor cursor=row(10,"com.example.app","Sin imagen","","http://example.com/old.jpg","content:missing-provider","https://example.com/play",600,50,0,0,1,"","",0)){
+                check(ContinueWatching.parse(cursor)==null,"A thumbnail without a content provider was accepted");
             }
             JSONObject metadata=new JSONObject().put("type","movie").put("ratingKey","local-movie").put("title","Película").put("duration",10_800_000).put("viewOffset",2_700_000).put("thumb","/poster");
             JSONObject root=new JSONObject().put("MediaContainer",new JSONObject().put("Metadata",new JSONArray().put(metadata)).put("offset",0).put("totalSize",1));
@@ -109,9 +152,11 @@ public class AndroidContinueWatchingTest extends Instrumentation {
             }
             View art=(View)field(home,"backdrop"),veil=(View)field(home,"backdropBottom");check(art.getBottom()==veil.getBottom(),"Backdrop stops before its bottom gradient, leaving a seam");
             check(plexBefore.equals(new PlexClient(c).prefs.getAll())&&Arrays.equals(apps,SidebarApps.slots(c)),"Preview changed accounts or app shortcuts");
-            result.putString("result","PASS exact Plex/Watch Next times, filtering, deduplication, safe links and twelve-card limit. Uniform panoramic resume cards in three sizes; portrait Latest uploads below, duplicate-title focus and remote row navigation. Real screenshot pixels verify right/start, both/middle and no right/end fades; full-height backdrop covers the gradient. Long two-line captions and hero titles fit, and real Down/Up preserves full headings in three sizes. Cache, playback positions, accounts and shortcuts preserved.");
+            result.putString("result","PASS newest Plex/Jellyfin resume position across refreshes, independent source cards, fallback thumbnail and aspect ratio, exact Watch Next times, filtering, safe links and twelve-card limit. Uniform panoramic resume cards in three sizes; portrait Latest uploads below, duplicate-title focus and remote row navigation. Real screenshot pixels verify right/start, both/middle and no right/end fades; full-height backdrop covers the gradient. Long two-line captions and hero titles fit, and real Down/Up preserves full headings in three sizes. Cache, playback positions, accounts and shortcuts preserved.");
         }catch(Throwable error){result.putString("error",android.util.Log.getStackTraceString(error));try{android.graphics.Bitmap shot=getUiAutomation().takeScreenshot();try(java.io.OutputStream out=new java.io.FileOutputStream(new java.io.File(c.getExternalFilesDir(null),"continue-failure.png"))){shot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}shot.recycle();}catch(Exception ignored){}}
-        finally{if(activity!=null){HomeActivity a=activity;ui(()->a.finish());}restore(personalization,saved);restore(visuals,visualSaved);}
+        finally{if(activity!=null){HomeActivity a=activity;ui(()->a.finish());}restore(personalization,saved);restore(visuals,visualSaved);restore(layout,originalLayout);
+            Locale.setDefault(locale);L10n.choose(c,language);
+            if(edition.isEmpty())VelaEdition.prefs(c).edit().remove("mode").commit();else VelaEdition.select(c,edition);}
         finish(result.containsKey("error")?1:-1,result);
     }
 }

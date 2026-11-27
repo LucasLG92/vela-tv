@@ -17,7 +17,8 @@ public final class JellyfinFeedTest {
         JSONObject source=movie().put("ProviderIds",new JSONObject().put("Imdb","tt1234567"));
         PlexClient.Film jf=JellyfinClient.parseFilm(source,false,true);
         List<PlexClient.Film> row=VelaHomeRows.merge("recent_movies",Arrays.asList(plex),Arrays.asList(jf));
-        check(row.size()==1&&row.get(0)==jf&&jf.alternative==plex,"A shared secondary IMDb ID must retain the newer card and the other provider");
+        check(row.size()==1&&row.get(0).key.equals(jf.key)&&row.get(0).packageName.equals(jf.packageName)&&row.get(0).alternative==plex,"A shared secondary IMDb ID must retain the newer card and the other provider");
+        check(jf.alternative==null&&plex.alternative==null,"Merging provider feeds changed their source cards");
         source.getJSONObject("ProviderIds").put("Tmdb","99");
         jf=JellyfinClient.parseFilm(source,false,true);
         row=VelaHomeRows.merge("recent_movies",Arrays.asList(plexMovie()),Arrays.asList(jf));

@@ -25,7 +25,7 @@ final class VelaHomeRows {
         Row(int limit){this.limit=limit;}
 
         void add(PlexClient.Film film){
-            Match candidate=new Match(film), match=null;
+            Match candidate=new Match(film,films.size()), match=null;
             for(Match existing:matches){
                 if(!existing.matches(candidate))continue;
                 if(match!=null){
@@ -37,8 +37,9 @@ final class VelaHomeRows {
             }
             if(match!=null){
                 match.remember(candidate);
-                if(match.first.alternative==null&&!match.first.packageName.equals(film.packageName)){
-                    match.first.alternative=film;
+                PlexClient.Film card=films.get(match.index);
+                if(card.alternative==null&&!card.packageName.equals(film.packageName)){
+                    films.set(match.index,card.withAlternative(film));
                 }
             }else if(films.size()<limit){
                 matches.add(candidate);
@@ -47,11 +48,13 @@ final class VelaHomeRows {
         }
 
         private static final class Match {
-            final PlexClient.Film first;
+            final int index;
+            final String type;
             final Set<String> localKeys=new HashSet<>();
             final Map<String,String> ids=new HashMap<>();
-            Match(PlexClient.Film film){
-                first=film;
+            Match(PlexClient.Film film,int index){
+                this.index=index;
+                type=film.type;
                 record(film);
                 if(film.alternative!=null)record(film.alternative);
             }
@@ -70,7 +73,7 @@ final class VelaHomeRows {
                 }
             }
             boolean matches(Match other){
-                if(!Objects.equals(first.type,other.first.type))return false;
+                if(!Objects.equals(type,other.type))return false;
                 boolean shared=!Collections.disjoint(localKeys,other.localKeys);
                 if(ids.containsValue("")||other.ids.containsValue(""))return false;
                 for(Map.Entry<String,String> id:ids.entrySet()){

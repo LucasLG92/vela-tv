@@ -35,7 +35,7 @@ final class ContinueWatching {
     }
     static PlexClient.Film parse(Cursor cursor){
         int kind=cursor.getInt(10);boolean next=kind==TvContract.WatchNextPrograms.WATCH_NEXT_TYPE_NEXT||kind==TvContract.WatchNextPrograms.WATCH_NEXT_TYPE_NEW;if(cursor.getInt(11)!=1||(!next&&kind!=TvContract.WatchNextPrograms.WATCH_NEXT_TYPE_CONTINUE)||(next&&cursor.getInt(14)!=TvContract.WatchNextPrograms.TYPE_TV_EPISODE))return null;
-        PlexClient.Film film=new PlexClient.Film();film.packageName=value(cursor,1);film.title=value(cursor,2);film.summary=value(cursor,3);film.thumb=value(cursor,4);boolean thumbnail=film.thumb.isEmpty();if(thumbnail)film.thumb=value(cursor,5);film.art=film.thumb;film.intent=value(cursor,6);
+        PlexClient.Film film=new PlexClient.Film();film.packageName=value(cursor,1);film.title=value(cursor,2);film.summary=value(cursor,3);film.thumb=value(cursor,4);boolean thumbnail=!imageUri(film.thumb);if(thumbnail)film.thumb=value(cursor,5);film.art=film.thumb;film.intent=value(cursor,6);
         if(!film.packageName.matches("[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+")||film.title.isEmpty()||!imageUri(film.thumb)||film.intent.isEmpty())return null;
         film.durationMs=cursor.isNull(7)?0:Math.max(0,cursor.getLong(7));film.positionMs=cursor.isNull(8)?-1:Math.max(-1,cursor.getLong(8));film.lastPlayedMs=cursor.isNull(9)?0:Math.max(0,cursor.getLong(9));
         if(film.durationMs>0&&film.positionMs>=film.durationMs)return null;
@@ -59,7 +59,7 @@ final class ContinueWatching {
         }
     }
     private static String value(Cursor cursor,int index){return cursor.isNull(index)?"":cursor.getString(index);}
-    static boolean imageUri(String path){try{Uri uri=Uri.parse(path);return "content".equals(uri.getScheme())||("https".equals(uri.getScheme())&&uri.getHost()!=null&&uri.getUserInfo()==null);}catch(RuntimeException invalid){return false;}}
+    static boolean imageUri(String path){try{Uri uri=Uri.parse(path);return ("content".equals(uri.getScheme())&&!android.text.TextUtils.isEmpty(uri.getAuthority()))||("https".equals(uri.getScheme())&&uri.getHost()!=null&&uri.getUserInfo()==null);}catch(RuntimeException invalid){return false;}}
     static List<PlexClient.Film> merge(List<PlexClient.Film> plex,List<PlexClient.Film> shared,boolean plexConnected){
         return merge(plex,shared,plexConnected?"com.plexapp.android":"");
     }
@@ -69,10 +69,26 @@ final class ContinueWatching {
         return result;
     }
     static List<PlexClient.Film> personalized(Context c,List<PlexClient.Film> base,List<PlexClient.Film> extra,List<PlexClient.Film> shared){
-        org.json.JSONObject settings=VelaLayout.read(c);List<PlexClient.Film> out=new ArrayList<>();VelaHomeRows.Row resume=new VelaHomeRows.Row(Integer.MAX_VALUE);
-        for(List<PlexClient.Film> group:Arrays.asList(base,extra,shared))for(PlexClient.Film original:group){PlexClient.Film f=original;if(!f.continuing){if(group==base)out.add(f);continue;}boolean fallback=!f.tvSource||settings.optBoolean("appResume",true);if(!VelaLayout.service(settings,f.packageName,fallback)){if(f.alternative==null||!VelaLayout.service(settings,f.alternative.packageName,true))continue;f=f.alternative;}resume.add(f);}
-        resume.films.sort((a,b)->Long.compare(b.lastPlayedMs,a.lastPlayedMs));
-        out.addAll(0,resume.films.subList(0,Math.min(12,resume.films.size())));
+        org.json.JSONObject settings=VelaLayout.read(c);
+        List<PlexClient.Film> out=new ArrayList<>(),candidates=new ArrayList<>();
+        for(List<PlexClient.Film> group:Arrays.asList(base,extra,shared)){
+            for(PlexClient.Film film:group){
+                if(!film.continuing){
+                    if(group==base)out.add(film);
+                    continue;
+                }
+                boolean enabledByDefault=!film.tvSource||settings.optBoolean("appResume",true);
+                if(VelaLayout.service(settings,film.packageName,enabledByDefault)){
+                    candidates.add(film);
+                }else if(film.alternative!=null&&VelaLayout.service(settings,film.alternative.packageName,true)){
+                    candidates.add(film.alternative);
+                }
+            }
+        }
+        candidates.sort((a,b)->Long.compare(b.lastPlayedMs,a.lastPlayedMs));
+        VelaHomeRows.Row resume=new VelaHomeRows.Row(Integer.MAX_VALUE);
+        for(PlexClient.Film film:candidates)resume.add(film);
+        out.addAll(0,resume.films.subList(0,Math.min(LIMIT,resume.films.size())));
         return out;
     }
     static String remaining(PlexClient.Film film){
