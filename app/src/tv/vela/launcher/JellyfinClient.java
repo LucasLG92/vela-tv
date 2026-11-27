@@ -129,8 +129,18 @@ final class JellyfinClient {
     static String watchedPath(String item,String user)throws IOException{if(id(item).isEmpty()||id(user).isEmpty())throw new IOException("Invalid Jellyfin item");return "/UserPlayedItems/"+id(item)+"?userId="+id(user);}
     void markWatched(String item,String expectedIdentity)throws Exception{Session scope=stored();String path=watchedPath(item,scope.userId);if(scope.token.isEmpty()||!expectedIdentity.equals(identity(scope)))throw new IOException("Jellyfin account changed");try{json(scope.server.base,path,scope.token,new JSONObject());}catch(Status error){if(error.status!=404)throw error;json(scope.server.base,"/Users/"+scope.userId+"/PlayedItems/"+id(item),scope.token,new JSONObject());}if(expectedIdentity.equals(identity()))prefs.edit().remove("cache").commit();}
     static List<PlexClient.Film> parse(JSONArray items,boolean resume,boolean recent,int limit)throws IOException{
-        if(items!=null&&items.length()>24)throw new IOException("Too many Jellyfin items");List<PlexClient.Film> out=new ArrayList<>();Set<String> seen=new HashSet<>();
-        for(int i=0;items!=null&&i<items.length()&&out.size()<limit;i++){JSONObject item=items.optJSONObject(i);if(item==null)continue;PlexClient.Film film=parseFilm(item,resume,recent);if(film!=null&&seen.add(film.key))out.add(film);}return out;
+        if(items!=null&&items.length()>24)throw new IOException("Too many Jellyfin items");
+        List<PlexClient.Film> out=new ArrayList<>();
+        Set<String> seen=new HashSet<>(),startedSeries=new HashSet<>();
+        for(int i=0;items!=null&&i<items.length()&&out.size()<limit;i++){
+            JSONObject item=items.optJSONObject(i);
+            if(item==null)continue;
+            PlexClient.Film film=parseFilm(item,resume,recent);
+            if(film==null||!seen.add(film.key))continue;
+            if(resume&&!film.seriesKey.isEmpty()&&!startedSeries.add(film.seriesKey))continue;
+            out.add(film);
+        }
+        return out;
     }
     PlexClient.Film item(String key)throws Exception{String id=id(key);if(id.isEmpty())throw new IOException("Invalid item");Session s=stored();return parseFilm(compatible(s,"/Items/"+id+"?userId="+s.userId+"&fields="+FIELDS,"/Users/"+s.userId+"/Items/"+id),false,false);}
     static PlexClient.Film parseFilm(JSONObject item,boolean resume,boolean recent){

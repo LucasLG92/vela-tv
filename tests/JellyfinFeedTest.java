@@ -51,7 +51,29 @@ public final class JellyfinFeedTest {
         check(JellyfinClient.parseFilm(season,false,true).externalIds.isEmpty(),"Latest season used a season ID for its parent series");
         check(!JellyfinClient.parseFilm(season,false,false).externalIds.isEmpty(),"Native season lost its own IDs");
     }
+    static void crowdedResumeFeed()throws Exception{
+        JSONArray started=new JSONArray();
+        for(int i=1;i<=12;i++){
+            started.put(movie().put("Id",String.format(Locale.ROOT,"%032x",i))
+                    .put("Type","Episode").put("SeriesId",series));
+        }
+        String otherSeries="22222222222222222222222222222222";
+        JSONObject inProgress=movie().put("Type","Episode").put("SeriesId",otherSeries);
+        started.put(inProgress);
+        List<PlexClient.Film> resume=JellyfinClient.parse(started,true,false,12);
+        JSONObject upcoming=movie().put("Id","33333333333333333333333333333333")
+                .put("Type","Episode").put("SeriesId",otherSeries);
+        upcoming.getJSONObject("UserData").put("PlaybackPositionTicks",0);
+        List<PlexClient.Film> merged=JellyfinClient.withNextEpisodes(resume,new JSONObject().put("Items",new JSONArray().put(upcoming)));
+        check(merged.size()==2&&merged.get(1).key.equals(item)&&!merged.get(1).nextEpisode&&merged.get(1).positionMs==2_700_000,
+                "Next Up replaced a started episode beyond the first twelve server records");
+        check(resume.size()==2&&resume.get(0).key.equals(started.getJSONObject(0).getString("Id")),
+                "Resume alone must show one card per series in server order when Next Up is unavailable");
+        check(JellyfinClient.parse(started,false,false,24).size()==13,
+                "Browsing a season must still list each episode");
+    }
     public static void main(String[] args)throws Exception{
+        crowdedResumeFeed();
         sharedIds();
         PlexClient.Film movie=JellyfinClient.parseFilm(movie(),true,false);check(movie!=null&&movie.provider.equals("Jellyfin")&&movie.packageName.equals(JellyfinClient.PACKAGE),"Source identity lost");check(movie.durationMs==10_800_000&&movie.positionMs==2_700_000&&movie.remainingMs()==8_100_000,"100ns ticks not converted to exact milliseconds");check(Math.abs(movie.progress-.25)<.001,"Progress mapping failed");check(movie.thumb.startsWith("/Items/"+item+"/Images/Primary?tag=")&&movie.art.contains("Backdrop")&&movie.logo.contains("Logo"),"Original image references lost");check(movie.addedAtMs>0&&movie.lastPlayedMs>movie.addedAtMs,"ISO timestamps, including tick precision, lost");
         JSONObject episode=movie().put("Type","Episode").put("SeriesName","Serie de prueba").put("SeriesId",series).put("SeriesPrimaryImageTag","seriesposter").put("ParentIndexNumber",2).put("IndexNumber",3);PlexClient.Film ep=JellyfinClient.parseFilm(episode,true,false);check(ep.key.equals(item)&&ep.title.equals("Serie de prueba")&&ep.thumb.contains(series)&&ep.episodeLabel.equals("T2 · E3"),"Episode lost playable ID, series artwork or season/episode");
